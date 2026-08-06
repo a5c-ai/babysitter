@@ -100,6 +100,8 @@ function toSkillPrompt(name: string, args: string): string {
 }
 
 
+
+
 export default function activate(pi: ExtensionAPI): void {
   initI18n(pi);
   const projectionApi = pi as ProjectionExtensionAPI;
@@ -249,46 +251,7 @@ export default function activate(pi: ExtensionAPI): void {
     },
   });
 
-  const agentCompleteParameters = pi.zod.object({
-    runDir: pi.zod.string(),
-    effectId: pi.zod.string(),
-    invocationKey: pi.zod.string(),
-    ownerName: pi.zod.string(),
-    dispatchToken: pi.zod.string(),
-    model: pi.zod.string().optional(),
-    value: pi.zod.unknown(),
-  });
-  pi.registerTool<typeof agentCompleteParameters>({
-    name: "babysitter_agent_complete",
-    label: "Complete owned Babysitter agent effect",
-    description: "Durably deliver the final value for the one Babysitter agent effect identified by a BABYSITTER_OMP_BRIDGE descriptor. Call only when the assignment explicitly provides that descriptor.",
-    parameters: agentCompleteParameters,
-    approval: "exec",
-    async execute(_toolCallId, params) {
-      const operationId = projectionOwner?.operationId;
-      try {
-        const completion = await driver.withProgressOperation(
-          operationId,
-          () => driver.completeAgentOwnerValue(params),
-        );
-        return {
-          content: [{ type: "text", text: JSON.stringify(completion, null, 2) }],
-          details: completion,
-        };
-      } catch (error) {
-        return {
-          content: [{
-            type: "text",
-            text: sanitizeDiagnosticText(error instanceof Error ? error.message : String(error)),
-          }],
-          details: { handled: true },
-          isError: true,
-        };
-      } finally {
-        await flushProjectionProgress(operationId);
-      }
-    },
-  });
+
 
   const agentRetryParameters = pi.zod.object({
     runDir: pi.zod.string(),

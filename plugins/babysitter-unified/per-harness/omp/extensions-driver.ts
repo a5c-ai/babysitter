@@ -114,6 +114,7 @@ interface ExecutionCheckpoint {
   finishedAt?: string;
   outputRef?: string;
   outputSha256?: string;
+  authenticatedOutputSha256?: string;
   stdoutRef?: string;
   stderrRef?: string;
   postedAt?: string;
@@ -126,6 +127,7 @@ interface ExecutionCheckpoint {
   attemptState?:
     | "prepared"
     | "claimed"
+    | "completion_authenticated"
     | "failed"
     | "aborted"
     | "cancelled"
@@ -203,9 +205,7 @@ export interface AgentToolCompletion {
   reason?: string;
 }
 
-export interface AgentOwnerCompletionInput extends AgentBridgeDescriptor {
-  value: unknown;
-}
+
 
 export interface AgentRetryInput extends AgentBridgeDescriptor {
   reason: string;
@@ -509,29 +509,10 @@ export class OmpDeterministicDriver {
     });
   }
 
-  async completeAgentOwnerValue(input: AgentOwnerCompletionInput): Promise<AgentToolCompletion> {
-    const descriptor = parseAgentOwnerCompletionInput(input);
-    if (!descriptor) return { handled: false };
-    return await this.withEffectLock(descriptor.runDir, descriptor.effectId, async () => {
-    const owner = await readJsonIfExists<AgentOwner>(agentOwnerPath(descriptor.runDir, descriptor.effectId));
-    if (
-      !owner ||
-      owner.effectId !== descriptor.effectId ||
-      owner.invocationKey !== descriptor.invocationKey ||
-      owner.ownerName !== descriptor.ownerName ||
-      owner.dispatchToken !== descriptor.dispatchToken
-    ) {
-      return {
-        handled: true,
-        reason: `Ignoring completion from a non-owner agent for effect ${descriptor.effectId}`,
-      };
-    }
-    return await this.persistAgentCompletion(descriptor, input.value);
-    });
-  }
+
 
   async authorizeAgentRetry(input: AgentRetryInput): Promise<AgentRetryAuthorization> {
-    const descriptor = parseAgentOwnerCompletionInput(input, false);
+    const descriptor = parseAgentOwnerControlInput(input);
     if (!descriptor || typeof input.reason !== "string" || input.reason.trim().length === 0) {
       return { handled: false, reason: "A complete owner descriptor and retry reason are required" };
     }
@@ -600,7 +581,6 @@ export class OmpDeterministicDriver {
   private async persistAgentCompletion(
     descriptor: AgentBridgeDescriptor,
     value: unknown,
-
   ): Promise<AgentToolCompletion> {
     const checkpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
     if (!checkpoint || checkpoint.kind !== "agent") {
@@ -617,16 +597,28 @@ export class OmpDeterministicDriver {
     }
 
     const outputPath = effectArtifactPath(descriptor.runDir, descriptor.effectId, "output.json");
+    const authenticatedOutputSha256 = sha256(Buffer.from(JSON.stringify(value, null, 2) + "\n", "utf8"));
+    const authenticated: ExecutionCheckpoint = {
+      ...checkpoint,
+      attemptState: "completion_authenticated",
+      attemptUpdatedAt: this.now().toISOString(),
+      authenticatedOutputSha256,
+    };
+    await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), authenticated);
     await writeImmutableJson(outputPath, value);
     const outputBytes = await fs.readFile(outputPath);
+    const outputSha256 = sha256(outputBytes);
+    if (outputSha256 !== authenticatedOutputSha256) {
+      throw new DriverError(`Authenticated output checksum mismatch for effect ${descriptor.effectId}`, descriptor.effectId);
+    }
     const completed: ExecutionCheckpoint = {
-      ...checkpoint,
+      ...authenticated,
       state: "completed",
       attemptState: "completed",
       attemptUpdatedAt: this.now().toISOString(),
       finishedAt: checkpoint.finishedAt ?? this.now().toISOString(),
       outputRef: taskRelativeRef(descriptor.effectId, "output.json"),
-      outputSha256: sha256(outputBytes),
+      outputSha256,
     };
     await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), completed);
     await this.emitProgress(
@@ -643,7 +635,7 @@ export class OmpDeterministicDriver {
   }
 
   async cancelAgentAttempt(input: AgentCancelInput): Promise<AgentAttemptTransition> {
-    const descriptor = parseAgentOwnerCompletionInput(input, false);
+    const descriptor = parseAgentOwnerControlInput(input);
     if (!descriptor || typeof input.reason !== "string" || input.reason.trim().length === 0) {
       return { handled: false, reason: "A complete owner descriptor and cancellation reason are required" };
     }
@@ -737,24 +729,18 @@ export class OmpDeterministicDriver {
     }
 
     await this.emitProgress(runDir, "shell_start", "running", "Starting bounded shell effect", action);
+    const commandOutputBefore = await shellCommandOutputFingerprint(runDir, action);
     const shellResult = await this.executeShell(action, this.workspaceCwd, signal);
     const stdoutPath = effectArtifactPath(runDir, action.effectId, "stdout.log");
     const stderrPath = effectArtifactPath(runDir, action.effectId, "stderr.log");
     await writeTextAtomic(stdoutPath, shellResult.stdout);
     await writeTextAtomic(stderrPath, shellResult.stderr);
 
-    const value = await shellResultValue(runDir, action, shellResult);
+    const value = await shellResultValue(runDir, action, shellResult, commandOutputBefore);
     const outputPath = effectArtifactPath(runDir, action.effectId, "output.json");
     const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
     const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
-    const configuredOutput = readObject(action.taskDef?.io)?.outputJsonPath;
-    const shellProducedDurableOutput = (
-      !shellResult.timedOut &&
-      shellResult.exitCode === expectedExitCode &&
-      typeof configuredOutput === "string" &&
-      path.resolve(resolveRunRelative(runDir, configuredOutput)) === path.resolve(outputPath)
-    );
-    if (!shellProducedDurableOutput) await writeImmutableJson(outputPath, value);
+    await writeImmutableJson(outputPath, value);
     const outputBytes = await fs.readFile(outputPath);
     checkpoint = {
       ...checkpoint,
@@ -918,6 +904,25 @@ export class OmpDeterministicDriver {
   ): Promise<ExecutionCheckpoint | null> {
     if (checkpoint.kind === "shell" && checkpoint.state !== "completed") return null;
     const outputPath = effectArtifactPath(runDir, checkpoint.effectId, "output.json");
+    const hasAuthenticatedAgentOutput = checkpoint.authenticatedOutputSha256 !== undefined && (
+      checkpoint.attemptState === "completion_authenticated" ||
+      checkpoint.attemptState === "completed"
+    );
+    if (checkpoint.kind === "agent" && !hasAuthenticatedAgentOutput) {
+      if (checkpoint.state === "completed" && await hasMatchingCommittedArtifact(runDir, checkpoint)) {
+        return checkpoint;
+      }
+      try {
+        await fs.access(outputPath);
+      } catch (error) {
+        if (isNotFound(error)) return null;
+        throw error;
+      }
+      throw new DriverError(
+        `Unauthenticated durable output exists for agent effect ${checkpoint.effectId}; refusing recovery`,
+        checkpoint.effectId,
+      );
+    }
     let bytes: Buffer;
     try {
       bytes = await fs.readFile(outputPath);
@@ -927,15 +932,20 @@ export class OmpDeterministicDriver {
       throw new DriverError(`Durable output for effect ${checkpoint.effectId} is unreadable: ${String(error)}`, checkpoint.effectId);
     }
     if (bytes.length === 0) return null;
-    if (checkpoint.outputSha256 && checkpoint.outputSha256 !== sha256(bytes)) {
+    const outputSha256 = sha256(bytes);
+    if (checkpoint.outputSha256 && checkpoint.outputSha256 !== outputSha256) {
       throw new DriverError(`Durable output checksum mismatch for effect ${checkpoint.effectId}`, checkpoint.effectId);
+    }
+    if (checkpoint.authenticatedOutputSha256 && checkpoint.authenticatedOutputSha256 !== outputSha256) {
+      throw new DriverError(`Authenticated output checksum mismatch for effect ${checkpoint.effectId}`, checkpoint.effectId);
     }
     const completed: ExecutionCheckpoint = {
       ...checkpoint,
       state: "completed",
+      attemptState: checkpoint.kind === "agent" ? "completed" : checkpoint.attemptState,
       finishedAt: checkpoint.finishedAt ?? this.now().toISOString(),
       outputRef: checkpoint.outputRef ?? taskRelativeRef(checkpoint.effectId, "output.json"),
-      outputSha256: checkpoint.outputSha256 ?? sha256(bytes),
+      outputSha256,
     };
     if (checkpoint.state !== "completed" || checkpoint.outputRef !== completed.outputRef || !checkpoint.outputSha256) {
       await writeJsonAtomic(executionPath(runDir, checkpoint.effectId), completed);
@@ -1331,7 +1341,7 @@ function buildAgentPrompt(action: EffectAction, descriptor: AgentBridgeDescripto
     "",
     "Complete only the assignment below. Return the final effect value through the required structured yield path.",
     "Do not call babysitter task:post or run:iterate; the deterministic driver is the sole result writer.",
-    "Before yielding, call `babysitter_agent_complete` exactly once with the bridge descriptor fields below and your final effect value as `value`, then yield the identical value. This durable owner channel lets the original agent finish even if its parent task wait is interrupted.",
+    "Yield the final effect value normally through the required structured output contract. The authenticated blocking task tool result is the only completion channel.",
     `BABYSITTER_OMP_BRIDGE ${JSON.stringify(descriptor)}`,
     "",
     prompt,
@@ -1404,9 +1414,9 @@ function containsAgentBridgeMarker(input: JsonObject): boolean {
 }
 
 
-function parseAgentOwnerCompletionInput(
-  input: AgentOwnerCompletionInput | AgentRetryInput | AgentCancelInput,
-  requireValue = true,
+
+function parseAgentOwnerControlInput(
+  input: AgentRetryInput | AgentCancelInput,
 ): AgentBridgeDescriptor | null {
   if (
     typeof input.runDir !== "string" ||
@@ -1414,8 +1424,7 @@ function parseAgentOwnerCompletionInput(
     typeof input.invocationKey !== "string" ||
     typeof input.ownerName !== "string" ||
     typeof input.dispatchToken !== "string" ||
-    (input.attempt !== undefined && (!Number.isInteger(input.attempt) || input.attempt < 1)) ||
-    (requireValue && !Object.hasOwn(input, "value"))
+    (input.attempt !== undefined && (!Number.isInteger(input.attempt) || input.attempt < 1))
   ) return null;
   return {
     runDir: path.resolve(input.runDir),
@@ -1540,18 +1549,71 @@ function validateJsonSchema(value: unknown, schema: JsonObject | undefined): str
   }
 }
 
-async function shellResultValue(runDir: string, action: EffectAction, result: ShellExecutionResult): Promise<unknown> {
+async function shellCommandOutputFingerprint(
+  runDir: string,
+  action: EffectAction,
+): Promise<string | null | undefined> {
+  const io = readObject(action.taskDef?.io);
+  if (typeof io?.outputJsonPath !== "string") return undefined;
+  const outputPath = resolveRunRelative(runDir, io.outputJsonPath);
+  const canonicalOutputPath = effectArtifactPath(runDir, action.effectId, "output.json");
+  if (path.resolve(outputPath) === path.resolve(canonicalOutputPath)) return undefined;
+  try {
+    const stats = await fs.stat(outputPath, { bigint: true });
+    return [
+      stats.dev,
+      stats.ino,
+      stats.size,
+      stats.mtimeNs,
+      stats.ctimeNs,
+    ].join(":");
+  } catch (error) {
+    if (isNotFound(error)) return null;
+    throw error;
+  }
+}
+
+async function shellResultValue(
+  runDir: string,
+  action: EffectAction,
+  result: ShellExecutionResult,
+  commandOutputBefore: string | null | undefined,
+): Promise<unknown> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
   if (!result.timedOut && result.exitCode === expectedExitCode) {
     const io = readObject(action.taskDef?.io);
     if (typeof io?.outputJsonPath === "string") {
       const outputPath = resolveRunRelative(runDir, io.outputJsonPath);
-      const bytes = await fs.readFile(outputPath);
+      const canonicalOutputPath = effectArtifactPath(runDir, action.effectId, "output.json");
+      if (path.resolve(outputPath) === path.resolve(canonicalOutputPath)) return result.stdout;
+      const commandOutputAfter = await shellCommandOutputFingerprint(runDir, action);
+      if (commandOutputAfter === commandOutputBefore) {
+        throw new DriverError(
+          `Shell output JSON for effect ${action.effectId} was not created or updated by the command`,
+          action.effectId,
+        );
+      }
+      let bytes: Buffer;
+      try {
+        bytes = await fs.readFile(outputPath);
+      } catch (error) {
+        throw new DriverError(
+          `Shell output JSON for effect ${action.effectId} could not be read: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
+          action.effectId,
+        );
+      }
       if (bytes.length > MAX_CAPTURE_BYTES) {
         throw new DriverError(`Shell output JSON for effect ${action.effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, action.effectId);
       }
-      return JSON.parse(bytes.toString("utf8"));
+      try {
+        return JSON.parse(bytes.toString("utf8"));
+      } catch (error) {
+        throw new DriverError(
+          `Shell output JSON for effect ${action.effectId} is invalid JSON: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
+          action.effectId,
+        );
+      }
     }
     return result.stdout;
   }

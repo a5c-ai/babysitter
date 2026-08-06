@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -73,14 +74,17 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     );
     const generatedIndex = await fs.readFile(path.join(result.outputDir, 'extensions', 'index.ts'), 'utf8');
     expect(generatedIndex).not.toContain('babysitter-proxied-session-start');
+    expect(generatedIndex).not.toContain('babysitter_agent_complete');
     const agentPrompt = await fs.readFile(path.join(result.outputDir, 'agents', 'babysitter-task.md'), 'utf8');
     expect(agentPrompt).toContain('blocking: true');
-    expect(agentPrompt).toContain('call `babysitter_agent_complete` exactly once');
+    expect(agentPrompt).toContain('Yield your final effect value normally');
+    expect(agentPrompt).not.toContain('babysitter_agent_complete');
     const instructions = await fs.readFile(path.join(result.outputDir, 'AGENTS.md'), 'utf8');
     expect(instructions).toContain("oh-my-pi's built-in todos remain native session planning state");
     expect(instructions).toContain('calling `babysitter_drive` with the absolute run directory');
     expect(instructions).toContain("call oh-my-pi's native `task` tool exactly once");
     expect(instructions).not.toContain('intercepts built-in task and todo tools');
+    expect(instructions).not.toContain('babysitter_agent_complete');
     expect(instructions).not.toContain('## 7. TUI Widgets');
     expect(instructions).toContain('| `/babysit`, `/babysitter` | `/skill:babysit` |');
     expect(instructions).toContain('| `/call`, `/babysitter:call` | `/skill:call` |');
@@ -286,6 +290,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       ...documentedCommandNames.map((name) => `babysitter:${name}`),
     ].sort());
     expect(tools.has('babysitter_agent_cancel')).toBe(true);
+    expect(tools.has('babysitter_agent_complete')).toBe(false);
     expect(commands.has('babysitter:status')).toBe(false);
     const commandContext = {
       cwd: '/workspace',
@@ -582,6 +587,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     });
     const tools = new Map<string, RegisteredTool>();
     const handlers = new Map<string, (event: Record<string, unknown>) => Promise<Record<string, unknown> | undefined>>();
+    let effectResolved = false;
+    let posts = 0;
     const pi: Record<string, unknown> = {
       logger: { warn: () => undefined },
       zod: {
@@ -595,8 +602,23 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       registerCommand: () => undefined,
       sendUserMessage: () => undefined,
       exec: async (_command: string, args: string[]) => {
-        if (args[0] !== 'run:iterate') throw new Error(`unexpected CLI operation ${args[0]}`);
-        return { code: 0, stdout: waiting(effect), stderr: '' };
+        if (args[0] === 'run:iterate') {
+          return {
+            code: 0,
+            stdout: effectResolved ? JSON.stringify({ status: 'completed' }) : waiting(effect),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+        }
+        if (args[0] === 'task:post') {
+          posts += 1;
+          effectResolved = true;
+          await recordCommittedResult(runDir, effect, { approved: true });
+          return { code: 0, stdout: '{}', stderr: '' };
+        }
+        throw new Error(`unexpected CLI operation ${args[0]}`);
       },
       on: (
         event: string,
@@ -610,8 +632,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const driveTool = tools.get('babysitter_drive');
     const cancelTool = tools.get('babysitter_agent_cancel');
     const retryTool = tools.get('babysitter_agent_retry');
+    expect(tools.has('babysitter_agent_complete')).toBe(false);
     const taskCall = handlers.get('tool_call');
-    if (!driveTool || !cancelTool || !retryTool || !taskCall) throw new Error('missing registered recovery surface');
+    const taskResult = handlers.get('tool_result');
+    if (!driveTool || !cancelTool || !retryTool || !taskCall || !taskResult) {
+      throw new Error('missing registered recovery surface');
+    }
 
     const driveResult = await driveTool.execute(
       'modeled-drive',
@@ -657,6 +683,164 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       },
     });
     expect(retryResult).not.toHaveProperty('isError', true);
+    const retryDetails = retryResult.details;
+    if (!retryDetails || typeof retryDetails !== 'object' || !('continuation' in retryDetails)) {
+      throw new Error('missing retry continuation');
+    }
+    const continuation = retryDetails.continuation;
+    if (!continuation || typeof continuation !== 'object' || !('task' in continuation)) {
+      throw new Error('invalid retry continuation');
+    }
+    const continuationTask = continuation.task;
+    if (
+      !continuationTask ||
+      typeof continuationTask !== 'object' ||
+      !('tasks' in continuationTask) ||
+      !Array.isArray(continuationTask.tasks)
+    ) throw new Error('invalid retry task payload');
+    const continuationItem = continuationTask.tasks[0];
+    if (!continuationItem || typeof continuationItem !== 'object' || !('name' in continuationItem)) {
+      throw new Error('missing retry owner name');
+    }
+    const continuationOwnerName = continuationItem.name;
+    if (typeof continuationOwnerName !== 'string') throw new Error('invalid retry owner name');
+    await expect(taskCall({
+      toolName: 'task',
+      toolCallId: 'modeled-owner-retry',
+      input: continuationTask,
+    })).resolves.toBeUndefined();
+    await expect(taskResult({
+      toolName: 'task',
+      toolCallId: 'modeled-owner-retry',
+      input: continuationTask,
+      details: {
+        results: [{
+          id: `${continuationOwnerName}-2`,
+          agent: 'babysitter-task',
+          exitCode: 0,
+          output: '{"approved":true}',
+        }],
+      },
+      isError: false,
+      content: [],
+    })).resolves.toMatchObject({ content: expect.any(Array) });
+    expect(posts).toBe(1);
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toEqual({ approved: true });
+  });
+
+  it('persists stdout when outputJsonPath names the canonical driver-owned artifact', async () => {
+    const runDir = await tempRun('omp-shell-canonical-output-');
+    const effect = action('shell', {
+      shell: { command: 'emit-only-stdout' },
+      io: { outputJsonPath: 'tasks/effect-shell/output.json' },
+    });
+    const stdout = '{"captured":"stdout"}';
+    let iterations = 0;
+    let posts = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode: 0,
+        stdout,
+        stderr: '',
+        timedOut: false,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-06T00:00:00.000Z',
+        finishedAt: '2026-08-06T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+        }
+        posts += 1;
+        await recordCommittedResult(runDir, effect, stdout);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+    expect(posts).toBe(1);
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toBe(stdout);
+  });
+
+  it('rejects a missing distinct command-owned outputJsonPath without posting or creating canonical output', async () => {
+    const runDir = await tempRun('omp-shell-missing-command-output-');
+    const effect = action('shell', {
+      shell: { command: 'omit-command-owned-json' },
+      io: { outputJsonPath: 'artifacts/command-output.json' },
+    });
+    const cliCalls: string[][] = [];
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode: 0,
+        stdout: '{"mustNotBecome":"fallback"}',
+        stderr: '',
+        timedOut: false,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-06T00:00:00.000Z',
+        finishedAt: '2026-08-06T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        cliCalls.push(args);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(`Shell output JSON for effect ${effect.effectId} was not created or updated`);
+    expect(cliCalls.some((args) => args[0] === 'task:post')).toBe(false);
+    await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
+
+  it('rejects a stale distinct command-owned output artifact that the command did not update', async () => {
+    const runDir = await tempRun('omp-shell-stale-command-output-');
+    const effect = action('shell', {
+      shell: { command: 'leave-stale-command-owned-json' },
+      io: { outputJsonPath: 'artifacts/command-output.json' },
+    });
+    await writeJson(path.join(runDir, 'artifacts', 'command-output.json'), { stale: true });
+    const cliCalls: string[][] = [];
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode: 0,
+        stdout: '{"mustNotBecome":"fallback"}',
+        stderr: '',
+        timedOut: false,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-06T00:00:00.000Z',
+        finishedAt: '2026-08-06T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        cliCalls.push(args);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      `Shell output JSON for effect ${effect.effectId} was not created or updated by the command`,
+    );
+    expect(cliCalls.some((args) => args[0] === 'task:post')).toBe(false);
+    await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
   });
 
   it('reuses a durable completed shell output without rerunning it and continues automatically', async () => {
@@ -957,10 +1141,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   it('retains the interrupted blocking agent owner and refuses a duplicate dispatch or writer', async () => {
     const runDir = await tempRun('omp-agent-owner-');
     const effect = action('agent', { agent: { prompt: 'Slow review' } });
+    const cliCalls: string[][] = [];
     const driver = new OmpDeterministicDriver({
       cwd: runDir,
       randomId: () => 'dispatch-token',
-      runCli: async () => ({ code: 0, stdout: waiting(effect), stderr: '' }),
+      runCli: async (args) => {
+        cliCalls.push(args);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
     });
 
     const dispatch = await driver.drive(runDir);
@@ -984,27 +1172,143 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       details: { results: [{ exitCode: 0, output: '{"approved":false}' }] },
       isError: false,
     })).resolves.toMatchObject({ handled: true, reason: expect.stringContaining('non-owner') });
+    expect(cliCalls.some((args) => args[0] === 'task:post')).toBe(false);
+    await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
   });
 
-  it('accepts a durable late result only from the retained owner after its parent wait is interrupted', async () => {
-    const runDir = await tempRun('omp-agent-late-owner-result-');
-    const effect = action('agent', {
-      agent: { prompt: 'Slow review' },
-      outputSchema: {
-        type: 'object',
-        required: ['approved', 'label'],
-        additionalProperties: false,
-        properties: {
-          approved: { type: 'boolean' },
-          label: { type: 'string', pattern: '^safe$' },
-        },
+  it('leaves an interrupted blocking task result unresolved without a descriptor-only completion path', async () => {
+    const runDir = await tempRun('omp-agent-lost-owner-result-');
+    const effect = action('agent', { agent: { prompt: 'Slow review' } });
+    const cliCalls: string[][] = [];
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      randomId: () => 'dispatch-token',
+      runCli: async (args) => {
+        cliCalls.push(args);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
       },
     });
+
+    const dispatch = await driver.drive(runDir);
+    if (dispatch.state !== 'agent') throw new Error('expected agent dispatch');
+    const input = dispatch.task as unknown as Record<string, unknown>;
+    await expect(driver.claimAgentToolCall(input, 'owner-call')).resolves.toEqual({ handled: true });
+    await expect(driver.completeAgentToolCall({
+      toolCallId: 'owner-call',
+      input,
+      details: { error: 'task transport disconnected' },
+      isError: true,
+    })).resolves.toMatchObject({
+      handled: true,
+      reason: expect.stringContaining('did not contain exactly one subagent result'),
+    });
+
+    const checkpoint = JSON.parse(
+      await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    expect(checkpoint).toMatchObject({ attemptState: 'awaiting_late_owner' });
+    expect(cliCalls.some((args) => args[0] === 'task:post')).toBe(false);
+    await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
+
+  it('rejects orphaned agent output without an authenticated completion checkpoint', async () => {
+    const runDir = await tempRun('omp-agent-unauthenticated-output-');
+    const effect = action('agent', { agent: { prompt: 'Reject orphaned output' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'agent',
+      state: 'in_progress',
+      startedAt: '2026-08-06T00:00:00.000Z',
+      ownerName: 'babysitter-effect-agent',
+      dispatchToken: 'dispatch-token',
+      attempt: 1,
+      attemptState: 'claimed',
+    });
+    await writeJson(path.join(taskDir, 'output.json'), { approved: true });
+    const cliCalls: string[][] = [];
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      runCli: async (args) => {
+        cliCalls.push(args);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      `Unauthenticated durable output exists for agent effect ${effect.effectId}; refusing recovery`,
+    );
+    expect(cliCalls.some((args) => args[0] === 'task:post')).toBe(false);
+  });
+
+  it('rejects an unposted completed agent output without an authenticated completion checkpoint', async () => {
+    const runDir = await tempRun('omp-agent-unauthenticated-completed-output-');
+    const effect = action('agent', { agent: { prompt: 'Reject unauthenticated completed output' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'agent',
+      state: 'completed',
+      startedAt: '2026-08-06T00:00:00.000Z',
+      finishedAt: '2026-08-06T00:00:01.000Z',
+      ownerName: 'babysitter-effect-agent',
+      dispatchToken: 'dispatch-token',
+      attempt: 1,
+      attemptState: 'completed',
+      outputRef: `tasks/${effect.effectId}/output.json`,
+    });
+    await writeJson(path.join(taskDir, 'output.json'), { approved: true });
+    const cliCalls: string[][] = [];
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      runCli: async (args) => {
+        cliCalls.push(args);
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      `Unauthenticated durable output exists for agent effect ${effect.effectId}; refusing recovery`,
+    );
+    expect(cliCalls.some((args) => args[0] === 'task:post')).toBe(false);
+  });
+
+  it('recovers and posts an authenticated completed agent output after a pre-post crash', async () => {
+    const runDir = await tempRun('omp-agent-authenticated-completed-output-');
+    const effect = action('agent', { agent: { prompt: 'Recover authenticated completed output' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    const value = { approved: true };
+    const outputBytes = JSON.stringify(value, null, 2) + '\n';
+    const outputSha256 = createHash('sha256').update(outputBytes).digest('hex');
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'agent',
+      state: 'completed',
+      startedAt: '2026-08-06T00:00:00.000Z',
+      finishedAt: '2026-08-06T00:00:01.000Z',
+      ownerName: 'babysitter-effect-agent',
+      dispatchToken: 'dispatch-token',
+      attempt: 1,
+      attemptState: 'completed',
+      outputRef: `tasks/${effect.effectId}/output.json`,
+      outputSha256,
+      authenticatedOutputSha256: outputSha256,
+    });
+    await writeJson(path.join(taskDir, 'output.json'), value);
     let iterations = 0;
     let posts = 0;
     const driver = new OmpDeterministicDriver({
       cwd: runDir,
-      randomId: () => 'dispatch-token',
       runCli: async (args) => {
         if (args[0] === 'run:iterate') {
           iterations += 1;
@@ -1018,45 +1322,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
         }
         posts += 1;
-        await recordCommittedResult(runDir, effect, { approved: true, label: 'safe' });
+        await recordCommittedResult(runDir, effect, value);
         return { code: 0, stdout: '{}', stderr: '' };
       },
     });
 
-    const dispatch = await driver.drive(runDir);
-    expect(dispatch.state).toBe('agent');
-    if (dispatch.state !== 'agent') throw new Error('expected agent dispatch');
-    const input = dispatch.task as unknown as Record<string, unknown>;
-    await expect(driver.claimAgentToolCall(input, 'owner-call')).resolves.toEqual({ handled: true });
-    await expect(driver.claimAgentToolCall(input, 'duplicate-call')).resolves.toMatchObject({ block: true });
-    await expect(driver.completeAgentToolCall({
-      toolCallId: 'owner-call',
-      input,
-      details: { results: [{ aborted: true, error: 'parent wait interrupted' }] },
-      isError: true,
-    })).resolves.toMatchObject({ handled: true, reason: expect.stringContaining('remains unresolved') });
-
-    const taskPrompt = dispatch.task.tasks[0].task;
-    const descriptor = bridgeDescriptor(taskPrompt);
-    await expect(driver.completeAgentOwnerValue({
-      ...descriptor,
-      value: { approved: true, label: 'unsafe', unexpected: true },
-    })).rejects.toThrow('output schema validation');
-    const completion = await driver.completeAgentOwnerValue({
-      ...descriptor,
-      value: { approved: true, label: 'safe' },
-    });
-
-    expect(completion).toMatchObject({ handled: true, posted: true, continuation: { state: 'completed' } });
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
     expect(posts).toBe(1);
     expect(iterations).toBe(2);
-    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
-    await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8')).resolves.toContain(
-      '"approved": true',
-    );
-    await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8')).resolves.toContain(
-      '"label": "safe"',
-    );
   });
 
   it('posts one immutable owner result and automatically continues the run', async () => {
@@ -1124,6 +1397,15 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(iterations).toBe(2);
     const outputPath = path.join(runDir, 'tasks', effect.effectId, 'output.json');
     await expect(fs.readFile(outputPath, 'utf8')).resolves.toContain('"approved": true');
+    const completionCheckpoint = JSON.parse(
+      await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    expect(completionCheckpoint).toMatchObject({
+      state: 'completed',
+      attemptState: 'completed',
+      authenticatedOutputSha256: expect.any(String),
+    });
+    expect(completionCheckpoint.authenticatedOutputSha256).toBe(completionCheckpoint.outputSha256);
     const ownerArtifact = JSON.parse(
       await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'agent-owner.json'), 'utf8'),
     ) as Record<string, unknown>;
@@ -1342,7 +1624,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
     ) as Record<string, unknown>;
     expect(retryCheckpoint).toMatchObject({ attempt: 2, attemptState: 'aborted' });
-    await expect(driver.completeAgentOwnerValue({ ...descriptor, value: { stale: true } })).resolves.toMatchObject({
+    await expect(driver.completeAgentToolCall({
+      toolCallId: 'owner-one',
+      input: firstInput,
+      details: { results: [{ exitCode: 0, output: '{"stale":true}' }] },
+      isError: false,
+    })).resolves.toMatchObject({
       handled: true,
       reason: expect.stringContaining('non-owner'),
     });
@@ -1439,7 +1726,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
 
     const [retry, staleCompletion] = await Promise.all([
       driver.authorizeAgentRetry({ ...descriptor, reason: 'rotate owner token' }),
-      driver.completeAgentOwnerValue({ ...descriptor, value: { stale: true } }),
+      driver.completeAgentToolCall({
+        toolCallId: 'race-owner',
+        input,
+        details: { results: [{ exitCode: 0, output: '{"stale":true}' }] },
+        isError: false,
+      }),
     ]);
     expect(retry).toEqual({ handled: true });
     expect(staleCompletion).toMatchObject({

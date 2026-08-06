@@ -98,12 +98,13 @@ Rules:
 - For an `agent` state, preserve the exact one-item native task payload. Its
   stable owner, dispatch token, model selector (including reasoning suffix),
   output schema, and strict schema mode are security and recovery boundaries.
-- The blocking `babysitter-task` agent calls `babysitter_agent_complete` exactly
-  once with its supplied bridge descriptor and final value.
+- The blocking `babysitter-task` agent yields its final structured value
+  normally. The authenticated blocking task result is the only completion path.
 - Do not treat a completed execution checkpoint as a resolved effect until the
   Babysitter journal confirms `EFFECT_RESOLVED`.
-- Return task failure as an effect outcome; do not invent a second writer or
-  bypass the orchestrator.
+- An interrupted or lost blocking task result remains unresolved and follows
+  the explicit recovery policy; do not invent a second writer or bypass the
+  orchestrator.
 
 ---
 
