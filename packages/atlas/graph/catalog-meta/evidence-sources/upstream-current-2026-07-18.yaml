@@ -1,0 +1,201 @@
+# Evidence captured during the 2026-07-18 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1784350575-g714407-2026-07-18
+attributes:
+  displayName: "Amp CLI 0.0.1784350575-g714407 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784350575-g714407"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784350575-g714407"
+  locator: "npm @ampcode/cli v0.0.1784350575-g714407"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-18T05:04:15Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli latest version 0.0.1784350575-g714407.
+    The package description identifies it as the Amp frontier coding agent CLI.
+    No public build-specific changelog, CLI flag, transport/API, model,
+    package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1784350575-g714407
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-4-2026-07-18
+attributes:
+  displayName: "Antigravity CLI 1.1.4 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.4"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.4"
+  locator: "google-antigravity/antigravity-cli release 1.1.4"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-18T00:48:48Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.4 release notes document stacked leading
+    slash commands, /diff viewer scrolling fixes, subagent filtering for
+    custom agents declaring subagent false, headless settings.json policy
+    enforcement, /btw duplicate conversation fixes, custom Enter binding
+    handling, and restored eligibility error reasons.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-4
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-214-2026-07-18
+attributes:
+  displayName: "Claude Code v2.1.214 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.214"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.214"
+  locator: "anthropics/claude-code release v2.1.214"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-18T01:20:30Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    Official Claude Code 2.1.214 release notes document expanded fail-closed
+    permission checks, EndConversation, long-running tool-call progress
+    heartbeats, OpenTelemetry message/tool correlation fields, configurable
+    content truncation via CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH, reasoning
+    effort in subagentStatusLine, oversized settings-file startup failure,
+    plugin loading through --settings, stream-json exit-drain fixes, Windows
+    PowerShell fixes, background daemon/session fixes, and telemetry fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-214
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-214-2026-07-18
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.214 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.214"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.214"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.214"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-18T01:20:14Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.214 release notes document
+    set_permission_mode validation with the manual alias, task-notification
+    subkind scheduled-trigger, effortLevel max typing, aborted interrupted
+    assistant messages, subagent_type and subagent_retry tool_progress fields,
+    plugin manifest version in system/init and reload_plugins responses, and
+    SessionStart hook source fork for forked sessions.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-214
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-changelog-2026-07-17
+attributes:
+  displayName: "Cursor changelog 2026-07-17"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog"
+  sourcePathOrUrl: "https://cursor.com/changelog"
+  locator: "Cursor changelog Jul 17, 2026"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-17T00:00:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    Official Cursor changelog for Jul 17, 2026 documents Cursor in Slack
+    sharing a plan before it starts, status updates while work runs,
+    cleaner Slack message rendering, named multi-repo environment support,
+    mid-task repo access prompts, and cross-channel/thread read and send
+    workflows.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:changelog-2026-07-17
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-175-0-2026-07-18
+attributes:
+  displayName: "Factory Droid CLI 0.175.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.175.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.175.0"
+  locator: "npm @factory/cli v0.175.0"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-17T22:13:16Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    npm metadata reports @factory/cli latest version 0.175.0, identifies it as
+    Factory Droid CLI, and points repository metadata at Factory-AI/factory
+    under apps/cli. No public 0.175.0-specific changelog, CLI flag,
+    transport/API, model, package-name, install-method, or migration change was
+    found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-175-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:omp-17-0-4-2026-07-18
+attributes:
+  displayName: "Oh-My-Pi v17.0.4 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.4"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.0.4"
+  locator: "can1357/oh-my-pi release v17.0.4"
+  capturedAt: "2026-07-18T07:45:00Z"
+  observedAt: "2026-07-18T05:17:32Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-18T07:45:00Z"
+  notes: |
+    Official Oh-My-Pi 17.0.4 release notes document Kimi Code usage reset
+    reporting fixes, best-effort Kimi device-id persistence, boolean
+    tool-schema coercion to MFJS object forms for native Moonshot/Kimi
+    endpoints and task schemas, Kimi-family MFJS schemas across hosts,
+    bundled Linux ffmpeg recording fixes, session blob-ref precheck
+    performance, transcript finalized-block compaction, /quit and /exit
+    shutdown fixes, hashline DEL header validation, and corrupt embedding
+    cache quarantine/retry behavior.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:17-0-4
+    - agent:omp
