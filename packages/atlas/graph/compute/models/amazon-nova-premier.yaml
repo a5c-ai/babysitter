@@ -1,0 +1,75 @@
+nodeKind: ModelVersion
+id: model:amazon-nova-premier@current
+attributes:
+  displayName: "Amazon Nova Premier"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  pricingNotes: "Pricing is region/model specific on the Bedrock pricing page and is not hardcoded in this graph node."
+  providerModelIds:
+    - amazon.nova-premier-v1:0
+    - us.amazon.nova-premier-v1:0
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:amazon-nova-2
+  versionRange: '>=1.0.0 <2.0.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  maxOutputTokens: 25000
+  modalities:
+    - text
+    - image
+    - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: video
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-10-31'
+  lifecycleStatus: legacy
+  lifecycleStatusChangedAt: '2026-08-06'
+  endOfLifeDate: '2026-09-14'
+  modelCardUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-premier.html
+  supportsFineTuning: false
+  regions:
+    - us-east-1
+  notes: |
+    Amazon Nova Premier is tracked from the official Bedrock model card as a
+    legacy Bedrock model with an announced end-of-life date. The model card
+    lists a regional profile and no global inference model ID.
+edges:
+  belongs_to_family:
+    - target: model-family:amazon-nova-2
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:amazon-nova-2
+  served_by:
+    - provider:aws-bedrock
+  speaks:
+    - model-transport:bedrock-converse
+    - model-transport:bedrock-invoke
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-premier-model-card
+    - target: capability:vision-input
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-premier-model-card
+    - target: capability:extended-thinking
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-premier-model-card
+    - target: capability:supports-prompt-caching
+      versionRange: '>=1.0.0 <2.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:amazon-nova-premier-model-card
