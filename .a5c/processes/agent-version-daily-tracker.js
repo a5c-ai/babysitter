@@ -106,7 +106,7 @@ const researchAndUpdateTask = defineTask('agent-version-tracker.research-and-upd
         'Cover every upstream host agent in the target list and the adapter npm install list. Exclude all @a5c-ai/* packages.',
         'Use npm view results from context for npm packages; for non-npm or ambiguous agents, research authoritative upstream sources.',
         'Do not treat generated babysitter plugin packages as upstream host agents.',
-        'Compare latest upstream versions against packages/atlas/graph/agent-stack/versions and products.',
+        'Compare latest upstream versions against packages/atlas/graph/agent-stack/agent-versions and products.',
         'For each new version not already represented, use actual release notes/changelog/blog/release pages. Record real capability changes, CLI flags, breaking changes, transport/API changes, tool/model support, install/package changes, and migration notes.',
         'Create or update AgentVersion YAML and evidence using existing graph patterns only.',
         'For each new agent+version pair, run gh issue list --label "agent-version-update" --search "<agent> <version>"; if no existing issue exists, create one with labels agent-version-update,graph-update.',
