@@ -1,4 +1,5 @@
 {
+  "generatedAt": "2026-08-06T08:07:00Z",
   "providers": [
     "Anthropic",
     "OpenAI",
@@ -8,7 +9,7 @@
     "DeepSeek",
     "Mistral",
     "Alibaba Qwen",
-    "Amazon Nova/Bedrock",
+    "Amazon Nova / Bedrock",
     "Cohere",
     "Together AI",
     "Fireworks AI",
@@ -17,131 +18,262 @@
   "findings": [
     {
       "provider": "Anthropic",
-      "finding": "Graph already tracks Claude Sonnet 5, Fable 5, Mythos 5, Haiku 4.5, Opus 4.8, and earlier Opus/Sonnet versions. Claude Opus 5 has an existing open model-version issue.",
-      "graphStatus": "tracked/issue-open",
-      "issues": ["#1621", "#1180", "#991", "#992", "#532"]
+      "status": "existing-coverage",
+      "details": "Graph already tracks Claude Opus/Sonnet/Haiku 4.x, Claude Fable/Mythos 5, and Claude Sonnet 5 sidecar records. Open issue #1621 covers Claude Opus 5."
     },
     {
       "provider": "OpenAI",
-      "finding": "Graph tracks GPT-5.5/GPT-5 family, GPT-4o, and gpt-oss. GPT-5.6 Sol/Terra/Luna already has an open model-version issue.",
-      "graphStatus": "tracked/issue-open",
-      "issues": ["#1622", "#430"]
+      "status": "existing-issue",
+      "details": "Graph already tracks GPT-5, GPT-5.3 Codex, GPT-5.4, GPT-5.5, GPT-4o, o1/o3, and GPT-OSS records. Open issue #1622 covers GPT-5.6 Sol/Terra/Luna."
     },
     {
       "provider": "Google Gemini",
-      "finding": "Graph tracks Gemini 3.1 Pro/Deep Think/Flash Lite/Flash Live/TTS and Gemini 3.x records. Gemini 3.6 Flash and related Flash-Lite/Cyber coverage already has open model-version issues.",
-      "graphStatus": "tracked/issue-open",
-      "issues": ["#1639", "#1626", "#1623"]
+      "status": "existing-issue",
+      "details": "Graph already tracks Gemini 2.5 and Gemini 3 families including Gemini 3.1 and 3.5 Flash records. Open issues #1623, #1626, and #1639 cover Gemini 3.6/3.5/3.1 updates."
     },
     {
       "provider": "xAI",
-      "finding": "Graph tracks Grok 4.5. Grok 4.20 variants have an existing model-version issue marked duplicate.",
-      "graphStatus": "tracked/issue-existing",
-      "issues": ["#1624"]
+      "status": "existing-issue",
+      "details": "Graph tracks Grok 4.5, and open issue #1624 covers Grok 4.20 variants."
     },
     {
       "provider": "Meta Llama",
-      "finding": "Graph tracks Llama 4 Scout and Llama 4 Maverick with provider availability through Meta/direct and inference providers. No untracked Llama 4.x release was confirmed in this run.",
-      "graphStatus": "tracked",
-      "issues": ["#1467"]
+      "status": "in-graph",
+      "details": "Graph tracks Llama 4 Scout and Llama 4 Maverick with provider availability through Meta/direct and inference providers."
     },
     {
       "provider": "DeepSeek",
-      "finding": "Graph tracks DeepSeek R1, V3, V4 Pro, and V4 Flash. DeepSeek-V4-Flash-0731 has an open model-version issue.",
-      "graphStatus": "tracked/issue-open",
-      "issues": ["#1638"]
+      "status": "existing-issue",
+      "details": "Graph tracks DeepSeek V3, R1, V4 Pro, and V4 Flash. Open issue #1638 covers DeepSeek-V4-Flash-0731."
     },
     {
       "provider": "Mistral",
-      "finding": "Graph tracks Mistral Large 3, Medium/Codestral/Pixtral family records, and provider edges. Mistral Small 4 and Large 3 issue searches returned existing issues.",
-      "graphStatus": "tracked/issue-existing",
-      "issues": ["#1640", "#1625", "#1469"]
+      "status": "existing-issue",
+      "details": "Graph tracks Mistral Medium 3.5 and Mistral Small 4. Open issues #1640 and #1625 cover Mistral Large 3 and Small 4 work."
     },
     {
       "provider": "Alibaba Qwen",
-      "finding": "Graph tracks Qwen 3.7 Max/Plus and earlier Qwen/Qwen-Coder models. Qwen3.8-Max and qwen3.8-max-preview already have an open model-version issue.",
-      "graphStatus": "tracked/issue-open",
-      "issues": ["#1627"]
+      "status": "existing-issue",
+      "details": "Graph includes Qwen3.6 and Qwen3.7 model records. Open issue #1627 covers Qwen3.8-Max and qwen3.8-max-preview."
     },
     {
-      "provider": "Amazon Nova/Bedrock",
-      "finding": "Graph tracks Amazon Nova 2 Lite, Sonic, Omni, and Nova 2 Pro Preview with Bedrock provider/model-transport sidecars and evidence.",
-      "graphStatus": "tracked",
-      "issues": ["#535"]
+      "provider": "Amazon Nova / Bedrock",
+      "status": "graph-updated",
+      "details": "Added Amazon Nova Premier with Bedrock provider IDs, 1M context, 25K max output, legacy lifecycle, and EOL 2026-09-14. Created issue #1655 for tracking and review."
     },
     {
       "provider": "Cohere",
-      "finding": "Graph tracks Command A+, Command A Reasoning/Vision, Embed v4-era coverage, and Cohere provider transports. Cohere Transcribe 03-2026 has an existing duplicate issue.",
-      "graphStatus": "tracked/issue-existing",
-      "issues": ["#1641", "#1518", "#1092", "#363"]
+      "status": "existing-coverage",
+      "details": "Graph tracks Command A Plus 05-2026 and Cohere Embed v4.0. Open issue #1641 covers Cohere Transcribe 03-2026."
     },
     {
       "provider": "Together AI",
-      "finding": "Together AI serverless catalog refresh already has an open issue. A specific missing model gap was found for Thinking Machines Inkling / Inkling Small on Together AI; created issue #1656.",
-      "graphStatus": "provider-tracked/model-gap-issue-created",
-      "issues": ["#1642", "#1656"]
+      "status": "existing-and-new-issue",
+      "details": "Open issue #1642 covers the 2026-08 Together AI serverless catalog refresh. Issue #1656 tracks Thinking Machines Inkling on Together AI."
     },
     {
       "provider": "Fireworks AI",
-      "finding": "Graph tracks Fireworks AI as an OpenAI-compatible inference provider with 2026-05 catalog evidence and model/provider edges for major open models. No distinct Fireworks-only untracked model was confirmed beyond existing closed/open catalog issues.",
-      "graphStatus": "tracked",
-      "issues": ["#1473", "#1009", "#1193", "#1322"]
+      "status": "new-issue",
+      "details": "Created issue #1658 to refresh Fireworks AI serverless model catalog from the current Fireworks docs/API and advance provider evidence beyond 2026-05 if warranted."
     },
     {
       "provider": "Groq",
-      "finding": "Groq has an open 2026-08 inference model catalog refresh issue; graph tracks Groq provider and existing model edges.",
-      "graphStatus": "tracked/issue-open",
-      "issues": ["#1643"]
+      "status": "new-issue",
+      "details": "Open issue #1643 covers general Groq catalog refresh. Created issue #1657 to track August 2026 deprecations for llama-3.1-8b-instant and llama-3.3-70b-versatile."
     }
   ],
   "issuesCreated": [
     {
+      "number": 1655,
+      "title": "Track Amazon Nova Premier lifecycle and EOL",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1655"
+    },
+    {
       "number": 1656,
       "title": "Track Thinking Machines Inkling on Together AI",
       "url": "https://github.com/a5c-ai/babysitter/issues/1656"
+    },
+    {
+      "number": 1657,
+      "title": "Track Groq August 2026 model deprecations",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1657"
+    },
+    {
+      "number": 1658,
+      "title": "Refresh Fireworks AI serverless model catalog for 2026-08",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1658"
     }
   ],
   "issuesExisting": [
-    1621,
-    1622,
-    1639,
-    1638,
-    1627,
-    1642,
-    1643,
-    1641,
-    1640,
-    1625,
-    1624,
-    1623,
-    535,
-    532,
-    430,
-    363
+    {
+      "number": 1621,
+      "title": "Track Claude Opus 5",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1621"
+    },
+    {
+      "number": 1622,
+      "title": "Track OpenAI GPT-5.6 Sol/Terra/Luna",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1622"
+    },
+    {
+      "number": 1623,
+      "title": "Track Gemini 3.6 Flash",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1623"
+    },
+    {
+      "number": 1624,
+      "title": "Track xAI Grok 4.20 variants",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1624"
+    },
+    {
+      "number": 1625,
+      "title": "Track Mistral Small 4",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1625"
+    },
+    {
+      "number": 1626,
+      "title": "Track Google Gemini 3.6 Flash and Gemini 3.5 Flash-Lite/Cyber",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1626"
+    },
+    {
+      "number": 1627,
+      "title": "Track Alibaba Qwen3.8-Max and qwen3.8-max-preview",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1627"
+    },
+    {
+      "number": 1638,
+      "title": "Track DeepSeek-V4-Flash-0731",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1638"
+    },
+    {
+      "number": 1639,
+      "title": "Track Google Gemini 3.1 Pro Preview",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1639"
+    },
+    {
+      "number": 1640,
+      "title": "Track Mistral Large 3",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1640"
+    },
+    {
+      "number": 1641,
+      "title": "Track Cohere Transcribe 03-2026",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1641"
+    },
+    {
+      "number": 1642,
+      "title": "Refresh Together AI serverless model catalog for 2026-08",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1642"
+    },
+    {
+      "number": 1643,
+      "title": "Refresh Groq inference model catalog for 2026-08",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1643"
+    }
   ],
   "changedFiles": [
-    "artifacts/model-provider-tracker/inkling-issue.md",
-    "artifacts/model-provider-tracker/summary.json",
-    ".a5c/processes/model-provider-daily-tracker.inputs.json"
+    "packages/atlas/graph/compute/model-families/amazon-nova-2.yaml",
+    "packages/atlas/graph/compute/models/amazon-nova-premier.yaml",
+    "packages/atlas/graph/compute/providers/bedrock.yaml",
+    "packages/atlas/graph/catalog-meta/evidence-sources/amazon-nova-premier-evidence-2026-08.yaml",
+    "packages/atlas/graph/catalog-meta/claims/amazon-nova-premier-issue-1655.yaml"
   ],
   "summaryTable": [
-    { "Provider": "Anthropic", "Model": "Claude Opus/Sonnet/Haiku/Fable/Mythos", "Latest Version": "Opus 5 issue open; Sonnet 5/Fable 5/Mythos 5/Haiku 4.5 tracked", "In Graph?": "Partial", "Status": "Existing issue/open graph work for Opus 5; others tracked" },
-    { "Provider": "OpenAI", "Model": "GPT-5.x, GPT-4o, o-series, gpt-oss", "Latest Version": "GPT-5.6 issue open; GPT-5.5 tracked", "In Graph?": "Partial", "Status": "Existing issue for GPT-5.6; graph has GPT-5.5/GPT-4o/gpt-oss" },
-    { "Provider": "Google Gemini", "Model": "Gemini 3.x/2.x Flash/Pro", "Latest Version": "Gemini 3.6 Flash issue open; Gemini 3.1 tracked", "In Graph?": "Partial", "Status": "Existing issues cover new 3.6/3.5 deltas" },
-    { "Provider": "xAI", "Model": "Grok", "Latest Version": "Grok 4.5 tracked; Grok 4.20 issue existing", "In Graph?": "Yes/Partial", "Status": "No new issue created" },
-    { "Provider": "Meta", "Model": "Llama 4", "Latest Version": "Llama 4 Scout/Maverick", "In Graph?": "Yes", "Status": "Tracked" },
-    { "Provider": "DeepSeek", "Model": "DeepSeek R1/V3/V4", "Latest Version": "V4 Flash 0731 issue open; V4 Pro/Flash tracked", "In Graph?": "Partial", "Status": "Existing issue covers latest delta" },
-    { "Provider": "Mistral", "Model": "Mistral Large/Codestral/Pixtral", "Latest Version": "Mistral Large 3; Small 4 issue existing", "In Graph?": "Yes/Partial", "Status": "No new issue created" },
-    { "Provider": "Alibaba", "Model": "Qwen/Qwen-Coder", "Latest Version": "Qwen3.8-Max issue open; Qwen3.7 tracked", "In Graph?": "Partial", "Status": "Existing issue covers latest delta" },
-    { "Provider": "Amazon", "Model": "Nova/Bedrock", "Latest Version": "Nova 2 Lite/Sonic/Omni/Pro Preview", "In Graph?": "Yes", "Status": "Tracked" },
-    { "Provider": "Cohere", "Model": "Command/Embed/North/Transcribe", "Latest Version": "Command A+ tracked; Transcribe 03-2026 issue existing", "In Graph?": "Yes/Partial", "Status": "No new issue created" },
-    { "Provider": "Together AI", "Model": "Serverless catalog + Inkling", "Latest Version": "Inkling / Inkling Small", "In Graph?": "No for Inkling", "Status": "Created #1656; catalog refresh #1642 open" },
-    { "Provider": "Fireworks AI", "Model": "Inference catalog", "Latest Version": "2026 provider catalog evidence", "In Graph?": "Yes", "Status": "No distinct new model confirmed" },
-    { "Provider": "Groq", "Model": "Inference catalog", "Latest Version": "2026-08 catalog refresh", "In Graph?": "Partial", "Status": "Existing issue #1643 open" }
+    {
+      "Provider": "Anthropic",
+      "Model": "Claude Opus/Sonnet/Haiku plus Fable/Mythos",
+      "Latest Version": "Claude Opus 5 / Sonnet 5 issue coverage; Fable/Mythos 5 in graph",
+      "In Graph?": "Partial",
+      "Status": "Existing graph records plus issue #1621"
+    },
+    {
+      "Provider": "OpenAI",
+      "Model": "GPT-5.x, GPT-4o, o-series, GPT-OSS",
+      "Latest Version": "GPT-5.6 Sol/Terra/Luna",
+      "In Graph?": "Partial",
+      "Status": "Existing graph records plus issue #1622"
+    },
+    {
+      "Provider": "Google Gemini",
+      "Model": "Gemini 2.x/3.x Flash/Pro",
+      "Latest Version": "Gemini 3.6 Flash / Gemini 3.1 Pro Preview issues",
+      "In Graph?": "Partial",
+      "Status": "Existing graph records plus issues #1623, #1626, #1639"
+    },
+    {
+      "Provider": "xAI",
+      "Model": "Grok",
+      "Latest Version": "Grok 4.20 variants",
+      "In Graph?": "Partial",
+      "Status": "Issue #1624"
+    },
+    {
+      "Provider": "Meta",
+      "Model": "Llama 4",
+      "Latest Version": "Llama 4 Scout / Maverick",
+      "In Graph?": "Yes",
+      "Status": "No new issue needed"
+    },
+    {
+      "Provider": "DeepSeek",
+      "Model": "DeepSeek V4/R1",
+      "Latest Version": "DeepSeek-V4-Flash-0731",
+      "In Graph?": "Partial",
+      "Status": "Issue #1638"
+    },
+    {
+      "Provider": "Mistral",
+      "Model": "Mistral Large/Codestral/Pixtral/Small/Medium",
+      "Latest Version": "Mistral Large 3 / Small 4",
+      "In Graph?": "Partial",
+      "Status": "Issues #1640 and #1625"
+    },
+    {
+      "Provider": "Alibaba Qwen",
+      "Model": "Qwen3 / Qwen Coder",
+      "Latest Version": "Qwen3.8-Max preview",
+      "In Graph?": "Partial",
+      "Status": "Issue #1627"
+    },
+    {
+      "Provider": "Amazon Nova / Bedrock",
+      "Model": "Nova Premier / Nova 2",
+      "Latest Version": "Nova Premier legacy, Nova 2 family",
+      "In Graph?": "Yes",
+      "Status": "Added Nova Premier; issue #1655"
+    },
+    {
+      "Provider": "Cohere",
+      "Model": "Command / Embed / Transcribe",
+      "Latest Version": "Command A Plus 05-2026, Embed v4, Transcribe 03-2026",
+      "In Graph?": "Partial",
+      "Status": "Graph has Command/Embed; issue #1641"
+    },
+    {
+      "Provider": "Together AI",
+      "Model": "Serverless catalog",
+      "Latest Version": "2026-08 catalog refresh, Inkling",
+      "In Graph?": "Partial",
+      "Status": "Issues #1642 and #1656"
+    },
+    {
+      "Provider": "Fireworks AI",
+      "Model": "Serverless catalog",
+      "Latest Version": "2026-08 catalog refresh",
+      "In Graph?": "Partial",
+      "Status": "Created issue #1658"
+    },
+    {
+      "Provider": "Groq",
+      "Model": "Inference catalog",
+      "Latest Version": "2026-08 catalog plus deprecations",
+      "In Graph?": "Partial",
+      "Status": "Issues #1643 and #1657"
+    }
   ],
   "notes": [
-    "Atlas build succeeded after repairing a corrupted local node_modules install for tsx/esbuild; tracked package metadata changes from npm install were reverted.",
-    "No Atlas graph YAML edits were made in this run, so no branch/commit/PR was created.",
-    "The Babysitter shell-result stdout had to be captured as artifact logs; the final research summary is stored here for downstream review."
+    "Atlas build passed after workspace dependencies were installed; the library bridge report still emits pre-existing semantic-edge warnings/failures while exiting zero.",
+    "No speculative provider-catalog YAML refresh was performed for Together, Fireworks, or Groq because exact model-list snapshots should be captured from each provider API/docs during those issue implementations.",
+    "The transport-adapter proxy supports Bedrock Invoke/Converse and OpenAI-compatible inference providers in existing graph/provider records, but slash-qualified provider IDs still need per-provider adapter smoke checks before marking new inference-provider models fully supported."
   ]
 }
