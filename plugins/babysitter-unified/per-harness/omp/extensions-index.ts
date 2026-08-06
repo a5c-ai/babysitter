@@ -19,9 +19,10 @@ export type TodoProjectionGate = "available" | "missing_capability" | "version_m
 
 export function getTodoProjectionGate(
   api: ProjectionExtensionAPI,
-  hostVersion = api.hostVersion ?? TODO_PROJECTION_MIN_OMP_VERSION,
+  hostVersion = api.hostVersion,
 ): TodoProjectionGate {
   if (typeof api.setTodoProjection !== "function") return "missing_capability";
+  if (typeof hostVersion !== "string") return "version_mismatch";
   const parse = (value: string): [number, number, number] | null => {
     const match = /^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/.exec(value);
     return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;

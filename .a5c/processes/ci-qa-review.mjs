@@ -77,7 +77,7 @@ The JSON format is: [{"agent":"...","model":"...","mode":"...","install":"...","
 - install: vanilla, bp
 - process_mode: predefined, create
 
-OMP requires Bun at runtime and supports ni or interactive mode. Do not select bridged-interactive or bridged-hooks for OMP because its cataloged bridge capability is false.
+OMP requires Bun at runtime and supports only ni mode in this non-TTY CI workflow. Do not select interactive, bridged-interactive, or bridged-hooks for OMP because the runner converts non-TTY interactive execution to bridge-hooks and OMP's cataloged bridge capability is false.
 
 Return { matrix: <JSON array>, reasoning: string }.`,
     },
@@ -91,9 +91,12 @@ const dispatchLiveStackTask = defineTask('dispatch-live-stack', async (args, ctx
     labels: ['qa', 'dispatch'],
     io: {
       instruction: `Dispatch the live-stack workflow definition from staging and make it check out the exact PR mergeable head ref.
-Run: gh workflow run live-stack.yml --ref staging -f ref='${args.prNumber ? `refs/pull/${args.prNumber}/head` : (args.branch || 'staging')}' -f matrix='${JSON.stringify(args.matrix)}'
-Then get the run ID: gh run list --workflow=live-stack.yml --limit=1 --json databaseId --jq '.[0].databaseId'
-Return { runId: number | null, reason: string | null }.`,
+First run: git diff --quiet origin/staging...HEAD -- .github/workflows/live-stack.yml
+If that exits nonzero, do not dispatch: the trusted staging definition cannot exercise workflow changes from this PR. Return { runId: null, reason: "Pre-merge live-stack validation is blocked because this PR changes .github/workflows/live-stack.yml" }.
+Otherwise create a unique request ID, record the current staging SHA, and dispatch with both values:
+Run: request_id=qa-${args.prNumber || 'branch'}-$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM; staging_sha=$(gh api repos/{owner}/{repo}/git/ref/heads/staging --jq '.object.sha'); gh workflow run live-stack.yml --ref staging -f request_id="$request_id" -f ref='${args.prNumber ? `refs/pull/${args.prNumber}/head` : (args.branch || 'staging')}' -f matrix='${JSON.stringify(args.matrix)}'
+Find the run by its exact unique display title, never by latest-run ordering: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,displayTitle,event,headBranch,headSha | jq --arg title "Live Stack QA $request_id" --arg sha "$staging_sha" '[.[] | select(.displayTitle == $title and .event == "workflow_dispatch" and .headBranch == "staging" and .headSha == $sha)]'
+Poll briefly for registration. Accept exactly one matching run; zero after polling or multiple matches are blocked correlation failures. Return { runId: number | null, reason: string | null }.`,
     },
   };
 });

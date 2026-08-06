@@ -184,6 +184,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       ) => 'available' | 'missing_capability' | 'version_mismatch';
     };
     expect(extensionModule.getTodoProjectionGate({})).toBe('missing_capability');
+    expect(extensionModule.getTodoProjectionGate({ setTodoProjection: () => undefined })).toBe('version_mismatch');
     expect(extensionModule.getTodoProjectionGate({ setTodoProjection: () => undefined }, '16.5.1')).toBe(
       'version_mismatch',
     );
@@ -1593,6 +1594,18 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8')).resolves.toContain(
       '"attemptState": "aborted"',
     );
+    await expect(driver.completeAgentToolCall({
+      toolCallId: 'owner-one',
+      input: firstInput,
+      details: { results: [{ exitCode: 0, output: '{"late":true}' }] },
+      isError: false,
+    })).resolves.toMatchObject({
+      handled: true,
+      reason: expect.stringContaining('terminal (aborted)'),
+    });
+    await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
 
     await expect(driver.authorizeAgentRetry({ ...descriptor, reason: 'operator-approved retry' })).resolves.toEqual({ handled: true });
     const second = await driver.drive(runDir);
@@ -1657,6 +1670,18 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       await fs.readFile(path.join(failedRun, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
     ) as Record<string, unknown>;
     expect(failedCheckpoint).toMatchObject({ attemptState: 'failed', lastOwnerOutcome: 'failed' });
+    await expect(failedDriver.completeAgentToolCall({
+      toolCallId: 'failed-owner',
+      input: failedInput,
+      details: { results: [{ exitCode: 0, output: '{"late":true}' }] },
+      isError: false,
+    })).resolves.toMatchObject({
+      handled: true,
+      reason: expect.stringContaining('terminal (failed)'),
+    });
+    await expect(fs.access(path.join(failedRun, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
     await expect(failedDriver.drive(failedRun)).resolves.toMatchObject({
       state: 'operator_attention',
       reason: expect.stringContaining('authorize retry'),
@@ -1680,6 +1705,18 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       await fs.readFile(path.join(cancelledRun, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
     ) as Record<string, unknown>;
     expect(cancelledCheckpoint).toMatchObject({ attemptState: 'cancelled', lastOwnerOutcome: 'cancelled' });
+    await expect(cancelledDriver.completeAgentToolCall({
+      toolCallId: 'cancelled-owner',
+      input: cancelledInput,
+      details: { results: [{ exitCode: 0, output: '{"late":true}' }] },
+      isError: false,
+    })).resolves.toMatchObject({
+      handled: true,
+      reason: expect.stringContaining('terminal (cancelled)'),
+    });
+    await expect(fs.access(path.join(cancelledRun, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
 
     const lateRun = await tempRun('omp-agent-late-');
     const lateDriver = new OmpDeterministicDriver({

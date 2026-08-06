@@ -449,6 +449,20 @@ export class OmpDeterministicDriver {
       await writeJsonAtomic(agentOwnerPath(descriptor.runDir, descriptor.effectId), owner);
     }
 
+    const currentCheckpoint = await readCheckpoint(descriptor.runDir, descriptor.effectId);
+    if (
+      currentCheckpoint?.kind === "agent" &&
+      !validateDescriptor(currentCheckpoint, descriptor) &&
+      (currentCheckpoint.attemptState === "failed" ||
+        currentCheckpoint.attemptState === "aborted" ||
+        currentCheckpoint.attemptState === "cancelled")
+    ) {
+      return {
+        handled: true,
+        reason: `Ignoring owner result for effect ${descriptor.effectId}: attempt is terminal (${currentCheckpoint.attemptState})`,
+      };
+    }
+
 
     const extracted = extractSingleAgentResult(event.details);
     if (event.isError || !extracted.ok) {

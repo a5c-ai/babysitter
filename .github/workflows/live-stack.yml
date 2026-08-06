@@ -1,4 +1,5 @@
 name: Live Stack
+run-name: ${{ inputs.request_id && format('Live Stack QA {0}', inputs.request_id) || 'Live Stack' }}
 on:
   push:
     branches:
@@ -9,6 +10,11 @@ on:
       - '.github/workflows/live-stack.yml'
   workflow_dispatch:
     inputs:
+      request_id:
+        description: 'Unique QA dispatch correlation identifier.'
+        required: false
+        type: string
+        default: ''
       ref:
         description: 'Branch or ref to check out and test. Defaults to the dispatched ref (usually staging).'
         required: false
