@@ -1,5 +1,43 @@
 # Changelog
 
+## [Unreleased] - 2026-07-17
+
+### Features
+- face488d0 feat(kip-sdk): graph-qa (TDD converged min=92, acceptance PASS) (Tal Muskal, 15 hours ago)
+- 5d9c7e1eb feat(kip-sdk): kip-mcp (TDD converged min=88, acceptance PASS) (Tal Muskal, 16 hours ago)
+- b20d6856f feat(kip-sdk): kip-cli (TDD converged min=88, acceptance PASS) (Tal Muskal, 17 hours ago)
+- 8cdebf440 feat(kip-sdk): modularize (TDD converged min=93, acceptance PASS) (Tal Muskal, 18 hours ago)
+- eec8c757a feat(kip-sdk): M9-conformance (TDD converged min=88, acceptance PASS) (Tal Muskal, 18 hours ago)
+- 345ca2da0 feat(kip-sdk): M8-security (TDD converged min=89, acceptance PASS) (Tal Muskal, 20 hours ago)
+- 1feb75c46 feat(kip-sdk): M7-acquisition (TDD converged min=92, acceptance PASS) (Tal Muskal, 22 hours ago)
+- c6137fbc3 feat(kip-sdk): M4-retrieval (TDD converged min=90, acceptance PASS) (Tal Muskal, 23 hours ago)
+
+### Bug Fixes
+- No changes.
+
+### Refactors
+- No changes.
+
+### Documentation
+- fae53b9ab docs(kip-sdk): fix-all final report + integration verification (Tal Muskal, 10 hours ago)
+- 66fe42ba6 docs: changelog update 2026-07-15 (#1412) (a5c-ai[bot], 24 hours ago)
+
+### Tests
+- d1226c83d test(kip-sdk): frozen graph-qa tests (spec-driven, pre-implementation) (Tal Muskal, 16 hours ago)
+- 72e6a0da7 test(kip-sdk): frozen kip-mcp tests (spec-driven, pre-implementation) (Tal Muskal, 17 hours ago)
+- bacfe8ab6 test(kip-sdk): frozen kip-cli tests (spec-driven, pre-implementation) (Tal Muskal, 18 hours ago)
+- b80136bc4 test(kip-sdk): frozen modularize tests (spec-driven, pre-implementation) (Tal Muskal, 18 hours ago)
+- 28aed84be test(kip-sdk): frozen M9-conformance tests (spec-driven, pre-implementation) (Tal Muskal, 19 hours ago)
+- 1e4e3ca26 test(kip-sdk): frozen M8-security tests (spec-driven, pre-implementation) (Tal Muskal, 21 hours ago)
+- 43f6dd688 test(kip-sdk): frozen M7-acquisition tests (spec-driven, pre-implementation) (Tal Muskal, 23 hours ago)
+- ec980e959 test(kip-sdk): frozen M4-retrieval tests (spec-driven, pre-implementation) (Tal Muskal, 24 hours ago)
+
+### CI/CD
+- No changes.
+
+### Maintenance
+- No changes.
+
 ## [Unreleased] - 2026-07-15
 
 ### Maintenance
