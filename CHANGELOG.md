@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] - 2026-07-18
+
+### New Features
+- 6ebdb6215 feat(kip-sdk): graph-qa-live (converged min=88, acceptance PASS) (Tal Muskal, 12 hours ago)
+
+### Documentation
+- 2a404745f docs(kip-sdk): model-wiring ADR for live graph-QA (Tal Muskal, 15 hours ago)
+
+### Tests
+- 85b69f301 test(kip-sdk): frozen graph-qa-live tests (spec-driven, pre-implementation) (Tal Muskal, 14 hours ago)
+
 ## [Unreleased] - 2026-07-15
 
 ### Maintenance
