@@ -35,6 +35,10 @@ export interface ParsedArgs {
   processId?: string;
   entrySpecifier?: string;
   inputsPath?: string;
+  canonicalInputSha256?: string;
+  processSnapshotHash?: string;
+  expectedRunJsonSha256?: string;
+  replacementSessionId?: string;
   runIdOverride?: string;
   processRevision?: string;
   requestId?: string;

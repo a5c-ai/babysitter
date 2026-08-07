@@ -3,6 +3,7 @@ import { CORE_PROGRAM, type CliProgram } from "./program";
 
 function coreAgentUsage(commandName: string): string {
   return `  ${commandName} run:create --process-id <id> [--entry <path#export>] [--inputs <file>] [--run-id <id>] [--process-revision <rev>] [--request <id>] [--prompt <text>] [--harness <name>] [--session-id <id>] [--non-interactive] [--json] [--dry-run]
+  ${commandName} run:create-convergent --run-id <id> --request <id> --process-id <id> --entry <path#export> --inputs <file> --canonical-input-sha256 <sha256> --process-snapshot-sha256 <sha256> --replacement-session-id <id> [--expected-run-json-sha256 <sha256>] [--json]
   ${commandName} run:assign-process <runDir> --entry <path#export> [--process-id <id>] [--process-revision <rev>] [--force] [--json] [--dry-run]
   ${commandName} run:status <runDir> [--json]
   ${commandName} run:events <runDir> [--json] [--limit <n>] [--reverse] [--filter-type <type>]
