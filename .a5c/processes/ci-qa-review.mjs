@@ -96,12 +96,13 @@ const dispatchLiveStackTask = defineTask('dispatch-live-stack', async (args, ctx
     title: 'Dispatch live-stack workflow',
     labels: ['qa', 'dispatch'],
     io: {
-      instruction: `Dispatch the trusted staging live-stack workflow while making its existing ref input check out the immutable PR head SHA.
-Resolve the current PR head SHA with: gh pr view ${args.prNumber} --json headRefOid --jq '.headRefOid'. Require a full 40-hex SHA; branch names and refs/pull aliases are not exact-head evidence.
-Resolve and retain the current trusted staging SHA with: gh api repos/{owner}/{repo}/git/ref/heads/staging --jq '.object.sha'.
-Immediately before dispatch, snapshot run IDs with: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId. Then run: gh workflow run live-stack.yml --ref staging -f ref="$head_sha" -f matrix='${JSON.stringify(args.matrix)}'
-Do not pass repository, request_id, or any other input absent from the trusted staging workflow. Poll briefly for registration, then return { trustedStagingSha, expectedHeadSha, beforeRunIds: number[], candidates: [{ databaseId, event, headBranch, headSha }] }. candidates must be the unfiltered post-dispatch result of: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,event,headBranch,headSha.
-Do not select a run ID yourself. The process compares the before/after snapshots and accepts exactly one new workflow_dispatch run whose branch is staging and whose workflow-definition head SHA equals the captured trusted staging SHA. Zero or multiple matches, a moving staging ref, and invalid IDs all fail closed.`,
+      instruction: `Dispatch the trusted staging live-stack workflow with its existing ref input set to the upstream pull-request ref refs/pull/${args.prNumber}/head.
+Resolve the pushed fork PR head SHA with: gh pr view ${args.prNumber} --repo a5c-ai/babysitter --json headRefOid --jq '.headRefOid'. Require a full 40-hex SHA.
+Resolve upstream refs/pull/${args.prNumber}/head immediately before dispatch with: gh api repos/a5c-ai/babysitter/git/ref/pull/${args.prNumber}/head --jq '.object.sha'. Require exactly one full 40-hex SHA and require it to equal the pushed fork PR head SHA. Do not dispatch on a missing, ambiguous, malformed, or mismatched resolution.
+Resolve and retain the current trusted staging SHA with: gh api repos/a5c-ai/babysitter/git/ref/heads/staging --jq '.object.sha'.
+Immediately before dispatch, snapshot run IDs with: gh run list --repo a5c-ai/babysitter --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId. Then run: gh workflow run live-stack.yml --repo a5c-ai/babysitter --ref staging -f ref="refs/pull/${args.prNumber}/head" -f matrix='${JSON.stringify(args.matrix)}'
+Do not pass repository, request_id, or any other input absent from the trusted staging workflow. Poll briefly for registration, then return { prNumber: ${args.prNumber}, upstreamPrRef: "refs/pull/${args.prNumber}/head", resolvedUpstreamPrHeadSha, trustedStagingSha, expectedHeadSha, beforeRunIds: number[], candidates: [{ databaseId, event, headBranch, headSha }] }, where expectedHeadSha is the pushed fork PR head SHA. candidates must be the unfiltered post-dispatch result of: gh run list --repo a5c-ai/babysitter --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,event,headBranch,headSha.
+Do not select a run ID yourself. The process verifies the required upstream PR ref and its exact fork-head resolution, then compares the before/after snapshots and accepts exactly one new workflow_dispatch run whose branch is staging and whose workflow-definition head SHA equals the captured trusted staging SHA. Any ref/SHA mismatch, zero or multiple runs, a moving staging ref, or invalid evidence fails closed.`,
     },
   };
 });
@@ -113,7 +114,7 @@ const waitForResultsTask = defineTask('wait-for-results', async (args, ctx) => {
     labels: ['qa', 'poll'],
     io: {
       instruction: `Poll live-stack run ${args.runId} until completion.
-Run: gh run view ${args.runId} --json status,conclusion. Check every 60 seconds and timeout after 120 minutes so the workflow's 90-minute scenario budget can finish.
+Run: gh run view ${args.runId} --repo a5c-ai/babysitter --json status,conclusion. Check every 60 seconds and timeout after 120 minutes so the workflow's 90-minute scenario budget can finish.
 After completion, fetch every job with databaseId, name, conclusion, and steps. Return jobs as [{ name, conclusion }]; an empty list is failure evidence, never green.
 For every job containing a step named "Checkout repository", require that step to conclude success and download that job's raw log. Accept a head SHA only when the log contains exactly one actions/checkout command marker ending in git log -1 --format=%H and its immediately following log line ends in one full 40-hex commit. This is the checkout action's observed HEAD even when gh labels raw action lines UNKNOWN STEP. Do not infer it from the branch, dispatch input, expected SHA, another command, or a shortened "HEAD is now at" line. Missing or ambiguous checkout evidence yields headSha: null.
 Return { jobs, checkouts: [{ jobName, conclusion, headSha }], conclusion, expectedHeadSha: "${args.expectedHeadSha}" }. The process independently requires a successful workflow, non-empty successful jobs including at least one Live Stack scenario job, successful checkout steps, and every observed checkout SHA equal to the immutable expected head.`,

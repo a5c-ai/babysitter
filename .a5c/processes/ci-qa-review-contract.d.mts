@@ -6,6 +6,9 @@ export interface ExactHeadCandidate {
 }
 
 export interface ExactHeadEvidence {
+  prNumber?: number;
+  upstreamPrRef?: string;
+  resolvedUpstreamPrHeadSha?: string;
   trustedStagingSha?: string;
   expectedHeadSha?: string;
   beforeRunIds?: number[];
@@ -44,5 +47,6 @@ export interface NormalizedLiveQaResult {
   exactHeadVerified: boolean;
 }
 
+export function upstreamPullRequestRef(prNumber: number): string;
 export function correlateExactHeadQa(input: ExactHeadEvidence): ExactHeadCorrelation;
 export function normalizeLiveQaResult(input: LiveQaResult): NormalizedLiveQaResult;

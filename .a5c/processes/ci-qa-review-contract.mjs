@@ -6,15 +6,40 @@ function isCommitSha(value) {
   return typeof value === 'string' && /^[0-9a-f]{40}$/i.test(value);
 }
 
+export function upstreamPullRequestRef(prNumber) {
+  if (!Number.isSafeInteger(prNumber) || prNumber <= 0) {
+    throw new RangeError('Pull request number must be a positive safe integer');
+  }
+  return `refs/pull/${prNumber}/head`;
+}
+
 export function correlateExactHeadQa(input) {
   if (!input || typeof input !== 'object') {
     return blocked('Live-stack dispatch returned no exact-head correlation evidence');
   }
 
-  const trustedStagingSha = input.trustedStagingSha;
+  let requiredUpstreamRef;
+  try {
+    requiredUpstreamRef = upstreamPullRequestRef(input.prNumber);
+  } catch {
+    return blocked('Live-stack dispatch omitted a valid pull request number');
+  }
+  if (input.upstreamPrRef !== requiredUpstreamRef) {
+    return blocked(`Live-stack dispatch ref mismatch; expected ${requiredUpstreamRef}`);
+  }
+
+  const resolvedUpstreamPrHeadSha = input.resolvedUpstreamPrHeadSha;
   const expectedHeadSha = input.expectedHeadSha;
-  if (!isCommitSha(trustedStagingSha) || !isCommitSha(expectedHeadSha)) {
-    return blocked('Live-stack dispatch omitted valid immutable commit SHAs');
+  if (!isCommitSha(resolvedUpstreamPrHeadSha) || !isCommitSha(expectedHeadSha)) {
+    return blocked('Live-stack dispatch omitted valid immutable PR head SHAs');
+  }
+  if (resolvedUpstreamPrHeadSha.toLowerCase() !== expectedHeadSha.toLowerCase()) {
+    return blocked('Upstream pull request ref does not resolve to the pushed fork head SHA');
+  }
+
+  const trustedStagingSha = input.trustedStagingSha;
+  if (!isCommitSha(trustedStagingSha)) {
+    return blocked('Live-stack dispatch omitted a valid immutable trusted staging SHA');
   }
 
   const beforeRunIds = Array.isArray(input.beforeRunIds) ? input.beforeRunIds : null;

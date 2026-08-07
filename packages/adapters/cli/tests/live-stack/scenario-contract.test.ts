@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   correlateExactHeadQa,
   normalizeLiveQaResult,
+  upstreamPullRequestRef,
 } from '../../../../../.a5c/processes/ci-qa-review-contract.mjs';
 
 import {
@@ -258,7 +259,11 @@ describe('live stack scenario contract primitives', () => {
     expect(workflow).toMatch(/cancel-in-progress:/);
   });
 
-  it('correlates exactly one new trusted-staging run from before/after snapshots', () => {
+  it('constructs upstream PR refs and correlates only a resolved fork head', () => {
+    expect(upstreamPullRequestRef(1582)).toBe('refs/pull/1582/head');
+    expect(() => upstreamPullRequestRef(0)).toThrow(RangeError);
+    expect(() => upstreamPullRequestRef(Number.NaN)).toThrow(RangeError);
+
     const trustedStagingSha = 'a'.repeat(40);
     const expectedHeadSha = 'b'.repeat(40);
     const candidate = {
@@ -268,6 +273,9 @@ describe('live stack scenario contract primitives', () => {
       headSha: trustedStagingSha,
     };
     const evidence = {
+      prNumber: 1582,
+      upstreamPrRef: upstreamPullRequestRef(1582),
+      resolvedUpstreamPrHeadSha: expectedHeadSha,
       trustedStagingSha,
       expectedHeadSha,
       beforeRunIds: [40, 41],
@@ -275,6 +283,18 @@ describe('live stack scenario contract primitives', () => {
     };
 
     expect(correlateExactHeadQa(evidence)).toEqual({ runId: 42, reason: null });
+    expect(correlateExactHeadQa({ ...evidence, upstreamPrRef: 'refs/pull/1580/head' })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('ref mismatch'),
+    });
+    expect(correlateExactHeadQa({ ...evidence, resolvedUpstreamPrHeadSha: 'c'.repeat(40) })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('does not resolve to the pushed fork head SHA'),
+    });
+    expect(correlateExactHeadQa({ ...evidence, resolvedUpstreamPrHeadSha: undefined })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('immutable PR head SHAs'),
+    });
     expect(correlateExactHeadQa({ ...evidence, candidates: [] })).toMatchObject({
       runId: null,
       reason: expect.stringContaining('0 new trusted-staging candidates'),
@@ -293,7 +313,7 @@ describe('live stack scenario contract primitives', () => {
     });
     expect(correlateExactHeadQa({ ...evidence, expectedHeadSha: 'branch-name' })).toMatchObject({
       runId: null,
-      reason: expect.stringContaining('immutable commit SHAs'),
+      reason: expect.stringContaining('immutable PR head SHAs'),
     });
   });
 
