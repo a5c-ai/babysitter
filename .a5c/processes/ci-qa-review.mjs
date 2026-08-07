@@ -1,4 +1,5 @@
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { correlateExactHeadQa, normalizeLiveQaResult } from './ci-qa-review-contract.mjs';
 
 /**
  * @process ci/qa-review
@@ -11,14 +12,16 @@ export async function process(inputs, ctx) {
   const pr = await ctx.task(readPrTask, { prNumber: inputs.prNumber });
   const guide = await ctx.task(readQaGuideTask, {});
   const matrix = await ctx.task(selectMatrixTask, { pr, guide, instructions: inputs.instructions });
-  const dispatch = await ctx.task(dispatchLiveStackTask, { prNumber: inputs.prNumber, branch: inputs.branch, matrix });
+  const dispatchEvidence = await ctx.task(dispatchLiveStackTask, { prNumber: inputs.prNumber, branch: inputs.branch, matrix });
+  const dispatch = correlateExactHeadQa(dispatchEvidence);
 
   if (!dispatch.runId) {
     await ctx.task(reportBlockedTask, { prNumber: inputs.prNumber, reason: dispatch.reason });
     return { dispatched: false, passed: false, reportPosted: true };
   }
 
-  const results = await ctx.task(waitForResultsTask, { runId: dispatch.runId });
+  const rawResults = await ctx.task(waitForResultsTask, { runId: dispatch.runId });
+  const results = normalizeLiveQaResult(rawResults);
   await ctx.task(postResultsTask, { prNumber: inputs.prNumber, runId: dispatch.runId, results, matrix });
 
   return { dispatched: true, passed: results.allPassed, reportPosted: true };
@@ -93,10 +96,9 @@ const dispatchLiveStackTask = defineTask('dispatch-live-stack', async (args, ctx
       instruction: `Dispatch the live-stack workflow definition from staging and make it check out the exact PR mergeable head ref.
 First run: git diff --quiet origin/staging...HEAD -- .github/workflows/live-stack.yml
 If that exits nonzero, do not dispatch: the trusted staging definition cannot exercise workflow changes from this PR. Return { runId: null, reason: "Pre-merge live-stack validation is blocked because this PR changes .github/workflows/live-stack.yml" }.
-Otherwise resolve the PR's fork repository and immutable head SHA, create a unique request ID containing that SHA, record the current staging SHA, and dispatch all of them. A branch name or refs/pull alias is not exact-head evidence. If PR head resolution or checkout fails, report blocked/failed; never treat skipped scenarios as green:
+Otherwise resolve the PR's fork repository and immutable head SHA, create a unique request ID containing that SHA, record the current staging SHA, and dispatch all of them. A branch name or refs/pull alias is not exact-head evidence. Resolve the exact head before dispatch (for example with git ls-remote or the commits API), and retain whether resolution succeeded plus the resolved SHA. If PR head resolution or checkout fails, report blocked/failed; never treat skipped scenarios as green:
 Run: head_sha=$(gh pr view ${args.prNumber} --json headRefOid --jq '.headRefOid'); head_repo=$(gh pr view ${args.prNumber} --json headRepository --jq '.headRepository.nameWithOwner'); test -n "$head_sha" && test -n "$head_repo"; head_short=$(printf %.12s "$head_sha"); request_id=qa-${args.prNumber || 'branch'}-$head_short-$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM; staging_sha=$(gh api repos/{owner}/{repo}/git/ref/heads/staging --jq '.object.sha'); gh workflow run live-stack.yml --ref staging -f request_id="$request_id" -f repository="$head_repo" -f ref="$head_sha" -f matrix='${JSON.stringify(args.matrix)}'
-Find candidates by exact unique display title plus the trusted workflow-definition SHA, never by latest-run ordering: matches=$(gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,displayTitle,event,headBranch,headSha | jq --arg title "Live Stack QA $request_id" --arg sha "$staging_sha" '[.[] | select(.displayTitle == $title and .event == "workflow_dispatch" and .headBranch == "staging" and .headSha == $sha)]')
-Poll briefly for registration, recomputing that exact match set each time. Then run: match_count=$(printf '%s' "$matches" | jq 'length'); test "$match_count" -eq 1; run_id=$(printf '%s' "$matches" | jq -r '.[0].databaseId'); test -n "$run_id" && test "$run_id" != "null". Accept exactly one matching run; zero after polling or multiple matches are blocked correlation failures, not green results. Return { runId: number | null, reason: string | null }.`,
+Poll briefly for registration. Return the raw evidence needed by the process-level fail-closed correlator: { expectedTitle: "Live Stack QA <request_id>", trustedStagingSha: staging_sha, expectedHeadSha: head_sha, checkoutResolved: boolean, actualHeadSha: string | null, candidates: [{ databaseId, displayTitle, event, headBranch, headSha }] }. candidates must be the unfiltered result of: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,displayTitle,event,headBranch,headSha. Do not select a run ID yourself; the process accepts exactly one candidate matching the unique title, workflow_dispatch event, staging branch, and trusted staging SHA, and rejects zero, multiple, or null-id matches.`,
     },
   };
 });

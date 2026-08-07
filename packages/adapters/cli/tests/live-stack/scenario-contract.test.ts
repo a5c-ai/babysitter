@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
+import {
+  correlateExactHeadQa,
+  normalizeLiveQaResult,
+} from '../../../../../.a5c/processes/ci-qa-review-contract.mjs';
 
 import {
   assertEvidenceBundleComplete,
@@ -254,31 +258,63 @@ describe('live stack scenario contract primitives', () => {
     expect(workflow).toMatch(/cancel-in-progress:/);
   });
 
-  it('checks out and verifies the fork-aware immutable PR head before live-stack scenarios', () => {
-    const liveStack = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
-    const qaDispatch = fs.readFileSync('.github/workflows/qa-dispatch.yml', 'utf8');
-    const qaProcess = fs.readFileSync('.a5c/processes/ci-qa-review.mjs', 'utf8');
+  it('correlates live-stack runs only to one executable exact-head candidate', async () => {
+    const candidate = {
+      databaseId: 42,
+      displayTitle: 'Live Stack QA qa-1582-deadbeef',
+      event: 'workflow_dispatch',
+      headBranch: 'staging',
+      headSha: 'trusted-staging-sha',
+    };
+    const evidence = {
+      expectedTitle: candidate.displayTitle,
+      trustedStagingSha: candidate.headSha,
+      expectedHeadSha: 'exact-pr-head-sha',
+      checkoutResolved: true,
+      actualHeadSha: 'exact-pr-head-sha',
+      candidates: [candidate],
+    };
 
-    expect(liveStack).toContain("run-name: ${{ inputs.request_id && format('Live Stack QA {0}', inputs.request_id)");
-    expect(liveStack).toContain('repository: ${{ inputs.repository || github.repository }}');
-    expect(liveStack).toContain('EXPECTED_HEAD_SHA: ${{ inputs.ref }}');
-    expect(liveStack).toContain('actual_head_sha=$(git rev-parse HEAD)');
-    expect(liveStack).toMatch(
-      /- name: Checkout repository\n\s+uses: actions\/checkout@v6[\s\S]*?repository: \$\{\{ inputs\.repository \|\| github\.repository \}\}[\s\S]*?ref: \$\{\{ inputs\.ref \|\| github\.ref \}\}[\s\S]*?\n\s+- name: Verify exact requested head/,
-    );
-    expect(qaDispatch).toContain('Resolve fork-aware exact PR head');
-    expect(qaDispatch).toContain('core.setFailed(`PR #${process.env.PR_NUMBER} has no checkoutable head repository/SHA`)');
-    expect(qaDispatch).toContain('repository: ${{ steps.target.outputs.repository || github.repository }}');
-    expect(qaDispatch).toContain('ref: ${{ steps.target.outputs.sha || inputs.branch');
-    expect(qaProcess).toContain('request_id=qa-${args.prNumber || \'branch\'}-$head_short-');
-    expect(qaProcess).toContain('staging_sha=$(gh api repos/{owner}/{repo}/git/ref/heads/staging');
-    expect(qaProcess).toContain('-f request_id="$request_id" -f repository="$head_repo" -f ref="$head_sha"');
-    expect(qaProcess).toContain('--arg title "Live Stack QA $request_id" --arg sha "$staging_sha"');
-    expect(qaProcess).toContain('.displayTitle == $title and .event == "workflow_dispatch" and .headBranch == "staging" and .headSha == $sha');
-    expect(qaProcess).toContain('match_count=$(printf \'%s\' "$matches" | jq \'length\')');
-    expect(qaProcess).toContain('test "$match_count" -eq 1');
-    expect(qaProcess).toContain('zero after polling or multiple matches are blocked correlation failures, not green results');
-    expect(qaProcess).not.toContain("-f ref='refs/pull/");
+    expect(correlateExactHeadQa(evidence)).toEqual({ runId: 42, reason: null });
+    expect(correlateExactHeadQa({ ...evidence, candidates: [] })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('0 candidates'),
+    });
+    expect(correlateExactHeadQa({ ...evidence, candidates: [candidate, { ...candidate }] })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('2 candidates'),
+    });
+    expect(correlateExactHeadQa({ ...evidence, candidates: [{ ...candidate, databaseId: null }] })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('null or invalid run id'),
+    });
+    expect(correlateExactHeadQa({
+      ...evidence,
+      candidates: [{ ...candidate, headSha: 'untrusted-staging-sha' }],
+    })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('0 candidates'),
+    });
+    expect(correlateExactHeadQa({ ...evidence, checkoutResolved: false, actualHeadSha: null })).toMatchObject({
+      runId: null,
+      reason: expect.stringContaining('could not be resolved'),
+    });
+  });
+
+  it('fails closed when live-stack reports passed=false or any non-successful job', async () => {
+    const success = {
+      allPassed: true,
+      conclusion: 'success',
+      jobs: [{ name: 'exact-head live stack', conclusion: 'success' }],
+    };
+
+    expect(normalizeLiveQaResult(success).allPassed).toBe(true);
+    expect(normalizeLiveQaResult({ ...success, allPassed: false }).allPassed).toBe(false);
+    expect(normalizeLiveQaResult({
+      ...success,
+      jobs: [{ name: 'checkout', conclusion: 'failure' }],
+    }).allPassed).toBe(false);
+    expect(normalizeLiveQaResult({ ...success, jobs: [] }).allPassed).toBe(false);
   });
 
   it('includes all target harnesses in live-stack setup matrix generation', () => {

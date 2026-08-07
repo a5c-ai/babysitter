@@ -1050,6 +1050,78 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(driver.drive(runDir)).resolves.toEqual(dispatch);
   });
 
+  it('re-enters skill effects before claim, under retained ownership, and from completed durable output', async () => {
+    const ownedRunDir = await tempRun('omp-skill-reentry-owned-');
+    const ownedEffect = action('skill', { agent: { prompt: 'Execute the skill effect' } });
+    const ownedDriver = new OmpDeterministicDriver({
+      cwd: ownedRunDir,
+      randomId: () => 'skill-dispatch-token',
+      runCli: async () => ({ code: 0, stdout: waiting(ownedEffect), stderr: '' }),
+    });
+
+    const dispatch = await ownedDriver.drive(ownedRunDir);
+    expect(dispatch.state).toBe('agent');
+    if (dispatch.state !== 'agent') throw new Error('expected skill-backed agent dispatch');
+    await expect(ownedDriver.drive(ownedRunDir)).resolves.toEqual(dispatch);
+    const input = dispatch.task as unknown as Record<string, unknown>;
+    await expect(ownedDriver.claimAgentToolCall(input, 'skill-owner-call')).resolves.toEqual({ handled: true });
+    await expect(ownedDriver.drive(ownedRunDir)).resolves.toMatchObject({
+      state: 'waiting',
+      reason: expect.stringContaining('skill-owner-call'),
+    });
+
+    const completedRunDir = await tempRun('omp-skill-reentry-completed-');
+    const completedEffect = action('skill', { agent: { prompt: 'Recover the skill effect' } });
+    const taskDir = path.join(completedRunDir, 'tasks', completedEffect.effectId);
+    const value = { recovered: true };
+    const outputBytes = JSON.stringify(value, null, 2) + '\n';
+    const outputSha256 = createHash('sha256').update(outputBytes).digest('hex');
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: completedEffect.effectId,
+      invocationKey: completedEffect.invocationKey,
+      kind: 'agent',
+      state: 'completed',
+      startedAt: '2026-08-07T00:00:00.000Z',
+      finishedAt: '2026-08-07T00:00:01.000Z',
+      ownerName: 'Babysitter-effect-skill',
+      dispatchToken: 'completed-skill-token',
+      attempt: 1,
+      attemptState: 'completed',
+      outputRef: `tasks/${completedEffect.effectId}/output.json`,
+      outputSha256,
+      authenticatedOutputSha256: outputSha256,
+    });
+    await writeJson(path.join(taskDir, 'output.json'), value);
+    let iterations = 0;
+    let posts = 0;
+    const completedDriver = new OmpDeterministicDriver({
+      cwd: completedRunDir,
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1
+              ? waiting(completedEffect)
+              : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+        }
+        posts += 1;
+        await recordCommittedResult(completedRunDir, completedEffect, value);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(completedDriver.drive(completedRunDir)).resolves.toMatchObject({ state: 'completed' });
+    expect(posts).toBe(1);
+    expect(iterations).toBe(2);
+  });
+
   it('authenticates the complete generated Babysitter bridge envelope before claiming it', async () => {
     const runDir = await tempRun('omp-agent-envelope-integrity-');
     const effect = action('agent', {
@@ -1413,6 +1485,82 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
     expect(posts).toBe(1);
     expect(iterations).toBe(2);
+  });
+
+  it.each([
+    {
+      name: 'additional properties forbidden by additionalProperties:false',
+      schema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['approved'],
+        properties: { approved: { type: 'boolean' } },
+      },
+      value: { approved: true, injected: true },
+    },
+    {
+      name: 'values outside every anyOf combinator branch',
+      schema: {
+        anyOf: [
+          { type: 'string', pattern: '^approved$' },
+          { type: 'number', minimum: 10 },
+        ],
+      },
+      value: false,
+    },
+    {
+      name: 'scalar minLength and pattern constraints',
+      schema: {
+        type: 'string',
+        minLength: 8,
+        pattern: '^approved',
+      },
+      value: 'no',
+    },
+  ])('rejects owner output with $name through completion', async ({ schema, value }) => {
+    const runDir = await tempRun('omp-agent-strict-schema-');
+    const effect = action('agent', {
+      agent: { prompt: 'Return strict structured output' },
+      outputSchema: schema,
+    });
+    let posts = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      randomId: () => 'strict-schema-token',
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          return { code: 0, stdout: waiting(effect), stderr: '' };
+        }
+        posts += 1;
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    const dispatch = await driver.drive(runDir);
+    if (dispatch.state !== 'agent') throw new Error('expected agent dispatch');
+    const input = dispatch.task as unknown as Record<string, unknown>;
+    await expect(driver.claimAgentToolCall(input, 'strict-owner-call')).resolves.toEqual({ handled: true });
+    await expect(driver.completeAgentToolCall({
+      toolCallId: 'strict-owner-call',
+      input,
+      details: {
+        results: [{
+          id: dispatch.task.tasks[0].name,
+          agent: 'babysitter-task',
+          exitCode: 0,
+          output: JSON.stringify(value),
+        }],
+      },
+      isError: false,
+    })).rejects.toThrow('failed output schema validation');
+
+    expect(posts).toBe(0);
+    await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+    await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8')).resolves.toContain(
+      '"attemptState": "claimed"',
+    );
   });
 
   it('posts one immutable owner result and automatically continues the run', async () => {
