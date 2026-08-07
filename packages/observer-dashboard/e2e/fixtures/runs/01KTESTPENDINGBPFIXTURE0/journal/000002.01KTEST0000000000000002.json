@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T10:00:01.000Z",
+  "data": {
+    "effectId": "01KTEST_AGENT_EFFECT_001",
+    "invocationKey": "test/pending-breakpoint:S000001:generate-report",
+    "invocationHash": "abc123",
+    "stepId": "S000001",
+    "taskId": "generate-report",
+    "kind": "agent",
+    "label": "Generate test report",
+    "taskDefRef": "tasks/01KTEST_AGENT_EFFECT_001/task.json"
+  },
+  "checksum": "e5f6g7h8"
+}

@@ -1,0 +1,48 @@
+{
+  "kind": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "fresh": {
+          "collision": false,
+          "deppDevHead": "b3e659c",
+          "note": "depp-dev unchanged since rebase; no new Dana pushes into scope"
+        }
+      },
+      "expert": "owner",
+      "question": "COORDINATION GATE — confirm the table partition + reconcile decisions BEFORE writing code.\n\nDana already pushed: 1655ec3 surgical-writehole (deployed); d9f2231 lockdown (abandoned, excluded)\n\nReconcile (overlapping tables):\n  - soldier: Keep his service-role-only WRITE model. Keep our role/self need-to-know SELECT + column REVOKE/GRANT.\n  - unit: His unit_select_org + unit_write_admin are correct and DEPLOYED. Our 000002 must NOT create duplicate policies on unit.\n  - commander_permission_override: His cpo policies are correct and DEPLOYED. Our 000002 must NOT create duplicates.\n\nApprove this partition + reconcile plan? (Confirm the boundary is agreed with Dana.)",
+      "tags": [
+        "approval-gate",
+        "destructive-git"
+      ],
+      "title": "Gate 1 — Coordinate partition with Dana"
+    },
+    "requestedAt": "2026-01-30T09:00:02.000Z"
+  },
+  "title": "breakpoint",
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_PAYLOAD_1",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "kanban/payload-gate:S000001:__sdk.breakpoint",
+  "stepId": "S000001",
+  "inputs": {
+    "label": "breakpoint",
+    "payload": {
+      "context": {
+        "fresh": {
+          "collision": false,
+          "deppDevHead": "b3e659c",
+          "note": "depp-dev unchanged since rebase; no new Dana pushes into scope"
+        }
+      },
+      "expert": "owner",
+      "question": "COORDINATION GATE — confirm the table partition + reconcile decisions BEFORE writing code.\n\nDana already pushed: 1655ec3 surgical-writehole (deployed); d9f2231 lockdown (abandoned, excluded)\n\nReconcile (overlapping tables):\n  - soldier: Keep his service-role-only WRITE model. Keep our role/self need-to-know SELECT + column REVOKE/GRANT.\n  - unit: His unit_select_org + unit_write_admin are correct and DEPLOYED. Our 000002 must NOT create duplicate policies on unit.\n  - commander_permission_override: His cpo policies are correct and DEPLOYED. Our 000002 must NOT create duplicates.\n\nApprove this partition + reconcile plan? (Confirm the boundary is agreed with Dana.)",
+      "tags": [
+        "approval-gate",
+        "destructive-git"
+      ],
+      "title": "Gate 1 — Coordinate partition with Dana"
+    }
+  }
+}

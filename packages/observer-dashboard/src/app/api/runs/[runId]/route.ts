@@ -26,13 +26,13 @@ function generateETag(run: { status: string; updatedAt: string; tasks: unknown[]
 
 export async function GET(
   request: Request,
-  { params }: { params: { runId: string } }
+  { params }: { params: Promise<{ runId: string }> }
 ) {
   try {
     // Ensure watcher and cache are initialized
     await ensureInitialized();
 
-    const { runId } = params;
+    const { runId } = await params;
     if (!isValidId(runId)) {
       return NextResponse.json({ error: "Invalid run ID" }, { status: 400 });
     }

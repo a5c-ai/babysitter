@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-01-26T10:00:01.000Z",
+  "data": {
+    "runId": "01KTESTKANBANAPPROVE0002",
+    "processId": "kanban/approve-flow",
+    "entrypoint": {
+      "importPath": "../../processes/kanban-approve-flow.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "e2e-kanban-fixture-0002-1"
+}

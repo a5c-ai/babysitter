@@ -192,13 +192,14 @@ describe('ToastStack', () => {
   it('shows pin icon for persistent notifications', () => {
     const persistentNotif = makeNotification({ id: 't-pin', persistent: true });
     render(<ToastStack notifications={[persistentNotif]} onDismiss={vi.fn()} />);
-    expect(screen.getByTitle('Pinned — won\'t auto-dismiss')).toBeInTheDocument();
+    // owner 2026-07-08: de-AI copy (no em-dashes) + answer-flow clarity
+    expect(screen.getByTitle('Pinned, won\'t auto-dismiss')).toBeInTheDocument();
   });
 
   it('does not show pin icon for non-persistent notifications', () => {
     const notif = makeNotification({ id: 't-nopin' });
     render(<ToastStack notifications={[notif]} onDismiss={vi.fn()} />);
-    expect(screen.queryByTitle('Pinned — won\'t auto-dismiss')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Pinned, won\'t auto-dismiss')).not.toBeInTheDocument();
   });
 
   // -----------------------------------------------------------------------

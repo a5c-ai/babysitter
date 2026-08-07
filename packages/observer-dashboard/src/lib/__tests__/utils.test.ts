@@ -7,7 +7,24 @@ import {
   getStatusBg,
   formatShortId,
   friendlyProcessName,
+  formatWakeRelative,
 } from '../utils';
+
+describe('formatWakeRelative (§15.1 AC-84/85)', () => {
+  const now = Date.UTC(2026, 6, 6, 12, 0, 0); // 2026-07-06T12:00:00Z
+  it('a future wake reads "in <rel>" and is not overdue', () => {
+    const iso = new Date(now + 3 * 3_600_000).toISOString();
+    expect(formatWakeRelative(iso, now)).toEqual({ overdue: false, text: 'in 3h' });
+  });
+  it('a past wake reads "<rel> ago" and is overdue', () => {
+    const iso = new Date(now - 17 * 3_600_000).toISOString();
+    expect(formatWakeRelative(iso, now)).toEqual({ overdue: true, text: '17h ago' });
+  });
+  it('undefined / unparseable input yields an empty, non-overdue result', () => {
+    expect(formatWakeRelative(undefined, now)).toEqual({ overdue: false, text: '' });
+    expect(formatWakeRelative('not-a-date', now)).toEqual({ overdue: false, text: '' });
+  });
+});
 
 describe('formatDuration', () => {
   it('returns dash for null/undefined', () => {
@@ -40,6 +57,15 @@ describe('formatDuration', () => {
   it('formats hours and minutes', () => {
     expect(formatDuration(3600000)).toBe('1h 0m');
     expect(formatDuration(7260000)).toBe('2h 1m');
+  });
+
+  it('formats ages >=48h in days (QA F7)', () => {
+    // Just under the threshold stays in hours.
+    expect(formatDuration(47 * 3600000 + 59 * 60000)).toBe('47h 59m');
+    // At the threshold, switch to days.
+    expect(formatDuration(48 * 3600000)).toBe('2d 0h');
+    // The QA F7 example: 388h 25m → 16d 4h.
+    expect(formatDuration((388 * 3600 + 25 * 60) * 1000)).toBe('16d 4h');
   });
 });
 
@@ -128,16 +154,29 @@ describe('getStatusBg', () => {
 
 describe('formatShortId', () => {
   it('returns dash for empty string', () => {
-    expect(formatShortId('')).toBe('\u2014');
+    // owner 2026-07-08: de-AI copy (no em-dashes) + answer-flow clarity
+    expect(formatShortId('')).toBe('N/A');
   });
 
   it('returns full string when within limit', () => {
     expect(formatShortId('abcd')).toBe('abcd');
   });
 
-  it('shows last N chars with leading ellipsis', () => {
-    expect(formatShortId('abcdefgh')).toBe('...efgh');
-    expect(formatShortId('abcdefgh', 6)).toBe('...cdefgh');
+  it('shows last N chars with leading ellipsis for machine ids', () => {
+    // ULID → any fragment is as good as any other, tail wins.
+    expect(formatShortId('01KVAEXP3ERB4KX9G031GS4YE0')).toBe('...4YE0');
+    expect(formatShortId('01KVAEXP3ERB4KX9G031GS4YE0', 6)).toBe('...GS4YE0');
+    // UUID and long hex hashes are equally opaque.
+    expect(formatShortId('550e8400-e29b-41d4-a716-446655440000')).toBe('...0000');
+    expect(formatShortId('dc57c0b0317c423c09d38028fb2fbbba')).toBe('...bbba');
+  });
+
+  it('keeps human-named ids readable instead of tail fragments (QA F9)', () => {
+    // "...-org" told the user nothing; the dir name is the meaning.
+    expect(formatShortId('ai-org')).toBe('ai-org');
+    expect(formatShortId('meeting-notes')).toBe('meeting-notes');
+    // Genuinely long human names head-truncate, preserving the head.
+    expect(formatShortId('a-very-long-human-readable-run-name')).toBe('a-very-long-human...');
   });
 });
 
