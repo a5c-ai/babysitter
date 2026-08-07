@@ -53,7 +53,7 @@
     {"agent": "copilot", "version": "1.0.78", "issue": "https://github.com/a5c-ai/babysitter/issues/1610"},
     {"agent": "cursor", "version": "2026-08-03-changelog", "issue": "https://github.com/a5c-ai/babysitter/issues/1611"},
     {"agent": "hermes", "version": "0.20.0", "issue": "https://github.com/a5c-ai/babysitter/issues/1614"},
-    {"agent": "openclaw", "version": "2026.7.1-2", "issue": "https://github.com/a5c-ai/babysitter/issues/1616"},
+    {"agent": "openclaw", "version": "2026.7.1-2", "issue": "https://github.com/a5c-ai/babysitter/issues/1576"},
     {"agent": "droid", "version": "0.189.0", "issue": "https://github.com/a5c-ai/babysitter/issues/1650"}
   ],
   "changedFiles": [
@@ -69,6 +69,7 @@
     "Verified latest npm versions for @ampcode/cli, @anthropic-ai/claude-agent-sdk, @anthropic-ai/claude-code, @factory/cli, @openai/codex, @qwen-code/qwen-code, openai, opencode-ai, @google/gemini-cli, @earendil-works/pi-coding-agent, @oh-my-pi/pi-coding-agent, @github/copilot, hermes-agent, and openclaw.",
     "Verified Antigravity latest from google-antigravity/antigravity-cli GitHub releases; 1.1.11 supersedes the earlier 1.1.10 issue from collected context.",
     "Verified Hermes upstream GitHub latest is 0.20.0 / v2026.8.3 while npm/PyPI bridge latest remains 0.19.0.",
+    "Used existing OpenClaw tracker #1576 as canonical for 2026.7.1-2; #1616 remains an open duplicate that points to #1576.",
     "Created duplicate issues #1671-#1679 during a race with already-created exact-version issues #1662-#1670; closed #1671-#1679 as duplicates, removed duplicate labels from open canonical issues #1664, #1665, #1666, #1668, and #1669, and kept #1661-#1670 as canonical.",
     "@pi-ai/sdk returned npm 404; Pi upstream was tracked through @earendil-works/pi-coding-agent.",
     "Created branch agent-versions/daily-2026-08-07, committed the graph/artifact changes, pushed to origin, and opened PR #1680 against staging."
