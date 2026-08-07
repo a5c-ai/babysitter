@@ -30,41 +30,41 @@ edges:
     - evidence:amp-0-0-1786077520-gcc65e7-2026-08-07
 ---
 nodeKind: AgentVersion
-id: agentVersion:antigravity:1-1-10
+id: agentVersion:antigravity:1-1-11
 attributes:
   agentId: "antigravity"
   agentProductId: agent:antigravity-cli
-  displayName: "Antigravity CLI 1.1.10"
+  displayName: "Antigravity CLI 1.1.11"
   runtimeFamily: "cli-harness"
   releaseChannel: "stable"
-  versionRange: "1.1.10"
-  currentVersion: "1.1.10"
-  releasedAt: "2026-08-03"
-  upstreamReleaseTag: "1.1.10"
-  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.10"
+  versionRange: "1.1.11"
+  currentVersion: "1.1.11"
+  releasedAt: "2026-08-07"
+  upstreamReleaseTag: "1.1.11"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.11"
   cliCommand: "antigravity"
-  summary: "Antigravity CLI release adding enterprise sign-in paths, safer sandbox and hook ordering, schedule coercion, model/effort flag fixes, and MCP/background task hardening."
+  summary: "Antigravity CLI release adding optional Vim editing, structured print-mode slash command answers, interactive-command refusals, config-owned plugin enablement, and permission/MCP hardening."
   assimilationNotes:
-    - "Latest official stable release moved from recorded 1.1.3 to 1.1.10."
-    - "Business sign-in for Gemini Enterprise, Workforce Identity Federation, and Application Default Credentials expand auth setup surfaces."
-    - "Terminal sandbox now grants read-only access to .git instead of writable access."
-    - "hooks.json hooks run before built-in termination checks, making Stop and PostInvocation hooks reachable."
-    - "schedule accepts integral DurationSeconds and MaxIterations as JSON numbers."
-    - "--model and --effort now apply correctly in interactive and headless -p runs."
-    - "MCP always-background tools and dropped-connection process leaks were fixed."
+    - "Latest official stable release moved from recorded 1.1.3 to 1.1.11."
+    - "Optional Vim editor mode adds Normal, Insert, Visual, and Visual Line modes, Vim help, status badge, motions, operators, text objects, and vim.* keybinding scopes."
+    - "Print mode now answers read-only slash commands /usage, /quota, /credits, /model, /effort, and /skills as TSV or structured JSON/stream-json without starting an agent turn."
+    - "Interactive-only slash commands in print mode now fail explicitly instead of falling through as prompt text."
+    - "Plugin enable/disable state now lives in config.json after initial manifest seeding."
+    - "Zero-word allowlist entries match nothing, request-review/strict modes no longer auto-approve commands, MCP admin controls refresh correctly, and MCP progress callbacks were restored."
   releaseHighlights:
-    - "Gemini Enterprise, WIF, and ADC sign-in paths."
-    - "Read-only .git terminal sandbox access."
-    - "hooks.json ordering before built-in termination checks."
-    - "Numeric schedule DurationSeconds and MaxIterations coercion."
-    - "--model and --effort propagation fixes."
+    - "Optional Vim editor mode with vim.* keybinding scopes."
+    - "Structured print-mode output for read-only slash commands."
+    - "Explicit refusal for interactive-only slash commands in print mode."
+    - "config.json-owned plugin enablement."
+    - "Permission allowlist and strict/request-review hardening."
+    - "MCP admin-control and progress callback fixes."
   installMethods:
     - install:github-release
 edges:
   version_of:
     - agent:antigravity-cli
   sourced_from:
-    - evidence:antigravity-1-1-10-2026-08-07
+    - evidence:antigravity-1-1-11-2026-08-07
 ---
 nodeKind: AgentVersion
 id: agentVersion:claude:2-1-224

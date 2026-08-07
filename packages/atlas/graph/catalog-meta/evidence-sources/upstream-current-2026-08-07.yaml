@@ -131,7 +131,7 @@ edges:
   has_trust_level:
     - trust-level:official-web
   references:
-    - agentVersion:codex:0-147-0
+    - agent-version:codex@0.147.0
     - agent:codex
 ---
 nodeKind: EvidenceSource
