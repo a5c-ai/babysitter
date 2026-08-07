@@ -1,5 +1,4 @@
 name: Live Stack
-run-name: ${{ inputs.request_id && format('Live Stack QA {0}', inputs.request_id) || 'Live Stack' }}
 on:
   push:
     branches:
@@ -10,18 +9,8 @@ on:
       - '.github/workflows/live-stack.yml'
   workflow_dispatch:
     inputs:
-      request_id:
-        description: 'Unique QA dispatch correlation identifier.'
-        required: false
-        type: string
-        default: ''
-      repository:
-        description: 'Fork-aware owner/repository containing the exact ref. Defaults to this repository.'
-        required: false
-        type: string
-        default: ''
       ref:
-        description: 'Exact commit SHA to check out and test. Defaults to the dispatched ref for non-QA runs.'
+        description: 'Branch or ref to check out and test. Defaults to the dispatched ref (usually staging).'
         required: false
         type: string
         default: ''
@@ -62,20 +51,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          repository: ${{ inputs.repository || github.repository }}
           ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
-
-      - name: Verify exact requested head
-        if: inputs.ref != ''
-        env:
-          EXPECTED_HEAD_SHA: ${{ inputs.ref }}
-        run: |
-          actual_head_sha=$(git rev-parse HEAD)
-          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
-            echo "Checked out $actual_head_sha instead of exact requested head $EXPECTED_HEAD_SHA" >&2
-            exit 1
-          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -353,20 +330,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          repository: ${{ inputs.repository || github.repository }}
           ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
-
-      - name: Verify exact requested head
-        if: inputs.ref != ''
-        env:
-          EXPECTED_HEAD_SHA: ${{ inputs.ref }}
-        run: |
-          actual_head_sha=$(git rev-parse HEAD)
-          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
-            echo "Checked out $actual_head_sha instead of exact requested head $EXPECTED_HEAD_SHA" >&2
-            exit 1
-          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -374,10 +339,6 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
-
-      - name: Setup Bun for OMP
-        if: matrix.scenario.agent == 'omp'
-        uses: oven-sh/setup-bun@v2
 
       - name: Setup Python (for pip-based agents like hermes)
         uses: actions/setup-python@v5

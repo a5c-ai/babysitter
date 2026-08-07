@@ -1,17 +1,14 @@
 export interface ExactHeadCandidate {
   databaseId?: number | null;
-  displayTitle?: string;
   event?: string;
   headBranch?: string;
   headSha?: string;
 }
 
 export interface ExactHeadEvidence {
-  expectedTitle?: string;
   trustedStagingSha?: string;
   expectedHeadSha?: string;
-  checkoutResolved?: boolean;
-  actualHeadSha?: string | null;
+  beforeRunIds?: number[];
   candidates?: ExactHeadCandidate[];
 }
 
@@ -25,11 +22,27 @@ export interface LiveQaJob {
   conclusion?: string;
 }
 
-export interface LiveQaResult {
-  allPassed?: boolean;
-  jobs?: LiveQaJob[];
+export interface LiveQaCheckout {
+  jobName?: string;
   conclusion?: string;
+  headSha?: string | null;
+}
+
+export interface LiveQaResult {
+  jobs?: LiveQaJob[];
+  checkouts?: LiveQaCheckout[];
+  conclusion?: string;
+  expectedHeadSha?: string;
+}
+
+export interface NormalizedLiveQaResult {
+  allPassed: boolean;
+  jobs: LiveQaJob[];
+  checkouts: LiveQaCheckout[];
+  conclusion: string;
+  expectedHeadSha: string;
+  exactHeadVerified: boolean;
 }
 
 export function correlateExactHeadQa(input: ExactHeadEvidence): ExactHeadCorrelation;
-export function normalizeLiveQaResult(input: LiveQaResult): Required<LiveQaResult>;
+export function normalizeLiveQaResult(input: LiveQaResult): NormalizedLiveQaResult;

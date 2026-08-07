@@ -47,45 +47,11 @@ jobs:
         continue-on-error: true
         uses: a5c-ai/generate-token-action@main
 
-      - name: Resolve fork-aware exact PR head
-        id: target
-        if: inputs.pr_number != '' || github.event.issue.number
-        uses: actions/github-script@v8
-        env:
-          PR_NUMBER: ${{ inputs.pr_number || github.event.issue.number }}
-        with:
-          github-token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
-          script: |
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: Number(process.env.PR_NUMBER),
-            });
-            if (!pr.head.repo?.full_name || !pr.head.sha) {
-              core.setFailed(`PR #${process.env.PR_NUMBER} has no checkoutable head repository/SHA`);
-              return;
-            }
-            core.setOutput('repository', pr.head.repo.full_name);
-            core.setOutput('sha', pr.head.sha);
-            core.setOutput('branch', pr.head.ref);
-
       - uses: actions/checkout@v6
         with:
-          repository: ${{ steps.target.outputs.repository || github.repository }}
-          ref: ${{ steps.target.outputs.sha || inputs.branch || github.event.repository.default_branch }}
+          ref: ${{ inputs.branch || github.event.repository.default_branch }}
           fetch-depth: 0
           token: ${{ steps.a5c-token.outputs.a5c_token || github.token }}
-
-      - name: Verify exact PR head checkout
-        if: steps.target.outputs.sha != ''
-        env:
-          EXPECTED_HEAD_SHA: ${{ steps.target.outputs.sha }}
-        run: |
-          actual_head_sha=$(git rev-parse HEAD)
-          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
-            echo "Checked out $actual_head_sha instead of exact PR head $EXPECTED_HEAD_SHA" >&2
-            exit 1
-          fi
 
       - uses: a5c-ai/babysitter/packages/adapters/triggers@staging
         with:
@@ -99,7 +65,7 @@ jobs:
           max-turns: '9999'
           prompt: |
             Execute the predefined QA process at .a5c/processes/ci-qa-review.mjs with these inputs:
-            { "prNumber": ${{ inputs.pr_number || github.event.issue.number || 0 }}, "branch": "${{ steps.target.outputs.branch || inputs.branch || github.head_ref || 'staging' }}", "instructions": "Exact checked-out head: ${{ steps.target.outputs.repository || github.repository }}@${{ steps.target.outputs.sha || github.sha }}. ${{ inputs.instructions || github.event.comment.body || 'Run default QA based on changed files' }}" }
+            { "prNumber": ${{ inputs.pr_number || github.event.issue.number || 0 }}, "branch": "${{ inputs.branch || github.head_ref || 'staging' }}", "instructions": "${{ inputs.instructions || github.event.comment.body || 'Run default QA based on changed files' }}" }
           trigger-query: ''
         env:
           AZURE_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}

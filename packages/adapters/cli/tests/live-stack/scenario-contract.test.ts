@@ -258,63 +258,100 @@ describe('live stack scenario contract primitives', () => {
     expect(workflow).toMatch(/cancel-in-progress:/);
   });
 
-  it('correlates live-stack runs only to one executable exact-head candidate', async () => {
+  it('correlates exactly one new trusted-staging run from before/after snapshots', () => {
+    const trustedStagingSha = 'a'.repeat(40);
+    const expectedHeadSha = 'b'.repeat(40);
     const candidate = {
       databaseId: 42,
-      displayTitle: 'Live Stack QA qa-1582-deadbeef',
       event: 'workflow_dispatch',
       headBranch: 'staging',
-      headSha: 'trusted-staging-sha',
+      headSha: trustedStagingSha,
     };
     const evidence = {
-      expectedTitle: candidate.displayTitle,
-      trustedStagingSha: candidate.headSha,
-      expectedHeadSha: 'exact-pr-head-sha',
-      checkoutResolved: true,
-      actualHeadSha: 'exact-pr-head-sha',
-      candidates: [candidate],
+      trustedStagingSha,
+      expectedHeadSha,
+      beforeRunIds: [40, 41],
+      candidates: [{ ...candidate, databaseId: 41 }, candidate],
     };
 
     expect(correlateExactHeadQa(evidence)).toEqual({ runId: 42, reason: null });
     expect(correlateExactHeadQa({ ...evidence, candidates: [] })).toMatchObject({
       runId: null,
-      reason: expect.stringContaining('0 candidates'),
+      reason: expect.stringContaining('0 new trusted-staging candidates'),
     });
-    expect(correlateExactHeadQa({ ...evidence, candidates: [candidate, { ...candidate }] })).toMatchObject({
+    expect(correlateExactHeadQa({ ...evidence, candidates: [candidate, { ...candidate, databaseId: 43 }] })).toMatchObject({
       runId: null,
-      reason: expect.stringContaining('2 candidates'),
+      reason: expect.stringContaining('2 new trusted-staging candidates'),
     });
-    expect(correlateExactHeadQa({ ...evidence, candidates: [{ ...candidate, databaseId: null }] })).toMatchObject({
+    expect(correlateExactHeadQa({ ...evidence, candidates: [{ ...candidate, headSha: 'c'.repeat(40) }] })).toMatchObject({
       runId: null,
-      reason: expect.stringContaining('null or invalid run id'),
+      reason: expect.stringContaining('0 new trusted-staging candidates'),
     });
-    expect(correlateExactHeadQa({
-      ...evidence,
-      candidates: [{ ...candidate, headSha: 'untrusted-staging-sha' }],
-    })).toMatchObject({
+    expect(correlateExactHeadQa({ ...evidence, beforeRunIds: undefined })).toMatchObject({
       runId: null,
-      reason: expect.stringContaining('0 candidates'),
+      reason: expect.stringContaining('before-run snapshot'),
     });
-    expect(correlateExactHeadQa({ ...evidence, checkoutResolved: false, actualHeadSha: null })).toMatchObject({
+    expect(correlateExactHeadQa({ ...evidence, expectedHeadSha: 'branch-name' })).toMatchObject({
       runId: null,
-      reason: expect.stringContaining('could not be resolved'),
+      reason: expect.stringContaining('immutable commit SHAs'),
     });
   });
 
-  it('fails closed when live-stack reports passed=false or any non-successful job', async () => {
+  it('fails closed on checkout, job, exact-head, and scenario evidence defects', () => {
+    const expectedHeadSha = 'b'.repeat(40);
     const success = {
-      allPassed: true,
       conclusion: 'success',
-      jobs: [{ name: 'exact-head live stack', conclusion: 'success' }],
+      expectedHeadSha,
+      jobs: [
+        { name: 'Build All', conclusion: 'success' },
+        { name: 'Live Stack (ubuntu, bp/create, omp/gpt-5.5, non-interactive)', conclusion: 'success' },
+      ],
+      checkouts: [
+        { jobName: 'Build All', conclusion: 'success', headSha: expectedHeadSha },
+        { jobName: 'Live Stack (ubuntu, bp/create, omp/gpt-5.5, non-interactive)', conclusion: 'success', headSha: expectedHeadSha },
+      ],
     };
 
-    expect(normalizeLiveQaResult(success).allPassed).toBe(true);
-    expect(normalizeLiveQaResult({ ...success, allPassed: false }).allPassed).toBe(false);
+    expect(normalizeLiveQaResult(success)).toMatchObject({ allPassed: true, exactHeadVerified: true });
+    expect(normalizeLiveQaResult({ ...success, conclusion: 'failure' }).allPassed).toBe(false);
+    expect(normalizeLiveQaResult({ ...success, jobs: [] }).allPassed).toBe(false);
     expect(normalizeLiveQaResult({
       ...success,
-      jobs: [{ name: 'checkout', conclusion: 'failure' }],
+      jobs: [{ name: 'Build All', conclusion: 'success' }],
     }).allPassed).toBe(false);
-    expect(normalizeLiveQaResult({ ...success, jobs: [] }).allPassed).toBe(false);
+    expect(normalizeLiveQaResult({
+      ...success,
+      jobs: success.jobs.map((job) => job.name.startsWith('Live Stack (') ? { ...job, conclusion: 'failure' } : job),
+    }).allPassed).toBe(false);
+    expect(normalizeLiveQaResult({
+      ...success,
+      checkouts: [{ jobName: 'Build All', conclusion: 'failure', headSha: null }],
+    })).toMatchObject({ allPassed: false, exactHeadVerified: false });
+    expect(normalizeLiveQaResult({
+      ...success,
+      checkouts: success.checkouts.map((checkout) => ({ ...checkout, headSha: 'c'.repeat(40) })),
+    })).toMatchObject({ allPassed: false, exactHeadVerified: false });
+    expect(normalizeLiveQaResult({ ...success, checkouts: [] })).toMatchObject({
+      allPassed: false,
+      exactHeadVerified: false,
+    });
+  });
+
+  it('keeps exact-head QA executable through the trusted staging workflow contract', () => {
+    const workflow = fs.readFileSync('.github/workflows/live-stack.yml', 'utf8');
+    const qaProcess = fs.readFileSync('.a5c/processes/ci-qa-review.mjs', 'utf8');
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8')) as { devDependencies?: Record<string, string> };
+
+    expect(workflow).toMatch(/workflow_dispatch:[\s\S]*?ref:/);
+    expect(workflow).not.toMatch(/^run-name:/m);
+    expect(workflow).not.toMatch(/^\s+request_id:/m);
+    expect(workflow).not.toMatch(/^\s+repository:/m);
+    expect(workflow).not.toContain('Setup Bun for OMP');
+    expect(qaProcess).toContain('beforeRunIds');
+    expect(qaProcess).toContain('checkouts: [{ jobName, conclusion, headSha }]');
+    expect(qaProcess).not.toContain('-f request_id=');
+    expect(qaProcess).not.toContain('-f repository=');
+    expect(packageJson.devDependencies?.bun).toBe('1.3.14');
   });
 
   it('includes all target harnesses in live-stack setup matrix generation', () => {

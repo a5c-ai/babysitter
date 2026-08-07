@@ -20,7 +20,10 @@ export async function process(inputs, ctx) {
     return { dispatched: false, passed: false, reportPosted: true };
   }
 
-  const rawResults = await ctx.task(waitForResultsTask, { runId: dispatch.runId });
+  const rawResults = await ctx.task(waitForResultsTask, {
+    runId: dispatch.runId,
+    expectedHeadSha: dispatchEvidence.expectedHeadSha,
+  });
   const results = normalizeLiveQaResult(rawResults);
   await ctx.task(postResultsTask, { prNumber: inputs.prNumber, runId: dispatch.runId, results, matrix });
 
@@ -93,12 +96,12 @@ const dispatchLiveStackTask = defineTask('dispatch-live-stack', async (args, ctx
     title: 'Dispatch live-stack workflow',
     labels: ['qa', 'dispatch'],
     io: {
-      instruction: `Dispatch the live-stack workflow definition from staging and make it check out the exact PR mergeable head ref.
-First run: git diff --quiet origin/staging...HEAD -- .github/workflows/live-stack.yml
-If that exits nonzero, do not dispatch: the trusted staging definition cannot exercise workflow changes from this PR. Return { runId: null, reason: "Pre-merge live-stack validation is blocked because this PR changes .github/workflows/live-stack.yml" }.
-Otherwise resolve the PR's fork repository and immutable head SHA, create a unique request ID containing that SHA, record the current staging SHA, and dispatch all of them. A branch name or refs/pull alias is not exact-head evidence. Resolve the exact head before dispatch (for example with git ls-remote or the commits API), and retain whether resolution succeeded plus the resolved SHA. If PR head resolution or checkout fails, report blocked/failed; never treat skipped scenarios as green:
-Run: head_sha=$(gh pr view ${args.prNumber} --json headRefOid --jq '.headRefOid'); head_repo=$(gh pr view ${args.prNumber} --json headRepository --jq '.headRepository.nameWithOwner'); test -n "$head_sha" && test -n "$head_repo"; head_short=$(printf %.12s "$head_sha"); request_id=qa-${args.prNumber || 'branch'}-$head_short-$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM; staging_sha=$(gh api repos/{owner}/{repo}/git/ref/heads/staging --jq '.object.sha'); gh workflow run live-stack.yml --ref staging -f request_id="$request_id" -f repository="$head_repo" -f ref="$head_sha" -f matrix='${JSON.stringify(args.matrix)}'
-Poll briefly for registration. Return the raw evidence needed by the process-level fail-closed correlator: { expectedTitle: "Live Stack QA <request_id>", trustedStagingSha: staging_sha, expectedHeadSha: head_sha, checkoutResolved: boolean, actualHeadSha: string | null, candidates: [{ databaseId, displayTitle, event, headBranch, headSha }] }. candidates must be the unfiltered result of: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,displayTitle,event,headBranch,headSha. Do not select a run ID yourself; the process accepts exactly one candidate matching the unique title, workflow_dispatch event, staging branch, and trusted staging SHA, and rejects zero, multiple, or null-id matches.`,
+      instruction: `Dispatch the trusted staging live-stack workflow while making its existing ref input check out the immutable PR head SHA.
+Resolve the current PR head SHA with: gh pr view ${args.prNumber} --json headRefOid --jq '.headRefOid'. Require a full 40-hex SHA; branch names and refs/pull aliases are not exact-head evidence.
+Resolve and retain the current trusted staging SHA with: gh api repos/{owner}/{repo}/git/ref/heads/staging --jq '.object.sha'.
+Immediately before dispatch, snapshot run IDs with: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId. Then run: gh workflow run live-stack.yml --ref staging -f ref="$head_sha" -f matrix='${JSON.stringify(args.matrix)}'
+Do not pass repository, request_id, or any other input absent from the trusted staging workflow. Poll briefly for registration, then return { trustedStagingSha, expectedHeadSha, beforeRunIds: number[], candidates: [{ databaseId, event, headBranch, headSha }] }. candidates must be the unfiltered post-dispatch result of: gh run list --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,event,headBranch,headSha.
+Do not select a run ID yourself. The process compares the before/after snapshots and accepts exactly one new workflow_dispatch run whose branch is staging and whose workflow-definition head SHA equals the captured trusted staging SHA. Zero or multiple matches, a moving staging ref, and invalid IDs all fail closed.`,
     },
   };
 });
@@ -109,11 +112,11 @@ const waitForResultsTask = defineTask('wait-for-results', async (args, ctx) => {
     title: 'Wait for live-stack results',
     labels: ['qa', 'poll'],
     io: {
-      instruction: `Poll the live-stack run until completion.
-Run: gh run view ${args.runId} --json status,conclusion --jq '{status, conclusion}'
-Check every 60 seconds. Timeout after 20 minutes.
-Once complete, get job results: gh run view ${args.runId} --json jobs --jq '.jobs[] | {name: .name, conclusion: .conclusion}'
-Return { allPassed: boolean, jobs: [{name, conclusion}], conclusion: string }.`,
+      instruction: `Poll live-stack run ${args.runId} until completion.
+Run: gh run view ${args.runId} --json status,conclusion. Check every 60 seconds and timeout after 120 minutes so the workflow's 90-minute scenario budget can finish.
+After completion, fetch every job with databaseId, name, conclusion, and steps. Return jobs as [{ name, conclusion }]; an empty list is failure evidence, never green.
+For every job containing a step named "Checkout repository", require that step to conclude success and download that job's raw log. Accept a head SHA only when the log contains exactly one actions/checkout command marker ending in git log -1 --format=%H and its immediately following log line ends in one full 40-hex commit. This is the checkout action's observed HEAD even when gh labels raw action lines UNKNOWN STEP. Do not infer it from the branch, dispatch input, expected SHA, another command, or a shortened "HEAD is now at" line. Missing or ambiguous checkout evidence yields headSha: null.
+Return { jobs, checkouts: [{ jobName, conclusion, headSha }], conclusion, expectedHeadSha: "${args.expectedHeadSha}" }. The process independently requires a successful workflow, non-empty successful jobs including at least one Live Stack scenario job, successful checkout steps, and every observed checkout SHA equal to the immutable expected head.`,
     },
   };
 });
