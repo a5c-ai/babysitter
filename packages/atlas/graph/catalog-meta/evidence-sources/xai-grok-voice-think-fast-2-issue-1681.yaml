@@ -1,0 +1,37 @@
+nodeKind: EvidenceSource
+id: evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+attributes:
+  displayName: xAI model catalog - Grok Voice Think Fast 2.0
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.x.ai/docs/models
+  sourcePathOrUrl: https://docs.x.ai/docs/models
+  locator: globalThis.__XAI_PUBLIC_MODELS__ audioModels entries for grok-voice-think-fast-2.0, alias grok-voice-latest, modalities, regions, endpoint, concurrency tiers, and realtime pricing fields
+  capturedAt: "2026-08-07T00:00:00Z"
+  observedAt: "2026-08-07T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-07T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:xai-grok-voice-think-fast-2-issue-1681
+attributes:
+  displayName: GitHub issue #1681 Grok Voice Think Fast 2.0 tracker
+  kindLabel: issue
+  trustLevel: trust-level:repo
+  sourceUrl: https://github.com/a5c-ai/babysitter/issues/1681
+  sourcePathOrUrl: https://github.com/a5c-ai/babysitter/issues/1681
+  locator: Daily model-version-update issue with xAI docs link, model ID, realtime endpoint, modalities, regions, pricing fields, and graph checklist
+  capturedAt: "2026-08-07T00:00:00Z"
+  observedAt: "2026-08-07T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-07T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:repo
