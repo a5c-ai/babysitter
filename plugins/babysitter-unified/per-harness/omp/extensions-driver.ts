@@ -117,6 +117,7 @@ interface ExecutionCheckpoint {
   authenticatedOutputSha256?: string;
   stdoutRef?: string;
   stderrRef?: string;
+  resultStatus?: "ok" | "error";
   postedAt?: string;
   ownerName?: string;
   dispatchToken?: string;
@@ -739,6 +740,9 @@ export class OmpDeterministicDriver {
       checkpoint = recovered;
       await this.emitProgress(runDir, "recovery", "completed", "Recovered durable shell output", action);
       await this.postCompletedCheckpoint(runDir, checkpoint, signal);
+      if (checkpoint.resultStatus === "error") {
+        throw new DriverError(`Shell effect ${action.effectId} failed; refusing deterministic continuation`, action.effectId);
+      }
       return;
     }
 
@@ -754,6 +758,7 @@ export class OmpDeterministicDriver {
     const outputPath = effectArtifactPath(runDir, action.effectId, "output.json");
     const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
     const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
+    const resultStatus = shellResult.timedOut || shellResult.exitCode !== expectedExitCode ? "error" : "ok";
     await writeImmutableJson(outputPath, value);
     const outputBytes = await fs.readFile(outputPath);
     checkpoint = {
@@ -764,6 +769,7 @@ export class OmpDeterministicDriver {
       outputSha256: sha256(outputBytes),
       stdoutRef: taskRelativeRef(action.effectId, "stdout.log"),
       stderrRef: taskRelativeRef(action.effectId, "stderr.log"),
+      resultStatus,
     };
     await writeJsonAtomic(checkpointFile, checkpoint);
     await this.emitProgress(
@@ -776,6 +782,9 @@ export class OmpDeterministicDriver {
       action,
     );
     await this.postCompletedCheckpoint(runDir, checkpoint, signal);
+    if (resultStatus === "error") {
+      throw new DriverError(`Shell effect ${action.effectId} failed; refusing deterministic continuation`, action.effectId);
+    }
   }
 
   private async prepareAgentEffect(runDir: string, action: EffectAction, signal?: AbortSignal): Promise<DriverResult | null> {
@@ -981,7 +990,10 @@ export class OmpDeterministicDriver {
       );
     }
     const payload = parseCliJson<JsonObject>(shown.stdout, "task:show");
-    return readObject(payload.effect)?.status === "resolved_ok";
+    const status = readObject(payload.effect)?.status;
+    return checkpoint.resultStatus === "error"
+      ? status === "resolved_error"
+      : status === "resolved_ok";
   }
 
   private async postCompletedCheckpoint(
@@ -997,13 +1009,14 @@ export class OmpDeterministicDriver {
       return false;
     }
 
+    const resultStatus = checkpoint.resultStatus ?? "ok";
     const args = [
       "task:post",
       runDir,
       checkpoint.effectId,
       "--status",
-      "ok",
-      "--value",
+      resultStatus,
+      resultStatus === "error" ? "--error" : "--value",
       path.join(runDir, checkpoint.outputRef),
       "--invocation-key",
       checkpoint.invocationKey,
@@ -1026,7 +1039,15 @@ export class OmpDeterministicDriver {
     }
     const posted = { ...checkpoint, postedAt: this.now().toISOString() };
     await writeJsonAtomic(executionPath(runDir, checkpoint.effectId), posted);
-    await this.emitProgress(runDir, "post", "completed", "Effect result committed to the authoritative journal", posted);
+    await this.emitProgress(
+      runDir,
+      "post",
+      resultStatus === "error" ? "failed" : "completed",
+      resultStatus === "error"
+        ? "Effect failure committed to the authoritative journal"
+        : "Effect result committed to the authoritative journal",
+      posted,
+    );
     return true;
   }
   private async emitProgress(
@@ -1648,8 +1669,9 @@ async function shellResultValue(
 async function hasMatchingCommittedArtifact(runDir: string, checkpoint: ExecutionCheckpoint): Promise<boolean> {
   const result = await readJsonIfExists<JsonObject>(effectArtifactPath(runDir, checkpoint.effectId, "result.json"));
   if (!result) return false;
+  const expectedStatus = checkpoint.resultStatus ?? "ok";
   if (
-    result.status !== "ok" ||
+    result.status !== expectedStatus ||
     result.effectId !== checkpoint.effectId ||
     result.invocationKey !== checkpoint.invocationKey
   ) {
@@ -1663,18 +1685,47 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
     ? resolveRunRelative(runDir, checkpoint.outputRef)
     : effectArtifactPath(runDir, checkpoint.effectId, "output.json");
   const durableOutput = await readJson<unknown>(outputPath);
-  const committedValue = typeof result.resultRef === "string"
-    ? await readJson<unknown>(resolveRunRelative(runDir, result.resultRef))
-    : "result" in result
-      ? result.result
-      : result.value;
-  if (!isDeepStrictEqual(committedValue, durableOutput)) {
+  const committedValue = expectedStatus === "error"
+    ? result.error
+    : typeof result.resultRef === "string"
+      ? await readJson<unknown>(resolveRunRelative(runDir, result.resultRef))
+      : "result" in result
+        ? result.result
+        : result.value;
+  const expectedDurableValue = expectedStatus === "error"
+    ? serializeCommittedEffectError(durableOutput)
+    : durableOutput;
+  if (!isDeepStrictEqual(committedValue, expectedDurableValue)) {
     throw new DriverError(
       `Committed result conflicts with immutable durable output for effect ${checkpoint.effectId}`,
       checkpoint.effectId,
     );
   }
   return true;
+}
+
+function serializeCommittedEffectError(error: unknown): JsonObject {
+  const object = readObject(error);
+  if (object && "name" in object) {
+    const serialized: JsonObject = {
+      name: object.name ?? "Error",
+      message: object.message ?? "Task failed",
+    };
+    if (typeof object.stack === "string") serialized.stack = object.stack;
+    if (object.data !== undefined) serialized.data = object.data;
+    return serialized;
+  }
+  if (error !== null && typeof error === "object") {
+    return {
+      name: Array.isArray(error) ? "Array" : "Object",
+      message: JSON.stringify(error),
+      data: error,
+    };
+  }
+  return {
+    name: "Error",
+    message: String(error),
+  };
 }
 
 

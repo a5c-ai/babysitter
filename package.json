@@ -147,7 +147,8 @@
     "react-dom": "^19.2.4",
     "react-router-dom-v6": "npm:react-router-dom@^6.30.2",
     "vitest": "4.1.6",
-    "webpackbar": "file:third_party/webpackbar"
+    "webpackbar": "file:third_party/webpackbar",
+    "zod": "^4.4.3"
   },
   "overrides": {
     "webpackbar": "file:third_party/webpackbar",

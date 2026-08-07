@@ -456,7 +456,7 @@ describe("CLI main entry", () => {
     );
   });
 
-  it("normalizes shell task error posts into success:false shell results", async () => {
+  it("preserves shell task error posts as failed effects", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-task-post-shell-error-"));
     const errorPath = path.join(tmpDir, "error.json");
     await fs.writeFile(
@@ -482,18 +482,15 @@ describe("CLI main entry", () => {
       ".",
     ]);
 
-    expect(exitCode).toBe(0);
+    expect(exitCode).toBe(1);
     expect(commitEffectResultMock).toHaveBeenCalledWith(
       expect.objectContaining({
         effectId: "ef-shell-err",
         result: {
-          status: "ok",
-          value: {
-            success: false,
+          status: "error",
+          error: {
             exitCode: 2,
-            stdout: "",
             stderr: "tsc failed",
-            error: "Shell command exited with code 2",
           },
           stdout: undefined,
           stderr: undefined,
@@ -506,7 +503,7 @@ describe("CLI main entry", () => {
       }),
     );
     expect(logSpy).toHaveBeenCalledWith(
-      "[task:post] status=ok normalizedShellFailure=true stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
+      "[task:post] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
     );
 
     await fs.rm(tmpDir, { recursive: true, force: true });

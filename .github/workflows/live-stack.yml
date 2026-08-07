@@ -15,8 +15,13 @@ on:
         required: false
         type: string
         default: ''
+      repository:
+        description: 'Fork-aware owner/repository containing the exact ref. Defaults to this repository.'
+        required: false
+        type: string
+        default: ''
       ref:
-        description: 'Branch or ref to check out and test. Defaults to the dispatched ref (usually staging).'
+        description: 'Exact commit SHA to check out and test. Defaults to the dispatched ref for non-QA runs.'
         required: false
         type: string
         default: ''
@@ -57,8 +62,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
+          repository: ${{ inputs.repository || github.repository }}
           ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
+
+      - name: Verify exact requested head
+        if: inputs.ref != ''
+        env:
+          EXPECTED_HEAD_SHA: ${{ inputs.ref }}
+        run: |
+          actual_head_sha=$(git rev-parse HEAD)
+          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
+            echo "Checked out $actual_head_sha instead of exact requested head $EXPECTED_HEAD_SHA" >&2
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -336,8 +353,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
+          repository: ${{ inputs.repository || github.repository }}
           ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
+
+      - name: Verify exact requested head
+        if: inputs.ref != ''
+        env:
+          EXPECTED_HEAD_SHA: ${{ inputs.ref }}
+        run: |
+          actual_head_sha=$(git rev-parse HEAD)
+          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
+            echo "Checked out $actual_head_sha instead of exact requested head $EXPECTED_HEAD_SHA" >&2
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

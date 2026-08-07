@@ -12,6 +12,7 @@ import {
   OmpDeterministicDriver,
   reconstructBabysitterProjection,
 } from '../../../../../plugins/babysitter-unified/per-harness/omp/extensions-driver.js';
+import { toSerializedEffectError } from '../../../../babysitter-sdk/src/runtime/errorUtils.js';
 
 const UNIFIED_PLUGIN_DIR = path.resolve(__dirname, '../../../../../plugins/babysitter-unified');
 const tempDirs: string[] = [];
@@ -807,6 +808,87 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json'))).rejects.toMatchObject({
       code: 'ENOENT',
     });
+  });
+
+  it.each([
+    { label: 'nonzero exit', exitCode: 7, timedOut: false },
+    { label: 'timeout', exitCode: 143, timedOut: true },
+  ])('posts $label shell gates as errors and refuses success continuation', async ({ exitCode, timedOut }) => {
+    const runDir = await tempRun(`omp-shell-${timedOut ? 'timeout' : 'nonzero'}-`);
+    const effect = action('shell', { shell: { command: 'failing-gate', expectedExitCode: 0 } });
+    const cliCalls: string[][] = [];
+    let iterations = 0;
+    let posted = false;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode,
+        stdout: 'partial stdout evidence',
+        stderr: timedOut ? 'terminated after deadline' : 'gate failed',
+        timedOut,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-07T00:00:00.000Z',
+        finishedAt: '2026-08-07T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        cliCalls.push(args);
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return { code: 0, stdout: waiting(effect), stderr: '' };
+        }
+        if (args[0] === 'task:post') {
+          posted = true;
+          const error = JSON.parse(
+            await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8'),
+          ) as unknown;
+          await writeJson(path.join(runDir, 'tasks', effect.effectId, 'result.json'), {
+            effectId: effect.effectId,
+            invocationKey: effect.invocationKey,
+            status: 'error',
+            error: toSerializedEffectError(error),
+          });
+          // task:post intentionally exits nonzero for an error result after committing it.
+          return { code: 1, stdout: '{}', stderr: 'shell gate failed' };
+        }
+        if (args[0] === 'task:show') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({ effect: { status: posted ? 'resolved_error' : 'requested' } }),
+            stderr: '',
+          };
+        }
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      `Shell effect ${effect.effectId} failed; refusing deterministic continuation`,
+    );
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      `Shell effect ${effect.effectId} failed; refusing deterministic continuation`,
+    );
+    expect(iterations).toBe(2);
+    const post = cliCalls.find((args) => args[0] === 'task:post');
+    expect(post).toBeDefined();
+    expect(post).toContain('error');
+    expect(post).not.toContain('ok');
+    expect(post).toContain('--error');
+    expect(post).not.toContain('--value');
+    expect(cliCalls.filter((args) => args[0] === 'task:post')).toHaveLength(1);
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toMatchObject({
+      success: false,
+      exitCode,
+      timedOut,
+      stdout: 'partial stdout evidence',
+      stderr: timedOut ? 'terminated after deadline' : 'gate failed',
+    });
+    await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'stdout.log'), 'utf8'))
+      .resolves.toBe('partial stdout evidence');
+    await expect(fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'stderr.log'), 'utf8'))
+      .resolves.toBe(timedOut ? 'terminated after deadline' : 'gate failed');
   });
 
   it('rejects a stale distinct command-owned output artifact that the command did not update', async () => {

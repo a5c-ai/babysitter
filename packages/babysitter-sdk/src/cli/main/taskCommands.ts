@@ -2,7 +2,6 @@ import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { commitEffectCancellation, commitEffectResult } from "../../runtime/commitEffectResult";
 import { readTaskDefinition } from "../../storage/tasks";
-import type { JsonRecord } from "../../storage/types";
 import type { ParsedArgs } from "./types";
 import { USAGE } from "./usage";
 import { collapseDoubledA5cRuns, resolveRunDir } from "./args";
@@ -21,34 +20,6 @@ import {
   toTaskListEntry,
 } from "./runState";
 
-function readStringField(value: JsonRecord | undefined, key: string): string | undefined {
-  const candidate = value?.[key];
-  return typeof candidate === "string" ? candidate : undefined;
-}
-
-function readNumericField(value: JsonRecord | undefined, key: string): number | undefined {
-  const candidate = value?.[key];
-  return typeof candidate === "number" && Number.isFinite(candidate) ? candidate : undefined;
-}
-
-function coerceShellFailureResult(errorPayload: unknown, stdout?: string, stderr?: string) {
-  const payloadData = isJsonRecord(errorPayload)
-    ? isJsonRecord(errorPayload.data)
-      ? errorPayload.data
-      : errorPayload
-    : undefined;
-  const exitCode = readNumericField(payloadData, "exitCode") ?? 1;
-  return {
-    success: false,
-    exitCode,
-    stdout: stdout ?? readStringField(payloadData, "stdout") ?? "",
-    stderr: stderr ?? readStringField(payloadData, "stderr") ?? "",
-    error:
-      readStringField(payloadData, "error") ??
-      readStringField(payloadData, "message") ??
-      `Shell command exited with code ${exitCode}`,
-  };
-}
 
 function resolveMaybeRunRelative(runDir: string, candidate?: string) {
   if (!candidate) return undefined;
@@ -187,14 +158,12 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
         ? readInlineJson(parsed.valueInline)
         : await readJsonFile(runDir, parsed.valuePath)
       : undefined;
-  const normalizedShellFailure = parsed.taskStatus === "error" && record.kind === "shell";
-  const committedStatus = normalizedShellFailure ? "ok" : parsed.taskStatus;
+  const committedStatus = parsed.taskStatus;
 
   const plan = {
     runDir: toRunRelativePosix(runDir, runDir) ?? runDir,
     effectId: parsed.effectId,
     status: committedStatus,
-    normalizedShellFailure,
     valueProvided: Boolean(parsed.valuePath || parsed.valueInline),
     errorProvided: Boolean(parsed.errorPath),
     stdoutRef: parsed.stdoutRef ?? null,
@@ -220,7 +189,7 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
       committedStatus === "ok"
         ? {
             status: "ok",
-            value: normalizedShellFailure ? coerceShellFailureResult(errorPayload, stdout, stderr) : value,
+            value,
             stdout,
             stderr,
             stdoutRef: parsed.stdoutRef,
@@ -246,10 +215,9 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   const stderrRef = normalizeArtifactRef(runDir, committed.stderrRef) ?? null;
   const resultRef = normalizeArtifactRef(runDir, committed.resultRef) ?? null;
   if (parsed.json) {
-    console.log(JSON.stringify({ status: committedStatus, normalizedShellFailure, committed, stdoutRef, stderrRef, resultRef }));
+    console.log(JSON.stringify({ status: committedStatus, committed, stdoutRef, stderrRef, resultRef }));
   } else {
     const parts = [`[task:post] status=${committedStatus}`];
-    if (normalizedShellFailure) parts.push("normalizedShellFailure=true");
     if (stdoutRef) parts.push(`stdoutRef=${stdoutRef}`);
     if (stderrRef) parts.push(`stderrRef=${stderrRef}`);
     if (resultRef) parts.push(`resultRef=${resultRef}`);
