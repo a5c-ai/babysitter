@@ -57,17 +57,19 @@
     {"agent": "droid", "version": "0.189.0", "issue": "https://github.com/a5c-ai/babysitter/issues/1650"}
   ],
   "changedFiles": [
+    ".a5c/processes/agent-version-daily-tracker.inputs.json",
+    "artifacts/agent-version-tracker/upstream-targets-and-latest.json",
+    "artifacts/agent-version-tracker/summary.json",
     "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-08-07.yaml",
-    "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-08-07.yaml",
-    "artifacts/agent-version-tracker/summary.json"
+    "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-08-07.yaml"
   ],
   "summary": "Checked every upstream host agent from catalog external repos plus non-@a5c-ai adapter install commands. Excluded @a5c-ai plugin packages. Recorded 16 new upstream AgentVersion entries and evidence references, plus the @pi-ai/sdk adapter package 404 as a non-upstream/no-version check. Canonical issue trackers exist for every new agent/version pair.",
   "verificationNotes": [
-    "Ran npm run build --workspace=@a5c-ai/atlas before edits; build completed with the repository's pre-existing library bridge quality failures and BAD_ALIAS warnings.",
+    "Ran npm run build --workspace=@a5c-ai/atlas before edits and after edits; both commands exited 0. The Atlas library bridge quality report still prints pre-existing edge/semantic target failures and BAD_ALIAS warnings, but they did not fail the requested build gate and were present before these agent-version graph changes.",
     "Verified latest npm versions for @ampcode/cli, @anthropic-ai/claude-agent-sdk, @anthropic-ai/claude-code, @factory/cli, @openai/codex, @qwen-code/qwen-code, openai, opencode-ai, @google/gemini-cli, @earendil-works/pi-coding-agent, @oh-my-pi/pi-coding-agent, @github/copilot, hermes-agent, and openclaw.",
     "Verified Antigravity latest from google-antigravity/antigravity-cli GitHub releases; 1.1.11 supersedes the earlier 1.1.10 issue from collected context.",
     "Verified Hermes upstream GitHub latest is 0.20.0 / v2026.8.3 while npm/PyPI bridge latest remains 0.19.0.",
-    "Created duplicate issues #1671-#1679 during a race with already-created exact-version issues #1662-#1670; closed #1671-#1679 as duplicates and kept #1661-#1670 as canonical.",
+    "Created duplicate issues #1671-#1679 during a race with already-created exact-version issues #1662-#1670; closed #1671-#1679 as duplicates, removed duplicate labels from open canonical issues #1664, #1665, #1666, #1668, and #1669, and kept #1661-#1670 as canonical.",
     "@pi-ai/sdk returned npm 404; Pi upstream was tracked through @earendil-works/pi-coding-agent.",
     "Created branch agent-versions/daily-2026-08-07, committed the graph/artifact changes, pushed to origin, and opened PR #1680 against staging."
   ]
