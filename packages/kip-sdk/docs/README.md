@@ -5,7 +5,7 @@
 
 **Source:** whole-spec map of `../SPEC.md`.
 
-> **`../SPEC.md` (3555 lines) remains the single authoritative source.** This documentation set is a
+> **`../SPEC.md` (~3.9k lines) remains the single authoritative source.** This documentation set is a
 > faithful decomposition for pre-development reading and planning. Where any doc and the spec
 > disagree, the spec wins. Companion sources: `../PRIOR-ART.md` (prior-art survey) and
 > `../SCORECARD.md` (six-round adversarial convergence record).
@@ -40,6 +40,7 @@ These five invariants run through every document; nothing in the set may contrad
 | [00-vision-and-scope.md](./00-vision-and-scope.md) | Thesis, what kip is / is not, goals G1–G8, non-goals N1–N5. | §1 |
 | [glossary.md](./glossary.md) | Authoritative definitions: Fact, fact set, proj, EID, CID, HLC, INGEST-GATE, PROJ-demotion, microagent, functionality, learner, etc. | §1 Terminology + throughout |
 | [prior-art.md](./prior-art.md) | The HP hard-problems / T tensions the spec resolves; pointer to PRIOR-ART.md and the scorecard. No new claims. | PRIOR-ART.md + SCORECARD.md |
+| [DEBTS.md](./DEBTS.md) | Verified documentation-debt register **and resolution record** for this doc set: every audited finding, its evidence, suggested fix, and resolution status. | audit of docs/ vs SPEC.md |
 
 ### Requirements
 
@@ -76,7 +77,7 @@ These five invariants run through every document; nothing in the set may contrad
 |---|---|---|
 | [25-context-enablement-seams.md](./25-context-enablement-seams.md) | pin/asOf/recall/subscribe/provenance seams the context layer consumes (kip provides seams, not the layer — N1). | §4c |
 | [26-retrieval.md](./26-retrieval.md) | Hybrid vector→graph→RRF pipeline, typed as-of traversal, derived/incremental indexing, salience projection. | §5 |
-| [28-stack-integration.md](./28-stack-integration.md) | How kip integrates with the rest of the stack (babysitter-sdk, genty, adapters, atlas, kradle): what kip consumes/provides, the seams used, data flow, and ALREADY-IN-SPEC / GROUNDED-NEW / SPECULATIVE status per point. | SPEC + real packages |
+| [28-stack-integration.md](./28-stack-integration.md) | How kip integrates with the rest of the stack (trust-core, babysitter-sdk, genty, adapters, atlas, kradle) plus the repo-level implementation wiring (package name, workspace/build-chain position): what kip consumes/provides, the seams used, data flow, and ALREADY-IN-SPEC / GROUNDED-NEW / SPECULATIVE status per point. | SPEC + real packages |
 | [40-sdk-api-surface.md](./40-sdk-api-surface.md) | The Kip/Repo interface: lifecycle, facts, reads, distribution, provenance/ops, and the §5b active-layer seams. Illustrative-normative shapes. | §6 |
 
 ### Active knowledge
@@ -88,6 +89,18 @@ These five invariants run through every document; nothing in the set may contrad
 | [32-knowledge-autoencoding.md](./32-knowledge-autoencoding.md) | encode→decode→reconstruction-loss→learner loop; bounded disjunctive budget; kip:learn recorded-as-fact; accelerator-vs-substrate boundary. | §5b.2 |
 | [33-mining-discovery-ingestion.md](./33-mining-discovery-ingestion.md) | Miner/Discoverer/Ingestor families; data-resource→objects-of-interest→query→acquire pipeline; open-set extensibility; all emit signed source-provenanced facts. | §5b.3 |
 
+### For maintainers (implementation-facing)
+
+These docs describe the **built package** (`src/`), not the pre-development spec — read them when
+changing code. See also the package [README](../README.md) and the consumer
+[getting-started guide](./guide/getting-started.md).
+
+| Doc | Purpose | Source |
+|---|---|---|
+| [maintainer/architecture.md](./maintainer/architecture.md) | Tour of the real current module layout (`src/`), the layering, and the invariants a change must preserve. | built `src/` |
+| [maintainer/conformance-guide.md](./maintainer/conformance-guide.md) | How the self-guarding conformance suite works and how to add a new `INV-*` test. | `src/__tests__/conformance/` + [60](./60-conformance-and-testability.md) |
+| [maintainer/contributing.md](./maintainer/contributing.md) | House rules, prerequisites, the `DEBTS.md` convention, the TDD/adversarial-review workflow, and the build/test gates. | [DEBTS.md](./DEBTS.md) + repo CLAUDE.md |
+
 ### Security & planning
 
 | Doc | Purpose | Source |
@@ -95,7 +108,7 @@ These five invariants run through every document; nothing in the set may contrad
 | [50-security-trust-tenancy.md](./50-security-trust-tenancy.md) | Root-of-trust/scoped-authority/revocation, tenancy & scoping, privacy/redaction/erasure, auditability, DoS/resource-exhaustion threat model. | §8.1–§8.3b |
 | [70-decision-records-adr.md](./70-decision-records-adr.md) | Distill the spec's key decisions into ADR-format records (context / decision / consequences / rejected alternatives). No new decisions. | all D-*/C-*/M-* across the spec |
 | [80-roadmap-and-milestones.md](./80-roadmap-and-milestones.md) | Pre-dev implementation roadmap: milestone ordering (substrate → proj → sync → retrieval → active layer), dependencies, what each milestone delivers. Planning only. Drills down into [81](./81-roadmap-epics-and-tasks.md) for the epic/task/subtask WBS. | synthesis (arch + requirements) |
-| [81-roadmap-epics-and-tasks.md](./81-roadmap-epics-and-tasks.md) | The detailed dependency-ordered WBS behind [80](./80-roadmap-and-milestones.md): 13 epics → 76 tasks → 193 subtasks, each with Implements (FR/NFR) / Exit criteria (INV) / Depends-on edges, plus a task-level mermaid dependency graph. | synthesis (SPEC + docs/10,11,60,80) |
+| [81-roadmap-epics-and-tasks.md](./81-roadmap-epics-and-tasks.md) | INDEX for the detailed dependency-ordered WBS behind [80](./80-roadmap-and-milestones.md): legend, id scheme, and the full task-level mermaid dependency graph. The 13 epics → 76 tasks → 193 subtasks (each with Implements (FR/NFR) / Exit criteria (INV) / Depends-on edges) are split across 11 per-milestone files, [81a](./81a-tasks-m0.md) (M0) through [81j](./81j-tasks-m9.md) (M9) plus [81k](./81k-tasks-cross-cutting.md) (cross-cutting SDK-surface/tooling epics E11/E13). | synthesis (SPEC + docs/10,11,60,80) |
 | [90-open-questions.md](./90-open-questions.md) | The explicitly-deferred non-core questions; faithful restatement with §-cites. | §9 |
 
 ---

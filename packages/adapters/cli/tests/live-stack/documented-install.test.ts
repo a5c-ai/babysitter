@@ -67,7 +67,7 @@ describe('documented published install — command building (no execution)', () 
     expect(commands).toHaveLength(3);
     expect(commands[0]).toMatchObject({
       command: 'codex',
-      args: ['plugin', 'marketplace', 'add', 'a5c-ai/babysitter', '--ref', 'staging', '--sparse', '.agents/plugins'],
+      args: ['plugin', 'marketplace', 'add', 'a5c-ai/babysitter-codex', '--ref', 'staging'],
     });
     expect(commands[1]).toMatchObject({
       command: 'codex',
@@ -79,6 +79,23 @@ describe('documented published install — command building (no execution)', () 
     });
     const flat = commands.flatMap((c) => [c.command, ...c.args]).join(' ');
     expect(flat).not.toContain('./packages/babysitter-sdk');
+  });
+
+  it('uses the per-repo codex marketplace, never the docs-disavowed monorepo sparse form', () => {
+    // docs/user-guide/harnesses/codex.md: the monorepo form
+    // (`a5c-ai/babysitter --sparse .agents/plugins`) must use a released tag and
+    // "**never** `--ref staging`" — its committed manifest pins the MAIN-channel
+    // plugin, so a prerelease channel resolves stale content. The per-repo
+    // marketplace in babysitter-codex is synced per branch and is the documented
+    // primary path.
+    for (const channel of ['staging', 'develop', 'main']) {
+      const flat = buildDocumentedInstallCommands('codex', channel, { cwd: '/repo' })
+        .flatMap((c) => [c.command, ...c.args])
+        .join(' ');
+      expect(flat).not.toContain('--sparse');
+      expect(flat).not.toContain('.agents/plugins');
+      expect(flat).toContain('a5c-ai/babysitter-codex');
+    }
   });
 
   it('threads the resolved channel into the codex --ref', () => {

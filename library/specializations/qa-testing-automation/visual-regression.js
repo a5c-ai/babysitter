@@ -1285,7 +1285,7 @@ export const visualTestImplementationTask = defineTask('visual-test-implementati
 }));
 
 // Phase 7: Threshold Configuration
-export const thresholdConfigurationTask = defineTask('threshold-configuration', (args, taskCtx) => ({
+export const thresholdConfigurationTask = defineTask('visual-regression.threshold-configuration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 7: Threshold Configuration - ${args.projectName}`,
   agent: {

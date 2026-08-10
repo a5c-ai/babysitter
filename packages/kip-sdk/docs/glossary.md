@@ -2,7 +2,7 @@
 
 > Authoritative definitions for every load-bearing term in the kip-sdk spec.
 
-**Source:** SPEC §1 Terminology (lines ~209–240), plus terms used throughout (§2, §3, §4, §4b, §5b).
+**Source:** SPEC §1 Terminology, plus terms used throughout (§2, §3, §4, §4b, §5b).
 
 > SPEC.md remains the authoritative source. Each entry is a faithful condensation of the spec's
 > own definition with its §-citation; consult the cited section for full normative detail.
@@ -67,6 +67,29 @@ identical on every replica. (§4.1, §4b.1)
 **Valid time** — When a fact is true *in the modeled world* (`validFrom`/`validTo`). MAY contain
 **gaps** (Unknown). (§4.2; see [temporality](./23-temporality-and-bitemporality.md))
 
+**`HlcOrTime`** — A valid-time endpoint: a full HLC stamp OR a plain wall-clock instant (ISO-8601 /
+epoch-ms), canonically encoded as the bigint `wall·2³² + counter` (a plain instant coerces to
+`(wall=epochMs, counter=0)`) — the total order `orderKey`'s first component sorts on, so mixed
+representations sort identically on every replica (m7-19). Defined normatively in
+[data model §1](./21-data-model.md).
+
+**Chain sequence (`seq`)** — The signed, per-`(replicaId, key)` **contiguous sequence number** in every
+fact's canonical payload (`seq = 0` at the pair's chain genesis, +1 per authored fact): the normative
+gap-detection witness for chain-completeness and pin-completeness (§4b.1/m7-1). Distinct from the HLC
+`counter` (which the receive-advance rule may skip); excluded from `orderKey` and every reducer.
+
+**`ScopeRef`** — The tenant/namespace read-write lens selector
+(`{ tenant, namespace?, snapshot? }`) consumed by `withScope`/`pin`/`recall`; defined normatively in
+the [SDK API surface "Supporting API types"](./40-sdk-api-surface.md#supporting-api-types-normative).
+(§8.2)
+
+**`Frontier.chainSeq`** — The normative pin selector: `Record<ChainId, number>` mapping each enumerated
+`(replicaId, key)` chain to the **highest `seq`** included at pin time (m7-2). A pin denotes exactly
+`{ f ∈ S : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }` — a chain **absent**
+from the map is excluded, not implicitly included. Pin-completeness is decided per-chain over this map
+(every `seq ∈ [0, frontier.chainSeq[chain]]` held). (§4c/m4-1/m7-2; see
+[context-enablement seams](./25-context-enablement-seams.md))
+
 **Transaction time (`rxFrom`)** — **Receiver-assigned, AUDIT-ONLY**: the HLC the *receiving* replica
 stamps when it first verifies and ingests a fact. Used **only** for per-replica "believed-then" audit
 reads, which are explicitly **non-convergent**. **Excluded from `proj`, `orderKey`, and every
@@ -90,27 +113,52 @@ as facts arrive. (§3.6, §8.1)
 
 **Projection trust states** — The trust label `proj` stamps on each admitted fact (the core output
 vocabulary of a PROJ-demotion):
-`trusted | pending | untrusted-anachronistic | untrusted-malformed | quarantined`. **`trusted`** —
+`trusted | pending | untrusted | untrusted-anachronistic | untrusted-malformed | quarantined |
+kip:revoked-concurrent`. **`trusted`** —
 projects over a complete, authorized, non-anachronistic chain. **`pending`** — chain not yet complete
-(e.g. a `(wall,counter)` gap from a missing/evicted same-key link), held back, never silently trusted.
+(e.g. a `seq` gap from a missing/evicted same-key link, §4b.1/m7-1), held back, never silently trusted.
+**`untrusted`** — the plain demotion label (§3.6): an out-of-namespace assert, a key-add whose chain
+misses the genesis root, or a fact demoted by an `ordinary-cutoff` revocation (author-HLC ≥
+`effectiveFrom`, §8.1) — loses to trusted asserts, surfaced, never dropped.
 **`untrusted-anachronistic`** — a same-key higher-author-HLC non-ancestor fact exists in the complete
-chain (backdating). **`untrusted-malformed`** — a forward (`> child`) or cyclic `causedBy` edge (§3.6).
-**`quarantined`** — demoted for trust (e.g. unregistered/unauthorized key), retained not dropped. This
+chain (backdating). **`untrusted-malformed`** — a forward (`> child`) or cyclic `causedBy` edge, a
+`seq` fork, or a `seq`/author-HLC order inversion (§3.6, §4b.1/m7-1).
+**`quarantined`** — demoted for trust (e.g. unregistered key), retained not dropped.
+**`kip:revoked-concurrent`** — the DISTINCT status stamped on a `causal-cutoff` revocation's
+honest-concurrent casualties (§8.1/M4-1): explicitly **not** the generic `untrusted` bucket, so
+operators can find and `re-attest` them. This
 is a **trust** axis stamped by `proj`; it is **orthogonal** to the byte-retention `RetentionClass`
 axis, and the trust state `quarantined` is **not** the retention class `quarantined-ttl`. (§3.6, §8.1)
 
 **Causal plausibility** — A set-pure anti-backdating rule (replaces the v2 receiver-clock drift gate). A
-fact `F` from key `K` projects **trusted** only over `K`'s **complete gap-free `(wall,counter)` chain**
+fact `F` from key `K` projects **trusted** only over `K`'s **complete gap-free `seq` chain**
 up to `F` (else **`pending`**); once complete it is demoted `untrusted-anachronistic` if `S` holds a
 **higher-author-HLC, non-ancestor** fact from the **same** `K` in that complete chain (per-key
 monotonicity — reads `K`'s involuntary footprint, not forgeable by omitting `causedBy`, C4-2; not
-defeatable by eviction — an evicted link yields a `(wall,counter)` gap ⇒ `pending`, C5-1). Compared
+defeatable by eviction — an evicted link yields a `seq` gap ⇒ `pending`, C5-1). Compared
 only to set-resident author-HLCs, never to a receiver clock. (§3.6, §8.1, §4b.1)
 
 **Authority** — A key (Ed25519) authorized, by a signed chain rooted in the tenant root key, to write a
 given EID **namespace** and/or perform scoped ops (excise, revoke), **as of an author-HLC interval**.
 Key-registration, namespace authority, and revocation are **all** proj decisions keyed on author-HLC;
 **only** signature validity is an ingest-gate predicate. (§2.4, §8)
+
+**Fork demotion** — Two admitted facts from one `(replicaId, key)` pair sharing the same `seq` but
+distinct `factCID`s: signed evidence of author misbehavior. Demotes the fork point and every same-pair
+fact causally after it (higher `seq`) to `untrusted-malformed` — never the honest chain prefix before
+it. **Per-shared-subset**, not unconditionally byte-identical: a replica missing one fork branch under
+partial replication legitimately trusts the chain until the second branch propagates, and a
+late-arriving second branch reverses a previously-trusted fact to demoted (the one case INV-19's
+non-reversal clause excludes). Recovery is by propagation or by excising the fork fact (which now
+requires the higher-privileged `excise-evidence` capability, not ordinary `excise`, so the forking key
+cannot unilaterally destroy the evidence). Named **R11** in the accepted-residuals catalog.
+(§4b.1/m7-1, A-2; see [R11](./90-open-questions.md#r11))
+
+**`KipError`** — The typed error thrown for **caller-input rejections** (never for domain outcomes,
+which are data). Carries `code: KipErrorCode` (`ERR_MALFORMED_INPUT`, `ERR_SIGNATURE_INVALID`,
+`ERR_SCOPE_DENIED`, `ERR_UNAUTHORIZED_EXCISION`, …) and an optional `context`. Every method's
+throws-vs-data split is tabulated per-method. (m7-10; see the
+[Errors section](./40-sdk-api-surface.md#errors--the-typed-kiperror-model-m7-10))
 
 **SEC (Strong Eventual Consistency)** — The convergence guarantee: convergence = **set-convergence** (the fact set is a G-Set/CRDT
 under union) **+ projection determinism** (`proj` is pure and total). Under partial replication it is
@@ -127,6 +175,14 @@ NOT be evicted. **`key-chain-durable`** — a registered key's chain, preferenti
 bounded per-key cap + TTL + global pool budget (m5-1). **`evicted`** — bytes freed. This is a
 **byte-retention** axis, **orthogonal** to the projection-trust axis (Projection trust states); the
 retention class `quarantined-ttl` is **not** the trust state `quarantined`. (§3.5a, INV-18)
+
+**Promisor (remote)** — Git's native representation of a *missing-but-fetchable* object, the normative
+realization of eviction: a replica configures its kip peers as **promisor remotes**
+(`remote.<peer>.promisor=true`, `extensions.partialClone`), so evicting a non-durable blob just drops
+the local copy while trees keep referencing it — `git fsck` treats it as legal (**promisor-missing**),
+and any later need is an ordinary lazy re-fetch from a peer still holding it. `kip fsck` reports a
+promisor-missing **durable** blob as an integrity failure and a promisor-missing **non-durable** blob as
+healthy. (§3.5a/m7-3; see [git substrate §6](./22-git-substrate.md#6-admission-control--retention--bounding-storage-without-touching-membership-35a-c4-1))
 
 **Tombstone (logical)** — Signature-preserving forgetting via a retraction fact; pure append-only,
 keeps verifiability of what remains. (§4.5; see [temporality](./23-temporality-and-bitemporality.md))
@@ -199,9 +255,11 @@ by EID. The set is **open**. (§5b.3; see
 
 **`kip:*` system kinds** — Reserved typed facts `proj` emits for non-silent outcomes: `kip:conflict`
 (tied reducer candidates, §3.4), `kip:schema-violation` (non-conforming under current ontology, §2.2),
-`kip:cardinality-violation` (multi-cell constraint breach, §2.2), `kip:revoked-concurrent` (causal-cutoff
-revocation, §8.1), plus `kip:learn`/`kip:learn-exhausted` (§5b.2). All visible and queryable — the
-machinery of N5 (no silent fallback).
+`kip:cardinality-violation` (multi-cell constraint breach, §2.2), plus `kip:learn`/`kip:learn-exhausted`
+(§5b.2). All visible and queryable — the machinery of N5 (no silent fallback). **Note:**
+`kip:revoked-concurrent` shares the reserved `kip:*` prefix but is **NOT a fact kind** — it is a
+**projected trust STATUS** stamped on demoted facts (§8.1/M4-1); see *Projection trust states* above
+(the D-02 axis separation applies here too).
 
 ## Cross-stack terms (external components referenced by kip)
 

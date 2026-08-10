@@ -1,10 +1,16 @@
 # Research Specialization
 
-Processes for systematic research analysis, standards comparison auditing, and extraction verification.
+Processes for systematic research analysis, standards comparison auditing, and extraction verification, plus a flagship end-to-end research-publication pipeline that composes the scanner point-tasks below.
 
 ## Processes
 
+- **research-publication-workflow.js** — Flagship end-to-end research pipeline: question framing -> plan -> parallel source gathering (composing the five scanner point-tasks below as lane playbooks) -> adversarial claim verification with re-fetched citations -> cited synthesis -> policy-gated publication. Deepest kip-librarian integration (kind `research`).
 - **standards-gap-audit.js** — Generic gap audit process for standards research documents. Audits research/comparison documentation against source extraction text using configurable failure pattern categories.
+- **evangelist.js** — Evangelist persona point-task: scans recent project activity (commits, PRs, docs, releases, benchmarks), filters for marketable novelties, and opens an evangelist report issue per item.
+- **novelties-scanner.js** — Novelties Scanner persona point-task: detects, analyzes, and reports on novel innovations, emerging trends, and breakthrough developments.
+- **patentable-novelties.js** — Patentable Novelties persona point-task: extends the novelties scanner with patent-potential assessment and structured invention disclosures.
+- **vendor-researcher.js** — Vendor-researcher persona point-task: discovers candidate vendors, analyses them in parallel against criteria, and produces a comparison and recommendation report.
+- **news-intelligence-pipeline.js** — End-to-end sourcing + intelligence pipeline (folded in from the former sourcing/ specialization): discover -> monitor -> dedupe -> filter signal -> per-portfolio impact assessment -> synthesize -> route alerts -> track follow-through. The former path `specializations/sourcing/news-intelligence-pipeline.js` remains as a header-only `@deprecated` alias that re-exports this file.
 
 ## Usage
 

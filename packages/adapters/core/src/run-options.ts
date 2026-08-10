@@ -199,6 +199,38 @@ export interface RunOptions {
   /** Invocation mode — how to spawn the underlying process (local, docker, ssh, k8s). */
   invocation?: InvocationMode;
 
+  /**
+   * Milestone D (§9.3 / AC-23a / AC-50) — GATE 3 credential-injection enforcement for the
+   * spawn path. When set AND the off-workspace config anchor (`POLICY_CONFIG_ROOT_FP`) is
+   * pinned, each declared scoped credential (env / docker `-v` / k8s serviceaccount) is
+   * delivered ONLY with a valid CommandAuthorization; otherwise the channel is omitted (and
+   * if required, the spawn is denied). When unset the spawn path is unchanged (back-compat).
+   */
+  policyGate3?: {
+    /** The project root anchoring the `.policy` config dir (defaults to `cwd`). */
+    projectRoot?: string;
+    /** env-var key → trusted alias (ARN/key-id/secret-name) + required flag (AC-40). */
+    scopedEnvKeys?: Record<string, { alias: string; required?: boolean }>;
+    /** docker `-v` mount spec → trusted alias + required flag (AC-50). */
+    scopedMounts?: Record<string, { alias: string; required?: boolean }>;
+    /** k8s `--serviceaccount` name → trusted alias + required flag (AC-50). */
+    scopedServiceAccount?: { name: string; alias: string; required?: boolean };
+    /** The bound tool identity for the authorization recheck (AC-32). */
+    toolName?: string;
+    toolCallId?: string;
+    /** Resolve the CommandAuthorization for this spawn (or none → drop scoped creds). */
+    resolveAuthorization?: () => unknown;
+  };
+
+  /**
+   * Milestone E (ALLOW path, §5 / AC-9 / AC-50) — the run's authorization-store resolver,
+   * threaded into GATE 3 when it AUTO-ACTIVATES from the signed credential-scope source (i.e.
+   * when the anchor is pinned and the signed source declares scoped credentials, without an
+   * explicit `policyGate3`). With none, an auto-gated scoped credential fails authorization and
+   * its channel is dropped (fail closed). Ignored when `policyGate3.resolveAuthorization` is set.
+   */
+  policyResolveAuthorization?: () => unknown;
+
   // --- Provider Configuration ---
 
   /** Provider configuration for model/provider selection. */

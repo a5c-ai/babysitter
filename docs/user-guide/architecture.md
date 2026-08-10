@@ -70,7 +70,7 @@ flowchart TB
 
     KRADLE["@a5c-ai/kradle (adjacent · MVP)<br/>K8s-native Git forge: CRDs + Argo CD + Gitea<br/>per-org dispatchable assistant<br/>kradle serve · kradle mcp"]
 
-    KIP["kip-sdk — packages/kip-sdk (SPEC-ONLY · no published package · not implemented)<br/>intended MEMORY SUBSTRATE<br/>git-substrate, bitemporal, signed-fact graph<br/>every component is a producer/consumer/client"]
+    KIP["kip-sdk — packages/kip-sdk (@a5c-ai/kip-sdk · private/0.0.1 · unpublished)<br/>MEMORY SUBSTRATE — built & runnable, not yet wired in<br/>git-substrate, bitemporal, signed-fact graph<br/>SDK + kip CLI + kip-mcp + graph-QA<br/>every component is a producer/consumer/client"]
 
     PROC -->|governs| SDK
     SDK -->|reads metadata| ATLAS
@@ -123,8 +123,9 @@ flowchart TB
 
    @a5c-ai/kradle   ── (adjacent · MVP) K8s-native Git forge: CRDs + Argo CD + Gitea,
                         per-org dispatchable assistant, `kradle serve` + `kradle mcp`
-   kip-sdk          ── packages/kip-sdk (SPEC-ONLY · no published package · not implemented) intended MEMORY SUBSTRATE;
-                        every other component is a producer/consumer/client of its seams
+   kip-sdk          ── packages/kip-sdk (@a5c-ai/kip-sdk · private/0.0.1 · unpublished) MEMORY SUBSTRATE — built & runnable
+                        (SDK + kip CLI + kip-mcp + graph-QA), not yet wired in; every other component is a
+                        producer/consumer/client of its seams
 ```
 
 ---
@@ -158,7 +159,7 @@ A typical interactive run:
 | Harnesses | Claude Code, Codex, … | Do the adaptive work, under enforcement. |
 | Observability | [observer-dashboard](./ecosystem/observer-dashboard.md) | Streams the journal live. |
 | Adjacent | [kradle](./ecosystem/kradle.md) | A hosting/forge + agent-dispatch substrate (MVP). |
-| Design-stage | [kip-sdk](./ecosystem/kip-sdk.md) | The intended memory substrate — **spec only, no code.** |
+| Memory substrate | [kip-sdk](./ecosystem/kip-sdk.md) | The signed, git-substrate memory layer — **built & runnable** (SDK + `kip` CLI + `kip-mcp` + graph-QA), but `private`/unpublished and not yet wired into the runtime. |
 
 ---
 
@@ -168,7 +169,7 @@ The diagram mixes shipping and forward-looking pieces deliberately, so be clear 
 
 - **GA / runtime:** babysitter-sdk, atlas, genty, observer-dashboard, the adapters family.
 - **MVP:** kradle (its own README's word).
-- **Spec only — not implemented:** kip-sdk (entirely Markdown; nothing to install).
+- **Implemented / pre-release:** kip-sdk — real `src/` + tests, a runnable SDK + `kip` CLI + `kip-mcp` server + graph-QA, but `private: true`/`0.0.1` (unpublished; use the workspace or built `dist/`, not `npm install`) and not yet wired into the runtime.
 
 ---
 

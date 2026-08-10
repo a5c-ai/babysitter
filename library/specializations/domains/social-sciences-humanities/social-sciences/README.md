@@ -1134,3 +1134,49 @@ Social scientists who can bridge quantitative and qualitative approaches, integr
 - **references.md**: Comprehensive list of social science resources, journals, associations, and educational materials
 - **Related Specializations**: Data Science, Public Health, Business and Management, Education
 - **Related Domains**: Psychology, Sociology, Political Science, Economics, Anthropology
+
+### Flagship Workflow
+
+- **empirical-study-lifecycle-workflow.js**: the first end-to-end flagship in the
+  social-sciences-humanities tier. It runs a social-science study from research question to
+  policy brief — construct definition, a genuine ctx-driven design-family branch
+  (experimental | quasi-experimental | mixed-methods), instrument development and validation,
+  an adversarial design-integrity gate, the pre-registration lock, an ethics/IRB review with a
+  bounded revise-and-resubmit loop that FAILS at its cap, participant recruitment, parallel
+  data-collection waves, parallel analysis execution against the registered specifications, a
+  pre-registration adherence diff, an adversarial methodological-integrity gate, program
+  evaluation and policy-impact assessment, participant-data disclosure control, and the policy
+  brief and manuscript.
+
+  It composes the following point tasks in this directory **by name** (as prompt playbooks —
+  never imported): `survey-research-design.js`, `experimental-design.js`,
+  `quasi-experimental-design.js`, `mixed-methods-research-design.js`,
+  `scale-development-validation.js`, `cross-cultural-measurement-adaptation.js`,
+  `research-pre-registration.js`, `survey-administration.js`, `in-depth-interview-protocol.js`,
+  `focus-group-facilitation.js`, `ethnographic-fieldwork.js`, `qualitative-coding-analysis.js`,
+  `statistical-analysis-pipeline.js`, `propensity-score-analysis.js`, `multilevel-modeling.js`,
+  `program-evaluation.js`, `policy-impact-assessment.js`, `policy-brief-development.js`,
+  `academic-manuscript-preparation.js`, and `literature-review-synthesis.js`.
+
+  Its five policy-gated actions (each a routed breakpoint whose `breakpointId` equals its
+  `actionId`, never auto-approved) are:
+
+  | actionId | expert |
+  | --- | --- |
+  | `empirical-study.pre-registration-submission` | principal-investigator |
+  | `empirical-study.irb-submission` | principal-investigator |
+  | `empirical-study.participant-recruitment-start` | irb-liaison |
+  | `empirical-study.analysis-plan-amendment` | principal-investigator |
+  | `empirical-study.policy-brief-publication` | department-chair |
+
+  This file establishes the tier's contract — reuse of
+  `library/specializations/common-utilities/routed-gate-combinators.js`, a per-domain kip fact
+  kind (`empirical-study`), policy-gated executors guarded by `approved === true`, and
+  fail-closed terminal returns. Future flagships under `humanities/`, `education/`,
+  `healthcare/`, `arts-culture/`, and `philosophy/` should mirror its shape.
+
+  Boundary with `library/specializations/research/research-publication-workflow.js`: that
+  process is the secondary-source pipeline (its gate re-fetches every citation); this one is
+  the primary-data human-subjects pipeline (its gates re-run analysis checks and diff the
+  registered plan against the analysis actually executed). A manuscript produced here may be
+  handed to that process for citation verification as a separate run.

@@ -1,0 +1,36 @@
+{
+  "name": "kip-resolver",
+  "version": "1.0.0",
+  "description": "The model-assisted Layer-2 entity resolver (ADR-B12): given a hard-bounded set of candidate node pairs (generated deterministically by the CLI from nodeEids + recall, NO model widening), adjudicates each pair and returns an AcquisitionResult. A confident `same` becomes a QUARANTINED `kip:same_as?` candidate edge that no identity read consults (never a merge on a model guess); a confident `not-same` becomes a trusted, reversible `not_same_as` veto (surfaces kip:conflict); uncertain / sub-min-confidence / failed / malformed each ABSTAIN (author nothing, N5). The rationale rides along as an audit-only edge prop. Reads only its input pair set (INV-A1); only runAcquisition authors its facts.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["pairs"],
+    "additionalProperties": false,
+    "properties": {
+      "pairs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["a", "b"],
+          "additionalProperties": false,
+          "properties": {
+            "a": { "type": "string", "minLength": 1 },
+            "b": { "type": "string", "minLength": 1 }
+          }
+        }
+      },
+      "minConfidence": { "type": "number" }
+    }
+  },
+  "outputSchema": {
+    "type": "object"
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-resolver.mjs",
+    "timeout": 120000,
+    "tools": ["kip-read"]
+  },
+  "tags": ["kip", "resolver", "entity-resolver", "acquisition", "layer2", "read-only"],
+  "builtIn": false
+}

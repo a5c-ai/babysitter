@@ -573,6 +573,31 @@ The Supply Chain Management specialization aims to achieve:
 
 ---
 
+### End-to-end fulfillment workflow (`supply-chain-fulfillment-e2e.js`)
+
+**Purpose**: An executable, orchestrated babysitter process that runs the fulfillment chain end-to-end and complements the buy-side `procurement/procurement-lifecycle.js` (which it composes rather than duplicates).
+
+**9-phase flow**:
+
+1. **P0 — kip recall**: recall supplier lead-time actuals, lane transit reliability, and prior fulfillment exceptions for the sku/supplier/lane signature (supply-chain memory).
+2. **P1 — demand-signal intake**: normalize the demand signal into `{ sku, quantity, requiredByDate, destination, riskFlags }`; ambiguous fields become `riskFlags`, and a blocking flag halts the run with the decision recorded.
+3. **P2 — parallel supply planning**: `ctx.parallel.all([inventory-position, supplier-capacity, logistics-options])` — three independent strands. The orchestrator then computes `netRequirement` and `compositeLeadTimeDays` and writes `fulfillment-plan.json`.
+4. **P3 — adversarial plan-feasibility gate**: two IRON-LAW critics re-execute the lead-time and net-requirement math from the plan artifacts; a bounded fixer loop and an owner escalation on budget exhaustion. Failure halts the run before any buy.
+5. **P4 — policy-gated supplier POs (composed buy-leg)**: only when `netRequirement > 0`, the buy-leg is **delegated to `procurement/procurement-lifecycle.js`** by name — its vendor-commitment / spend-approval / po-issuance routed gates realize the supplier-commitment and PO-issuance policy actions (surfaced through `procurement.approvals`, not re-raised here).
+6. **P5 — fulfillment execution tracking + exception routing**: the tracker reports raw exceptions by TYPE only; the orchestrator owns severity and expert routing via the frozen map's throwing lookups.
+7. **P6 — policy-gated expedite/reroute + disruption comms**: per routed exception, fail-closed guarded executors run only on `approved === true`.
+8. **P7 — delivery confirmation + OTIF metrics**: proof-of-delivery per line; the orchestrator computes on-time / in-full / OTIF deterministically into `otif-metrics.json`.
+9. **P8 — kip assert**: durable supply-chain learnings (supplier lead-time actuals vs quoted, exception resolution, OTIF outcome) built in process code from run state.
+
+**Four policy-gated actions**:
+- `supplier-commitment-approval` and `po-issuance-approval` — realized by the composed procurement-lifecycle buy-leg (not duplicated).
+- `expedite-reroute-approval` — raised natively, severity-routed (`critical → supply-chain-director`, `major`/`minor → logistics-manager`); guarded `scf.expedite-reroute` executor.
+- `disruption-comms-send` — raised natively (`supply-chain-director`; never raised at `minor`); guarded `scf.exception-comms` executor.
+
+**Frozen `EXCEPTION_ROUTING` map** (`actionId → severity → expert`, `null` = never raised so its lookup throws): pairs with `EXCEPTION_SEVERITY` (exception TYPE → severity) and `EXCEPTION_POLICY` (per-severity comms/presentAlwaysApprove modes). Every lookup throws on unknown inputs — there is no default severity, expert, or policy (fallbacks forbidden).
+
+---
+
 ## Key Frameworks
 
 ### SCOR Model (Supply Chain Operations Reference)

@@ -1,6 +1,7 @@
 import type { TObject } from "@sinclair/typebox";
 import type { BackgroundProcessRegistry } from "@a5c-ai/genty-runtime";
 import type { DeferredToolRegistry } from "./deferredToolRegistry";
+import type { SignedEnvelope, ModelDecisionPayload } from "@a5c-ai/trust-core";
 
 export type AgentCoreOutputFormat = "text" | "json_object" | "json_schema";
 
@@ -65,6 +66,10 @@ export interface AgentCorePromptResult<TParsed = unknown> {
     totalTokens: number;
     provider?: string;
     model?: string;
+    /** Tokens served from a vendor prompt cache (Anthropic `cache_read_input_tokens`, OpenAI/Azure `cached_tokens`). */
+    cacheReadTokens?: number;
+    /** Tokens written to a vendor prompt cache (Anthropic `cache_creation_input_tokens` only; OpenAI/Azure don't report writes). */
+    cacheWriteTokens?: number;
   };
 }
 
@@ -141,6 +146,86 @@ export interface AgentCoreSessionOptions extends AgentCoreStructuredOutputOption
   agentDir?: string;
   /** Adapters adapter/backend name forwarded as `agent`. */
   backend?: string;
+  /**
+   * Milestone C (AC-15) — the genty adapter identity key used to sign the
+   * IN-PROCESS, correlation-grade model-decision attestation for each model turn.
+   * When present, the session signs ONE `ModelDecisionPayload` per turn binding
+   * every tool call and attaches it (plus `endpoint.model`) to each call's
+   * `ToolExecutionContext`. When absent, no in-process attestation is produced and
+   * the tool-execution path is unchanged (back-compat).
+   *
+   * This key is held INSIDE the agent process, so the attestation it produces is
+   * correlation-grade only (AC-39) — NOT the authoritative out-of-agent proxy
+   * attestation. A policy step requiring proxy attestation rejects it.
+   */
+  modelAttestationKey?: {
+    privateKey: string;
+    publicKey: string;
+    fingerprint: string;
+  };
+  /** sha256 over the turn's input messages, bound into the in-process attestation. */
+  modelAttestationInputMessagesHash?: string;
+  /**
+   * Milestone D (§9.4 / AC-23b / AC-49) — the genty session tool-execution GATE.
+   * When present, it is consulted BEFORE `definition.execute` for each tool call: a
+   * COVERED action without a valid CommandAuthorization is denied before execution
+   * (this seam is a LOAD-BEARING, un-bypassable blocking gate). A denial short-
+   * circuits the call with an error tool-result. When absent, the tool-execution
+   * path is unchanged (no covered actions configured). Never a fallback: any thrown
+   * exception is treated as a denial by the gate implementation.
+   */
+  policyToolGate?: (context: {
+    toolName: string;
+    toolCallId: string;
+    input: unknown;
+    modelId?: string;
+  }) => { allowed: boolean; reason?: string };
+  /**
+   * Opt-in vendor-aware prompt caching. When absent, no caching directives are
+   * added to any provider request body (current behavior, byte-identical).
+   * Per-provider knobs are independent because each vendor's cache mechanism
+   * has a different shape (Anthropic: explicit breakpoints; OpenAI/Azure:
+   * automatic, config is advisory only; Gemini: implicit + optional explicit
+   * resource).
+   *
+   * The `anthropic`, `openai`, and `azure` sub-configs are wired up in
+   * `callCompletionApi`. The `gemini` sub-config is declared but unsupported:
+   * genty-core has no Gemini endpoint today, so setting it throws rather than
+   * being silently ignored (see the plan's §3.4).
+   */
+  promptCaching?: {
+    /** Master switch. Defaults to false. When false, all sub-options are ignored. */
+    enabled: boolean;
+    anthropic?: {
+      /**
+       * Where to place cache_control breakpoints. See genty-core's
+       * `docs/research/genty-llm-prompt-caching-plan.md` §4 for placement
+       * rationale. Defaults to `["system", "tools"]` when enabled.
+       */
+      breakpoints?: Array<"tools" | "system" | "history">;
+      /** cache_control.ttl. Anthropic supports "5m" (default) or "1h". */
+      ttl?: "5m" | "1h";
+    };
+    openai?: {
+      /** Forwarded as prompt_cache_key (routing hint only, no-op if unsupported by model). */
+      promptCacheKey?: string;
+    };
+    azure?: {
+      /** Forwarded as prompt_cache_key where the deployment supports it. */
+      promptCacheKey?: string;
+    };
+    gemini?: {
+      /**
+       * "implicit" relies on automatic server-side caching (no request
+       * change). "explicit" requires an out-of-band CachedContent resource.
+       * Defaults to "implicit" when enabled.
+       */
+      mode?: "implicit" | "explicit";
+      /** Required when mode === "explicit". */
+      cachedContentName?: string;
+      ttl?: string; // e.g. "3600s"
+    };
+  };
 }
 
 export interface ToolResult {
@@ -162,6 +247,22 @@ export interface ToolExecutionContext {
   cache?: {
     get(key: string, signal?: AbortSignal): Promise<unknown> | unknown;
   };
+  /**
+   * Milestone C (AC-15) — the model id (`endpoint.model`) that drove this turn,
+   * flowed from `runCompletionLoop` into the per-call execution context so a gate
+   * can correlate the executing tool call with the model decision that authorized it.
+   */
+  modelId?: string;
+  /**
+   * Milestone C (AC-15) — the IN-PROCESS (correlation-grade) model-decision
+   * attestation signed once per model turn, binding EVERY tool call the model
+   * emitted. The SAME signed envelope is attached to each call's context; each gate
+   * matches its own `toolCallId` against the signed `toolCalls[]` (AC-34a).
+   *
+   * This producer's key is held INSIDE the agent process, so it is correlation-grade
+   * only (AC-39) — NOT the authoritative out-of-agent proxy attestation.
+   */
+  modelAttestation?: SignedEnvelope<ModelDecisionPayload>;
 }
 
 export type UnifiedToolSource = "builtin" | "mcp" | "plugin" | "custom";
@@ -206,6 +307,8 @@ export interface UnifiedToolDispatcherLike {
       toolName: string;
       input: unknown;
       caller?: string;
+      /** Milestone D (AC-34a) — the executing tool-call id GATE 1 binds an authorization to. */
+      toolCallId?: string;
       signal?: AbortSignal;
       onUpdate?: (event: ToolUpdateEvent) => void | Promise<void>;
     },

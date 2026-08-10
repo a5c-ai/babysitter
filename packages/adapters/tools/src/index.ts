@@ -59,7 +59,7 @@ export type { NormalizedToolDefinition, CodecCapabilities } from './schema-trans
 /*  Hooks bridge                                                       */
 /* ------------------------------------------------------------------ */
 
-export { HooksMuxToolHookBridge, NoopToolHookBridge } from './hooks.js';
+export { HooksMuxToolHookBridge, NoopToolHookBridge, CompositeToolHookBridge } from './hooks.js';
 export type {
   HooksMuxLikeEngine,
   HooksMuxLikeEngineResult,
@@ -69,6 +69,19 @@ export type {
   ToolHookBridge,
   ToolHookResult,
 } from './hooks.js';
+
+/* ------------------------------------------------------------------ */
+/*  GATE 1 — policy verifier (Milestone D, AC-23/AC-49)                */
+/* ------------------------------------------------------------------ */
+
+export { PolicyVerifierHookBridge, decideCoverage } from './policy-verifier-hook.js';
+export type {
+  PolicyVerifierHookBridgeOptions,
+  CoverageDecision,
+} from './policy-verifier-hook.js';
+
+/* GATE 1 — production wiring (Milestone D, AC-49): construct + install the bridge. */
+export { loadPolicyVerifierBridge, composePolicyBridge } from './policy-verifier-wiring.js';
 
 /* ------------------------------------------------------------------ */
 /*  MCP bridge                                                         */

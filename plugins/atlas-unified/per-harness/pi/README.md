@@ -26,8 +26,7 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for pi:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin pi
+pi install npm:@a5c-ai/atlas-pi
 ```
 
 ## License

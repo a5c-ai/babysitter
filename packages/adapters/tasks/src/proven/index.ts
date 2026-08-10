@@ -13,5 +13,10 @@ export type {
   PrivateKeyRecord,
 } from "./keys.js";
 
-export { signAnswer, signAnswerWithKeyRecord } from "./sign.js";
+export {
+  signAnswer,
+  signAnswerWithKeyRecord,
+  buildHardenedSigningPayload,
+  buildLegacySigningPayload,
+} from "./sign.js";
 export { verifyAnswer } from "./verify.js";

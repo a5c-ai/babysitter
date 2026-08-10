@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import path from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerTaskTools } from "../../tools/tasks";
 
@@ -319,7 +320,7 @@ describe("task_cancel", () => {
     });
 
     expect(mockedCommitEffectCancellation).toHaveBeenCalledWith({
-      runDir: "/tmp/runs/01POST",
+      runDir: path.resolve("/tmp/runs", "01POST"),
       effectId: "eff-1",
       reason: "not needed",
     });

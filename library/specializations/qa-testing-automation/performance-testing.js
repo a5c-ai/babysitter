@@ -807,7 +807,7 @@ export const workloadModelingTask = defineTask('workload-modeling', (args, taskC
 }));
 
 // Phase 3: Environment Setup
-export const environmentSetupTask = defineTask('environment-setup', (args, taskCtx) => ({
+export const environmentSetupTask = defineTask('performance-testing.environment-setup', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 3: Test Environment Setup - ${args.projectName}`,
   agent: {
@@ -1755,7 +1755,7 @@ export const performanceAssessmentTask = defineTask('performance-assessment', (a
 }));
 
 // Phase 14: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('performance-testing.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 14: CI/CD Integration Setup - ${args.projectName}`,
   agent: {

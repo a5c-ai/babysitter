@@ -805,6 +805,12 @@ jobs:
           - name: adapters-tasks
             build: npm run build --workspace=@a5c-ai/tasks-adapter
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/tasks-adapter --skip-build
+          # trust-core has no @a5c-ai dependencies and is a runtime dep of
+          # policy-adapter / comm-adapter / tools-adapter / transport-adapter, so it
+          # must be published for `npm i -g @a5c-ai/adapters` to resolve.
+          - name: trust-core
+            build: npm run build --workspace=@a5c-ai/trust-core
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/trust-core --skip-build
           - name: adapters-observability
             build: npm run build --workspace=@a5c-ai/adapters-observability
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-observability --skip-build
@@ -885,6 +891,12 @@ jobs:
           - name: adapters-extensions
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/extensions-adapter
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/extensions-adapter --skip-build
+          # policy-adapter depends on tasks-adapter + trust-core (both published in
+          # the foundation job above) and is itself a runtime dep of comm-adapter,
+          # tools-adapter and transport-adapter.
+          - name: adapters-policy
+            build: npm run build --workspace=@a5c-ai/trust-core && npm run build --workspace=@a5c-ai/tasks-adapter && npm run build --workspace=@a5c-ai/policy-adapter
+            publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/policy-adapter --skip-build
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v4

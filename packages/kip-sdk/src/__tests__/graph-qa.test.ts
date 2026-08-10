@@ -1,0 +1,2230 @@
+/**
+ * graph-qa.test.ts — FROZEN, spec-driven, PRE-implementation ACCEPTANCE tests for the graph-QA
+ * microagent core `answerQuestion` (design source of truth: packages/kip-sdk/docs/design/
+ * kip-graph-qa.md §8, the 15 numbered acceptance criteria). One `describe` per criterion; each test
+ * name cites the exact §8 item.
+ *
+ * WHAT IS UNDER TEST. `answerQuestion(input, { repo, synthesize })` is the READ-ONLY
+ * retrieval→synthesis core the bundled `kip-graph-qa.mjs` entrypoint / `kip ask` / `kip_ask` dispatch
+ * to (kip-graph-qa.md §1/§3/§7). It uses ONLY the kip read seams (recall/query/asOf/getNode/getEdge/
+ * provenanceOf), authors NOTHING (INV-A1), and abstains rather than fabricates (N5). `answerQuestion`
+ * is an unimplemented throwing stub this round (src/graph-qa/index.ts:
+ * `throw new Error("unimplemented: answerQuestion …")`), so every test that awaits it FAILS on a real
+ * assertion (a rejected promise where a `GraphQaResult` was expected), never on a type/syntax/import
+ * error — the established frozen-test precedent (see m4-retrieval.test.ts's header).
+ *
+ * HOW THE MODEL SYNTHESIS IS MADE DETERMINISTIC (kip-graph-qa.md §0.1/§5.3 accelerator boundary). The
+ * single non-deterministic step — prompting `runtime.model` to write prose + pick per-claim citations
+ * (§3.3) — is INJECTED as `synthesize`. The suite injects a DETERMINISTIC scripted synthesizer that
+ * reads the assembled read-only context (`{ question, facts }`, each fact bound to its signed
+ * `factId`) and returns a fixed answer + citations drawn from that context. The retrieval half is a
+ * pure read over `proj`, so the whole PIPELINE is byte-testable while the model boundary stays
+ * recall-/citation-based. No live model is ever in the loop.
+ *
+ * HOW RETRIEVAL IS MADE DETERMINISTIC WITHOUT AN EMBEDDING. `answerQuestion`'s input carries no query
+ * vector (kip-graph-qa.md §2 inputSchema = `{ question, asOf?, scope? }`), so the vector half never
+ * runs here. The ONLY embedding-free, deterministic candidate-seed the kip read surface exposes is the
+ * §5.1 `text` GRAPH SEED: `recall({ text })` surfaces a node whose `content` cell value === the query
+ * text EXACTLY (kip-repo.ts computeRecall — the same G0 text-seed m4-retrieval.test.ts pins). So each
+ * fixture seeds the SUBJECT entity with a `content` prop equal to the exact `question`, making the
+ * retrieval envelope a deterministic function of the as-of fact set (a production host supplies a
+ * query embedding instead; that path is out of this suite's scope, §8 preamble).
+ *
+ * The graph fixtures are built with `assertFact` (the M0 mint-then-ingest authoring path) except the
+ * conflicted-cell fixture (§8.9), which needs two DISTINCT candidate `factId`s and so is built from
+ * two overlapping `supersede` facts via `ingest` (the inv-4-m2-surface pattern) — the only substrate
+ * shape that yields a two-candidate `kip:conflict` segment (proj.ts detectConflict).
+ */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { KipRepo } from "../index";
+import type { AsOf, EID, Fact, Provenance, PropValue } from "../index";
+import {
+  ABSTENTION_ANSWER,
+  answerQuestion,
+  type AnswerQuestionDeps,
+  type GraphQaResult,
+  type SynthesisContext,
+  type SynthesisOutput,
+} from "../graph-qa";
+import { cloneFact, makeWellFormedFact } from "./conformance/fixtures";
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// Repo lifecycle + fixture authoring helpers.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+const open: KipRepo[] = [];
+let replicaCounter = 0;
+function freshRepo(label: string): KipRepo {
+  replicaCounter += 1;
+  const repo = new KipRepo({ replicaId: `graph-qa-${label}-${replicaCounter}-${Date.now()}` });
+  open.push(repo);
+  return repo;
+}
+afterEach(() => {
+  while (open.length > 0) open.pop()?.close();
+});
+
+/** Placeholder provenance — `mintFact` overwrites signature/fpr/signedFields with the repo's own real
+ *  keypair (see fixtures-m5.ts). These fields exist only to satisfy the `Provenance` type. */
+function fixtureProvenance(): Provenance {
+  return { author: "graph-qa-fixture", signature: "sig:placeholder", publicKeyFingerprint: "fpr", signedFields: [] };
+}
+
+/** Assert a node-existence fact; returns its signed `FactId`. */
+async function assertNode(repo: KipRepo, eid: EID, nodeKind: string, opts?: { validFrom?: number }): Promise<string> {
+  const r = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "node", eid, nodeKind },
+    value: true,
+    validFrom: opts?.validFrom ?? 0,
+    validTo: null,
+    replicaId: "author",
+    provenance: fixtureProvenance(),
+  });
+  return r.id;
+}
+
+/** Assert a node-prop fact (the observable value carrier — reads back via `getNode(eid).props`);
+ *  returns its signed `FactId` (the `PropCell` value segment's `assertedBy`). */
+async function assertProp(
+  repo: KipRepo,
+  eid: EID,
+  prop: string,
+  value: PropValue,
+  opts?: { validFrom?: number },
+): Promise<string> {
+  const r = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "node-prop", eid, prop },
+    value,
+    validFrom: opts?.validFrom ?? 0,
+    validTo: null,
+    replicaId: "author",
+    provenance: fixtureProvenance(),
+  });
+  return r.id;
+}
+
+/** Assert an edge-existence fact; returns its signed `FactId` (the edge-backing fact, §3.2/§4). */
+async function assertEdge(
+  repo: KipRepo,
+  eid: EID,
+  edgeKind: string,
+  from: EID,
+  to: EID,
+  opts?: { validFrom?: number },
+): Promise<string> {
+  const r = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "edge", eid, edgeKind, from, to },
+    value: true,
+    validFrom: opts?.validFrom ?? 0,
+    validTo: null,
+    replicaId: "author",
+    provenance: fixtureProvenance(),
+  });
+  return r.id;
+}
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// The scripted (deterministic) model-synthesis seam. Each test builds a closure that reads the
+// assembled context and returns a fixed answer + citations DRAWN FROM the context's facts — the
+// citation `factId`s are exactly the ids the retrieval half bound, so the assertions genuinely verify
+// the pipeline retrieved and bound the right signed facts.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+type Scripted = (ctx: SynthesisContext) => SynthesisOutput;
+
+/** Wrap a scripted synthesizer in a spy so a test can assert it was (or was NOT — §8.4/§8.5) called. */
+function spySynth(fn: Scripted): AnswerQuestionDeps["synthesize"] & { mock: ReturnType<typeof vi.fn> } {
+  const m = vi.fn(fn);
+  return Object.assign((ctx: SynthesisContext) => m(ctx), { mock: m }) as never;
+}
+
+function edgeFactOf(ctx: SynthesisContext, edgeKind: string) {
+  return ctx.facts.find((f) => f.kind === "edge" && f.edgeKind === edgeKind);
+}
+function propValueOf(ctx: SynthesisContext, eid: string, prop: string): PropValue | undefined {
+  return ctx.facts.find((f) => f.kind === "node-prop" && f.eid === eid && f.prop === prop)?.value;
+}
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.1 — Happy-path answer cites the backing fact.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.1 — happy-path answer names the company and cites the employed_by edge fact", () => {
+  const QUESTION = "Where does Tal work?";
+  async function seed(repo: KipRepo): Promise<{ Fe: string }> {
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION); // §5.1 text-seed anchor
+    await assertNode(repo, "org/a5c", "org");
+    await assertProp(repo, "org/a5c", "content", "a5c");
+    const Fe = await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    return { Fe };
+  }
+  // The model reads the retrieved edge + its target org's label and answers, citing the edge fact.
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    const label = (edge && (propValueOf(ctx, String(edge.to), "content") ?? edge.to)) ?? "";
+    return {
+      answer: `Tal works at ${String(label)}.`,
+      citations: edge ? [{ factId: edge.factId, eid: edge.eid, edgeKind: "employed_by", quote: String(label) }] : [],
+    };
+  };
+
+  it("returns abstained===false, an answer naming a5c, and a citation whose factId === the employed_by edge fact F_e, with F_e ∈ usedFacts", async () => {
+    const repo = freshRepo("happy");
+    const { Fe } = await seed(repo);
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.answer).toContain("a5c");
+    const cited = result.citations.find((c) => c.factId === Fe);
+    expect(cited).toBeDefined();
+    expect(result.usedFacts).toContain(Fe);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.2 — Every cited factId is in the retrieved envelope.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.2 — for any non-abstaining answer, every citation.factId ∈ usedFacts (§3.4)", () => {
+  const QUESTION = "Where does Tal work?";
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    return { answer: "Tal works at a5c.", citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : [] };
+  };
+  it("citations.every(c => usedFacts.includes(c.factId)) is true", async () => {
+    const repo = freshRepo("envelope");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+    await assertNode(repo, "org/a5c", "org");
+    await assertProp(repo, "org/a5c", "content", "a5c");
+    await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations.length).toBeGreaterThan(0);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.3 — No uncited factual claim.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.3 — every factual claim in the answer maps to ≥1 citation with a backing factId", () => {
+  const QUESTION = "Where does Tal work?";
+  // The scripted synthesizer makes exactly ONE factual claim (Tal↔a5c) and binds it to the edge fact —
+  // no claim is emitted without a backing factId.
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    return {
+      answer: "Tal works at a5c.",
+      citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by", quote: "Tal works at a5c" }] : [],
+    };
+  };
+  it("the happy-path answer has ≥1 citation and every citation carries a non-empty backing factId that is in usedFacts", async () => {
+    const repo = freshRepo("cited");
+    const Fe0 = await (async () => {
+      await assertNode(repo, "person/tal", "person");
+      await assertProp(repo, "person/tal", "content", QUESTION);
+      await assertNode(repo, "org/a5c", "org");
+      await assertProp(repo, "org/a5c", "content", "a5c");
+      return assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    })();
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.citations.length).toBeGreaterThanOrEqual(1);
+    expect(result.citations.every((c) => typeof c.factId === "string" && c.factId.length > 0)).toBe(true);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+    expect(result.citations.some((c) => c.factId === Fe0)).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.4 — Abstention on an entity with no facts (never fabricates, never calls the model).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.4 — asking about an entity with ZERO covering facts abstains and fabricates nothing", () => {
+  it("returns abstained===true, answer===canonical phrase, empty citations/usedFacts, and does NOT invoke synthesize", async () => {
+    const repo = freshRepo("abstain-entity");
+    // A populated graph — but NOTHING about the asked subject ('Zara').
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", "Where does Tal work?");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called on empty retrieval (§6.1)");
+    });
+    // THE ORIGINAL QUESTION, RESTORED. Asking about an absent entity ('Zara') in a graph that knows
+    // only about Tal must abstain WITHOUT invoking the model — that is the property §8.4 exists to
+    // pin, and it is a real fabrication guard: handing a synthesizer Tal's facts and the question
+    // "Where does Zara work?" is precisely the setup in which a model answers about the wrong person.
+    // ROUND-3: the fix lives HERE, in graph-QA, not in the recall floor. Recall's `text` seed is a
+    // LOCAL lexical match (docs/26 §5.1a), so the incidental term "work" (in Tal's `content`) DOES
+    // seed Tal's node — recall is not the place to decide relevance. `answerQuestion` then applies the
+    // SUBJECT-ANCHORING check (§6.1b): the subject term "zara" is absent from every retrieved node's
+    // IDENTITY surface (Tal's eid/kind/name — `content` is excluded), so the retrieved facts are not
+    // about the question and the honest outcome is abstention, with `synthesize` never called. This
+    // REPLACES the round-2 graph-global recall floor (`bestMatched >= 2`), which suppressed correct
+    // single-term SUBJECT matches too (it could not tell this case from the Zara-present one).
+    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  // ROUND-3 (finding #3) — the OTHER half of the §8.4 property: the SAME natural question, whose
+  // relation lives in a PROP KEY, must be ANSWERED when the subject IS in the graph. Together with the
+  // Zara-absent case above this pins that the subject-anchoring check is a genuine relevance test —
+  // not a blanket suppression of "Where does X work?" questions. A guard that made §8.4 pass by
+  // suppressing retrieval (the round-2 recall floor) FAILS this test, because it also suppressed the
+  // present-subject case; the honest fix (abstain on retrieved-evidence relevance) passes both.
+  it("ROUND-3: when the subject IS in the graph, the same multi-term question (relation in a prop KEY) is ANSWERED, not abstained", async () => {
+    const repo = freshRepo("answer-entity-present");
+    // Zara is present, with her employer under the exact prop key the question's relation names.
+    await assertNode(repo, "person/zara", "person");
+    await assertProp(repo, "person/zara", "name", "Zara");
+    await assertProp(repo, "person/zara", "employer", "Acme Corp");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const emp = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "employer");
+      return {
+        answer: `Zara works at ${String(emp?.value ?? "")}.`,
+        citations: emp ? [{ factId: emp.factId, eid: emp.eid, prop: "employer", quote: String(emp.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    // The subject 'zara' anchored the answer, and the employer fact was in the model context.
+    expect((seen?.facts ?? []).some((f) => f.eid === "person/zara")).toBe(true);
+    expect(result.answer).toContain("Acme Corp");
+    expect(result.citations.some((c) => c.prop === "employer")).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-4 (finding #1) — the subject-anchoring surface is WIDENED to prop KEYS + STRUCTURED prop
+// VALUES (string/number/boolean), still EXCLUDING free-text values (content/description/summary).
+// Both directions are pinned here:
+//   (a) a question keyed on a STRUCTURED prop value ("Who is the CEO?" answered by `role:"CEO"`) must
+//       be ANSWERED — round-3's identity-only surface (eid/kind/name/title/label) retrieved the
+//       backing signed fact and then SILENTLY ABSTAINED, a docs/27 §0 "surfaced, never silent"
+//       violation in the hard-to-notice direction.
+//   (b) the §8.4 Zara-absent fabrication guard must STILL abstain — a relation term that lives ONLY
+//       in a FREE-TEXT value must never anchor a question whose real subject is absent.
+// The two together prove the surface is a genuine relevance check, not a blanket widen-everything:
+// forcing `subjectAnchored=true` breaks (b); forcing it `false` breaks (a).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa round-4 §6.1b — the anchoring surface includes prop KEYS + STRUCTURED values, but NOT free-text values", () => {
+  it("ANSWERS a question keyed on a STRUCTURED prop value: 'Who is the CEO?' over a `role:\"CEO\"` node does not abstain", async () => {
+    const repo = freshRepo("anchor-structured-value");
+    // The subject's ROLE (a structured, non-free-text value) is what the question names — there is no
+    // `name`/`title`/`label` term "ceo" anywhere, so round-3's identity-only surface would have missed
+    // it and abstained despite retrieving the fact.
+    await assertNode(repo, "person/alice", "person");
+    await assertProp(repo, "person/alice", "name", "Alice");
+    await assertProp(repo, "person/alice", "role", "CEO");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const role = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "role");
+      return {
+        answer: `The CEO is ${String(role?.eid === "person/alice" ? "Alice" : "")}.`,
+        citations: role ? [{ factId: role.factId, eid: role.eid, prop: "role", quote: String(role.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "Who is the CEO?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    // The `role:"CEO"` fact was in the model context and anchored the answer.
+    expect((seen?.facts ?? []).some((f) => f.prop === "role" && f.value === "CEO")).toBe(true);
+    expect(result.answer).toContain("Alice");
+    expect(result.citations.some((c) => c.prop === "role")).toBe(true);
+  });
+
+  it("STILL ABSTAINS when the query term lives ONLY in a FREE-TEXT value: 'Who is the CEO?' over a node whose `content` mentions the CEO but has no structured 'ceo'", async () => {
+    const repo = freshRepo("anchor-freetext-excluded");
+    // "ceo" appears ONLY inside a free-text `content` blob — recall WILL seed this node on the lexical
+    // overlap, but the anchoring surface excludes free-text VALUES, so the retrieved fact is not ABOUT
+    // a CEO subject and the honest outcome is abstention. This is the mutation-check for the free-text
+    // EXCLUSION: drop `content` from FREE_TEXT_PROPS and this node anchors and synthesize is called.
+    await assertNode(repo, "note/restructure", "note");
+    await assertProp(repo, "note/restructure", "content", "The CEO decided to restructure the platform team.");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: 'ceo' is only in a free-text value (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "Who is the CEO?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  it("ANSWERS a question keyed on a prop KEY: 'What is the status?' over a `status:\"blocked\"` node does not abstain", async () => {
+    const repo = freshRepo("anchor-prop-key");
+    await assertNode(repo, "ticket/kip-99", "ticket");
+    await assertProp(repo, "ticket/kip-99", "status", "blocked");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const st = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "status");
+      return {
+        answer: `The status is ${String(st?.value ?? "")}.`,
+        citations: st ? [{ factId: st.factId, eid: st.eid, prop: "status", quote: String(st.value) }] : [],
+      };
+    });
+    // Both the prop KEY "status" and the structured value "blocked" are in the anchoring surface, so
+    // the question anchors on either term.
+    const result = await answerQuestion({ question: "What is the status?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    expect((seen?.facts ?? []).some((f) => f.prop === "status" && f.value === "blocked")).toBe(true);
+    expect(result.answer).toContain("blocked");
+    expect(result.citations.some((c) => c.prop === "status")).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ABSENT-SUBJECT FABRICATION FIX (round-5) — the round-4 surface WIDENING (bare prop KEYS + node/edge
+// KINDS folded into the anchoring surface) re-opened the §8.4 fabrication hole in a new shape: a
+// question that shares ONLY a schema key with a retrieved node anchored even when the question's
+// actual NAMED SUBJECT was absent from every retrieved fact. Empirically confirmed against the built
+// dist: "What is Zara's role?" over a graph holding ONLY `person/tal` (with `role:"Engineer"`)
+// returned `abstained:false`, answer "Zara's role is Engineer.", citing TAL's signed fact — a
+// fabricated answer about an absent subject wearing a real signed citation (the exact §8.4
+// fabrication).
+//
+// THE FIX — partition the question's non-stopword terms against the SCHEMA VOCABULARY of the
+// retrieved facts (all prop KEYS + node KINDS + edge KINDS):
+//   • schema terms  = query terms that ARE in that vocabulary (e.g. `role`, `status`, `team`, `owns`)
+//   • subject terms = query terms that are NOT (the words naming WHO/WHAT — `zara`, `ceo`, `ledger`)
+// Anchored iff the exact-content match, OR there is ≥1 retrieved fact AND (there are no subject terms
+// — a pure schema question like "What is the status?" — OR at least one subject term appears in a
+// retrieved node/edge's IDENTITY-or-VALUE surface: eid localId + STRUCTURED string/number/boolean
+// prop/edge-prop values, free-text {content,description,summary} VALUES still excluded; NOT prop keys,
+// NOT kinds). A schema key match alone can no longer anchor a subject that is absent. The five cases
+// below pin the honest contract in one place.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa absent-subject fabrication fix (round-5 §6.1b) — a shared SCHEMA key is not subject relevance", () => {
+  it("ABSTAINS on 'What is Zara's role?' over a Tal-only graph (Tal.role='Engineer') — the absent subject 'zara' is unmatched; synthesize is NEVER called", async () => {
+    const repo = freshRepo("absent-subject-role");
+    // ONLY Tal exists, with a STRUCTURED `role` prop. Zara is absent from every fact. The question
+    // shares the SCHEMA KEY "role" with Tal's node, but its named subject "zara" appears in no
+    // retrieved identity/value surface, so the honest outcome is abstention — never a fabricated
+    // answer about Zara citing Tal's signed fact.
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "role", "Engineer");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: 'zara' is absent; only the schema key 'role' overlaps (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "What is Zara's role?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  it("ANSWERS 'Who is the CEO?' over a `role:\"CEO\"` node — 'ceo' matches the structured VALUE, so the subject is anchored", async () => {
+    const repo = freshRepo("absent-subject-ceo-value");
+    await assertNode(repo, "person/alice", "person");
+    await assertProp(repo, "person/alice", "name", "Alice");
+    await assertProp(repo, "person/alice", "role", "CEO");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const role = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "role");
+      return {
+        answer: `The CEO is ${String(role?.eid === "person/alice" ? "Alice" : "")}.`,
+        citations: role ? [{ factId: role.factId, eid: role.eid, prop: "role", quote: String(role.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "Who is the CEO?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    expect((seen?.facts ?? []).some((f) => f.prop === "role" && f.value === "CEO")).toBe(true);
+    expect(result.answer).toContain("Alice");
+  });
+
+  it("ANSWERS 'What is the status?' over a `status:\"blocked\"` node — `status` is a SCHEMA term with NO subject term, so it anchors (round-4 not regressed)", async () => {
+    const repo = freshRepo("absent-subject-status-key");
+    await assertNode(repo, "ticket/kip-99", "ticket");
+    await assertProp(repo, "ticket/kip-99", "status", "blocked");
+    const synth = spySynth((ctx) => {
+      const st = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "status");
+      return {
+        answer: `The status is ${String(st?.value ?? "")}.`,
+        citations: st ? [{ factId: st.factId, eid: st.eid, prop: "status", quote: String(st.value) }] : [],
+      };
+    });
+    const result = await answerQuestion({ question: "What is the status?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    expect(result.answer).toContain("blocked");
+  });
+
+  it("ANSWERS 'Which team owns Ledger?' over a graph with a `ledger` node and an `owns` edge — `team`/`owns` are schema terms, `ledger` matches identity", async () => {
+    const repo = freshRepo("absent-subject-team-owns-ledger");
+    // `team`/`component` are node KINDS, `owns` is an edge KIND — all schema vocabulary. The only
+    // SUBJECT term is `ledger`, which matches the `component/ledger` node's identity, so the question
+    // anchors and answers.
+    await assertNode(repo, "team/data-platform", "team");
+    await assertProp(repo, "team/data-platform", "name", "Data Platform Team");
+    await assertNode(repo, "component/ledger", "component");
+    await assertProp(repo, "component/ledger", "name", "Ledger");
+    await assertEdge(repo, "edge/dp-owns-ledger", "owns", "team/data-platform", "component/ledger");
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      return { answer: "The Data Platform Team owns Ledger.", citations: [] };
+    });
+    const result = await answerQuestion({ question: "Which team owns Ledger?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    const eids = new Set((seen?.facts ?? []).map((f) => f.eid));
+    expect(eids.has("component/ledger")).toBe(true);
+  });
+
+  it("ABSTAINS on §8.4 'Where does Zara work?' over a Tal-only graph (free-text overlap only) — unchanged", async () => {
+    const repo = freshRepo("absent-subject-zara-work");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", "Where does Tal work?");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: 'zara' is absent; only a free-text value shares 'work' (§8.4)");
+    });
+    const result = await answerQuestion({ question: "Where does Zara work?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.5 — Abstention on an empty graph.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.5 — against a graph with NO facts, any question abstains (recall [] is never synthesized)", () => {
+  it("abstains with the canonical phrase and never calls synthesize", async () => {
+    const repo = freshRepo("abstain-empty");
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called against an empty graph (§6.1)");
+    });
+    const result = await answerQuestion({ question: "Where does Tal work?" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.6 — Node-property question cites the PropCell's assertedBy.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.6 — a node-prop question cites the prop fact F_p (factId + prop) backing the value", () => {
+  const QUESTION = "What is Tal's title?";
+  const synth: Scripted = (ctx) => {
+    const title = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "title");
+    return {
+      answer: `Tal's title is ${String(title?.value ?? "")}.`,
+      citations: title ? [{ factId: title.factId, eid: title.eid, prop: "title", quote: String(title.value) }] : [],
+    };
+  };
+  it("returns an answer containing 'founder' and a citation with factId===F_p and prop==='title'", async () => {
+    const repo = freshRepo("prop");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+    const Fp = await assertProp(repo, "person/tal", "title", "founder");
+
+    // Cross-check the binding independently: the PropCell value segment's `assertedBy` IS F_p (§3.2).
+    const node = await repo.getNode("person/tal");
+    const seg = node?.props.title?.segments.find((s) => s.kind === "value");
+    expect(seg && "assertedBy" in seg ? seg.assertedBy : undefined).toBe(Fp);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.answer).toContain("founder");
+    const cited = result.citations.find((c) => c.factId === Fp);
+    expect(cited).toBeDefined();
+    expect(cited?.prop).toBe("title");
+    expect(result.usedFacts).toContain(Fp);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.7 — Nothing is authored (INV-A1): zero write-seam calls + byte-identical fact-set digest.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.7 — an ask authors NOTHING (INV-A1): zero write-seam calls, frontier digest byte-identical", () => {
+  const QUESTION = "Where does Tal work?";
+  const WRITE_SEAMS = [
+    "assertFact",
+    "retractFact",
+    "putNode",
+    "putEdge",
+    "registerFunctionality",
+    "runContextualQuery",
+    "runAcquisition",
+    "learn",
+  ] as const;
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    return { answer: "Tal works at a5c.", citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : [] };
+  };
+
+  async function digest(repo: KipRepo): Promise<string> {
+    const ref = await repo.pin({ tenant: "t" }, { validTime: 1_000_000_000 });
+    return ref.factSetDigest;
+  }
+
+  it("HAPPY PATH: spies on every write seam record zero calls and the fact-set digest is unchanged", async () => {
+    const repo = freshRepo("inv-a1-happy");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+    await assertNode(repo, "org/a5c", "org");
+    await assertProp(repo, "org/a5c", "content", "a5c");
+    await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+
+    const before = await digest(repo);
+    const spies = WRITE_SEAMS.map((m) => vi.spyOn(repo, m));
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    for (const s of spies) expect(s).not.toHaveBeenCalled();
+    const after = await digest(repo);
+    expect(after).toBe(before);
+  });
+
+  it("ABSTENTION PATH: an abstaining ask likewise authors nothing (zero write calls, unchanged digest)", async () => {
+    const repo = freshRepo("inv-a1-abstain");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+
+    const before = await digest(repo);
+    const spies = WRITE_SEAMS.map((m) => vi.spyOn(repo, m));
+
+    // D-52: zero lexical overlap with the graph's searchable surface, so retrieval is genuinely
+    // empty and this really exercises the ABSTENTION path (see §8.4's note).
+    const result = await answerQuestion({ question: "Which satellite did Nobody launch?" }, {
+      repo,
+      synthesize: spySynth(() => ({ answer: "unused", citations: [] })),
+    });
+    expect(result.abstained).toBe(true);
+
+    for (const s of spies) expect(s).not.toHaveBeenCalled();
+    const after = await digest(repo);
+    expect(after).toBe(before);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.8 — Hallucinated citation is dropped (§3.4).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.8 — a cited factId not in usedFacts is DROPPED before return (§3.4)", () => {
+  const QUESTION = "Where does Tal work?";
+  const BOGUS = "cid-hallucinated-not-in-envelope";
+  // The model returns BOTH the real edge citation AND a bogus factId absent from the retrieved set.
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    return {
+      answer: "Tal works at a5c.",
+      citations: [
+        ...(edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : []),
+        { factId: BOGUS, quote: "fabricated" },
+      ],
+    };
+  };
+  it("the bogus factId does NOT appear in the returned citations; the real edge citation survives", async () => {
+    const repo = freshRepo("hallucination");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+    await assertNode(repo, "org/a5c", "org");
+    await assertProp(repo, "org/a5c", "content", "a5c");
+    const Fe = await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.citations.some((c) => c.factId === BOGUS)).toBe(false);
+    expect(result.usedFacts).not.toContain(BOGUS);
+    expect(result.citations.some((c) => c.factId === Fe)).toBe(true);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.9 — Conflicted evidence is surfaced, not resolved (cites BOTH candidates).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.9 — a conflicted cell surfaces the contradiction and cites BOTH candidate factIds (§6.3)", () => {
+  const QUESTION = "What is Tal's status?";
+  const replicaId = "conflict-author";
+
+  /** Two overlapping `supersede` facts over one base assert with DIFFERENT values ⇒ a `kip:conflict`
+   *  segment whose candidates are the two DISTINCT supersede ids (proj.ts detectConflict). */
+  function makeSupersede(id: string, seq: number, value: PropValue, baseId: string): Fact {
+    const f = makeWellFormedFact({
+      replicaId,
+      seq,
+      id,
+      target: { kind: "node-prop", eid: "person/tal", prop: "status" },
+    });
+    f.type = "supersede";
+    f.value = value;
+    f.validFrom = 0;
+    f.validTo = null;
+    f.supersedes = [baseId];
+    return f;
+  }
+
+  async function seedConflict(repo: KipRepo): Promise<{ Fa: string; Fb: string }> {
+    const existence = makeWellFormedFact({ replicaId, seq: 0, id: "conf-exist", target: { kind: "node", eid: "person/tal", nodeKind: "person" } });
+    existence.value = true;
+    existence.validFrom = 0;
+    existence.validTo = null;
+    const content = makeWellFormedFact({ replicaId, seq: 1, id: "conf-content", target: { kind: "node-prop", eid: "person/tal", prop: "content" } });
+    content.value = QUESTION; // §5.1 text-seed anchor
+    content.validFrom = 0;
+    content.validTo = null;
+    const base = makeWellFormedFact({ replicaId, seq: 2, id: "conf-base", target: { kind: "node-prop", eid: "person/tal", prop: "status" } });
+    base.value = "pending";
+    base.validFrom = 0;
+    base.validTo = null;
+    const superA = makeSupersede("conf-super-a", 3, "active", "conf-base");
+    const superB = makeSupersede("conf-super-b", 4, "terminated", "conf-base");
+    for (const f of [existence, content, base, superA, superB]) {
+      // eslint-disable-next-line no-await-in-loop -- sequential ingest mirrors the m4/inv-4 rig
+      await repo.ingest(cloneFact(f));
+    }
+    return { Fa: "conf-super-a", Fb: "conf-super-b" };
+  }
+
+  // The model, seeing a conflicted datum with two candidates, surfaces the contradiction citing BOTH.
+  const synth: Scripted = (ctx) => {
+    const conf = ctx.facts.filter((f) => f.conflicted === true);
+    const candidates = [...new Set(conf.flatMap((f) => f.candidates ?? [f.factId]))];
+    return {
+      answer: "Tal's status is contested: the graph holds conflicting facts (active vs terminated).",
+      citations: candidates.map((factId) => ({ factId, eid: "person/tal", prop: "status" })),
+    };
+  };
+
+  it("citations include BOTH F_a and F_b (both candidates present, never a single-sided answer), both in usedFacts", async () => {
+    const repo = freshRepo("conflict");
+    const { Fa, Fb } = await seedConflict(repo);
+
+    // Cross-check the substrate genuinely surfaces a two-candidate conflict on the status cell.
+    const node = await repo.getNode("person/tal");
+    const conflictSeg = node?.props.status?.segments.find((s) => s.kind === "conflict");
+    expect(conflictSeg && "candidates" in conflictSeg ? [...conflictSeg.candidates].sort() : []).toEqual([Fa, Fb].sort());
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations.some((c) => c.factId === Fa)).toBe(true);
+    expect(result.citations.some((c) => c.factId === Fb)).toBe(true);
+    expect(result.usedFacts).toContain(Fa);
+    expect(result.usedFacts).toContain(Fb);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.10 — Pinned asOf gives a reproducible retrieved set (R5).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.10 — two asks at the SAME pinned asOf produce EQUAL usedFacts (order-insensitive), even if prose differs", () => {
+  const QUESTION = "Where does Tal work?";
+  const PINNED: AsOf = { validTime: 5_000 };
+  it("usedFacts is set-equal across two runs at the same pinned asOf (retrieval envelope is deterministic under R5)", async () => {
+    const repo = freshRepo("reproducible");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+    await assertNode(repo, "org/a5c", "org");
+    await assertProp(repo, "org/a5c", "content", "a5c");
+    await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+
+    // Prose VARIES per call (the model is accelerator-class, §5.2), the envelope does not.
+    let n = 0;
+    const synth: Scripted = (ctx) => {
+      n += 1;
+      const edge = edgeFactOf(ctx, "employed_by");
+      return { answer: `answer-variant-${n}`, citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : [] };
+    };
+    const first = await answerQuestion({ question: QUESTION, asOf: PINNED }, { repo, synthesize: synth });
+    const second = await answerQuestion({ question: QUESTION, asOf: PINNED }, { repo, synthesize: synth });
+    expect(first.abstained).toBe(false);
+    expect(second.abstained).toBe(false);
+    expect([...first.usedFacts].sort()).toEqual([...second.usedFacts].sort());
+    // The prose is allowed to differ — the criterion is set-equality of usedFacts, not string equality.
+    expect(first.answer).not.toBe(second.answer);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.11 — asOf actually scopes retrieval (before/after validTime).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.11 — asOf bounds the evidence: ask before validFrom abstains; after validFrom cites F_e", () => {
+  const QUESTION = "Where does Tal work?";
+  const T1 = 1_000; // the whole subject becomes valid at T1
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    return { answer: "Tal works at a5c.", citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : [] };
+  };
+  async function seedAtT1(repo: KipRepo): Promise<string> {
+    await assertNode(repo, "person/tal", "person", { validFrom: T1 });
+    await assertProp(repo, "person/tal", "content", QUESTION, { validFrom: T1 });
+    await assertNode(repo, "org/a5c", "org", { validFrom: T1 });
+    await assertProp(repo, "org/a5c", "content", "a5c", { validFrom: T1 });
+    return assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c", { validFrom: T1 });
+  }
+  it("asOf = T0 (< T1) abstains — the facts are not yet valid", async () => {
+    const repo = freshRepo("asof-before");
+    await seedAtT1(repo);
+    const result = await answerQuestion({ question: QUESTION, asOf: { validTime: 0 } }, {
+      repo,
+      synthesize: spySynth(synth),
+    });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.usedFacts).toHaveLength(0);
+  });
+  it("asOf = T2 (> T1) cites F_e — the same question against the now-valid fact set", async () => {
+    const repo = freshRepo("asof-after");
+    const Fe = await seedAtT1(repo);
+    const result = await answerQuestion({ question: QUESTION, asOf: { validTime: T1 + 1_000 } }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations.some((c) => c.factId === Fe)).toBe(true);
+    expect(result.usedFacts).toContain(Fe);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.12 — scope isolates tenants.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.12 — scope isolates tenants: scope.tenant B abstains, scope.tenant A cites F_e (no cross-tenant leak)", () => {
+  const QUESTION = "Where does Tal work?";
+  const synth: Scripted = (ctx) => {
+    const edge = edgeFactOf(ctx, "employed_by");
+    return { answer: "Tal works at a5c.", citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : [] };
+  };
+  // Fixtures namespace the entity EIDs by tenant so a scoped read has a sound narrowing to apply.
+  async function seedTenantA(repo: KipRepo): Promise<string> {
+    await assertNode(repo, "A/person/tal", "person");
+    await assertProp(repo, "A/person/tal", "content", QUESTION);
+    await assertNode(repo, "A/org/a5c", "org");
+    await assertProp(repo, "A/org/a5c", "content", "a5c");
+    return assertEdge(repo, "A/edge/tal-a5c", "employed_by", "A/person/tal", "A/org/a5c");
+  }
+  it("scope.tenant === 'B' abstains — tenant A's F_e is not visible under tenant B", async () => {
+    const repo = freshRepo("scope-b");
+    await seedTenantA(repo);
+    const result = await answerQuestion({ question: QUESTION, scope: { tenant: "B" } }, {
+      repo,
+      synthesize: spySynth(synth),
+    });
+    expect(result.abstained).toBe(true);
+    expect(result.usedFacts).toHaveLength(0);
+  });
+  it("scope.tenant === 'A' cites F_e — the fact is visible within its own tenant", async () => {
+    const repo = freshRepo("scope-a");
+    const Fe = await seedTenantA(repo);
+    const result = await answerQuestion({ question: QUESTION, scope: { tenant: "A" } }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations.some((c) => c.factId === Fe)).toBe(true);
+    expect(result.usedFacts).toContain(Fe);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.13 — Malformed input THROWS; abstention is DATA (the two-channel model, §6.5).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.13 — a malformed invocation throws; a well-formed no-fact question abstains as DATA", () => {
+  it("an invocation missing `question` rejects through the THROW channel (schema-mismatch / ERR_MALFORMED_INPUT)", async () => {
+    const repo = freshRepo("malformed");
+    // Missing required `question` — the input-rejection throw channel (§6.5). Asserted on the TYPED
+    // error CODE, not a message substring (a generic error must NOT satisfy this — that would let the
+    // unimplemented stub's own throw pass vacuously).
+    await expect(
+      answerQuestion({} as never, { repo, synthesize: spySynth(() => ({ answer: "x", citations: [] })) }),
+    ).rejects.toMatchObject({ code: "ERR_MALFORMED_INPUT" });
+  });
+  it("a well-formed question with no supporting facts returns an abstention as DATA (does NOT throw)", async () => {
+    const repo = freshRepo("abstain-data");
+    const result: GraphQaResult = await answerQuestion({ question: "Where does Nobody work?" }, {
+      repo,
+      synthesize: spySynth(() => ({ answer: "x", citations: [] })),
+    });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.14 — Output validates against the manifest outputSchema.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.14 — every returned object satisfies the manifest outputSchema (required answer/citations/usedFacts; citations[i].factId required)", () => {
+  const manifestPath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "cli",
+    "microagents",
+    "graph-qa",
+    "microagent.json",
+  );
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { outputSchema: JsonSchema };
+
+  it("the happy-path result validates against outputSchema", async () => {
+    const QUESTION = "Where does Tal work?";
+    const repo = freshRepo("schema-happy");
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION);
+    await assertNode(repo, "org/a5c", "org");
+    await assertProp(repo, "org/a5c", "content", "a5c");
+    await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    const synth: Scripted = (ctx) => {
+      const edge = edgeFactOf(ctx, "employed_by");
+      return { answer: "Tal works at a5c.", citations: edge ? [{ factId: edge.factId, edgeKind: "employed_by" }] : [] };
+    };
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(validateAgainstSchema(result, manifest.outputSchema)).toEqual([]);
+  });
+
+  it("the abstention result also validates against outputSchema", async () => {
+    const repo = freshRepo("schema-abstain");
+    const result = await answerQuestion({ question: "Where does Nobody work?" }, {
+      repo,
+      synthesize: spySynth(() => ({ answer: "x", citations: [] })),
+    });
+    expect(validateAgainstSchema(result, manifest.outputSchema)).toEqual([]);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// §8.15 — Multi-hop answer cites each hop.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa §8.15 — a two-hop chain cites the FactId of BOTH traversed edges (each claim → its own signed fact)", () => {
+  const QUESTION = "What city is Tal's employer based in?";
+  async function seedChain(repo: KipRepo): Promise<{ Fe1: string; Fe2: string }> {
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", QUESTION); // §5.1 text-seed anchor
+    await assertNode(repo, "org/a5c", "org");
+    await assertNode(repo, "city/tlv", "city");
+    await assertProp(repo, "city/tlv", "content", "tlv");
+    const Fe1 = await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    const Fe2 = await assertEdge(repo, "edge/a5c-tlv", "headquartered_in", "org/a5c", "city/tlv");
+    return { Fe1, Fe2 };
+  }
+  // The model follows both hops and cites each traversed edge.
+  const synth: Scripted = (ctx) => {
+    const hop1 = edgeFactOf(ctx, "employed_by");
+    const hop2 = edgeFactOf(ctx, "headquartered_in");
+    const city = propValueOf(ctx, String(hop2?.to ?? ""), "content") ?? hop2?.to ?? "";
+    const citations = [] as SynthesisOutput["citations"];
+    if (hop1) citations.push({ factId: hop1.factId, eid: hop1.eid, edgeKind: "employed_by" });
+    if (hop2) citations.push({ factId: hop2.factId, eid: hop2.eid, edgeKind: "headquartered_in" });
+    return { answer: `Tal's employer is based in ${String(city)}.`, citations };
+  };
+  it("returns an answer naming tlv whose citations include the FactIds of BOTH traversed edges", async () => {
+    const repo = freshRepo("multihop");
+    const { Fe1, Fe2 } = await seedChain(repo);
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.answer).toContain("tlv");
+    expect(result.citations.some((c) => c.factId === Fe1)).toBe(true);
+    expect(result.citations.some((c) => c.factId === Fe2)).toBe(true);
+    expect(result.usedFacts).toContain(Fe1);
+    expect(result.usedFacts).toContain(Fe2);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// EDGE-PROP HYDRATION (kip-graph-qa.md §3.2) — regression suite for the retrieval defect where a fact
+// stored on an EDGE PROPERTY was structurally invisible to synthesis.
+//
+// THE DEFECT. The §3 step-3 hydration loop walked `NodeView.props` and bound each covering
+// value/conflict segment to its signed `FactId`, but for an edge it recorded ONLY
+// `edgeExistenceFactId(eid)` — there was no equivalent walk over `EdgeView.props`. So an edge
+// qualifier (`reason`, `max_duration_seconds`, …) — exactly what `kip learn`'s encoder puts on an
+// edge — never reached the model context, and `kip ask` reported "the graph does not contain facts
+// explaining the reason" while `kip get --edge` showed the prop sitting right there. Recall was
+// correct, traversal was correct, and the answer was still unreachable: a RETRIEVAL bug, not a model
+// one, which is why these tests assert on the ASSEMBLED CONTEXT (`SynthesisContext.facts`) rather
+// than on prose — a scripted synthesizer cannot answer from a datum it was never handed.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+
+/** Assert an EDGE-prop fact (the edge qualifier carrier — reads back via `getEdge(eid).props`);
+ *  returns its signed `FactId` (the `PropCell` value segment's `assertedBy`). */
+async function assertEdgeProp(
+  repo: KipRepo,
+  eid: EID,
+  prop: string,
+  value: PropValue,
+  opts?: { validFrom?: number },
+): Promise<string> {
+  const r = await repo.assertFact({
+    type: "assert",
+    v: 1,
+    target: { kind: "edge-prop", eid, prop },
+    value,
+    validFrom: opts?.validFrom ?? 0,
+    validTo: null,
+    replicaId: "author",
+    provenance: fixtureProvenance(),
+  });
+  return r.id;
+}
+
+function edgePropFactOf(ctx: SynthesisContext, eid: string, prop: string) {
+  return ctx.facts.find((f) => f.kind === "edge-prop" && f.eid === eid && f.prop === prop);
+}
+
+describe("graph-qa edge-prop hydration — a fact stored ONLY on an edge property reaches synthesis and is citable (§3.2)", () => {
+  // The live shape this reproduces: a design-note graph where the REASON an alternative was rejected
+  // lives on the `objected_to` edge, not on either endpoint node.
+  const QUESTION = "Why was the RPC facade alternative rejected?";
+  const REASON = "maintains synchronous coupling, Ledger outage would take checkout down";
+  const EDGE = "edge/marcus-objected-to-rpc";
+
+  async function seed(repo: KipRepo): Promise<{ Fe: string; Fep: string }> {
+    await assertNode(repo, "person/marcus", "person");
+    await assertProp(repo, "person/marcus", "content", QUESTION); // §5.1 text-seed anchor
+    await assertNode(repo, "option/rpc-facade", "option");
+    await assertProp(repo, "option/rpc-facade", "content", "RPC facade");
+    const Fe = await assertEdge(repo, EDGE, "objected_to", "person/marcus", "option/rpc-facade");
+    // THE ONLY PLACE THE ANSWER EXISTS: an edge property. No node prop carries it.
+    const Fep = await assertEdgeProp(repo, EDGE, "reason", REASON);
+    return { Fe, Fep };
+  }
+
+  it("places the edge-prop value AND its asserting factId into the context handed to synthesize", async () => {
+    const repo = freshRepo("edge-prop-context");
+    const { Fep } = await seed(repo);
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      return { answer: "seen", citations: [] };
+    });
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(seen).toBeDefined();
+    const fact = edgePropFactOf(seen!, EDGE, "reason");
+    expect(fact).toBeDefined();
+    expect(fact!.value).toBe(REASON);
+    expect(fact!.factId).toBe(Fep);
+    // The edge-prop datum names the edge it qualifies, so a citation can be rebound to it (§3.4).
+    expect(fact!.edgeKind).toBe("objected_to");
+  });
+
+  it("includes the edge-prop factId in the usedFacts retrieval envelope (§4)", async () => {
+    const repo = freshRepo("edge-prop-envelope");
+    const { Fe, Fep } = await seed(repo);
+    const result = await answerQuestion(
+      { question: QUESTION },
+      { repo, synthesize: spySynth(() => ({ answer: "seen", citations: [] })) },
+    );
+    expect(result.usedFacts).toContain(Fep);
+    // The edge-existence fact is still bound too — the fix is ADDITIVE, not a replacement.
+    expect(result.usedFacts).toContain(Fe);
+  });
+
+  it("the edge-prop fact is CITABLE: a citation naming it survives §3.4 and is rebound to eid/prop/edgeKind", async () => {
+    const repo = freshRepo("edge-prop-citable");
+    const { Fep } = await seed(repo);
+    // The scripted model answers FROM the edge-prop datum and cites it — exactly how a node-prop
+    // citation is produced (§8.6), which is the parity this suite pins.
+    const synth: Scripted = (ctx) => {
+      const fact = edgePropFactOf(ctx, EDGE, "reason");
+      return {
+        answer: fact ? `It was rejected because it ${String(fact.value)}.` : ABSTENTION_ANSWER,
+        // Deliberately supplies NO eid/prop/edgeKind: they must be RECONSTRUCTED from retrieval.
+        citations: fact ? [{ factId: fact.factId, quote: String(fact.value) }] : [],
+      };
+    };
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.answer).toContain("synchronous coupling");
+    const cited = result.citations.find((c) => c.factId === Fep);
+    expect(cited).toBeDefined();
+    expect(cited!.eid).toBe(EDGE);
+    expect(cited!.prop).toBe("reason");
+    expect(cited!.edgeKind).toBe("objected_to");
+    expect(result.usedFacts).toContain(Fep);
+  });
+
+  it("a NON-string edge-prop value (the `max_duration_seconds: 5` live case) is carried verbatim, not coerced", async () => {
+    const Q = "How long might the storefront show a pending state?";
+    const E = "edge/storefront-displays-pending";
+    const repo = freshRepo("edge-prop-number");
+    await assertNode(repo, "svc/storefront", "service");
+    await assertProp(repo, "svc/storefront", "content", Q);
+    await assertNode(repo, "state/pending", "state");
+    await assertProp(repo, "state/pending", "content", "pending");
+    await assertEdge(repo, E, "displays", "svc/storefront", "state/pending");
+    const Fep = await assertEdgeProp(repo, E, "max_duration_seconds", 5);
+
+    let seen: SynthesisContext | undefined;
+    await answerQuestion(
+      { question: Q },
+      {
+        repo,
+        synthesize: spySynth((ctx) => {
+          seen = ctx;
+          return { answer: "seen", citations: [] };
+        }),
+      },
+    );
+    const fact = edgePropFactOf(seen!, E, "max_duration_seconds");
+    expect(fact).toBeDefined();
+    expect(fact!.value).toBe(5);
+    expect(fact!.factId).toBe(Fep);
+  });
+
+  it("REGRESSION GUARD: node-prop hydration is unchanged — the node-prop datum and its factId are still bound exactly as before", async () => {
+    const repo = freshRepo("edge-prop-node-regression");
+    const { Fep } = await seed(repo);
+    const Fnp = await assertProp(repo, "option/rpc-facade", "status", "rejected");
+    let seen: SynthesisContext | undefined;
+    await answerQuestion(
+      { question: QUESTION },
+      {
+        repo,
+        synthesize: spySynth((ctx) => {
+          seen = ctx;
+          return { answer: "seen", citations: [] };
+        }),
+      },
+    );
+    const np = seen!.facts.find(
+      (f) => f.kind === "node-prop" && f.eid === "option/rpc-facade" && f.prop === "status",
+    );
+    expect(np).toBeDefined();
+    expect(np!.value).toBe("rejected");
+    expect(np!.factId).toBe(Fnp);
+    // A node-prop datum carries NO edge topology — the two kinds stay distinct.
+    expect(np!.edgeKind).toBeUndefined();
+    expect(np!.from).toBeUndefined();
+    // …and the edge-prop datum is a SEPARATE entry, never folded into the node's.
+    expect(edgePropFactOf(seen!, EDGE, "reason")?.factId).toBe(Fep);
+  });
+
+  it("N5 HOLDS: an edge with NO covering props contributes no edge-prop datum, and a graph with no facts still abstains", async () => {
+    const repo = freshRepo("edge-prop-abstain");
+    const Q = "Where does Tal work?";
+    await assertNode(repo, "person/tal", "person");
+    await assertProp(repo, "person/tal", "content", Q);
+    await assertNode(repo, "org/a5c", "org");
+    await assertEdge(repo, "edge/tal-a5c", "employed_by", "person/tal", "org/a5c");
+    let seen: SynthesisContext | undefined;
+    await answerQuestion(
+      { question: Q },
+      {
+        repo,
+        synthesize: spySynth((ctx) => {
+          seen = ctx;
+          return { answer: "seen", citations: [] };
+        }),
+      },
+    );
+    // The propless edge yields its existence fact and NOTHING invented on top of it.
+    expect(seen!.facts.some((f) => f.kind === "edge-prop")).toBe(false);
+
+    // And the empty-graph abstention path is untouched: synthesize is never called.
+    const empty = freshRepo("edge-prop-abstain-empty");
+    const spy = spySynth(() => ({ answer: "should never run", citations: [] }));
+    const result = await answerQuestion({ question: "anything at all?" }, { repo: empty, synthesize: spy });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.usedFacts).toEqual([]);
+    expect(spy.mock).not.toHaveBeenCalled();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// A faithful, minimal JSON-schema validator for the manifest outputSchema (§8.14). Covers exactly the
+// constructs kip-graph-qa.md §2's outputSchema uses: object/array/string/boolean types, `required`,
+// `additionalProperties: false`, and `items`. Returns a list of violation paths ([] === valid).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+interface JsonSchema {
+  type?: string;
+  required?: string[];
+  additionalProperties?: boolean;
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
+}
+function validateAgainstSchema(value: unknown, schema: JsonSchema, path = "$"): string[] {
+  const errors: string[] = [];
+  const typeOk = (t: string | undefined): boolean => {
+    switch (t) {
+      case undefined:
+        return true;
+      case "object":
+        return typeof value === "object" && value !== null && !Array.isArray(value);
+      case "array":
+        return Array.isArray(value);
+      case "string":
+        return typeof value === "string";
+      case "boolean":
+        return typeof value === "boolean";
+      case "number":
+        return typeof value === "number";
+      default:
+        return true;
+    }
+  };
+  if (!typeOk(schema.type)) {
+    errors.push(`${path}: expected type ${schema.type}, got ${Array.isArray(value) ? "array" : typeof value}`);
+    return errors;
+  }
+  if (schema.type === "object" && typeof value === "object" && value !== null) {
+    const obj = value as Record<string, unknown>;
+    for (const req of schema.required ?? []) {
+      if (!(req in obj)) errors.push(`${path}: missing required '${req}'`);
+    }
+    for (const [k, v] of Object.entries(obj)) {
+      const propSchema = schema.properties?.[k];
+      if (!propSchema) {
+        if (schema.additionalProperties === false) errors.push(`${path}.${k}: additional property not allowed`);
+        continue;
+      }
+      errors.push(...validateAgainstSchema(v, propSchema, `${path}.${k}`));
+    }
+  }
+  if (schema.type === "array" && Array.isArray(value) && schema.items) {
+    value.forEach((el, i) => errors.push(...validateAgainstSchema(el, schema.items as JsonSchema, `${path}[${i}]`)));
+  }
+  return errors;
+}
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// ROUND-2 CRITIC FIXES (D-52 follow-up) — CORRECTED IN ROUND-3.
+//
+// (A) THE FABRICATION GUARD — "a single incidental shared term is not relevance". D-52 replaced
+//     exact-`content` equality with distinct-term matching, which made a learn-shaped graph
+//     discoverable but also made ONE incidental shared term enough to SEED retrieval — so a question
+//     about an entity the graph has never heard of ("Where does Zara work?") retrieved an unrelated
+//     person's facts. That is the exact fabrication setup §8.4's `not.toHaveBeenCalled()` guard exists
+//     to prevent.
+//     ROUND-3 CORRECTION — WHERE THE GUARD LIVES. Round 2 put it in `computeRecall` as a graph-GLOBAL
+//     floor (`bestMatched >= 2`: admit a single-term match only if SOME node in the graph matched ≥2
+//     terms). That was a retrieval regression — non-local, so it also suppressed CORRECT single-term
+//     SUBJECT matches (`recall({text:"Where does Zara work?"})` → [] on a graph that HELD Zara) and
+//     collapsed the instant any coincidental 2-term node appeared. The guard now lives where it can
+//     actually be evaluated: `answerQuestion`'s SUBJECT-ANCHORING check (§6.1b) abstains when no query
+//     term appears in any RETRIEVED node/edge's IDENTITY surface. These tests therefore assert the
+//     graph-QA OUTCOME (abstain vs answer), which is unchanged and correct; the recall layer no longer
+//     carries the floor (its local bar is pinned in `debt-closure-d52.test.ts`).
+//
+// (B) A CONFLICTED EDGE-PROP — the §6.3 contradiction rule, on the edge-prop path the af45ed046
+//     hydration fix added. The node path was pinned (§8.9) and the edge path's `value` half was
+//     pinned, but its `conflict` half — one datum per candidate, both candidate ids in `usedFacts`,
+//     never a silently picked side — was not.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+
+describe("graph-qa subject-anchoring relevance — a single incidental shared term is not relevance (§6.1b/§8.4)", () => {
+  it("a question whose SUBJECT is absent but which shares ONE term with a node abstains and never calls synthesize", async () => {
+    const repo = freshRepo("floor-single-term");
+    // The graph knows about a deployment runbook. It knows nothing about invoices.
+    await assertNode(repo, "runbook/deploy", "runbook");
+    await assertProp(repo, "runbook/deploy", "content", "How do we deploy the checkout service?");
+    await assertProp(repo, "runbook/deploy", "owner", "platform");
+
+    const synth = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called on a single incidental term overlap");
+    });
+    // Shares exactly ONE term with the graph's surface ("checkout", buried in the runbook's `content`);
+    // the SUBJECT ('invoice reconciliation') is absent from every retrieved node's IDENTITY (eid/kind/
+    // name), and no fact here can answer it. ROUND-3: recall DOES seed the runbook (the local lexical
+    // bar admits the "checkout" overlap), but `answerQuestion`'s subject-anchoring check finds no
+    // query term in the retrieved identity surface and abstains — the honest outcome.
+    const result = await answerQuestion(
+      { question: "Which invoice reconciliation job failed during checkout?" },
+      { repo, synthesize: synth },
+    );
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synth.mock).not.toHaveBeenCalled();
+  });
+
+  it("the guard does NOT cost the D-52 capability: a question ANCHORED in the graph still retrieves and answers, including its single-term neighbours", async () => {
+    const repo = freshRepo("floor-anchored");
+    await assertNode(repo, "team/data-platform", "team");
+    await assertProp(repo, "team/data-platform", "name", "Data Platform Team");
+    await assertProp(repo, "team/data-platform", "description", "Owns the Ledger settlement store");
+    await assertNode(repo, "component/ledger", "component");
+    await assertProp(repo, "component/ledger", "name", "Ledger");
+
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      return { answer: "The Data Platform Team owns Ledger.", citations: [] };
+    });
+    const result = await answerQuestion({ question: "which team owns Ledger" }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(synth.mock).toHaveBeenCalled();
+    const eids = new Set((seen?.facts ?? []).map((f) => f.eid));
+    // ROUND-3 STRENGTHENING: the single-term neighbour `component/ledger` is retrieved because "ledger"
+    // is in ITS OWN identity (name/eid) — a LOCAL match, not because the team node cleared ≥2 terms.
+    // Both the multi-term anchor AND its single-term neighbour are retrieved.
+    expect(eids.has("team/data-platform")).toBe(true);
+    expect(eids.has("component/ledger")).toBe(true);
+  });
+});
+
+describe("graph-qa edge-prop hydration — a CONFLICTED edge-prop surfaces both candidates and picks no side (§6.3)", () => {
+  const QUESTION = "Why was the RPC facade alternative rejected?";
+  const EDGE = "edge/marcus-objected-to-rpc";
+  const replicaId = "edge-conflict-author";
+
+  /** Two overlapping `supersede` facts over ONE base edge-prop assert with DIFFERENT values ⇒ a
+   *  two-candidate `kip:conflict` segment on the EDGE's cell (proj.ts detectConflict) — the edge
+   *  analogue of §8.9's node-prop fixture, built the same way for the same reason. */
+  function makeEdgePropSupersede(id: string, seq: number, value: PropValue, baseId: string): Fact {
+    const f = makeWellFormedFact({ replicaId, seq, id, target: { kind: "edge-prop", eid: EDGE, prop: "reason" } });
+    f.type = "supersede";
+    f.value = value;
+    f.validFrom = 0;
+    f.validTo = null;
+    f.supersedes = [baseId];
+    return f;
+  }
+
+  it("records ONE datum per candidate, both carrying conflicted:true and BOTH candidate factIds in usedFacts", async () => {
+    const repo = freshRepo("edge-prop-conflict");
+    // Endpoints + the text-seed anchor via the ordinary authoring path…
+    await assertNode(repo, "person/marcus", "person");
+    await assertProp(repo, "person/marcus", "content", QUESTION);
+    await assertNode(repo, "option/rpc-facade", "option");
+    await assertEdge(repo, EDGE, "objected_to", "person/marcus", "option/rpc-facade");
+    // …and the conflicting edge qualifier via `ingest` (the only shape yielding two candidates).
+    const base = makeWellFormedFact({
+      replicaId,
+      seq: 0,
+      id: "edge-conf-base",
+      target: { kind: "edge-prop", eid: EDGE, prop: "reason" },
+    });
+    base.value = "pending review";
+    base.validFrom = 0;
+    base.validTo = null;
+    const Fa = "edge-conf-super-a";
+    const Fb = "edge-conf-super-b";
+    for (const f of [
+      base,
+      makeEdgePropSupersede(Fa, 1, "synchronous coupling", "edge-conf-base"),
+      makeEdgePropSupersede(Fb, 2, "cost", "edge-conf-base"),
+    ]) {
+      // eslint-disable-next-line no-await-in-loop -- sequential ingest mirrors the §8.9 rig
+      await repo.ingest(cloneFact(f));
+    }
+
+    // Cross-check the substrate genuinely surfaces a two-candidate conflict on the EDGE's cell.
+    const edge = await repo.getEdge(EDGE);
+    const seg = edge?.props.reason?.segments.find((s) => s.kind === "conflict");
+    expect(seg && "candidates" in seg ? [...seg.candidates].sort() : []).toEqual([Fa, Fb].sort());
+
+    let seen: SynthesisContext | undefined;
+    const synth = spySynth((ctx) => {
+      seen = ctx;
+      const conf = ctx.facts.filter((f) => f.kind === "edge-prop" && f.conflicted === true);
+      return {
+        answer: "The graph holds conflicting reasons.",
+        citations: conf.map((f) => ({ factId: f.factId })),
+      };
+    });
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+
+    const conflicted = (seen?.facts ?? []).filter((f) => f.kind === "edge-prop" && f.conflicted === true);
+    // ONE datum per candidate — never one datum carrying a silently chosen winner.
+    expect(conflicted.map((f) => f.factId).sort()).toEqual([Fa, Fb].sort());
+    for (const f of conflicted) {
+      expect([...(f.candidates ?? [])].sort()).toEqual([Fa, Fb].sort());
+      expect(f.value).toBeUndefined(); // a conflict has NO covering value (§6.3)
+      expect(f.edgeKind).toBe("objected_to"); // still names the edge it qualifies (§3.4 rebinding)
+    }
+    expect(result.usedFacts).toContain(Fa);
+    expect(result.usedFacts).toContain(Fb);
+    // …and both survive the §3.4 citation guard, rebound to the edge, prop and edgeKind.
+    expect(result.citations.map((c) => c.factId).sort()).toEqual([Fa, Fb].sort());
+    for (const c of result.citations) {
+      expect(c.eid).toBe(EDGE);
+      expect(c.prop).toBe("reason");
+      expect(c.edgeKind).toBe("objected_to");
+    }
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-62 — LINKED CODE EVIDENCE. After `kip link` (src/linker/entity-linker.ts) authors a `documents`
+// edge from a `doc:` concept node to its `code:module` node, a `kip ask` whose answer rests on that
+// concept cited the CONCEPT side only: the linked `code:module` node's props (content-blob/format/loc)
+// carry no question-lexical text, so the accelerator-class synthesizer never cited it. The fix
+// (`linkedCodeEvidenceCitations`) is a deterministic, set-pure augmentation that runs AFTER citation
+// binding: for every concept the answer GENUINELY cites, if a `documents` edge in the already-retrieved
+// set connects it to a `code:*` node, it adds ONE linked-evidence citation naming the code node, bound
+// to the `documents` edge's REAL signed factId (already in `usedFacts`). Honest/N5: only a real edge
+// from a genuinely-cited concept; never fabricated, never a code node no cited concept documents; the
+// abstention contract (no citations) is preserved because the augmentation runs only on the
+// non-abstaining path. These tests build the linked graph the demo built and assert the code side is
+// citable deterministically (the PROSE naming the file stays the model's job — only the FACT is pinned).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-62 — a used concept's `documents`-linked code node is surfaced as citable LINKED EVIDENCE", () => {
+  const QUESTION = "which file implements the encode step?";
+  const CONCEPT = "doc:designblob#encode-step";
+  const CODE = "code:module:repo-x9f2c1:src/encoder/encode.ts";
+  const DOC_EDGE = `documents:${CONCEPT}=>${CODE}`;
+
+  /** Build the linked graph: a `code:module` node (props with NO question-lexical text), a `doc:`
+   *  concept node (content text-seed + a summary the model answers from), and a `documents` edge
+   *  concept→code — exactly the shape `kip index` + `kip learn` + `kip link` produce. */
+  async function seedLinked(repo: KipRepo): Promise<{ Fsummary: string; Fdoc: string }> {
+    // The code:module node — reached across the `documents` edge, but its props do not match the
+    // question (the whole reason the synthesizer never cites it: D-62).
+    await assertNode(repo, CODE, "code:module");
+    await assertProp(repo, CODE, "format", "typescript");
+    await assertProp(repo, CODE, "linesOfCode", 42);
+    // The concept node — content is the §5.1 exact text-seed; `summary` is the concept fact the model
+    // cites (the concept side that DOES lexically describe the encode step).
+    await assertNode(repo, CONCEPT, "concept");
+    await assertProp(repo, CONCEPT, "content", QUESTION);
+    const Fsummary = await assertProp(
+      repo,
+      CONCEPT,
+      "summary",
+      "The encode step turns raw text into signed fact assertions.",
+    );
+    const Fdoc = await assertEdge(repo, DOC_EDGE, "documents", CONCEPT, CODE);
+    return { Fsummary, Fdoc };
+  }
+
+  // The scripted model answers naming the file and cites the CONCEPT fact only — reproducing the D-62
+  // behavior (it never cites the code node, whose props carry no question-lexical text).
+  const synth: Scripted = (ctx) => {
+    const summary = ctx.facts.find((f) => f.kind === "node-prop" && f.eid === CONCEPT && f.prop === "summary");
+    return {
+      answer: "The encode step is implemented in src/encoder/encode.ts.",
+      citations: summary ? [{ factId: summary.factId, eid: CONCEPT, prop: "summary", quote: "encode step" }] : [],
+    };
+  };
+
+  it("POSITIVE: usedFacts + citations include BOTH the concept fact AND the code:module linked evidence (bound to the real documents-edge factId)", async () => {
+    const repo = freshRepo("d62-positive");
+    const { Fsummary, Fdoc } = await seedLinked(repo);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    // The concept side is cited (the model's own citation).
+    const conceptCite = result.citations.find((c) => c.factId === Fsummary);
+    expect(conceptCite).toBeDefined();
+    expect(conceptCite?.eid).toBe(CONCEPT);
+
+    // The LINKED CODE EVIDENCE: a citation naming the code node, bound to the REAL `documents` edge
+    // fact, qualified by its EdgeKind — added deterministically, not by the model.
+    const codeCite = result.citations.find((c) => c.eid === CODE);
+    expect(codeCite).toBeDefined();
+    expect(codeCite?.factId).toBe(Fdoc); // a real signed factId (the documents edge existence fact)…
+    expect(codeCite?.edgeKind).toBe("documents");
+
+    // …and every cited factId is in the retrieved envelope (§3.4 invariant preserved).
+    expect(result.usedFacts).toContain(Fsummary);
+    expect(result.usedFacts).toContain(Fdoc);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+
+  it("NEGATIVE: a code:module reached by a NON-`documents` edge from the used concept is NOT spuriously cited", async () => {
+    const repo = freshRepo("d62-negative-edgekind");
+    // Same concept, but the code node is linked by a `mentions` edge, not `documents`. The augmentation
+    // fires ONLY on `documents`, so the code node must not be cited.
+    await assertNode(repo, CODE, "code:module");
+    await assertProp(repo, CODE, "format", "typescript");
+    await assertNode(repo, CONCEPT, "concept");
+    await assertProp(repo, CONCEPT, "content", QUESTION);
+    const Fsummary = await assertProp(repo, CONCEPT, "summary", "The encode step turns raw text into assertions.");
+    await assertEdge(repo, `mentions:${CONCEPT}=>${CODE}`, "mentions", CONCEPT, CODE);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations.some((c) => c.factId === Fsummary)).toBe(true);
+    // No citation points at the code node — there is no `documents` edge to the used concept.
+    expect(result.citations.some((c) => c.eid === CODE)).toBe(false);
+  });
+
+  it("NEGATIVE: a `documents` edge whose concept is NOT cited adds no code citation (the concept must be genuine evidence)", async () => {
+    const repo = freshRepo("d62-negative-uncited");
+    await seedLinked(repo);
+    // The model answers WITHOUT citing the concept (empty citations). No concept is in the answer's used
+    // evidence, so the linked code node must not be cited either.
+    const noCiteSynth: Scripted = () => ({
+      answer: "The encode step is implemented in src/encoder/encode.ts.",
+      citations: [],
+    });
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: noCiteSynth });
+    expect(result.abstained).toBe(false);
+    expect(result.citations).toHaveLength(0); // no cited concept ⇒ no linked code evidence.
+  });
+
+  it("ABSTENTION PRESERVED: an absent-subject question over the linked graph abstains with EMPTY citations (augmentation never fabricates)", async () => {
+    const repo = freshRepo("d62-abstain");
+    await seedLinked(repo);
+    // A question whose named subject is absent from the graph must abstain (§6.1b), and the augmentation
+    // — which only runs on the non-abstaining path — must not conjure a code citation.
+    const synthNever = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: the subject 'zara' is absent (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "What is Zara's role?" }, { repo, synthesize: synthNever });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synthNever.mock).not.toHaveBeenCalled();
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-66 — the `same_as`-alias PROP-UNION (ADR-B11c). Two concepts that live in DIFFERENT documents but
+// denote the same entity are joined by a signed `same_as` edge. proj folds them into one equivalence
+// class and `getNode(alias)` returns ONLY the canonical member's cells — so a `kip ask`/`recall` seeded
+// on one alias saw ONE side's facts, MASKING the other member's distinct props (the D-66 gap). The fix
+// (graph-qa/index.ts §3a) closes it in the RETRIEVAL layer, NOT in proj: for every retrieved seed it
+// enumerates the seed's `same_as` class (`Repo.sameAsClass`, reusing proj's already-computed closure)
+// and records EACH member's OWN node-prop facts read RAW (`Repo.getNodeRaw`, the alias-unmasked read
+// `getNode` collapses), each bound to its OWN `assertedBy` FactId. No merge; per-fact citations stay
+// honest. These tests build the two-document `same_as` graph and assert the UNION is answerable, that
+// proj's merge/read semantics are UNCHANGED, that the result is deterministic, that abstention is
+// preserved, and that the union composes with the D-62 linked-code-evidence augmentation.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-66 — a `same_as`-linked entity is answerable from the UNION of both members' distinct props", () => {
+  const QUESTION = "What is the role and team for Orchid?";
+  // Two DIFFERENT-document concept nodes for the same entity. `blobA` < `blobB` byte-order, so the
+  // `(namespaceId, localId)` canonical rule folds the class onto A — B is the MASKED alias under `getNode`.
+  const A = "doc:blobA#orchid"; // carries the `role` prop
+  const B = "doc:blobB#orchid"; // carries the DISTINCT `team` prop
+  const SAME_AS = `same_as:${A}=${B}`;
+
+  /** Build the two-document union graph: concept A (content text-seed + a `role`), concept B (a distinct
+   *  `team`), and a `same_as` edge A—B — the shape `kip link`'s cross-doc same-entity match authors. */
+  async function seedUnion(repo: KipRepo): Promise<{ Frole: string; Fteam: string; Fsame: string }> {
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION); // §5.1 exact text-seed → recall seeds A
+    const Frole = await assertProp(repo, A, "role", "Engineer");
+    await assertNode(repo, B, "concept");
+    const Fteam = await assertProp(repo, B, "team", "Platform");
+    const Fsame = await assertEdge(repo, SAME_AS, "same_as", A, B);
+    return { Frole, Fteam, Fsame };
+  }
+
+  // The scripted model answers from the UNION: it finds BOTH the `role` fact (member A) and the `team`
+  // fact (member B) in the assembled context and cites each to its own signed factId.
+  const synth: Scripted = (ctx) => {
+    const role = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "role");
+    const team = ctx.facts.find((f) => f.kind === "node-prop" && f.prop === "team");
+    const cites = [role, team]
+      .filter((f): f is NonNullable<typeof f> => f !== undefined)
+      .map((f) => ({ factId: f.factId, eid: f.eid, prop: f.prop, quote: String(f.value) }));
+    return { answer: `Orchid's role is ${String(role?.value ?? "")} on ${String(team?.value ?? "")}.`, citations: cites };
+  };
+
+  it("POSITIVE: usedFacts + citations include BOTH member A's `role` fact AND member B's `team` fact, each bound to its own real factId", async () => {
+    const repo = freshRepo("d66-union");
+    const { Frole, Fteam } = await seedUnion(repo);
+
+    // MUTATION SENSITIVITY (documented): B's `team` fact is reachable ONLY through the §3a class-union —
+    // `getNode(B)` masks it behind A's canonical cells (asserted below). Delete the §3a union pass and
+    // `Fteam` never enters `usedFacts`, so both `team` assertions below fail. The union is what surfaces it.
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    // The UNION: both members' distinct facts are in the retrieval envelope…
+    expect(result.usedFacts).toContain(Frole);
+    expect(result.usedFacts).toContain(Fteam);
+
+    // …and cited, each to its OWN real signed factId with its OWN eid (no merge, per-fact citations).
+    const roleCite = result.citations.find((c) => c.factId === Frole);
+    expect(roleCite).toBeDefined();
+    expect(roleCite?.eid).toBe(A);
+    expect(roleCite?.prop).toBe("role");
+    const teamCite = result.citations.find((c) => c.factId === Fteam);
+    expect(teamCite).toBeDefined();
+    expect(teamCite?.eid).toBe(B);
+    expect(teamCite?.prop).toBe("team");
+
+    // §3.4 invariant preserved: every cited factId is in the envelope.
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+
+  it("NO MERGE (proj read semantics UNCHANGED): getNode still collapses the alias to canonical and masks B's props; the union reads B's OWN cells via getNodeRaw", async () => {
+    const repo = freshRepo("d66-nomerge");
+    const { Frole, Fteam } = await seedUnion(repo);
+
+    // `getNode` is UNTOUCHED by this change — the class still folds onto canonical A, and A's canonical
+    // view carries ONLY A's own props (`role`), NEVER B's `team` (the mask that motivated D-66).
+    const viewA = await repo.getNode(A);
+    expect(viewA?.eid).toBe(A);
+    expect(viewA?.props.role).toBeDefined();
+    expect(viewA?.props.team).toBeUndefined();
+    // `getNode(B)` collapses to canonical A EXACTLY as before (no proj merge-semantics change) — its
+    // `team` cell stays masked behind A's canonical view.
+    const viewB = await repo.getNode(B);
+    expect(viewB?.eid).toBe(A);
+    expect(viewB?.props.team).toBeUndefined();
+
+    // The RAW seam the union reads: B's OWN cells, unmasked — `team` present under B's own eid, bound to
+    // B's own `assertedBy` factId; A's raw view keeps `role` (no cell renamed/collapsed onto the other).
+    const rawB = await repo.getNodeRaw(B);
+    expect(rawB?.eid).toBe(B);
+    const teamSeg = rawB?.props.team?.segments.find((s) => s.kind === "value");
+    expect(teamSeg && "assertedBy" in teamSeg ? teamSeg.assertedBy : undefined).toBe(Fteam);
+    const rawA = await repo.getNodeRaw(A);
+    expect(rawA?.props.team).toBeUndefined();
+    const roleSeg = rawA?.props.role?.segments.find((s) => s.kind === "value");
+    expect(roleSeg && "assertedBy" in roleSeg ? roleSeg.assertedBy : undefined).toBe(Frole);
+  });
+
+  it("DETERMINISM: two asks over the same graph produce EQUAL, sorted usedFacts (stable class ordering)", async () => {
+    const repo = freshRepo("d66-determinism");
+    await seedUnion(repo);
+    const first = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const second = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect([...first.usedFacts].sort()).toEqual([...second.usedFacts].sort());
+    // No duplicate facts leak into the envelope despite the union re-reading the canonical member.
+    expect(new Set(first.usedFacts).size).toBe(first.usedFacts.length);
+  });
+
+  it("ABSTENTION PRESERVED: an absent-subject question over the `same_as` graph abstains with EMPTY citations (the union never fabricates)", async () => {
+    const repo = freshRepo("d66-abstain");
+    await seedUnion(repo);
+    const synthNever = spySynth(() => {
+      throw new Error("synthesize MUST NOT be called: the subject 'zara' is absent (§6.1b)");
+    });
+    const result = await answerQuestion({ question: "What is Zara's role?" }, { repo, synthesize: synthNever });
+    expect(result.abstained).toBe(true);
+    expect(result.answer).toBe(ABSTENTION_ANSWER);
+    expect(result.citations).toHaveLength(0);
+    expect(result.usedFacts).toHaveLength(0);
+    expect(synthNever.mock).not.toHaveBeenCalled();
+  });
+
+  it("COMPOSES WITH D-62: a `same_as` union AND a `documents`-linked code node coexist — both members' props AND the linked code evidence are cited, with no double-count", async () => {
+    const repo = freshRepo("d66-d62-compose");
+    const CODE = "code:module:repo-x9f2c1:src/orchid/service.ts";
+    const DOC_EDGE = `documents:${A}=>${CODE}`;
+    const { Frole, Fteam } = await seedUnion(repo);
+    // Member A ALSO documents a code node (the D-62 concept→code link). The union (member B) and the
+    // linked-code augmentation (the code node) must BOTH fire without interfering.
+    await assertNode(repo, CODE, "code:module");
+    await assertProp(repo, CODE, "format", "typescript");
+    const Fdoc = await assertEdge(repo, DOC_EDGE, "documents", A, CODE);
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    // The D-66 union: both members' distinct facts are present and cited.
+    expect(result.usedFacts).toContain(Frole);
+    expect(result.usedFacts).toContain(Fteam);
+    expect(result.citations.some((c) => c.factId === Frole && c.eid === A)).toBe(true);
+    expect(result.citations.some((c) => c.factId === Fteam && c.eid === B)).toBe(true);
+
+    // The D-62 linked-code evidence: the `documents`-linked code node is cited once, bound to the REAL
+    // documents-edge factId — added by the augmentation, not double-counted by the union.
+    const codeCites = result.citations.filter((c) => c.eid === CODE);
+    expect(codeCites).toHaveLength(1);
+    expect(codeCites[0]?.factId).toBe(Fdoc);
+    expect(codeCites[0]?.edgeKind).toBe("documents");
+
+    // No duplication anywhere: the envelope has unique factIds and every citation is in it.
+    expect(new Set(result.usedFacts).size).toBe(result.usedFacts.length);
+    expect(result.citations.every((c) => result.usedFacts.includes(c.factId))).toBe(true);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-60 — CROSS-DOCUMENT CONTRADICTION surfacing (extends the D-66 §3a `same_as` prop-union). Two
+// documents' facts about the SAME real-world entity, joined by a signed `same_as` edge, genuinely
+// DISAGREE about a scalar prop (`doc:A#ed` employer="Acme", `doc:B#ed` employer="Globex"). Before this
+// change the prop-union recorded EACH member's value as a plain, compatible fact and the disagreement
+// was never flagged — `getNode(A)` is a canonical REDIRECT (proj node-merge, UNCHANGED here), so the
+// contradicting value never enters one cell and proj's per-cell conflict detection never fires across
+// documents. The fix (graph-qa/index.ts §3a) detects a CROSS-MEMBER contradiction at the retrieval
+// layer where cross-document facts are consumed: a prop whose covering VALUE differs across ≥2 DISTINCT
+// `same_as`-class members is surfaced as `conflicted: true` citing ALL competing candidate `FactId`s
+// (mirroring the within-cell conflict shape), so §6.3 flags a contradiction instead of presenting both
+// values as compatible. An AGREEING prop stays an ordinary datum; a free-text prop is never a scalar
+// contradiction; a class of one never self-conflicts. getNode stays a pure redirect (retrieval-only).
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-60 — a cross-document `same_as` disagreement surfaces as a CONFLICTED datum, not two compatible facts", () => {
+  const QUESTION = "What is Ed's employer?";
+  // Two DIFFERENT-document concept nodes for the same real-world entity "Ed". `blobA` < `blobB`, so the
+  // canonical rule folds the class onto A — B is the MASKED alias under `getNode`.
+  const A = "doc:blobA#ed"; // employer="Acme"
+  const B = "doc:blobB#ed"; // employer="Globex" (CONTRADICTS A) — but AGREES on name="Ed"
+
+  /** Capture the read-only synthesis context (the assembled `facts`) so the tests can assert the
+   *  retrieval half flagged the cross-document contradiction. The scripted synth surfaces both sides. */
+  function capturingSynth(): AnswerQuestionDeps["synthesize"] & { ctx: () => SynthesisContext | undefined } {
+    let seen: SynthesisContext | undefined;
+    const fn: Scripted = (ctx) => {
+      seen = ctx;
+      const employer = ctx.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer");
+      const cites = employer.map((f) => ({ factId: f.factId, eid: f.eid, prop: f.prop, quote: String(f.value ?? "conflict") }));
+      return { answer: "Ed's employer is disputed: doc A says Acme, doc B says Globex.", citations: cites };
+    };
+    return Object.assign((ctx: SynthesisContext) => fn(ctx), { ctx: () => seen }) as never;
+  }
+
+  /** Build the two-document `same_as` graph: A (content text-seed + name + employer), B (name AGREES,
+   *  employer CONTRADICTS), and the `same_as` edge A—B. Returns each side's employer + name factIds. */
+  async function seedDisagree(
+    repo: KipRepo,
+    order: "a-first" | "b-first" = "a-first",
+  ): Promise<{ FemployerA: string; FemployerB: string; FnameA: string; FnameB: string }> {
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION); // §5.1 exact text-seed → recall seeds A
+    await assertNode(repo, B, "concept");
+    const FnameA = await assertProp(repo, A, "name", "Ed");
+    const FnameB = await assertProp(repo, B, "name", "Ed"); // AGREE — must NOT be flagged
+    let FemployerA: string;
+    let FemployerB: string;
+    if (order === "a-first") {
+      FemployerA = await assertProp(repo, A, "employer", "Acme");
+      FemployerB = await assertProp(repo, B, "employer", "Globex");
+    } else {
+      FemployerB = await assertProp(repo, B, "employer", "Globex");
+      FemployerA = await assertProp(repo, A, "employer", "Acme");
+    }
+    await assertEdge(repo, `same_as:${A}=${B}`, "same_as", A, B);
+    return { FemployerA, FemployerB, FnameA, FnameB };
+  }
+
+  it("POSITIVE: the `employer` datum is CONFLICTED citing BOTH Acme's and Globex's factIds; usedFacts carries both", async () => {
+    const repo = freshRepo("d60-positive");
+    const { FemployerA, FemployerB } = await seedDisagree(repo);
+    const synth = capturingSynth();
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    const employer = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer");
+    // The contradiction is surfaced: at least one employer datum is flagged conflicted, and its
+    // candidate set names BOTH competing signed facts (Acme AND Globex) — never two compatible facts.
+    const conflicted = employer.filter((f) => f.conflicted === true);
+    expect(conflicted.length).toBeGreaterThan(0);
+    const cands = conflicted[0]?.candidates ?? [];
+    expect(cands).toContain(FemployerA);
+    expect(cands).toContain(FemployerB);
+    // Both competing signed facts land in the retrieval envelope (via the conflicted `candidates` fold).
+    expect(result.usedFacts).toContain(FemployerA);
+    expect(result.usedFacts).toContain(FemployerB);
+    // Candidate order is deterministic (sorted).
+    expect(cands).toEqual([...cands].sort());
+
+    // SYMMETRY (the property the weak version missed): NO plain, non-conflicted `employer` datum
+    // survives for the class on ANY member — not the canonical member's own value, and not the
+    // getNode-redirect duplicate that mis-attributes the canonical value to the alias eid. A
+    // value-reading synthesizer must not be able to take either side as authoritative.
+    expect(employer.every((f) => f.conflicted === true)).toBe(true);
+
+    // NAMEABILITY (the second missed property): BOTH competing VALUES are recoverable from the assembled
+    // synthesis context — so synthesis can name "sources disagree: Acme vs Globex", not just flag an
+    // opaque dispute. "Globex" (the value the redirect previously erased) is present, as is "Acme".
+    const employerValues = new Set(employer.map((f) => f.value));
+    expect(employerValues.has("Acme")).toBe(true);
+    expect(employerValues.has("Globex")).toBe(true);
+    // Each competing value rides on a conflicted datum bound to its own member eid + own factId.
+    const acme = employer.find((f) => f.value === "Acme");
+    expect(acme?.eid).toBe(A);
+    expect(acme?.factId).toBe(FemployerA);
+    expect(acme?.candidates).toContain(FemployerB);
+    const globex = employer.find((f) => f.value === "Globex");
+    expect(globex?.eid).toBe(B);
+    expect(globex?.factId).toBe(FemployerB);
+    expect(globex?.candidates).toContain(FemployerA);
+  });
+
+  it("AGREEING PROP NOT FLAGGED: both members say name=\"Ed\", so `name` stays an ordinary (non-conflicted) datum (N5 — no fabricated conflict)", async () => {
+    const repo = freshRepo("d60-agree");
+    await seedDisagree(repo);
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    const name = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "name");
+    // The agreeing prop is present as a real datum, and NONE of its datums is flagged conflicted.
+    expect(name.length).toBeGreaterThan(0);
+    expect(name.some((f) => f.value === "Ed")).toBe(true);
+    expect(name.every((f) => f.conflicted !== true)).toBe(true);
+  });
+
+  it("DETERMINISM: the conflicted candidate set + order is the sorted candidate pair, independent of fact-authoring order", async () => {
+    // Each repo signs facts with its OWN keypair, so factIds are not comparable ACROSS repos; the
+    // determinism claim is that the FLAGGED SET + ORDER is a pure function of the fact set, NOT of the
+    // authoring order. Prove it by authoring the two competing employer facts in OPPOSITE orders and
+    // asserting each run's conflicted candidate list is exactly THAT repo's two employer factIds SORTED.
+    const candsOf = (s: ReturnType<typeof capturingSynth>): string[] =>
+      s.ctx()!.facts.find((f) => f.kind === "node-prop" && f.prop === "employer" && f.conflicted === true)?.candidates ?? [];
+
+    const repoA = freshRepo("d60-determinism-a");
+    const { FemployerA: aA, FemployerB: aB } = await seedDisagree(repoA, "a-first");
+    const sA = capturingSynth();
+    await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: sA });
+    expect(candsOf(sA)).toEqual([aA, aB].sort());
+
+    const repoB = freshRepo("d60-determinism-b");
+    const { FemployerA: bA, FemployerB: bB } = await seedDisagree(repoB, "b-first");
+    const sB = capturingSynth();
+    await answerQuestion({ question: QUESTION }, { repo: repoB, synthesize: sB });
+    expect(candsOf(sB)).toEqual([bA, bB].sort());
+
+    // Idempotent WITHIN a repo: two asks over the same fact set produce EQUAL, sorted usedFacts.
+    const sA2 = capturingSynth();
+    const rA2 = await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: sA2 });
+    const rA1 = await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: capturingSynth() });
+    expect([...rA1.usedFacts].sort()).toEqual([...rA2.usedFacts].sort());
+  });
+
+  it("FREE-TEXT NOT A SCALAR CONTRADICTION: distinct `description` prose across members is NOT flagged, while the scalar `employer` disagreement still is", async () => {
+    const repo = freshRepo("d60-freetext");
+    const { FemployerA, FemployerB } = await seedDisagree(repo);
+    // Distinct FREE-TEXT `description` on each member (prose, not a scalar claim) — must NOT be flagged.
+    await assertProp(repo, A, "description", "Ed's role at the first firm.");
+    await assertProp(repo, B, "description", "Ed's role at the second firm.");
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    // The free-text prop is never surfaced as a scalar contradiction…
+    const description = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "description");
+    expect(description.every((f) => f.conflicted !== true)).toBe(true);
+    // …while the structured `employer` disagreement still surfaces with both candidates.
+    const employer = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer" && f.conflicted === true);
+    expect(employer.length).toBeGreaterThan(0);
+    const cands = employer[0]?.candidates ?? [];
+    expect(cands).toContain(FemployerA);
+    expect(cands).toContain(FemployerB);
+  });
+
+  it("NO SHARED PROP KEY: members whose props do not overlap produce NO spurious conflict", async () => {
+    const repo = freshRepo("d60-disjoint");
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION);
+    await assertProp(repo, A, "name", "Ed");
+    await assertProp(repo, A, "employer", "Acme");
+    await assertNode(repo, B, "concept");
+    await assertProp(repo, B, "team", "Platform"); // a DIFFERENT key — no overlap with A's `employer`
+    await assertEdge(repo, `same_as:${A}=${B}`, "same_as", A, B);
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    // Nothing is flagged: no prop key is held by two members with distinct values.
+    expect(ctx!.facts.every((f) => f.conflicted !== true)).toBe(true);
+    // NO D-66 REGRESSION: the prop-union still exposes BOTH members' distinct props PLAINLY, each bound
+    // to its own member eid — A's `employer`="Acme" and B's `team`="Platform" (masked by getNode) both
+    // present as ordinary value datums.
+    expect(ctx!.facts.some((f) => f.prop === "employer" && f.value === "Acme" && f.eid === A && f.conflicted !== true)).toBe(true);
+    expect(ctx!.facts.some((f) => f.prop === "team" && f.value === "Platform" && f.eid === B && f.conflicted !== true)).toBe(true);
+  });
+
+  it("CLASS OF ONE: a single member (no `same_as` peer) never self-conflicts on its own scalar prop", async () => {
+    const repo = freshRepo("d60-single");
+    await assertNode(repo, A, "concept");
+    await assertProp(repo, A, "content", QUESTION);
+    await assertProp(repo, A, "name", "Ed");
+    await assertProp(repo, A, "employer", "Acme");
+    const synth = capturingSynth();
+
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = synth.ctx();
+    expect(ctx).toBeDefined();
+    const employer = ctx!.facts.filter((f) => f.kind === "node-prop" && f.prop === "employer");
+    expect(employer.length).toBeGreaterThan(0);
+    expect(employer.every((f) => f.conflicted !== true)).toBe(true);
+  });
+
+  it("PROJ REDIRECT UNCHANGED (retrieval-only): getNode still collapses B to canonical A and masks B's employer; the contradiction lives in retrieval, not in proj", async () => {
+    const repo = freshRepo("d60-redirect");
+    await seedDisagree(repo);
+    // getNode is a pure redirect — B collapses to canonical A, whose employer cell reads ONLY "Acme".
+    // Globex never enters A's cell; proj surfaces NO cross-document conflict (the D-60 gap this fix
+    // closes at the retrieval layer, NOT in proj).
+    const viewA = await repo.getNode(A);
+    expect(viewA?.eid).toBe(A);
+    const viewB = await repo.getNode(B);
+    expect(viewB?.eid).toBe(A); // redirect to canonical
+    const employerSegA = viewA?.props.employer?.segments.find((s) => s.kind === "value");
+    expect(employerSegA && "value" in employerSegA ? employerSegA.value : undefined).toBe("Acme");
+    expect(employerSegA && "kind" in employerSegA ? employerSegA.kind : undefined).not.toBe("conflict");
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+// D-61 — TEMPORAL SUPERSESSION. A learned graph can retain a superseded design-choice edge marked
+// `status:"current"`, so a `kip ask` presents a superseded choice as present-tense (the live demo saw
+// a pre-decision "Orchid writes Ledger" edge still `status:"current"` after the document's later
+// decision superseded it). The fix lives HERE, in the graph-QA RETRIEVAL layer (consistent with
+// D-60/D-66 — proj/`getNode` are UNTOUCHED): a `supersedes` EDGE (convention `edgeKind:"supersedes"`,
+// `from`=the superseding node, `to`=the superseded node) marks its `to` node HISTORICAL. For a
+// superseded node X, X's own `status` and its OUTGOING claim edges (edges whose `from` is X) are
+// presented in the assembled synthesis context as superseded/historical — the misleading
+// `status:"current"` value is OVERRIDDEN so a VALUE-READING synthesizer never reads it as current (the
+// D-60 robustness lesson: an opaque flag alongside a dominating `"current"` datum is not enough), and
+// the `supersedes` edge itself is surfaced so the "why" is citable. Liveness reuses the D-68-correct
+// edge existence (`edgeExistenceFactId !== null`): a RETRACTED supersedes edge does NOT invalidate
+// (N5 — the target reverts to `status:"current"`), and a node with no live supersedes edge keeps its
+// status unchanged (never a fabricated supersession). These tests assert on the ASSEMBLED CONTEXT
+// (`SynthesisContext.facts`) — a scripted synthesizer cannot answer from a datum it was never handed —
+// and on a VALUE-READING synth's prose, exactly the gap the D-60 round exposed.
+// ────────────────────────────────────────────────────────────────────────────────────────────────
+describe("graph-qa D-61 — a superseded design-choice edge is presented as HISTORICAL, not `status:\"current\"`", () => {
+  const QUESTION = "What is the Orchid to Ledger data flow?";
+  const OLD = "decision/orchid-writes-ledger"; // the superseded (earlier) decision — localId anchors the subject
+  const NEW = "decision/event-sourced-ledger"; // the superseding (later) decision
+  const LEDGER = "service/ledger";
+  const WRITES_EDGE = "edge/orchid-writes-ledger"; // OLD's OUTGOING claim edge, carrying status:"current"
+  const SUP_EDGE = "edge/new-supersedes-old"; // NEW --supersedes--> OLD
+
+  /** Seed the live-demo shape: an OLD decision node (status:"current") with an outgoing `writes` claim
+   *  edge (edge-prop status:"current") to LEDGER, a NEW decision node, and a `supersedes` edge NEW→OLD.
+   *  `seedOps` lets a test PERMUTE the authoring order (determinism). Returns the load-bearing factIds. */
+  async function seedSuperseded(
+    repo: KipRepo,
+    opts?: { withSupersedes?: boolean },
+  ): Promise<{ Fstatus: string; Fwrites: string; FwritesStatus: string; Fsup: string | null }> {
+    await assertNode(repo, OLD, "decision");
+    await assertProp(repo, OLD, "content", QUESTION); // §5.1 exact text-seed → recall finds OLD
+    const Fstatus = await assertProp(repo, OLD, "status", "current"); // X's OWN status
+    await assertNode(repo, LEDGER, "service");
+    await assertProp(repo, LEDGER, "content", "Ledger service");
+    const Fwrites = await assertEdge(repo, WRITES_EDGE, "writes", OLD, LEDGER); // OLD's outgoing claim edge
+    const FwritesStatus = await assertEdgeProp(repo, WRITES_EDGE, "status", "current"); // the MISLEADING edge-prop
+    await assertNode(repo, NEW, "decision");
+    await assertProp(repo, NEW, "content", "The ledger is now event-sourced.");
+    let Fsup: string | null = null;
+    if (opts?.withSupersedes !== false) {
+      Fsup = await assertEdge(repo, SUP_EDGE, "supersedes", NEW, OLD); // new supersedes old (from=new, to=old)
+    }
+    return { Fstatus, Fwrites, FwritesStatus, Fsup };
+  }
+
+  /** A VALUE-READING synthesizer: it reads the `writes` edge's `status` VALUE straight out of the
+   *  context and puts it in the prose — the exact naive behavior the D-60 round proved a bare flag does
+   *  not defend against. If the context still said "current", this prose would too. */
+  function captureAndRead(): { synth: AnswerQuestionDeps["synthesize"] & { mock: ReturnType<typeof vi.fn> }; seen: () => SynthesisContext | undefined } {
+    let ctx: SynthesisContext | undefined;
+    const synth = spySynth((c) => {
+      ctx = c;
+      const ws = c.facts.find((f) => f.kind === "edge-prop" && f.eid === WRITES_EDGE && f.prop === "status");
+      return {
+        answer: `The Orchid→Ledger write relationship is ${String(ws?.value ?? "unknown")}.`,
+        citations: ws
+          ? [{ factId: ws.factId, eid: WRITES_EDGE, prop: "status", edgeKind: "writes", quote: String(ws.value) }]
+          : [],
+      };
+    });
+    return { synth, seen: () => ctx };
+  }
+
+  it("POSITIVE: the superseded edge's status reads `superseded` (NOT `current`), it carries superseded/supersededBy, and the `supersedes` edge is citable", async () => {
+    const repo = freshRepo("d61-positive");
+    const { Fstatus, Fwrites, FwritesStatus, Fsup } = await seedSuperseded(repo);
+    const { synth, seen } = captureAndRead();
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    const ctx = seen();
+    expect(ctx).toBeDefined();
+
+    // ── The MISLEADING `status:"current"` value is GONE everywhere in the assembled context. This is the
+    // ROBUST assertion (not "a flag exists somewhere"): a value-reading synthesizer cannot read "current".
+    for (const f of ctx!.facts) {
+      if (f.prop === "status") expect(f.value).not.toBe("current");
+    }
+
+    // ── The OLD node's OWN status datum: overridden to "superseded", flagged, and pointing at the WHY.
+    const oldStatus = ctx!.facts.find((f) => f.kind === "node-prop" && f.eid === OLD && f.prop === "status");
+    expect(oldStatus).toBeDefined();
+    expect(oldStatus?.value).toBe("superseded");
+    expect(oldStatus?.superseded).toBe(true);
+    expect(oldStatus?.supersededBy).toBe(Fsup);
+    expect(oldStatus?.factId).toBe(Fstatus); // still the REAL signed fact (citable), just honestly presented
+
+    // ── The OUTGOING `writes` claim edge's status edge-prop: same override + markers.
+    const writesStatus = ctx!.facts.find((f) => f.kind === "edge-prop" && f.eid === WRITES_EDGE && f.prop === "status");
+    expect(writesStatus).toBeDefined();
+    expect(writesStatus?.value).toBe("superseded");
+    expect(writesStatus?.superseded).toBe(true);
+    expect(writesStatus?.supersededBy).toBe(Fsup);
+    expect(writesStatus?.factId).toBe(FwritesStatus);
+
+    // ── The `writes` edge EXISTENCE datum is itself flagged superseded (the relationship is historical).
+    const writesEdge = ctx!.facts.find((f) => f.kind === "edge" && f.eid === WRITES_EDGE);
+    expect(writesEdge).toBeDefined();
+    expect(writesEdge?.superseded).toBe(true);
+    expect(writesEdge?.supersededBy).toBe(Fsup);
+    expect(writesEdge?.factId).toBe(Fwrites);
+
+    // ── The `supersedes` edge itself is SURFACED (the citable "why") and is NOT itself superseded.
+    const supEdge = ctx!.facts.find((f) => f.kind === "edge" && f.edgeKind === "supersedes");
+    expect(supEdge).toBeDefined();
+    expect(supEdge?.factId).toBe(Fsup);
+    expect(supEdge?.from).toBe(NEW);
+    expect(supEdge?.to).toBe(OLD);
+    expect(supEdge?.superseded).not.toBe(true);
+    expect(result.usedFacts).toContain(Fsup); // citable
+
+    // ── A VALUE-READING synth's PROSE reads "superseded", NEVER "current" (the D-60 lesson, end to end).
+    expect(result.answer).toContain("superseded");
+    expect(result.answer).not.toContain("current");
+  });
+
+  it("N5 (NO supersedes edge): the same graph WITHOUT the supersedes edge keeps `status:\"current\"` unchanged — no fabricated supersession", async () => {
+    const repo = freshRepo("d61-n5-none");
+    const { Fstatus, FwritesStatus } = await seedSuperseded(repo, { withSupersedes: false });
+    const { synth, seen } = captureAndRead();
+
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    expect(result.abstained).toBe(false);
+    const ctx = seen();
+
+    const oldStatus = ctx!.facts.find((f) => f.factId === Fstatus);
+    expect(oldStatus?.value).toBe("current"); // UNCHANGED — no live supersedes edge exists
+    expect(oldStatus?.superseded).toBeUndefined();
+    const writesStatus = ctx!.facts.find((f) => f.factId === FwritesStatus);
+    expect(writesStatus?.value).toBe("current");
+    expect(writesStatus?.superseded).toBeUndefined();
+    // The value-reading synth honestly reads "current" here — there is nothing historical to override.
+    expect(result.answer).toContain("current");
+  });
+
+  it("N5 (RETRACTED supersedes edge): retracting the supersedes edge REVERTS the target to `status:\"current\"` (D-68 liveness)", async () => {
+    const repo = freshRepo("d61-n5-retract");
+    const { Fstatus, FwritesStatus, Fsup } = await seedSuperseded(repo);
+    // Retract the supersedes edge as an ORDINARY signed retract — its existence winner is gone, so the
+    // liveness gate (`edgeExistenceFactId !== null`) no longer fires and the target reverts to current.
+    await repo.retractFact({
+      type: "retract",
+      v: 1,
+      target: { kind: "edge", eid: SUP_EDGE, edgeKind: "supersedes", from: NEW, to: OLD },
+      validFrom: 0,
+      validTo: null,
+      replicaId: repo.replicaId,
+      provenance: fixtureProvenance(),
+    });
+    expect(await repo.edgeExistenceFactId(SUP_EDGE)).toBeNull(); // independently confirm it is not live
+    expect(Fsup).not.toBeNull();
+
+    const { synth, seen } = captureAndRead();
+    const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+    const ctx = seen();
+
+    const oldStatus = ctx!.facts.find((f) => f.factId === Fstatus);
+    expect(oldStatus?.value).toBe("current"); // REVERTED — the supersedes edge is no longer live
+    expect(oldStatus?.superseded).toBeUndefined();
+    const writesStatus = ctx!.facts.find((f) => f.factId === FwritesStatus);
+    expect(writesStatus?.value).toBe("current");
+    expect(writesStatus?.superseded).toBeUndefined();
+    expect(result.answer).toContain("current");
+  });
+
+  it("N5 (DIFFERENT target): a supersedes edge targeting a DIFFERENT node does not invalidate OLD's unrelated `writes` edge", async () => {
+    const repo = freshRepo("d61-n5-different");
+    const OTHER = "decision/some-other-choice";
+    // OLD carries a live writes→LEDGER edge (status:"current"), reachable-linked to a SEPARATE cluster where
+    // NEW supersedes OTHER (never OLD). The supersedes edge IS retrieved, but OLD must stay current.
+    await assertNode(repo, OLD, "decision");
+    await assertProp(repo, OLD, "content", QUESTION);
+    const Fstatus = await assertProp(repo, OLD, "status", "current");
+    await assertNode(repo, LEDGER, "service");
+    await assertProp(repo, LEDGER, "content", "Ledger service");
+    const FwritesStatus = await assertEdgeProp(
+      repo,
+      WRITES_EDGE,
+      "status",
+      "current",
+      { validFrom: 0 },
+    );
+    await assertEdge(repo, WRITES_EDGE, "writes", OLD, LEDGER);
+    await assertNode(repo, OTHER, "decision");
+    await assertProp(repo, OTHER, "status", "current");
+    await assertNode(repo, NEW, "decision");
+    await assertEdge(repo, "edge/old-relates-other", "relates_to", OLD, OTHER); // links OTHER into retrieval
+    const Fsup = await assertEdge(repo, "edge/new-supersedes-other", "supersedes", NEW, OTHER);
+
+    let ctx: SynthesisContext | undefined;
+    const synth = spySynth((c) => {
+      ctx = c;
+      return { answer: "read", citations: [] };
+    });
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+
+    // The supersedes edge WAS retrieved (otherwise the test is vacuous)…
+    const supEdge = ctx!.facts.find((f) => f.kind === "edge" && f.edgeKind === "supersedes");
+    expect(supEdge).toBeDefined();
+    expect(supEdge?.to).toBe(OTHER);
+    // …but OLD (the DIFFERENT node) is untouched — its status and its writes edge stay current.
+    const oldStatus = ctx!.facts.find((f) => f.factId === Fstatus);
+    expect(oldStatus?.value).toBe("current");
+    expect(oldStatus?.superseded).toBeUndefined();
+    const writesStatus = ctx!.facts.find((f) => f.factId === FwritesStatus);
+    expect(writesStatus?.value).toBe("current");
+    expect(writesStatus?.superseded).toBeUndefined();
+    // OTHER, the genuine target, IS marked superseded (the mechanism fired, just on the right node).
+    const otherStatus = ctx!.facts.find((f) => f.kind === "node-prop" && f.eid === OTHER && f.prop === "status");
+    expect(otherStatus?.value).toBe("superseded");
+    expect(otherStatus?.superseded).toBe(true);
+    expect(otherStatus?.supersededBy).toBe(Fsup);
+  });
+
+  it("DETERMINISM: the assembled context is byte-identical across two different fact-authoring permutations", async () => {
+    // Permutation A: canonical order.
+    const repoA = freshRepo("d61-det-a");
+    await assertNode(repoA, OLD, "decision");
+    await assertProp(repoA, OLD, "content", QUESTION);
+    await assertProp(repoA, OLD, "status", "current");
+    await assertNode(repoA, LEDGER, "service");
+    await assertProp(repoA, LEDGER, "content", "Ledger service");
+    await assertEdge(repoA, WRITES_EDGE, "writes", OLD, LEDGER);
+    await assertEdgeProp(repoA, WRITES_EDGE, "status", "current");
+    await assertNode(repoA, NEW, "decision");
+    await assertProp(repoA, NEW, "content", "The ledger is now event-sourced.");
+    await assertEdge(repoA, SUP_EDGE, "supersedes", NEW, OLD);
+
+    // Permutation B: the SUPERSEDES edge + NEW node authored FIRST, LEDGER/edge interleaved differently.
+    const repoB = freshRepo("d61-det-b");
+    await assertNode(repoB, NEW, "decision");
+    await assertProp(repoB, NEW, "content", "The ledger is now event-sourced.");
+    await assertNode(repoB, OLD, "decision");
+    await assertEdge(repoB, SUP_EDGE, "supersedes", NEW, OLD);
+    await assertNode(repoB, LEDGER, "service");
+    await assertEdgeProp(repoB, WRITES_EDGE, "status", "current");
+    await assertEdge(repoB, WRITES_EDGE, "writes", OLD, LEDGER);
+    await assertProp(repoB, OLD, "content", QUESTION);
+    await assertProp(repoB, LEDGER, "content", "Ledger service");
+    await assertProp(repoB, OLD, "status", "current");
+
+    const capture = () => {
+      let ctx: SynthesisContext | undefined;
+      const synth = spySynth((c) => {
+        ctx = c;
+        return { answer: "read", citations: [] };
+      });
+      return { synth, seen: () => ctx };
+    };
+    const a = capture();
+    const b = capture();
+    await answerQuestion({ question: QUESTION }, { repo: repoA, synthesize: a.synth });
+    await answerQuestion({ question: QUESTION }, { repo: repoB, synthesize: b.synth });
+
+    // Compare the assembled context MODULO the replica-specific signed factIds (which differ per repo):
+    // the STRUCTURE — order, eids, kinds, values, superseded markers — must be identical.
+    const shape = (ctx: SynthesisContext | undefined): string =>
+      JSON.stringify(
+        (ctx?.facts ?? []).map((f) => ({
+          kind: f.kind,
+          eid: f.eid,
+          prop: f.prop ?? null,
+          value: f.value ?? null,
+          edgeKind: f.edgeKind ?? null,
+          from: f.from ?? null,
+          to: f.to ?? null,
+          superseded: f.superseded ?? false,
+        })),
+      );
+    expect(shape(a.seen())).toBe(shape(b.seen()));
+  });
+
+  // ── D-60-CLASS ROBUSTNESS (round-2 review). A superseded decision described across TWO
+  // `same_as`-merged documents (a realistic `kip link` graph). `getNode(alias)` returns the CANONICAL
+  // merged view (a redirect-duplicate status datum under the alias eid) and the §3a prop-union reads
+  // each member's OWN status cell — so if supersession stayed keyed on the LITERAL `supersedes.to` eid,
+  // an alias member's `status:"current"` would leak UN-overridden and a value-reading synthesizer would
+  // read the superseded entity as CURRENT under the alias. The pre-pass EXPANDS supersession across the
+  // `same_as` class, so NO status datum reads "current" for ANY class member — in BOTH target directions.
+  describe.each([
+    { label: "supersedes → CANONICAL member", targetPick: (a: string, b: string) => (a < b ? a : b) },
+    { label: "supersedes → ALIAS (non-canonical) member", targetPick: (a: string, b: string) => (a < b ? b : a) },
+  ])("same_as + supersedes ($label): no class member leaks status:\"current\"", ({ targetPick }) => {
+    const A = "decision/orchid-flow-doc-a"; // one document's node
+    const B = "decision/orchid-flow-doc-b"; // the other document's node — same real entity
+    const NEWER = "decision/event-sourced-ledger";
+    const WE = "edge/orchid-writes-ledger";
+
+    it("EVERY status datum across the class reads `superseded`, both members are marked, and the supersedes edge is citable", async () => {
+      const repo = freshRepo(`d61-sameas-${targetPick(A, B) === A ? "canon" : "alias"}`);
+      const target = targetPick(A, B); // the LITERAL supersedes `to` — canonical or alias per the case
+      await assertNode(repo, A, "decision");
+      await assertProp(repo, A, "content", QUESTION); // §5.1 recall seed on A
+      await assertProp(repo, A, "status", "current"); // A's own status
+      await assertNode(repo, B, "decision");
+      await assertProp(repo, B, "status", "current"); // B's own status (the alias member)
+      await assertEdge(repo, `same_as:${A}=${B}`, "same_as", A, B); // the cross-doc merge
+      await assertNode(repo, LEDGER, "service");
+      await assertProp(repo, LEDGER, "content", "Ledger service");
+      await assertEdge(repo, WE, "writes", A, LEDGER); // A's outgoing claim edge
+      await assertEdgeProp(repo, WE, "status", "current"); // the misleading edge-prop
+      await assertNode(repo, NEWER, "decision");
+      const Fsup = await assertEdge(repo, `edge/newer-supersedes-${target === A ? "a" : "b"}`, "supersedes", NEWER, target);
+
+      let ctx: SynthesisContext | undefined;
+      const synth = spySynth((c) => {
+        ctx = c;
+        // A VALUE-READING synth: it echoes every status value it can see. If ANY member still said
+        // "current", this prose would too — the exact D-60 failure mode.
+        const statuses = c.facts.filter((f) => f.prop === "status").map((f) => String(f.value));
+        return { answer: `statuses: ${statuses.join(", ")}`, citations: [] };
+      });
+      const result = await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+      expect(result.abstained).toBe(false);
+
+      // THE HOLE: no status datum — node-prop OR edge-prop, canonical OR alias — reads "current".
+      const statusData = ctx!.facts.filter((f) => f.prop === "status");
+      expect(statusData.length).toBeGreaterThan(0);
+      for (const f of statusData) {
+        expect(f.value).not.toBe("current");
+        expect(f.value).toBe("superseded");
+        expect(f.superseded).toBe(true);
+        expect(f.supersededBy).toBe(Fsup);
+      }
+      // Both class members are covered (canonical view, alias own-cell, and the redirect-duplicate).
+      expect(statusData.some((f) => f.eid === A)).toBe(true);
+      expect(statusData.some((f) => f.eid === B)).toBe(true);
+      // The value-reading prose never reads "current".
+      expect(result.answer).not.toContain("current");
+      expect(result.answer).toContain("superseded");
+      // The supersedes edge is citable.
+      expect(result.usedFacts).toContain(Fsup);
+    });
+  });
+
+  it("DETERMINISM (tie-break): with TWO live supersedes edges onto one node, `supersededBy` is the MIN existence factId", async () => {
+    const X = "decision/orchid-writes-ledger";
+    const NEW1 = "decision/newer-one";
+    const NEW2 = "decision/newer-two";
+    const repo = freshRepo("d61-min-factid");
+    await assertNode(repo, X, "decision");
+    await assertProp(repo, X, "content", QUESTION);
+    const Fx = await assertProp(repo, X, "status", "current");
+    await assertNode(repo, NEW1, "decision");
+    await assertNode(repo, NEW2, "decision");
+    const Fsup1 = await assertEdge(repo, "edge/new1-supersedes-x", "supersedes", NEW1, X);
+    const Fsup2 = await assertEdge(repo, "edge/new2-supersedes-x", "supersedes", NEW2, X);
+    const expectedMin = Fsup1 < Fsup2 ? Fsup1 : Fsup2;
+
+    let ctx: SynthesisContext | undefined;
+    const synth = spySynth((c) => {
+      ctx = c;
+      return { answer: "read", citations: [] };
+    });
+    await answerQuestion({ question: QUESTION }, { repo, synthesize: synth });
+
+    const xStatus = ctx!.facts.find((f) => f.factId === Fx);
+    expect(xStatus?.value).toBe("superseded");
+    expect(xStatus?.superseded).toBe(true);
+    // The tie is broken deterministically toward the lexicographically smallest supersedes existence fact.
+    expect(xStatus?.supersededBy).toBe(expectedMin);
+    // Both supersedes edges are still surfaced/citable (nothing is dropped).
+    expect(ctx!.facts.filter((f) => f.kind === "edge" && f.edgeKind === "supersedes")).toHaveLength(2);
+  });
+});

@@ -1,0 +1,27 @@
+{
+  "name": "code-miner",
+  "version": "1.0.0",
+  "description": "Runs static analysis over a git-tracked repository source tree and returns candidate objects-of-interest as an AcquisitionResult (code:repo/code:module/code:symbol/code:package nodes; code:contains/code:imports/code:exports/code:depends_on edges; format node-props; code-resource://<repoId>@<gitSha> provenance). Reads the graph nothing (INV-A1); only runAcquisition authors its facts. The guaranteed tier (git + node builtins) needs no external tools; rg/tokei/scc/cloc are probed and skipped-with-reason (N5) behind KIP_INDEX_TOOLS.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["repoDir"],
+    "additionalProperties": false,
+    "properties": {
+      "repoDir": { "type": "string", "minLength": 1 },
+      "gitSha": { "type": "string" },
+      "include": { "type": "array", "items": { "type": "string" } },
+      "exclude": { "type": "array", "items": { "type": "string" } }
+    }
+  },
+  "outputSchema": {
+    "type": "object"
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "code-miner.mjs",
+    "timeout": 120000,
+    "tools": ["kip-read", "static-analysis"]
+  },
+  "tags": ["kip", "code", "miner", "acquisition", "read-only"],
+  "builtIn": false
+}

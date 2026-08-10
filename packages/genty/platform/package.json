@@ -129,6 +129,7 @@
     "@a5c-ai/comm-adapter": "6.0.0",
     "@a5c-ai/genty-core": "6.0.0",
     "@a5c-ai/genty-runtime": "6.0.0",
+    "@a5c-ai/policy-adapter": "6.0.0",
     "@a5c-ai/tasks-adapter": "6.0.0",
     "@a5c-ai/tools-adapter": "6.0.0",
     "@agentsh/secure-sandbox": "^0.1.7",

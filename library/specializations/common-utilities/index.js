@@ -11,3 +11,5 @@
 
 export { convertToDocxTask } from './docx-conversion.js';
 export { fanOutFanIn, pipeline } from './parallel-combinator.js';
+export { routedBreakpoint, adversarialGate, kipRecall, kipAssert, KIP_CLI_NOTE } from './routed-gate-combinators.js';
+export { routedGateCombinatorsDemo } from './routed-gate-combinators-demo.js';

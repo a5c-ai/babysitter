@@ -126,3 +126,15 @@ This document tracks the implementation status of AI-assisted processes for the 
 23. Kanban Flow Optimization
 24. Program Dependency Management
 25. Lessons Learned and Knowledge Management
+
+---
+
+## Anchored by the Program Delivery Flagship
+
+`program-delivery-workflow.js` (`specializations/domains/business/project-management/program-delivery-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Business case and program charter -> scope baseline and WBS -> parallel core planning (schedule/CPM, budget, risk register, stakeholder map) and parallel supporting planning (resource, procurement, quality, dependency map) -> deterministic integrated-baseline coverage verification -> adversarial estimate-and-risk-realism gate with EXECUTED WBS-to-schedule-to-budget traceability -> sponsor baseline approval -> stage-gated execution with earned-value checkpoints and a workstream status rollup -> adversarial status-integrity (watermelon) gate -> bounded change-control-board loop -> issue/dependency escalation -> steering-committee phase gates -> sponsor closure, lessons learned, and a benefits-realization stage whose critic EXECUTES claimed benefits against the business-case baseline.
+
+It composes the planning, control and closure point processes in this directory BY NAME rather than re-implementing them.
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

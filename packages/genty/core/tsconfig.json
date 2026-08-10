@@ -18,6 +18,7 @@
   "exclude": ["node_modules", "dist", "src/**/__tests__"],
   "references": [
     { "path": "../../babysitter-sdk" },
-    { "path": "../runtime" }
+    { "path": "../runtime" },
+    { "path": "../../trust-core" }
   ]
 }

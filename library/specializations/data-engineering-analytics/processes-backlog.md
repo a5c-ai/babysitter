@@ -2302,3 +2302,15 @@ This backlog contains **18 comprehensive processes** covering:
 - 🔄 **Operational**: 5 processes (ongoing maintenance)
 
 All processes are designed to be implemented as orchestrated workflows in the Babysitter SDK framework with proper task definitions, breakpoints for human approval, and parallel execution where appropriate.
+
+---
+
+## Anchored by the Data Product Lifecycle Flagship
+
+`data-product-lifecycle-workflow.js` (`specializations/data-engineering-analytics/data-product-lifecycle-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Requirement + data-contract definition -> parallel source discovery/profiling (an unprofileable source FAILS the run) + lineage mapping -> parallel model/pipeline build across the composed point tasks -> parallel EXECUTED data-quality and contract test families -> two adversarial gates whose critics RE-EXECUTE the quality suite and RE-COMPUTE profile stats and row/metric reconciliation (a green dbt run is NOT evidence) -> policy-gated destructive backfill and PII-field exposure -> conditional policy-gated contract-breaking-change -> policy-gated production cutover with executed post-cutover reconciliation -> catalog/contract publish -> SLA + freshness monitoring -> policy-gated irreversible dataset deprecation -> kip-backed data-product memory.
+
+It composes the catalog, lineage, quality, modelling, pipeline, serving and optimization point processes in this directory BY NAME as callable stages — they are routed to, NOT superseded (see the `@composes` block in the file header for the pattern/mode/surface routing tables).
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

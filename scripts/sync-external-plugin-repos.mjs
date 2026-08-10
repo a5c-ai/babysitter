@@ -42,12 +42,6 @@ async function buildTargetsFromCatalog() {
   }
 }
 
-const targets = await buildTargetsFromCatalog();
-if (!targets || targets.length === 0) {
-  console.error('ERROR: catalog is required for sync-external-plugin-repos. Build atlas first (npm run build --workspace=@a5c-ai/atlas).');
-  process.exit(1);
-}
-
 function currentBranch() {
   const result = spawnSync('git', ['branch', '--show-current'], { cwd: ROOT, encoding: 'utf8' });
   return result.status === 0 ? result.stdout.trim() : null;
@@ -110,7 +104,7 @@ function rewritePackageJson(repoDir, target) {
   writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 }
 
-function writeMarketplace(repoDir, spec) {
+export function writeMarketplace(repoDir, spec) {
   const data = JSON.parse(readFileSync(join(ROOT, spec.from), 'utf8'));
   if (spec.kind === 'claude') {
     for (const plugin of data.plugins || []) plugin.source = './';
@@ -138,7 +132,7 @@ function writeMarketplace(repoDir, spec) {
 //    `codex plugin marketplace add a5c-ai/babysitter-codex` resolve without
 //    `--sparse` (previously it failed with "marketplace root does not contain a
 //    supported manifest" — only the monorepo had a codex marketplace manifest).
-function writeRepoMarketplace(repoDir) {
+export function writeRepoMarketplace(repoDir) {
   const claudePluginPath = join(repoDir, '.claude-plugin', 'plugin.json');
   if (existsSync(claudePluginPath)) {
     const plugin = JSON.parse(readFileSync(claudePluginPath, 'utf8'));
@@ -316,6 +310,19 @@ function prepareTarget(target) {
   return { repo: target.repo, changed: hasChanges, path: repoDir, source: target.sourceDir };
 }
 
-mkdirSync(workDir, { recursive: true });
-const results = targets.map(prepareTarget);
-console.log(JSON.stringify({ branch, workDir, pushed: shouldPush, results }, null, 2));
+async function main() {
+  const targets = await buildTargetsFromCatalog();
+  if (!targets || targets.length === 0) {
+    console.error('ERROR: catalog is required for sync-external-plugin-repos. Build atlas first (npm run build --workspace=@a5c-ai/atlas).');
+    process.exit(1);
+  }
+  mkdirSync(workDir, { recursive: true });
+  const results = targets.map(prepareTarget);
+  console.log(JSON.stringify({ branch, workDir, pushed: shouldPush, results }, null, 2));
+}
+
+// Only run the sync when invoked directly as a CLI. Importing this module (e.g.
+// from tests) exposes the pure generator helpers without side effects.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}

@@ -981,3 +981,17 @@ Establish robust test environment management with infrastructure as code, contai
 - Quality gates should be adjusted based on project risk and context
 - Continuous improvement cycles should be built into all processes
 - Team training and culture change are critical success factors
+
+---
+
+## Anchored by the Release Quality Assurance Flagship
+
+`release-quality-assurance-workflow.js` (`qa-testing-automation/release-quality-assurance-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Risk-based test strategy -> coverage/gap analysis -> suite authoring -> environment + test-data provisioning behind an adversarial fidelity gate -> parallel multi-tier suite execution -> mutation + flake depth analysis -> adversarial false-green gate -> defect routing with policy-gated waivers/quarantines/finding-acceptances -> release quality certificate with an explicit go/no-go.
+
+It composes the point processes in this directory BY NAME rather than re-implementing them. Ownership boundary: this process owns the release-quality EVIDENCE; `specializations/release-engineering/release-lifecycle.js` owns the ACT (cut/build/rollout/rollback).
+
+This pass also namespaced the `defineTask` ids in the 13 pre-existing point-task files in this directory to resolve a proven global-registry collision; the task ids changed, the processes did not.
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

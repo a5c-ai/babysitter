@@ -1,0 +1,174 @@
+# Additive upstream release records from the 2026-07-06 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1783329373-gb3eec2
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1783329373-gb3eec2"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1783329373-gb3eec2"
+  currentVersion: "0.0.1783329373-gb3eec2"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1783329373-gb3eec2"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from 0.0.1783069983-gce9c8b to 0.0.1783329373-gb3eec2."
+    - "npm metadata identifies the package as the Amp frontier coding agent CLI and points users to https://ampcode.com/."
+    - "No public build-specific changelog, CLI flag, transport/API, model, install-method, package-name, or migration change was found for this timestamped build."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1783329373-gb3eec2."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1783329373-gb3eec2-2026-07-06
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-201
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.201"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.201"
+  currentVersion: "2.1.201"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.201"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.201"
+  cliCommand: "claude"
+  summary: "Claude Code release changing Claude Sonnet 5 harness reminder injection so sessions no longer use the mid-conversation system role for those reminders."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.199 to 2.1.201."
+    - "Claude Sonnet 5 sessions no longer use the mid-conversation system role for harness reminders, affecting prompt assembly and transcript-role expectations in Claude adapter tests."
+    - "No package-name, install-method, CLI flag, transport/API, model default, or migration change was published for this release."
+    - "Install command remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "Harness reminders for Claude Sonnet 5 avoid the mid-conversation system role."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-201-2026-07-06
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-201
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.201"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.201"
+  currentVersion: "0.3.201"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.201"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.201"
+  summary: "Claude Agent SDK TypeScript release updated to parity with Claude Code v2.1.201."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.199 to 0.3.201."
+    - "The SDK release notes state parity with Claude Code v2.1.201, so SDK consumers should preserve the same Claude Sonnet 5 harness-reminder role behavior as the CLI."
+    - "Versioned npm, yarn, pnpm, and bun install commands remain the published update path."
+    - "No package-name, transport/API, CLI flag, model, or migration change beyond the parity update was published."
+  releaseHighlights:
+    - "Parity with Claude Code v2.1.201."
+    - "Versioned npm/yarn/pnpm/bun update commands documented."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-201-2026-07-06
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:16-3-10
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 16.3.10"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "16.3.10"
+  currentVersion: "16.3.10"
+  releasedAt: "2026-07-06"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v16.3.10"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.3.10"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release hardening strict-tool fallback, Ollama empty-stop retries, LiteLLM discovery, high-subagent TUI rendering, browser teardown cleanup, session stats, llama.cpp vision metadata, IRC waits, and postmortem cleanup."
+  assimilationNotes:
+    - "Latest npm moved from recorded 16.3.4 to 16.3.10; an existing issue tracks 16.3.6, but 16.3.10 supersedes it."
+    - "Claude Sonnet 5 strict-tool rejections from feature-gated gateways are now classified and retried without strict tools, affecting provider fallback and strict-tool error handling."
+    - "Ollama/Ollama Cloud EOS-only completions retry empty stops with a single output token before the agent loop halts, affecting model-response retry logic."
+    - "get_session_stats RPC responses now include context-window usage, affecting RPC clients and context meter rendering."
+    - "High-subagent sessions limit HUD/subagent tree rendering and coalesce observer updates, affecting TUI rendering and performance assumptions."
+    - "Browser run cleanup aborts are downgraded to log lines instead of killing every subagent sharing the process, affecting browser-run lifecycle supervision."
+    - "postmortem cleanup adds expected-cleanup-error tagging and a 10s cleanup deadline, affecting fatal-path cleanup behavior."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Strict-tool rejection fallback for Claude Sonnet 5 feature-gated gateways."
+    - "Ollama empty-stop retry before silent halt."
+    - "LiteLLM rich discovery placeholder filtering."
+    - "Bounded high-subagent HUD/tree rendering and lower TUI CPU use."
+    - "Browser teardown cleanup no longer exits the shared process."
+    - "get_session_stats includes context-window usage."
+    - "Postmortem expected-cleanup-error tagging and 10s cleanup deadline."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-16-3-10-2026-07-06
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-19-6
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.19.6"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.19.6"
+  currentVersion: "0.19.6"
+  releasedAt: "2026-07-03"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.19.6"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.6"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding dataviz skills, nested subagents, daemon session artifact APIs, vision model selection, mobile MCP coordinates, workspace memory operations, and scheduler/runtime reliability fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.19.5 to 0.19.6."
+    - "New bundled dataviz skill affects skill discovery and command availability."
+    - "Sub-agents can spawn nested sub-agents up to configurable depth, affecting subagent lifecycle limits and task-tree rendering."
+    - "Daemon session artifact APIs affect daemon transport/API capability mapping."
+    - "Vision model selection appears in daemon provider status and web-shell model dialogs, affecting model selection metadata."
+    - "Scheduler adds opt-in per-tool-call execution timeout and configurable recurring cron/loop job expiration, affecting launch/config surfaces."
+    - "Mobile MCP vendors opt-in 0-1000 relative coordinates, affecting mobile tool schema and coordinate normalization."
+    - "No package-name or install-method migration was published."
+  releaseHighlights:
+    - "Bundled dataviz skill."
+    - "Nested subagents with configurable depth."
+    - "Daemon session artifact APIs."
+    - "Vision model selection in daemon/web-shell surfaces."
+    - "Opt-in per-tool-call timeout and recurring job expiration config."
+    - "Mobile MCP relative coordinate support."
+    - "Workspace memory forget/dream operations."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-19-6-2026-07-06

@@ -1,8 +1,9 @@
 /**
  * @process methodologies/domain-driven-design
  * @description Domain-Driven Design (DDD) - Strategic and tactical design patterns for complex business domains
- * @inputs { projectName: string, domainDescription?: string, complexity?: string, phase?: string }
- * @outputs { success: boolean, strategicDesign: object, tacticalDesign: object, domainModel: object, ubiquitousLanguage: object, implementation: object }
+ * @inputs { projectName: string, domainDescription?: string, complexity?: string, phase?: string, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, strategicDesign: object, tacticalDesign: object, domainModel: object, ubiquitousLanguage: object, implementation: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract A team outside a bounded context can read the context map and name the exact integration pattern and published contract it must code against.
    * @graph
  *   domains: [domain:software-engineering]
  *   specializations: [specialization:software-architecture]
@@ -13,6 +14,24 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated DDD ceremonies. Approving the bounded contexts together with
+ * the context map is the one decision that binds other teams: it fixes the
+ * boundaries and the published language they must code against. Subdomain
+ * classification, tactical modelling and language checks are internal design
+ * work and stay plain.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.ddd.bounded-context-change',
+    expert: 'architect',
+    description: 'Change a bounded-context boundary or published language/contract other teams depend on (domain-driven-design/domain-driven-design.js).',
+  },
+];
 
 /**
  * Domain-Driven Design Process
@@ -44,8 +63,23 @@ export async function process(inputs, ctx) {
     domainDescription = '',
     complexity = 'moderate',
     phase = 'full',
-    existingDomainModel = null
+    existingDomainModel = null,
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
+
+  // Recall what prior modelling sessions learned about this domain.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'Domain-Driven Design strategic practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance and gate verdict. Both stay empty/null when
+  // the requested phase does not enter the strategic branch.
+  const ceremonyDecisions = [];
+  let contextMapGate = null;
 
   const results = {
     projectName,
@@ -67,7 +101,8 @@ export async function process(inputs, ctx) {
       projectName,
       domainDescription,
       complexity,
-      existingDomainModel
+      existingDomainModel,
+      priorPractice: priorPractice.insights
     });
 
     results.strategicDesign = { subdomains: subdomainResult };
@@ -104,8 +139,44 @@ export async function process(inputs, ctx) {
 
     results.strategicDesign.contextMap = contextMapResult;
 
-    // Breakpoint: Review strategic design
-    await ctx.breakpoint({
+    // Quality gate: is the context map a real contract, or a diagram?
+    contextMapGate = await adversarialGate(ctx, {
+      gateId: 'methodologies.ddd.context-map-contract-integrity',
+      artifact: {
+        path: 'artifacts/ddd/CONTEXT_MAP.md',
+        description: 'Bounded contexts and their integration patterns / published contracts'
+      },
+      critics: [
+        {
+          name: 'context-boundary-critic',
+          role: 'Domain architect auditing context boundaries',
+          focus: 'each bounded context has a coherent, non-overlapping responsibility and an explicit integration pattern'
+        },
+        {
+          name: 'published-language-critic',
+          role: 'Ubiquitous-language auditor',
+          focus: 'no term carries two meanings across contexts without an anti-corruption layer or translation'
+        }
+      ],
+      ironLaw: [
+        'Open artifacts/ddd/BOUNDED_CONTEXTS.md, CONTEXT_MAP.md and context-relationships.json and cite file:line for every relationship you accept.',
+        'A relationship that does not name a specific DDD pattern (Shared Kernel, Customer/Supplier, Conformist, Anti-Corruption Layer, Open Host Service, Published Language, Separate Ways, Partnership) is an issue.',
+        'A relationship referencing a context that does not exist in BOUNDED_CONTEXTS.md is a high-severity issue.',
+        'A domain term used with different meanings in two contexts with no translation layer is a high-severity issue — that is the exact failure the context map exists to prevent.',
+        'Do not accept createContextMapTask own summary; derive the context graph yourself from the artifacts.'
+      ],
+      maxFixAttempts: 2,
+      fixer: {},
+      context: {
+        projectName,
+        complexity,
+        domainDescription
+      }
+    });
+
+    // Ceremony: change the bounded-context boundaries and published contracts.
+    // Routed to the architect.
+    const boundedContextDecision = await routedBreakpoint(ctx, {
       question: `Review strategic design for "${projectName}". Bounded contexts define clear boundaries with integration patterns (Shared Kernel, Customer/Supplier, Anti-Corruption Layer, etc.). Approve to proceed with tactical design?`,
       title: 'Strategic Design Review',
       context: {
@@ -115,7 +186,29 @@ export async function process(inputs, ctx) {
           { path: 'artifacts/ddd/CONTEXT_MAP.md', format: 'markdown', label: 'Context Map' },
           { path: 'artifacts/ddd/context-relationships.json', format: 'code', language: 'json', label: 'Context Relationships' }
         ]
+      },
+      qualityGate: {
+        passed: contextMapGate.passed,
+        issues: contextMapGate.issues,
+        evidence: contextMapGate.evidence,
+        attempts: contextMapGate.attempts,
+        escalated: contextMapGate.escalated
       }
+    }, {
+      breakpointId: 'methodology-retrofit.ddd.bounded-context-change',
+      expert: 'architect',
+      tags: ['policy-gated', 'methodology', 'domain-driven-design'],
+      strategy: 'single'
+    });
+
+    ceremonyDecisions.push({
+      actionId: 'methodology-retrofit.ddd.bounded-context-change',
+      expert: 'architect',
+      description: policyGatedActions[0].description,
+      scope: { phase: 'strategic' },
+      approved: boundedContextDecision.approved === true,
+      autoApproved: boundedContextDecision.autoApproved === true,
+      decidedAt: ctx.now()
     });
 
     // Step 1.4: Build Ubiquitous Language (Initial)
@@ -373,6 +466,50 @@ export async function process(inputs, ctx) {
     }
   });
 
+  const boundedContextCount = results.strategicDesign && results.strategicDesign.boundedContexts
+    ? results.strategicDesign.boundedContexts.contexts.length
+    : 0;
+  const integrationPatterns = results.strategicDesign && results.strategicDesign.contextMap
+    ? [...new Set(results.strategicDesign.contextMap.relationships.map(r => r.pattern))]
+    : [];
+
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:domain-driven-design',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.ddd.bounded-context-change',
+        props: { raises: ceremonyDecisions.length, phase }
+      },
+      {
+        subject: 'methodology:domain-driven-design',
+        predicate: 'quality-gate-verdict',
+        object: String(contextMapGate === null ? 'not-reached' : contextMapGate.passed),
+        props: {
+          gateId: 'methodologies.ddd.context-map-contract-integrity',
+          attempts: contextMapGate === null ? 0 : contextMapGate.attempts,
+          escalated: contextMapGate === null ? false : contextMapGate.escalated,
+          phase
+        }
+      },
+      {
+        subject: 'methodology:domain-driven-design',
+        predicate: 'bounded-context-count',
+        object: String(boundedContextCount),
+        props: { projectName, complexity }
+      },
+      {
+        subject: 'methodology:domain-driven-design',
+        predicate: 'integration-patterns',
+        object: String(integrationPatterns.join(', ')),
+        props: { distinctPatterns: integrationPatterns.length }
+      }
+    ]
+  });
+
   return {
     success: finalValidation.valid,
     projectName,
@@ -399,6 +536,13 @@ export async function process(inputs, ctx) {
       timestamp: ctx.now(),
       methodology: 'Domain-Driven Design (Eric Evans)',
       version: '1.0.0'
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: contextMapGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

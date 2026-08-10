@@ -103,6 +103,10 @@
       "src/processes.ts": "file:per-harness/genty/src/processes.ts",
       "src/register.ts": "file:per-harness/genty/src/register.ts",
       "src/index.ts": "file:per-harness/genty/src/index.ts"
+    },
+    "codex-tests": {
+      "test/integration.test.js": "file:per-harness/codex/test/integration.test.js",
+      "test/packaged-install.test.js": "file:per-harness/codex/test/packaged-install.test.js"
     }
   },
   "harnessInstallSurfaceExportSets": {
@@ -162,7 +166,8 @@
         "codex-branding",
         "codex-support-files",
         "readme",
-        "codex-team-install"
+        "codex-team-install",
+        "codex-tests"
       ],
       "harnessManifest": {
         "skills": "./skills/",
@@ -210,7 +215,6 @@
         "LEGACY_SKILL_NAMES",
         "LEGACY_PROMPT_NAMES",
         "LEGACY_HOOK_SCRIPT_NAMES",
-        "MANAGED_HOOK_SCRIPT_NAMES",
         "getCodexHome",
         "getHomePluginRoot",
         "getHomeMarketplacePath",
@@ -229,7 +233,14 @@
         "removeLegacyCodexSurface",
         "installCodexSurface",
         "harnessInstall",
-        "harnessTeamInstall"
+        "harnessTeamInstall",
+        "MANAGED_HOOK_FILE_PREFIXES",
+        "MANAGED_SURFACE_MARKER",
+        "looksLikeBabysitterArtifact",
+        "stripManagedHooks",
+        "rewriteManagedHookCommand",
+        "removeManagedCodexSurface",
+        "harnessUninstall"
       ]
     },
     "cursor": {

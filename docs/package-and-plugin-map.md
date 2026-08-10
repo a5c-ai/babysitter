@@ -1,7 +1,7 @@
 ---
 title: Package and Plugin Docs Map
 description: Canonical docs coverage map for public packages, internal workspaces, and harness plugin surfaces in the Babysitter repo.
-last_updated: 2026-04-27
+last_updated: 2026-07-19
 ---
 
 # Package and Plugin Docs Map
@@ -24,6 +24,7 @@ Use it to answer three questions quickly:
 - **Public harness plugin**: a supported harness/plugin surface for a specific host.
 - **Internal-only workspace**: active inside this monorepo, but not documented as a productized public offering.
 - **Internal-only companion app**: repo-active support app surface with no separate public docs contract.
+- **Pre-release workspace (private/unpublished)**: built and runnable inside this monorepo with its own package docs, but `private`/unpublished — not yet a public npm surface.
 
 ## Family entrypoints
 
@@ -107,6 +108,7 @@ Use it to answer three questions quickly:
 | `packages/adapters/watch-wearos-app` | Internal-only companion app | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | [docs/adapters/README.md](./adapters/README.md) | No package README today. This map is the explicit internal-only note until the surface is promoted. |
 | `packages/genty/tui-plugins` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Internal-only support package for the TUI surface. This map is the explicit documentation home until the workspace gets a README. |
 | `packages/kradle/web` | Internal-only workspace | [docs/package-and-plugin-map.md](./package-and-plugin-map.md) | — | Kradle web console. Internal-only; this map is the documentation home until the surface is promoted. |
+| `packages/kip-sdk` | Pre-release workspace (private/unpublished) | [packages/kip-sdk/README.md](../packages/kip-sdk/README.md) | [docs/user-guide/ecosystem/kip-sdk.md](./user-guide/ecosystem/kip-sdk.md)<br />[packages/kip-sdk/docs/guide/getting-started.md](../packages/kip-sdk/docs/guide/getting-started.md) | Signed, git-substrate, bitemporal typed property-graph **memory SDK** (K/I/P): `open()`/`KipRepo` SDK, a `kip` CLI, a `kip-mcp` server, graph-QA (`kip ask`), and a 40-invariant conformance suite. Built & runnable, but `private: true`/`0.0.1` — **unpublished** (workspace/`dist/`, not `npm install`) and not yet wired into the rest of the stack. |
 
 ## Coverage rules for future changes
 

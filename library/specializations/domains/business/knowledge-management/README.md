@@ -422,3 +422,43 @@ Knowledge Management interfaces with multiple organizational functions:
 ---
 
 This specialization provides the foundation for organizations to systematically capture, share, and leverage their collective knowledge for competitive advantage and continuous learning.
+
+---
+
+## Flagship Orchestration: Knowledge Lifecycle Workflow
+
+[`knowledge-lifecycle-workflow.js`](./knowledge-lifecycle-workflow.js) is the end-to-end orchestration for this specialization. It runs:
+
+`P0 kip corpus recall -> P1 multi-method knowledge intake (parallel lanes) -> P2 curation into candidate knowledge assets -> P3 per-candidate dedupe recall + enrichment + classification (parallel) -> P4 adversarial accuracy-and-freshness gate + merge adjudication -> P5 taxonomy/ontology placement -> P6 publish to the shared KB (+ conditional external exposure) -> P7 decay monitoring + retention/retirement decisions -> P8 deterministic kip assert`
+
+### Policy-gated actions
+
+Four routed breakpoints, each with `breakpointId === actionId` and a guarded executor that runs only on `approved === true`. None of them has `autoApproveAfterN`:
+
+| Action | Expert | Phase | Raised when |
+| --- | --- | --- | --- |
+| `knowledge-lifecycle.publish-to-shared-kb` | knowledge-manager | P6 | always, once candidates survive adjudication |
+| `knowledge-lifecycle.external-exposure` | communications-lead | P6 | `externalExposureRequested` and the publish executed |
+| `knowledge-lifecycle.taxonomy-change` | information-architect | P5 | the placement requires mutating the taxonomy itself |
+| `knowledge-lifecycle.retire-artifact` | knowledge-manager | P7 | the retention audit passed and something is proposed for supersede/retire |
+
+Conditional gates that are not raised are still recorded as `required: false` in `outputs.gatedActions`, and any harness-level auto-approval is surfaced in `outputs.autoApprovals`.
+
+### Adversarial gates
+
+- **`klw.accuracy-freshness`** (P4) — source-accuracy, freshness/staleness, duplication-recall and sensitivity/classification critics that must EXECUTE their checks: open every cited locator, diff against the live corpus, and re-run the kip recall themselves. A failed gate publishes nothing.
+- **`klw.retention-audit`** (P7) — supersession-evidence and institutional-memory critics whose default verdict is FAIL. A failed audit can only ever mean *keep the knowledge*: the retire breakpoint is never raised.
+
+### Composition by name
+
+The workflow composes the 16 point tasks in this directory BY NAME as prompt playbooks — it never imports or executes them:
+
+- **Intake** — `critical-knowledge-identification.js`, `expert-knowledge-elicitation.js`, `tacit-to-explicit-conversion.js`, `project-knowledge-capture.js`, `lessons-learned-documentation.js`, `after-action-review.js`, `knowledge-transfer-succession.js`
+- **Curation + enrichment** — `knowledge-base-content.js`, `knowledge-base-quality-assurance.js`
+- **Classification + placement** — `taxonomy-metadata-governance.js`, `enterprise-knowledge-base-architecture.js`, `search-optimization.js`
+- **Decay + retention** — `knowledge-lifecycle-management.js`, `knowledge-audit-assessment.js`
+- **Feedback loop** — `lessons-learned-integration.js`, `continuous-improvement-integration.js`
+
+### kip integration
+
+This is the specialization where kip is the substrate rather than a bolt-on. Following the [kip-librarian skill](../../../shared/skills/kip-librarian/SKILL.md) under kind `knowledge-asset`, the workflow recalls the corpus at intake AND inside every per-candidate dedupe lane, and asserts at publish AND at retire so the next run's decay monitoring reads this run's own assertions. An unreachable or uninitialized store is a surfaced failure, never an empty-corpus silent pass.

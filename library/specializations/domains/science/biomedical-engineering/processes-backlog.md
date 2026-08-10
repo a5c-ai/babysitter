@@ -477,3 +477,15 @@ Sterilization Validation
 - EU MDR 2017/745 - Medical Device Regulation
 - FDA Design Control Guidance for Medical Device Manufacturers
 - FDA Guidance on Human Factors and Usability Engineering
+
+---
+
+## Anchored by the Medical Device TPLC Flagship
+
+`medical-device-tplc-workflow.js` (`specializations/domains/science/biomedical-engineering/medical-device-tplc-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Design-control intake -> ISO 14971 risk management -> parallel design characterization (biological evaluation, sterilization/sterile-barrier, human factors, IEC 62304 software) -> policy-gated DESIGN FREEZE -> V&V over the frozen baseline -> clinical evaluation with policy-gated first-in-human authorization -> Design History File sufficiency gate -> policy-gated regulatory submission with bounded deficiency-response rounds -> post-market surveillance with severity-routed CAPA, policy-gated field action and vigilance filing.
+
+It composes the 14 biomedical point processes in this directory BY NAME (prompt prose only — never imported).
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

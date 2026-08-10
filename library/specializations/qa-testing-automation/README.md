@@ -517,3 +517,57 @@ QA, Testing, and Test Automation is a critical specialization that ensures softw
 The field continues to evolve with trends like AI-assisted testing, shift-left testing, continuous testing in DevOps, and quality engineering (going beyond traditional QA). Professionals who embrace automation, collaborate effectively across teams, and focus on building quality in (not just testing it in) will thrive in this dynamic specialization.
 
 Quality is not a phase; it's a continuous journey that requires dedication, collaboration, and a commitment to excellence throughout the software development lifecycle.
+
+## Release Quality Assurance Workflow (flagship)
+
+`release-quality-assurance-workflow.js` is this specialization's flagship orchestration. It turns
+the point processes in this directory into one gated chain and produces a **release quality
+certificate** with an explicit go/no-go verdict.
+
+**Phase chain:** kip recall of prior release-quality memory -> risk-based test strategy +
+shift-left findings (parallel) -> coverage and gap analysis -> automation-framework readiness and
+per-layer suite authoring -> environment and test-data provisioning -> **adversarial fidelity
+gate** -> parallel multi-tier suite execution -> mutation score and flakiness depth analysis ->
+**adversarial false-green gate** -> defect routing and policy-gated waivers/quarantines/finding
+acceptances -> quality-gate aggregation, metrics dashboard and CI wiring -> go/no-go sign-off,
+guarded certificate, kip assert, run report.
+
+**Four policy-gated actions** (each `breakpointId` is identical to its `actionId`, each guards its
+executor on `approved === true`, and each executor has exactly one call site):
+
+| actionId | expert | auto-approval |
+| --- | --- | --- |
+| `release-quality.go-no-go-signoff` | qa-lead | none — production promotion authorization never auto-approves, and `presentAlwaysApprove` is deliberately omitted |
+| `release-quality.suite-quarantine` | qa-lead | `quarantineAutoApproveAfterN` (default 3) — lowest-consequence and expiry-bound; the auto-approved provenance is recorded on every quarantine record |
+| `release-quality.coverage-threshold-waiver` | engineering-manager | none — waiving a measured bar is always a human decision |
+| `release-quality.security-finding-acceptance` | security-lead | none |
+
+**Two adversarial gates**, both demanding EXECUTED evidence (a report-reading verdict is invalid):
+
+- `qa.env-data-fidelity` (environment-parity-critic + test-data-fidelity-critic) runs **before any
+  suite executes** — results from an unfaithful environment are worthless, so a failure here ends
+  the run and the go/no-go gate is never raised.
+- `qa.false-green` (mutation-false-green-critic + flake-and-quarantine-integrity-critic) re-runs the
+  suites and injects mutations to prove they can still go red, and diffs the test ids that ran
+  against the ids authored so no coverage was quietly removed.
+
+**Nineteen composed point processes** (imported and invoked): `test-strategy`,
+`shift-left-testing`, `automation-framework`, `e2e-test-suite`, `api-testing`, `contract-testing`,
+`performance-testing`, `security-testing`, `accessibility-testing`, `cross-browser-testing`,
+`mobile-testing`, `visual-regression`, `mutation-testing`, `environment-management`,
+`test-data-management`, `flakiness-elimination`, `continuous-testing`, `quality-gates`,
+`metrics-dashboard`. `flakiness-elimination` is invoked with `quarantineEnabled: false` — coverage
+is only ever removed through the `release-quality.suite-quarantine` policy gate, never as a
+sub-process side effect.
+
+**Boundary vs `release-engineering/release-lifecycle.js`:** that process owns the release **act**
+(cut, changelog, versioning, artifact build, staged rollout, rollback); this one owns the release
+**evidence** (whether the candidate has been genuinely tested). This workflow never deploys, never
+shifts traffic, never rolls back, and never writes a changelog. The certificate it emits is
+consumed by `release-lifecycle`'s `rel.release-readiness` gate; a no-go here means
+`release-lifecycle` is never started.
+
+**No fallbacks:** an unknown layer, an unknown tier, an unknown threshold key, an unset
+`p95LatencyMs` performance budget, an empty change manifest and an unknown suite status all THROW.
+`SUITE_STATUSES` has exactly two members (`passed`, `failed`) so the skipped-and-passed path is
+unrepresentable: a suite that cannot run is `failed` with `executionError` set.

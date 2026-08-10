@@ -187,6 +187,9 @@ export class HooksMuxToolHookBridge implements ToolHookBridge {
       caller: context.caller,
       runId: context.runId,
       sessionId: context.sessionId,
+      // Milestone D (AC-34a): carry the ACTUAL executing tool-call id so the policy
+      // layer binds a CommandAuthorization to this exact call (not `runId`).
+      toolCallId: context.toolCallId,
     };
     if (result) {
       payload.result = result;
@@ -203,7 +206,10 @@ export class HooksMuxToolHookBridge implements ToolHookBridge {
         nativeEventName: rawEventName,
         adapter: this.adapter,
         toolName: context.toolName,
-        toolCallId: context.runId ?? null,
+        // Milestone D (AC-34a): the ACTUAL executing tool-call id when present. Fall
+        // back to `runId` only as a legacy correlation hint — the policy binding uses
+        // `context.toolCallId` (threaded above), never `runId`.
+        toolCallId: context.toolCallId ?? context.runId ?? null,
         source: descriptor.source,
         metadata: {
           ...this.metadata,
@@ -218,6 +224,49 @@ export class HooksMuxToolHookBridge implements ToolHookBridge {
       env: this.env,
       raw: payload,
     };
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Composite bridge (Milestone D GATE-1 composition)                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Compose two `ToolHookBridge`s so a policy verifier (e.g.
+ * `PolicyVerifierHookBridge`) runs BEFORE an existing bridge in `beforeToolUse`: if
+ * the first bridge returns `{ decision: 'deny' }` the call short-circuits (the second
+ * bridge is not consulted); otherwise the second bridge's decision is returned. This
+ * is how GATE 1 (§9.1) wraps or composes the existing hooks bridge — the policy
+ * verifier is the LOAD-BEARING, un-bypassable line and cannot be relaxed by a later
+ * bridge (a deny wins). `afterToolUse` runs both (first, then second) for telemetry.
+ */
+export class CompositeToolHookBridge implements ToolHookBridge {
+  constructor(
+    private readonly first: ToolHookBridge,
+    private readonly second: ToolHookBridge,
+  ) {}
+
+  async beforeToolUse(
+    context: ToolCallContext,
+    descriptor: ToolDescriptor,
+  ): Promise<ToolHookResult | undefined> {
+    const firstResult = await this.first.beforeToolUse(context, descriptor);
+    // A deny from the first (policy) bridge short-circuits — un-bypassable.
+    if (firstResult?.decision === 'deny') return firstResult;
+    const secondResult = await this.second.beforeToolUse(context, descriptor);
+    // A deny from either bridge denies (most-restrictive wins).
+    if (secondResult?.decision === 'deny') return secondResult;
+    // Prefer an explicit decision from the second, else the first's.
+    return secondResult ?? firstResult;
+  }
+
+  async afterToolUse(
+    context: ToolCallContext,
+    descriptor: ToolDescriptor,
+    result: ToolCallResult,
+  ): Promise<ToolHookResult | undefined> {
+    await this.first.afterToolUse(context, descriptor, result);
+    return this.second.afterToolUse(context, descriptor, result);
   }
 }
 

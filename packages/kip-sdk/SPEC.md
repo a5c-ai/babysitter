@@ -105,7 +105,7 @@
 > *registered* key could backdate a fully-trusted fact onto a victim replica whose durable subset lacks
 > that key's higher facts (late registration + disk-pressure eviction, both in-spec/default). v5 closes
 > this at the root by **reusing machinery already in the spec**: per-key trust is **gated on per-key
-> `(wall,counter)` chain completeness** — the exact contiguity rule §4c/m4-1 already defines for
+> `seq` chain completeness** — the exact contiguity rule §4c/m4-1 already defines for
 > pin-completeness. A fact `F` from key `K` projects **trusted** only over `K`'s complete gap-free chain
 > up to `F`; an evicted/withheld/unreplicated earlier same-key fact yields a gap, so `F` projects
 > **`pending`** (not trusted, not rejected) until the chain completes — an evicted higher honest fact can
@@ -126,7 +126,7 @@
 >
 > **v6 headline fix — DECOUPLE backdating-safety from chain RETENTION; the registered-key durable pool is
 > CAP-BOUNDED with on-demand re-fetch (M6-1), closing the last internal contradiction.** The v5 C5-1 fix
-> used two mechanisms: **(i)** a per-key **chain-completeness gate** (a `(wall,counter)` gap ⇒ `pending`,
+> used two mechanisms: **(i)** a per-key **chain-completeness gate** (a `seq` gap ⇒ `pending`,
 > never a silent trusted backdate) and **(ii)** `key-chain-durable` retention (a registered key's chain is
 > never evicted). Mechanism (i) alone is the **safety** property; (ii) was a **liveness** aid that
 > over-reached into "never evict a registered key's *entire emission*," which (a) reopened the C4-1
@@ -134,7 +134,7 @@
 > own "bounded per registered key by quota" claim — a quota that can never evict is not a bound. v6 makes
 > `key-chain-durable` **bounded by a per-key `keyChainDurableCapBytes`** (manifest-pinned): a registered
 > key's chain is **preferentially retained up to its cap**; past the cap, the *oldest* chain links may be
-> evicted. **Safety is unaffected** — the completeness gate (i) makes any resulting `(wall,counter)` gap
+> evicted. **Safety is unaffected** — the completeness gate (i) makes any resulting `seq` gap
 > project **`pending`** (never a silent trusted backdate), so an evicted-then-needed link is simply
 > **re-fetched on demand** (content-addressed, the mechanism the spec already uses for late registration);
 > dependent same-key facts stay `pending` until the link is re-fetched or the chain otherwise completes.
@@ -144,7 +144,7 @@
 > completed-chain frontier** (a link that has completed a chain for a non-`pending` dependent is retained
 > while that dependent is non-`pending`), so `pending → demoted/trusted` still happens at most once. The
 > per-key chain is disambiguated as **per-key** (an author key may emit from multiple replicas), with
-> `(wall,counter)` contiguity decided **per-`(replicaId,key)`** (matching the §4c/m4-1 rule it reuses) and
+> `seq` contiguity decided **per-`(replicaId,key)`** (matching the §4c/m4-1 rule it reuses) and
 > the monotonicity demotion key-wide (m6-1). The honest **re-fetch liveness residual** (a pre-registration
 > chain link LRU-dropped from *every* replica leaves dependent facts permanently `pending` — safe, never a
 > wrong trusted value) is stated plainly (m6-3); INV-19 holds under cap-bounded retention (m6-2).
@@ -224,7 +224,7 @@ substrate, agents are clients). It provides:
 | **Author-HLC** | The fact's own author-stamped, signed `hlc` (§4.1). The **only** time axis `proj` ever reads — for `orderKey`, valid-time geometry, *and* authorization/revocation/plausibility decisions. Set-resident ⇒ identical on every replica. |
 | **INGEST-GATE** | The **signature-validity-only** admission predicate (well-formed ∧ Ed25519 signature verifies). Decides set *membership* only; a pure function of the fact's bytes ⇒ identical on every honest replica; **never** decides a projected value, and **never** consults drift, key-registration, authority, or revocation (C2-1, C3-1, M3-4). §3.2. |
 | **PROJ-demotion** | All trust decisions — key-registration, namespace-authorization, revocation, *and* author-HLC causal plausibility (anti-backdating) — made **inside `proj`**, keyed on **author-HLC** over the admitted set. Set-pure ⇒ convergent. A demoted fact is `untrusted`/`quarantined`, never dropped, and re-evaluated monotonically as facts arrive. §3.6, §8.1. |
-| **Causal plausibility** | A set-pure anti-backdating rule (replaces the v2-draft receiver-clock drift gate, C3-1/C3-3/M3-1; C4-2 makes its PRIMARY form involuntary; C5-1 makes it eviction-safe): a fact `F` from key `K` projects **trusted** only over `K`'s **complete gap-free `(wall,counter)` chain** up to `F` (else **`pending`**, reusing the §4c/m4-1 pin-completeness contiguity rule, C5-1), and once complete is demoted `untrusted-anachronistic` if `S` holds a **higher-author-HLC, non-ancestor** fact from the **same** `K` **in that complete chain** (per-key monotonicity — reads `K`'s *involuntary* footprint, not forgeable by omitting `causedBy`, C4-2; not defeatable by evicting `K`'s higher facts — an evicted link yields a `(wall,counter)` gap ⇒ `pending`, and a registered key's chain is `key-chain-durable`, cap-bounded with on-demand re-fetch, §3.5a, C5-1/M6-1; contiguity decided per-`(replicaId,key)`, demotion key-wide, m6-1). A *secondary* tightening rule additionally requires `F`'s author-HLC to dominate its *declared* `causedBy` closure over `S`. Compared only to set-resident author-HLCs, never to any receiver clock. §3.6, §8.1, §4b.1. |
+| **Causal plausibility** | A set-pure anti-backdating rule (replaces the v2-draft receiver-clock drift gate, C3-1/C3-3/M3-1; C4-2 makes its PRIMARY form involuntary; C5-1 makes it eviction-safe): a fact `F` from key `K` projects **trusted** only over `K`'s **complete gap-free `seq` chain** up to `F` (else **`pending`**, reusing the §4c/m4-1 pin-completeness contiguity rule, C5-1), and once complete is demoted `untrusted-anachronistic` if `S` holds a **higher-author-HLC, non-ancestor** fact from the **same** `K` **in that complete chain** (per-key monotonicity — reads `K`'s *involuntary* footprint, not forgeable by omitting `causedBy`, C4-2; not defeatable by evicting `K`'s higher facts — an evicted link yields a `seq` gap ⇒ `pending`, and a registered key's chain is `key-chain-durable`, cap-bounded with on-demand re-fetch, §3.5a, C5-1/M6-1; contiguity decided per-`(replicaId,key)`, demotion key-wide, m6-1). A *secondary* tightening rule additionally requires `F`'s author-HLC to dominate its *declared* `causedBy` closure over `S`. Compared only to set-resident author-HLCs, never to any receiver clock. §3.6, §8.1, §4b.1. |
 | **Authority** | A key (Ed25519) authorized, by a signed chain rooted in the tenant root key, to write a given EID **namespace** and/or perform scoped ops (excise, revoke), **as of an author-HLC interval**. Key-registration, namespace authority, and revocation are **all** proj decisions keyed on author-HLC; **only** signature validity is an ingest-gate predicate. §2.4, §8. |
 | **Functionality / Microagent** | A genty microagent (`IsolationMode` `subprocess`/`worker`/`container`) with a declared `inputSchema`/`outputSchema`, invoked as a `MicroagentInvocation` and returning a `MicroagentResult`. The patent's "functionality" (an isolated, single-purpose executable bound to a relation). A **client** of kip, never the substrate: its output is wrapped as signed facts, never written to the graph directly (§5b.1). |
 | **Functionality descriptor** | A `MicroagentManifest` (`name`, `version`, `description`, `inputSchema`, `outputSchema`, `isolation`, `runtime{entrypoint, skills, tools, scripts, processes, model, timeout, env}`, `tags`, `builtIn`). Advisory **selection** metadata only — it ranks *which* microagent to dispatch; it **never** gates fact membership (only the Ed25519 signature does, C2-1). §5b.1. |
@@ -259,7 +259,11 @@ interface NodeView {
   eid: EID;
   kind: NodeKind;
   props: Record<PropKey, PropCell>;   // each cell carries its own provenance + temporality
-  provenance: Provenance;             // latest asserting fact's provenance
+  provenance: Provenance;             // "LATEST" defined precisely (m7-8): the orderKey-max TRUSTED assert
+                                      //   among the facts covering the view's resolved asOf across ALL of
+                                      //   this node's cells, node-existence included. Per-cell provenance
+                                      //   is on each segment (assertedBy); this field is the node-level
+                                      //   summary of that same total order — never a separate heuristic.
 }
 
 interface EdgeView {
@@ -269,7 +273,7 @@ interface EdgeView {
   to: EID;
   props: Record<PropKey, PropCell>;
   validFrom: HlcOrTime; validTo: HlcOrTime | null;   // valid-time interval (Graphiti-style)
-  provenance: Provenance;
+  provenance: Provenance;                            // same m7-8 rule as NodeView, over the edge's cells
 }
 
 // A cell projects to a sequence of valid-time segments. Gaps are FIRST-CLASS (Unknown), not errors.
@@ -378,11 +382,13 @@ interface FactAnnotation {
 is built deterministically from **exactly** these fields, in this order, and the `factCID` is the
 content hash of that payload:
 
-`[ v, type, target, value?, validFrom, validTo, hlc, causedBy?, supersedes?, reAttests?, author,
+`[ v, type, target, value?, validFrom, validTo, hlc, seq, causedBy?, supersedes?, reAttests?, author,
   publicKeyFingerprint, replicaId ]`
 
 — i.e. every author/replica-distinguishing field (`publicKeyFingerprint`, `replicaId`, the schema
-version `v`) is **in** the canonical payload. The `signature` field is the **only** field excluded
+version `v`) is **in** the canonical payload, and so is the per-`(replicaId, key)` **chain sequence
+number `seq`** (§4b.1/m7-1 — the signed contiguity witness the chain-completeness gate reads; excluded
+from `orderKey`). The `signature` field is the **only** field excluded
 (one cannot sign over one's own signature); `commit` and `rxFrom` are post-hoc annotations and are
 likewise excluded. Consequence: two facts that differ in *any* author/replica/version field have
 **distinct `factCID`s**, so `factCID` is a genuine always-unique final tiebreak (re-stated in §3.4
@@ -421,8 +427,12 @@ refs/
   heads/main                         # the trunk: canonical, merged history
   kip/replicas/<replicaId>           # one branch per replica/agent (T-2 hybrid)
   kip/sessions/<runId>               # short-lived per-session branch, pinned read-set (kradle snapshot)
-  kip/projections/<name>@<srcHash>   # CACHE ref: a built projection keyed to its source tree hash
-  kip/keys/<tenant>/trusted          # per-tenant authority set (root + delegated keys, §8) — append-only, signed
+  kip/projections/<name>@<srcHash>   # CACHE ref: a built projection keyed to its source tree hash — LOCAL-ONLY
+                                     #   (points at a local cache commit/tree; EXCLUDED from sync refspecs;
+                                     #   droppable at any time and rebuilt — never fetched/pushed, m7-5)
+  kip/keys/<tenant>/trusted          # DERIVED INDEX ref (m7-5): a regenerable per-tenant view of the
+                                     #   key-authorization/revocation FACTS in /facts/** (target.kind "key", §8).
+                                     #   NOT authoritative, NOT synced, NOT read by proj — proj reads ONLY /facts.
 objects/                             # content-addressed: blobs, trees, commits (+ packs)
 
 # tree layout inside a commit (working tree of the memory):
@@ -461,6 +471,19 @@ the T-3 contradiction (committed *and* derived):
   bounded by snapshots). Viable and **halves write amplification** (M-6); we choose (b) committed +
   regenerate-not-merge to keep the "self-contained clone" property, and note (a) explicitly as the
   lower-write-amplification option an embedder MAY select via `manifest.headsCommitted=false`.
+- **Merge-driver PROVISIONING is normative (m7-4).** `.gitattributes` only *names* the driver; its
+  command lives in per-clone git config, which `.gitattributes` cannot ship — in an unconfigured clone
+  stock `git merge` silently falls back to the default 3-way text merge. Therefore: **`kip init` and
+  `kip open` (of any clone) MUST install `merge.kip-regen.driver` into the repo-local config before
+  any other operation, and `kip fsck` MUST verify it is installed** (a missing driver is a reported
+  integrity failure). A **bare `git merge` run outside kip in a driver-less clone is UNSUPPORTED**; its
+  damage is *detected*, not prevented: (a) `/heads` is advisory — `fsck`/first-read finds
+  `/heads ≠ proj(/facts)` and re-folds (INV-1); (b) for `/manifest.json`, kip records the **genesis
+  manifest blob CID** (reachable from the root commit) and every `open`/`fsck`/merge-postcheck MUST
+  verify the current `/manifest.json` blob CID equals it — a silently text-merged manifest fails this
+  byte-equality check and is a **hard error (fork)**, so the m2-5 guarantee holds even when the driver
+  was bypassed. Conformance: INV-6's excision/fsck recipe includes a driver-less-merge fixture whose
+  merged manifest MUST be rejected and whose merged `/heads` MUST be regenerated on first read.
 
 **`/manifest.json` is genesis-immutable and NEVER 3-way-merged (m2-5).** The genesis parameters —
 hash algorithm, `shardDepth`, `ε_causal` (the proj-time causal-plausibility slack, §4b.1; **not** a
@@ -506,6 +529,12 @@ ingest(f) ⇒                                       // THE INGEST-GATE: signatur
      untrusted/quarantined and is re-evaluated automatically as more facts arrive (monotone).
 ```
 
+> **Disambiguation — one procedure, two entry points.** The SDK-facing `Repo.ingest(f)` method
+> (§6/docs/40-sdk-api-surface.md) IS this same six-step procedure, entered directly with an
+> already-signed fact; `assertFact`/`retractFact` construct and sign a fact and THEN invoke this
+> identical procedure. There is exactly one ingest procedure, reached via two different entry points —
+> not two different things that happen to share a name.
+
 > **NOTE — the gate decides MEMBERSHIP by signature ALONE, never a value, never anything time-/replica-
 > local (C2-1, C3-1, M3-4, M3-5).** Steps 1–2 are a pure function of `f`'s own signed bytes (Ed25519
 > verification is deterministic and input-only), so every honest replica admits **the same set**: the
@@ -522,10 +551,50 @@ ingest(f) ⇒                                       // THE INGEST-GATE: signatur
 > on violation" step either. Ontology is applied later, in `proj`, with non-conforming facts
 > quarantined (§2.2), never dropped.
 
+**Well-formedness — the NORMATIVE definition (m7-6).** "Well-formed" is half of the sole membership
+predicate, so it MUST be a pure function of `f`'s bytes, defined exhaustively. A fact is
+**well-formed** iff ALL of the following hold; failing any one is **reject-malformed** at step 1:
+
+1. `f` parses as the §4.1 `Fact` **envelope** — every required ENVELOPE field present (`v`, `type`,
+   `target`, `validFrom`, `hlc`, `seq`, `provenance.{author, signature, publicKeyFingerprint,
+   signedFields}`), every envelope field of its declared type; `value` present iff the `type` admits
+   it; `supersedes` present iff `type === "supersede"`; `reAttests` present iff `type === "re-attest"`.
+   This is an **envelope-shape** check only (see clause 4's version-invariance note) — it does NOT
+   validate `value`'s internal payload shape against `v`'s ontology, which is `proj`'s upcaster concern
+   (§2.2), never the gate's.
+2. `f.target` matches its `target.kind` discriminant shape (§4.1).
+3. `f.hlc` is a well-typed `(wall: int64ms, counter: uint32, replicaId)` stamp and `f.seq` a
+   non-negative safe integer (§4b.1/m7-1).
+4. **`f.provenance.signedFields` MUST equal — exactly, and in order — THE canonical envelope field list
+   (§2.4).** This list is **VERSION-INVARIANT (A-10)**: there is **exactly one** canonical field list,
+   used for **every** `v` — `v` is opaque to the gate; it is never consulted to select a
+   per-version field list. `v` affects only `proj`'s payload-schema upcaster dispatch (§2.2), never the
+   gate's field-list check, which is why an unknown/future `v` is quarantined-not-dropped by `proj`
+   (§2.2) rather than rejected here: a future or past `v` whose *payload* shape differs from what this
+   replica's ontology expects is still **gate-admitted** (its signature over the fixed envelope fields
+   verifies exactly like any other fact) and is `proj`'s job to quarantine-if-unknown, never the gate's.
+   The gate rebuilds the canonical payload from that single normative list; it MUST NOT verify over an
+   author-declared subset or superset, and MUST NOT rebuild a *different* list per `v`. A fact whose
+   `signedFields` differs from the canonical list is **malformed-rejected**, never partially verified —
+   divergent well-formedness answers would produce divergent admitted sets and void the
+   equal-admitted-sets antecedent of SEC (§4b.4).
+
+Every clause reads only `f`'s bytes plus the version-pinned canonical list, so well-formedness is
+identical on every honest replica (the same purity as the Ed25519 check). Conformance: INV-6's
+malformed-rejection recipe (§8.4) includes a `signedFields`-mismatch fixture.
+
 **Commit granularity (decision).** Default is **batched**: a `txn([...facts])` — a *memory
 transaction* — produces **one commit** containing many facts (resolving HP-3 / write-amplification M-6:
 per-fact commits explode object count, and per-fact `/heads` rewrites multiply tree churn). `/heads` is
-**not** rewritten per commit; it is rebuilt lazily (step 6). *Rejected alternative:* one-commit-per-fact
+**not** rewritten per commit; it is rebuilt lazily (step 6). **`/heads` COMMIT policy (m7-17):**
+committed `/heads` trees are written only at **txn-commit boundaries** (the committing writer folds the
+cells its own facts touched) and by the **merge driver**; a **read-triggered** re-fold lives in an
+uncommitted local cache/worktree and is folded into the *next* commit on that replica's branch — reads
+never mint commits. A fresh clone may therefore see stale-but-advisory committed `/heads` for cells
+whose last writer predates later reads; it re-folds those cells on first read (the "self-contained
+clone" property is zero-rebuild point reads for cells whose committed heads are fresh, plus lazy
+re-fold for the rest — authoritative truth is always `proj(/facts)`, INV-1). *Rejected alternative:*
+one-commit-per-fact
 (Datomic-tx-like) — clean but pathological for git object count at agent write rates.
 
 **Durability (m-9).** `assertFact` returns a `{ factId, status }` where `status ∈ {"pending","durable"}`.
@@ -763,20 +832,23 @@ second touch the first.)
      `KeyAuthorization ≤ the fact's author-HLC`, §8.1), **tenant-scoped**. A registered key's **trusted**
      (in-namespace, non-revoked, plausible) facts are `durable` and **always durably stored** (never
      evicted) — honest authors are never starved. A registered key's **untrusted/anachronistic** facts
-     (which still anchor its `(wall,counter)` chain) are `key-chain-durable` — preferentially retained up
+     (which still anchor its `seq` chain) are `key-chain-durable` — preferentially retained up
      to `keyChainDurableCapBytes`, not unconditionally (M6-1, next).
 
 **Retention model (set-pure eligibility, transport-local enforcement).** `proj` computes, as a pure
 function of `S`, a per-fact **`RetentionClass`** that the transport layer reads to decide eviction. It is
 **not** a `proj` *value* and never feeds `/heads` — it is metadata about durability, derived set-purely
-so every replica computes the *same class* for the same fact:
+so **every replica holding the same set computes the same class for the same fact** (equal held sets ⇒
+equal classes; like every set-pure derivation it is a function of `S` — e.g. a fact from key `K`
+computes `key-chain-durable` only once `K`'s `KeyAuthorization` is set-resident *on that replica*, and
+`quarantined-ttl` until then, converging monotonically as the registration propagates):
 
 ```ts
 type RetentionClass =
   | "durable"             // trusted (registered, in-namespace, non-revoked, plausible) — NEVER evicted
   | "key-chain-durable"   // a KEY's OWN emission (a fact authored by registered key K, including its
                           //   own quarantined/anachronistic facts) — PREFERENTIALLY retained up to a
-                          //   per-key keyChainDurableCapBytes cap, because K's complete (wall,counter)
+                          //   per-key keyChainDurableCapBytes cap, because K's complete seq
                           //   chain is the substrate the per-key anti-backdating rule reads (C5-1).
                           //   Past the cap, oldest chain links may be evicted; an evicted-then-needed
                           //   link is re-fetched on demand, and dependent same-key facts stay `pending`
@@ -794,10 +866,10 @@ type RetentionClass =
   PREFERENTIALLY RETAINED up to a per-key `keyChainDurableCapBytes` cap (manifest-pinned); past the cap,
   the OLDEST chain links may be evicted (M6-1 — bounded, not "never-evict").** Rationale: the per-key
   anti-backdating rule (§3.6) and the per-key chain-completeness gate it now requires both read `K`'s
-  **own complete `(wall,counter)` chain** in `S`; the chain must be *available* for honest registered
+  **own complete `seq` chain** in `S`; the chain must be *available* for honest registered
   facts to leave `pending`. **The safety, however, does NOT require never-evicting it** — it rests on the
   **chain-completeness gate alone** (§3.6 step (i)): an evicted higher-stamped honest fact leaves a
-  `(wall,counter)` gap, and a gap projects **`pending`** (never a silent trusted backdate). The cap
+  `seq` gap, and a gap projects **`pending`** (never a silent trusted backdate). The cap
   therefore buys *liveness* (keep the working set local so completion is reachable without re-fetch), not
   *safety*. **When a chain link is evicted past the cap and a dependent same-key fact later needs it, the
   link is re-fetched ON DEMAND** (content-addressed; any peer that still holds the blob serves it — the
@@ -831,7 +903,7 @@ type RetentionClass =
   cell), so dropping its bytes **cannot change `proj`** of any *trusted* fact. **It also cannot silently
   flip a same-key backdate to trusted**, because (i) the authoring key is unregistered, so it has no
   *trusted* same-key fact whose monotonicity check could be defeated, and (ii) any later evaluation of a
-  same-key fact across an evicted predecessor finds a `(wall,counter)` gap and projects **`pending`**,
+  same-key fact across an evicted predecessor finds a `seq` gap and projects **`pending`**,
   not trusted (§3.6 completeness gate). If a registration for the key later arrives, **all** of the key's
   facts flip to `key-chain-durable` and are **re-fetched on demand** (content-addressed; any peer that
   still holds them serves the blob) so no honest late-registered fact — or its chain — is lost.
@@ -855,6 +927,60 @@ type RetentionClass =
   complete; until then the dependent reads `pending` (safe). See the **per-shared-subset SEC restatement**
   in §4b.4.
 
+**Git realization of eviction & partial replication (m7-3) — how "bytes reclaimed" coexists with
+committed trees.** Every fact is a blob referenced by committed trees, so naive deletion of an evicted
+blob would break `git fsck`, `clone`, and checkout of any commit whose tree references it. The
+normative realization is git's **promisor-remote / partial-clone** mechanism — git's native
+representation of *missing-but-fetchable* objects:
+
+- A replica applying a retention policy configures its kip peers as **promisor remotes**
+  (`remote.<peer>.promisor=true`, `extensions.partialClone`). **Eviction of a non-durable blob
+  (`quarantined-ttl`, or a `key-chain-durable` link past the cap) = dropping the local copy of a
+  promisor-covered object**: trees keep referencing it, `git fsck` treats it as legal
+  (promisor-missing), and any later need (the on-demand re-fetch of §3.6/C5-1) is an ordinary lazy
+  object fetch from any peer still holding it. `kip fsck` reports a promisor-missing **durable** blob
+  as an integrity failure (durable facts are never evicted) and promisor-missing non-durable blobs as
+  healthy.
+  - **Eviction mechanics (A-11a).** The eviction procedure is a **repack that excludes the evicted
+    blob(s) from new pack files**, with the resulting/survivor pack(s) marked **PROMISOR packs** — a
+    `.promisor` marker file per pack, following git's native partial-clone convention — so `git fsck`
+    and object lookups correctly treat a missing-but-promisor-referenced object as **expected-absent**
+    rather than corruption. This covers an evicted object **regardless of whether it arrived via push
+    or local ingest**: promisor-marking is a property of the LOCAL pack state (which packs exist and how
+    they are marked), not of the object's origin, so a locally-authored fact that later becomes
+    non-durable and is evicted is marked exactly the same way as one received over sync.
+    **Repack-frequency DoS mitigation.** A repack is triggered on eviction, so an attacker pushing facts
+    that repeatedly straddle a retention threshold (e.g. hovering a pool just over/under
+    `quarantinePoolBytes`) could force per-push repacking. Eviction repacks SHOULD be **debounced into a
+    periodic sweep** rather than triggered synchronously on every push, to bound repack CPU/IO frequency;
+    the exact cadence is an operational knob deferred to OQ-8/OQ-9 alongside the rest of the re-fetch
+    serving contract.
+  - **Serving contract for peers (A-11b).** A replica serving `clone`/`fetch` to a peer for a commit
+    range whose tree references an evicted blob MUST do one of: **(i)** already be a
+    promisor-remote-aware server — i.e. it advertises and honors `uploadpack.allowFilter` — so the peer
+    clones/fetches with a **matching partial-clone filter** and therefore never requests the missing
+    blob in the first place; or **(ii)** if asked for the blob directly (a peer that did not filter, or
+    an on-demand re-fetch request), respond with the existing re-fetch protocol's "not found here, ask a
+    promisor peer / a peer that durably holds it" signal (§3.5a) rather than serving corrupt/partial
+    data or crashing. Either path keeps the serving replica from ever claiming to hold bytes it evicted.
+- A replica with no promisor peer configured (e.g. its own sole origin) MUST NOT evict — retention is
+  a MAY and eviction without a re-fetch source would turn the R3 liveness residual into certainty.
+- **Enforcement point.** Admission control is enforced by the **kip sync layer, not stock git
+  protocol** (stock git cannot policy-filter individual blobs by signing key): on the **push-accepting
+  side**, a `pre-receive`/`proc-receive` hook installed by `kip init` (m7-4 provisioning) applies the
+  per-key/pool quotas before the ref update; on the **fetching side**, `kip sync` fetches with
+  partial-clone filters where the peer supports them and otherwise applies the retention policy
+  immediately post-fetch (evicting over-quota non-durable blobs before they are considered stored).
+  Either way the policy stays at transport — `proj` and membership never see it.
+- **"Self-contained clone" is scoped to DURABLE facts only (A-11c).** The rationale given above for
+  committing `/heads` (§3.1 — "keep the self-contained clone property") applies only to **durable**
+  facts: a fresh clone answers point reads for durable state with zero rebuild. **Evicted facts**
+  (`quarantined-ttl` past its cap/TTL, or a `key-chain-durable` link past its cap) are **not** part of
+  that guarantee — a clone of a replica that has evicted such a fact does not carry its bytes locally
+  and depends on the promisor/re-fetch mechanism above (or a peer still holding it) to reconstruct them
+  on demand; this is the expected, bounded liveness tradeoff (R3, §9), not a violation of
+  "self-contained."
+
 **Why this bounds the C4-1 attack while preserving v3's convergence.** The unlimited-identity vector is
 **unregistered keys** (registration is proj-time, so a fresh keypair's facts are admitted logically). v4
 makes their **bytes** the bounded resource: an unregistered key's flood is `quarantined-ttl`, capped
@@ -869,14 +995,14 @@ lacked.
 **Why eviction is anti-backdating-safe (C5-1) — safety rests on the gate, not on retention (M6-1).** The
 per-key anti-backdating rule (§3.6) reads `K`'s own same-key facts in `S`. The **safety** property (no
 eviction ever flips a same-key backdate to *trusted*) is closed by the **chain-completeness gate alone**:
-any absent same-key fact — evicted, withheld, never-replicated, or cap-evicted — leaves a `(wall,counter)`
+any absent same-key fact — evicted, withheld, never-replicated, or cap-evicted — leaves a `seq`
 gap, and a gap projects **`pending`**, never trusted. `key-chain-durable` retention (cap-bounded, M6-1) is
 a **liveness** aid layered on top — it keeps the chain local so honest registered facts complete without
 re-fetch — *not* a safety requirement; even fully relaxed, safety survives via the gate, at the cost of a
-dependent fact sitting `pending` until re-fetch. Both readings reuse the per-key `(wall,counter)`
+dependent fact sitting `pending` until re-fetch. Both readings reuse the per-key `seq`
 contiguity rule already defined for pins (§4c/m4-1), with **no new machinery**:
 - For a **registered** key, its facts are `key-chain-durable` — **preferentially retained up to
-  `keyChainDurableCapBytes`**, so `K`'s complete `(wall,counter)` chain is normally available locally and
+  `keyChainDurableCapBytes`**, so `K`'s complete `seq` chain is normally available locally and
   honest registered facts project trusted without re-fetch. **Safety does not depend on this retention**:
   if a chain link is evicted past the cap, the completeness gate (§3.6 step (i)) makes the resulting gap
   project **`pending`**, never a silent trusted backdate; the link is re-fetched on demand to complete the
@@ -884,7 +1010,7 @@ contiguity rule already defined for pins (§4c/m4-1), with **no new machinery**:
   the worst case is a dependent fact stuck `pending` until re-fetch (M6-1).
 - For an **unregistered** key, its facts are `quarantined-ttl` and evictable, **but** the key has no
   trusted same-key fact to defeat; and §3.6 now gates per-key trust on **chain completeness**: a fact `F`
-  from `K` projects **trusted** only over a gap-free `(wall,counter)` chain of `K` up to `F`'s
+  from `K` projects **trusted** only over a gap-free `seq` chain of `K` up to `F`'s
   author-HLC. If an earlier same-key fact is evicted/withheld/unreplicated, the gap forces `F`
   **`pending`** (not trusted, not rejected) until the chain is complete. So an evicted higher fact can
   never *silently* flip a lower backdate to trusted — the gap makes the dependent projection `pending`.
@@ -904,8 +1030,15 @@ contiguous chain segment with no lower same-key fact (genuine first-emission), e
 §3.6 residual — not a fact that contradicts a higher same-key fact in its chain. The guarantees are:
 **(a) no UNREGISTERED key can force unbounded DURABLE growth on a replica applying the default retention
 policy; (b) no eviction or partial replication can flip a same-key backdate from `pending`/`demoted` to
-`trusted` (C5-1); (c) a REGISTERED key's durable chain is now bounded by `keyChainDurableCapBytes`, so a
-registered/compromised key can no longer force unbounded non-evictable durable bytes (M6-1).**
+`trusted` (C5-1); (c) a REGISTERED key's `key-chain-durable` pool (its untrusted/chain-anchor emissions)
+is bounded by `keyChainDurableCapBytes` (M6-1).** Guarantee (c) is deliberately scoped: **the cap covers
+the key-chain-durable pool ONLY.** A registered key's **trusted** facts (in-namespace, non-revoked,
+plausible) are `durable — never evicted` by definition, so a **compromised registered key flooding
+valid in-namespace facts forces durable growth on every replica at its trusted-write rate until a
+`revoke-key` fact lands** — the durable-storage bound for the trusted-fact flood is
+**revocation latency** (deployment-dependent, not quantified by this spec), optionally tightened by the
+MAY per-key transport quota above. Stated honestly: the insider trusted-flood vector is
+revocation-latency-bounded, not cap-bounded (§8.3b).
 
 **Re-fetch liveness residual — stated honestly (m6-3).** Cap-bounded retention plus on-demand re-fetch
 introduces one narrow, *safe* liveness cliff. A key registered *after* its pre-registration facts have
@@ -918,6 +1051,18 @@ yields a wrong *trusted* value — `pending` is a labeled not-yet-known, §3.6) 
 `keyChainDurableCapBytes`, and operators **size the cap (and `quarantineTtlMs`) to the working set** and
 **register keys before their pre-registration facts' `quarantineTtlMs` elapses**, so the working chain is
 retained somewhere and re-fetch succeeds. This residual is listed as an accepted non-core bound in §8.3b/§9.
+
+**Two declared deferrals adjacent to this section.** (1) The **re-fetch transport contract** — which
+peer is asked, in what order, serving authorization, retry/backoff, and rate limits — is deliberately
+unspecified here (the mechanism is content-addressed lazy object fetch, m7-3; the *protocol policy* is
+deployment-shaped) and is declared as **OQ-8** (§9), including the churn-amplification consideration
+noted in §8.3b. (2) The **capacity parameters are genesis-final** (`quarantineTtlMs`,
+`quarantineKeyCapBytes`, `quarantinePoolBytes`, `keyChainDurableCapBytes`, `shardDepth` — all
+manifest-pinned, m2-5): there is **no in-repo migration/re-tuning path**; a deployment that mis-sizes
+them (R3's own mitigation says "size the cap to the working set", which a growing working set defeats)
+can only **re-genesis** — a new manifest/repo plus fact re-import (§8.1 re-genesis flow). Operators
+SHOULD size every cap and `shardDepth` with generous headroom to the *ceiling* (not current) working
+set. Declared honestly as residual **R10** (§9).
 
 ### 3.6 Content-addressing vs stable identity (the dual-id scheme)
 
@@ -1001,13 +1146,16 @@ in author-HLC space). Concretely:
   primary anti-backdating bound **per-key author-HLC monotonicity**, which reads the author's *involuntary*
   footprint in `S` and is **not** author-forgeable:
   - **PRIMARY — per-key HLC monotonicity, GATED ON PER-KEY CHAIN COMPLETENESS (set-pure, involuntary,
-    eviction-safe — C4-2 primary + C5-1 root fix).** Every key `K`'s own facts form a per-key
-    `(wall,counter)` sequence in `S` (gap-free by construction at the author, §4b.1/§4c m4-1). A fact `F`
+    eviction-safe — C4-2 primary + C5-1 root fix).** Every key `K`'s own facts form, per `(replicaId,
+    key)` pair, a contiguous signed chain-sequence `seq` in `S` (gap-free by construction at the author,
+    §4b.1/m7-1/§4c m4-1 — the `(wall,counter)` stamps ride along for ordering only). A fact `F`
     from key `K` is evaluated as follows:
     - **(i) Chain-completeness gate (C5-1).** `F` may project **trusted** only if the replica holds the
-      **complete, gap-free `(wall,counter)` chain of `K`'s facts up to `F`'s author-HLC** — the *exact*
+      **complete, gap-free `seq` chain of `K`'s facts up to `F`'s author-HLC** — contiguity
+      decided over the signed per-`(replicaId,key)` chain sequence `seq` (§4b.1/m7-1, the normative
+      witness; never over `hlc.counter`) — the *exact*
       per-key contiguity rule already defined for pin-completeness (§4c/m4-1, INV-14). If any earlier
-      same-key fact below `F` is **missing / evicted / not-yet-replicated** (a `(wall,counter)` gap in
+      same-key fact below `F` is **missing / evicted / not-yet-replicated** (a `seq` gap in
       `K`'s chain below `F`), `F` projects **`pending`** — *not* trusted, *not* rejected — exactly like a
       `pin-incomplete` read, and is **re-evaluated monotonically** as the missing chain links arrive. This
       makes per-key trust a function of `K`'s **complete-for-`K` durable chain**, which is
@@ -1016,18 +1164,66 @@ in author-HLC space). Concretely:
       fact also leaves the chain incomplete, so the backdate is `pending` (not trusted) until the chain —
       including that higher fact — is present, at which point the monotonicity rule (ii) demotes it. The
       gate reads only **local-chain contiguity** (locally decidable, §4c m4-1), so it stays set-pure.
+      - **Excised slots are ATTESTED HOLES, not gaps (A-1, closes the excision×seq interaction).** A
+        **physically excised** (§4.5) mid-chain fact would otherwise brick this gate forever: every
+        later same-pair fact's contiguity check would find `seq` missing below it and read `pending`
+        permanently, and every pin enumerating that chain would permanently read `pin-incomplete` —
+        contradicting "a pin survives excision" (§4.5) and INV-14. The fix: the signed `excision` fact
+        (§4.5) carries `excisedChainId`/`excisedSeq` (docs 40 `ExcisionMarker`) naming the excised
+        fact's exact chain position. The contiguity check in (i) and in pin-completeness (§4c/m4-1)
+        therefore treats a **present, signature-valid `excision` marker** for `(chainId, seq)` as
+        **satisfying that slot** — the marker is itself the witness that nothing unaccounted-for is
+        missing there, which is why it is admissible where an ordinary absence is not: an ordinary gap
+        has no evidence explaining it, while an excised slot carries a signed, authorized record of
+        *why* it is empty. Contiguity over `[0, F.seq]` is therefore satisfied when every `seq` in the
+        range is covered by **either** a held fact **or** a matching excision marker. `factSetDigest`
+        recomputation (§4c) for a pin whose enumerated subset lost an excised member: the merkle root is
+        computed over the **surviving** subset in `orderKey` order exactly as before (the excised fact
+        simply drops out of the folded set, the same way any excised fact drops out of `proj`) — the
+        excision marker itself is not a member of the digested subset, it only satisfies the
+        completeness *check*. Conformance: this is covered by a new **INV-14b** fixture (§8.4): excise a
+        mid-chain fact → assert later same-pair facts remain locally decidable as trusted (not stuck
+        `pending`) → assert a pin enumerating that chain re-resolves `pin-complete` with the recomputed
+        digest.
       - **What "`K`'s chain" means — per-key, contiguity per-`(replicaId,key)` (DISAMBIGUATED, m6-1).** An
         author key `K` MAY emit from **multiple `replicaId`s** (a shared service key, or a key rotated
         onto two agents), so "`K`'s chain" is **per-key across all replicaIds `K` used**, ordered by `K`'s
         global emission in **author-HLC** order. There is no single `(wall,counter)` sequence spanning two
-        replicas; the gate therefore decides **`(wall,counter)` contiguity per-`(replicaId, key)`** —
-        exactly the §4c/m4-1 rule — requiring, for **each** `(replicaId, key)` pair `K` used at or below
-        `F`'s author-HLC, an unbroken `(wall,counter)` chain from that pair's genesis up to its frontier.
-        Completeness is the **union** over all of `K`'s `(replicaId,key)` chains (a gap on *any* of `K`'s
-        replicas ⇒ `pending`); the monotonicity demotion (ii) is **key-wide** (it compares author-HLCs
-        across **all** of `K`'s facts regardless of replica). So *completeness* is
+        replicas; the gate therefore decides **contiguity per-`(replicaId, key)`** over each pair's
+        signed `seq` chain (§4b.1/m7-1) —
+        exactly the §4c/m4-1 rule — requiring, for **each** `(replicaId, key)` pair `K` is *locally known
+        to have used* at or below `F`'s author-HLC, an unbroken `seq` chain from that pair's genesis
+        (`seq = 0`) up to its highest locally-held sub-frontier link.
+        Completeness is the **union** over all of `K`'s known `(replicaId,key)` chains (a gap on *any* of
+        `K`'s replicas ⇒ `pending`); the monotonicity demotion (ii) is **key-wide** (it compares
+        author-HLCs across **all** of `K`'s facts regardless of replica). So *completeness* is
         per-`(replicaId,key)`-union-wide and *demotion* is key-wide. A build that checks only a single
         `replicaId`'s chain and misses a gap on `K`'s other replica is non-conformant (INV-19).
+        **Honest bound (R8, BROADENED — A-6).** A chain of `K`'s that is *entirely* absent locally (every
+        fact of some `(replicaId, K)` pair withheld/never replicated) is **locally undetectable** — the
+        gate cannot demand what it has no evidence ever existed. Such total withholding can hide
+        demotion evidence exactly as R1's lone first-emission does (it can delay a demotion, never flip
+        a `pending` to `trusted`, and resolves monotonically the moment any link of the hidden chain
+        arrives). This is an accepted residual (§9 R8), the per-key analogue of R1 — pins are NOT
+        exposed to it (a pin enumerates its chains explicitly, m7-2). **This is the SAME class of gap as
+        a withheld higher-author-HLC fact on a DIFFERENT `(replicaId, key)` pair of the SAME key (A-6):**
+        the chain-completeness gate's cross-pair reach is bounded by *local knowledge* — it can only
+        demand contiguity of pairs it has evidence `K` used. An **entirely-withheld chain on a different
+        pair of the same key** is therefore equally undetectable as an entirely-absent chain; the "never
+        silently flip a backdate to trusted" claim (i, above) is consequently precise **only within the
+        same `(replicaId, key)` pair as the evidence the gate actually holds** — it is not a claim about
+        pairs of `K` the replica has never observed. R8 is extended to cover this, rather than minting a
+        new residual number (it is the same undetectability class, just phrased per-pair instead of
+        per-total-absence).
+        - **Operational note — multi-device same-key concurrent emission (A-8).** A key SHOULD have **at
+          most one actively-writing `replicaId` at any moment**: concurrent same-key emission from two
+          different `replicaId`s, if the two authors' HLCs are not causally related (skew beyond the
+          causal-plausibility epsilon, §4b.1), **WILL demote one side's facts on merge** (the key-wide
+          monotonicity rule (ii) above) — this is **expected, not a bug**: `K`'s two concurrent chains
+          are honest per-pair, but key-wide monotonicity still compares author-HLCs across all of `K`'s
+          facts regardless of replica, so an apparent backdate can arise purely from concurrent
+          multi-device use. Multi-device same-key use MUST **serialize writes** (e.g. a single active
+          writer with explicit device handoff) to avoid it.
     - **(ii) Monotonicity demotion (involuntary).** Once the chain is complete up to `F`, `F` is demoted
       `untrusted-anachronistic` iff `S` contains another admitted fact `F'` from the **same key `K`** with
       `author-HLC(F') > author-HLC(F)` **and** `F` is **not** a causal ancestor of `F'` (via the
@@ -1102,9 +1298,14 @@ the Noms pitfall (content == identity) and T-1, and closes C-5 by binding identi
 
 ```ts
 type FactId = string;          // = CID of the canonical SIGNED fact payload (content-addressed, M-4)
-type FactType = "assert" | "retract" | "supersede" | "revoke-key" | "excision" | "re-attest";
+type FactType = "assert" | "retract" | "supersede" | "revoke-key" | "excision" | "re-attest" | "grant" | "policy";
 //   re-attest (m5-3): a trusted-key re-assertion of a kip:revoked-concurrent casualty's content, naming
 //   the demoted fact via reAttests; projects the content as a trusted assert under the NEW key (§8.1).
+//   grant (§8.2): a cross-tenant namespace-reference authorization — lets a tenant-A key REFERENCE
+//   tenant-B's frozen namespaceId without ever granting tenant-B WRITE authority (M2-3).
+//   policy (§8.2): the access-policy fact kind, subsuming both "allow" and "deny" as ONE FactType with
+//   an internal `decision` field (rather than two separate FactTypes) — see the Target "policy" variant
+//   and the `AccessPolicy` shape below.
 type Target =
   | { kind: "node-prop"; eid: EID; nodeKind: NodeKind; prop: PropKey }
   | { kind: "edge"; eid: EID; edgeKind: EdgeKind; from: EID; to: EID }
@@ -1112,7 +1313,8 @@ type Target =
   | { kind: "node-existence"; eid: EID; nodeKind: NodeKind }
   | { kind: "schema"; ontologyRef: string }
   | { kind: "key"; keyFpr: string; namespace: string }            // authority/revocation facts (§8)
-  | { kind: "control"; op: "rollup" | "tombstone" | "consolidate" | "excision" };
+  | { kind: "control"; op: "rollup" | "tombstone" | "consolidate" | "excision" }
+  | { kind: "policy"; scope: ScopeRef; actor: ActorId; capability: string };  // access-policy facts (§8.2)
 
 interface Fact {
   id: FactId;                  // CID of the canonical payload — payload INCLUDES hlc (so it is signed)
@@ -1125,6 +1327,11 @@ interface Fact {
   validTo: HlcOrTime | null;   // null = still valid; a retract sets a bounded interval (gaps legal, M-9)
   // CAUSAL/ORDERING anchor — AUTHOR-STAMPED and SIGNED (M-4): part of the canonical payload & of id.
   hlc: HlcStamp;
+  // PER-KEY CHAIN-CONTIGUITY witness — AUTHOR-STAMPED and SIGNED (m7-1, §4b.1): this fact's position in
+  seq: number;                 //   its (replicaId, key) chain — 0 for the pair's FIRST fact (chain genesis),
+                               //   exactly previous+1 thereafter. Chain-completeness (§3.6/§4c) is decided
+                               //   over seq — NEVER over hlc.counter (which the receive-advance rule may
+                               //   legitimately skip). In the canonical payload; EXCLUDED from orderKey (§3.4).
   // Concurrency hints. Detection ALSO uses the git commit DAG (the causal history git already stores):
   causedBy?: FactId[];         // OPTIONAL same-replica causal parents. A LOWER BOUND on real causality
                                //   (author-supplied: may omit real predecessors, M4-2). Anti-backdating's
@@ -1287,6 +1494,17 @@ and one **physical** mechanism (the explicit, authorized history-rewrite). The s
    - **Authorization (m-11).** An `excision` fact MUST be signed by a key holding the **`excise` scope**
      for the target's tenant/namespace (§8). An unauthorized excision marker is **rejected** — a
      replica never deletes data on an unauthorized peer's say-so (closes the censorship/DoS vector).
+   - **Excise-evidence safeguard for fork/well-formedness-demoted facts (new, security).** Ordinary
+     `excise` scope is sufficient for GDPR-erasure excision, but excising a **fork-demoted** or
+     **well-formedness-demoted** fact (§4b.1's `untrusted-malformed` class, R11) is different in kind:
+     the same key that forked (or any colluding ordinary-`excise`-scope holder) could otherwise use a
+     routine erasure to destroy the very evidence of the fork, and the marker's free-text `reason` field
+     is unauthenticated, so nothing today distinguishes a legitimate privacy erasure from evidence
+     destruction. An excision marker targeting a fork/well-formedness-demoted fact SHOULD reference the
+     demoted fact's class in a **structured** field, not free text, and excising it MUST require an
+     explicit **`excise-evidence`** capability distinct from ordinary GDPR-erasure `excise` — see
+     `ExcisionMarker.excisedReason` (docs/40-sdk-api-surface.md). This is a normative requirement on the
+     scope model, not a new wire type.
    - **Marker (C-4.3 — no PII fingerprint).** The signed `excision` fact records a **random nonce id**
      (or a tenant-salted HMAC of the removed CID), the **reason + actor + scope**, and the **set of
      `/heads` cells to re-fold** — it does **NOT** carry the raw content CID of low-entropy PII as a
@@ -1364,7 +1582,12 @@ and one **physical** mechanism (the explicit, authorized history-rewrite). The s
      strictly before it are byte-identical and reused. Regeneration is therefore
      `O(facts after the earliest excision point)`, not whole-history; concurrent excisions regenerate
      from the **minimum** of their excision points. The cost is stated plainly here (it is the excision
-     analogue of the §3.5 read-latency/byte tradeoffs) rather than assumed free.
+     analogue of the §3.5 read-latency/byte tradeoffs) rather than assumed free. **Fork-recovery excisions
+     SHOULD be batched (m3-5 corollary).** Because regeneration cost is keyed on the **earliest** excision
+     point, repeated fork-recovery excisions (R11) applied fact-by-fact — each at an ever-earlier point as
+     new forks are discovered or a fork is traced back further — could force repeated near-full
+     regenerations. Operators SHOULD batch/coalesce fork-recovery excisions into a single excision pass
+     covering all known fork facts, rather than excising them one at a time as each is found.
    - **SEC bound (C-4.2).** The convergence theorem (§4b.4) is stated over the **non-excised admitted
      fact set, after excision markers have propagated**. During the propagation window a replica that
      has not yet applied the excision still holds the fact and its `/heads` differ; this is an explicit,
@@ -1397,6 +1620,85 @@ signed (§4.1). (T-5 resolved.)
 `wall` millisecond the algorithm **carries into `wall+1` and resets `counter` to 0** (it never wraps —
 wrap would violate the total order and break SEC). `wall: int64ms` cannot realistically overflow.
 
+**Per-key chain sequence `seq` — the NORMATIVE contiguity construction (m7-1; closes the
+receive-advance conflict).** Chain-completeness (§3.6 step (i), §4c/m4-1) needs a per-`(replicaId,
+key)` gap-detection witness. The HLC `(wall, counter)` pair CANNOT be that witness: the canonical HLC
+receive rule ("advance the local clock past any received stamp", §3.2 step 3) legitimately makes an
+author's own next `counter` **jump** after it receives a higher-counter fact, and `counter` resets to
+`0` whenever `wall` advances — so an honest author's `(wall, counter)` stream is **not** gap-free, and
+a hole in it is indistinguishable from a missing fact. kip therefore separates the two roles:
+
+- **`hlc = (wall, counter, replicaId)`** remains the CAUSAL/ORDERING anchor. It follows the standard
+  HLC send/receive-advance rules **unmodified** and feeds `orderKey` (§3.4). It carries **no**
+  contiguity obligation.
+- **`seq`** is a SEPARATE, signed, per-`(replicaId, key)` **contiguous sequence number** in the
+  canonical payload (§2.4, §4.1): the first fact a `(replicaId, key)` pair ever authors carries
+  `seq = 0` (the pair's **chain genesis**); every subsequent fact authored by that pair carries exactly
+  the previous `seq + 1`. It is a pure author-side counter — **never advanced by receipt, never reset
+  by `wall`** — so it is monotone and gap-free **by construction**, compatible with the receive-advance
+  rule by *not sharing state with it*. **`seq` MUST NOT wrap (A-4).** It is a non-wrapping unsigned
+  integer: when a chain's `seq` would exceed its safe-integer range, the author MUST retire that
+  `(replicaId, key)` pair and rotate to a fresh key or `replicaId` rather than reuse or wrap `seq` —
+  wrapping would manifest as a duplicate `seq`, i.e. a self-inflicted fork (below), exactly like any
+  other `seq` collision. **`seq` is assigned in COMMIT order, at the txn commit/publish boundary
+  (A-5).** The author mints `seq` when a `txn` actually commits/publishes (§3.2 durability), never at
+  intent-construction or buffering time; an aborted or rolled-back txn therefore never burns a `seq`
+  value, and the committed chain is gap-free **by construction**, not merely by convention (mirrored at
+  the `Tx`/commit-semantics discussion, §3.2/§3.3). **Crash-recovery durability of the seq tip (A-3).**
+  The author MUST persist its per-key `seq` tip durably; on recovery from a crash it MUST NOT
+  re-derive or re-emit a `seq` value below the highest `seq` it has **ever** durably persisted for that
+  `(replicaId, key)` pair — replay MUST query its own committed chain tip from `/facts` (never assume a
+  lower resume point from in-memory state, a stale cache, or a fixed counter reset), since doing
+  otherwise self-inflicts exactly the fork this section demotes.
+  - **A fork** — two admitted facts from one `(replicaId, key)` pair with equal `seq` but distinct
+    `factCID`s — is signed evidence of author misbehavior, **scoped precisely (A-2)**: it demotes the
+    **fork point and every same-pair fact causally AFTER it** (higher `seq`) to `untrusted-malformed`
+    — it does **not** demote the honest chain prefix **before** the fork, which remains covered by the
+    ordinary revocation/backdating machinery (§3.6/§8.1) like any other fact. Demotion is
+    **byte-identical only for replicas holding the SAME admitted set (per-shared-subset, mirroring the
+    §4b.4 SEC caveat)**: this is **not** unconditionally eviction-safe or monotone in the way ordinary
+    demotions are — a replica missing one fork branch under partial replication legitimately trusts the
+    chain until the second branch propagates (an explicit, bounded, replica-local divergence, not a
+    broken guarantee), and a **late-arriving second branch reverses a previously-trusted fact to
+    demoted** — the one case where `trusted → demoted` is expected on later information (INV-19's
+    non-reversal clause is scoped to exclude fork-demoted cells, below). **Recovery**: excising (§4.5)
+    the attacker/duplicate fork fact — using the higher-privileged **`excise-evidence`** capability, not
+    ordinary GDPR-erasure `excise` (§4.5) — restores the chain to
+    trustable once the fork fact itself is physically gone (the excised-slot treatment of A-1 applies:
+    the excision marker attests the hole, so the chain re-completes around it). This bounded,
+    replica-local, resolvable divergence is named **R11** in §9 (mirrored in docs/90-open-questions.md):
+    "fork demotion is a bounded, replica-local, resolvable divergence — not a guarantee violation —
+    until the fork resolves (propagation or excision)."
+  - **Inversion demotion — same scope discipline (A-12).** Within one pair, `seq` order and author-HLC
+    order MUST agree (the author stamps both monotonically); a pair whose `seq` order **inverts** its
+    own author-HLC order is likewise demoted, with the **same precise scope as the fork rule above**: it
+    demotes the inverting fact and **every same-pair fact with a higher `seq` than it**, to
+    `untrusted-malformed` (same well-formedness family as M4-2) — never the honest lower-`seq` prefix.
+  - **Precedence when both classes could apply (A-12).** A fact can in principle be simultaneously
+    eligible for a well-formedness demotion (fork/inversion, `untrusted-malformed`) and a trust-class
+    demotion (HLC-anachronism, `untrusted-anachronistic`, §3.6 (ii)). **`untrusted-malformed` (the
+    well-formedness class) takes precedence over `untrusted-anachronistic` (the trust class)** when
+    both could apply to the same fact — well-formedness is decided first and is definitive; a fixture
+    landing in this ambiguous zone MUST accept either label consistent with this precedence rule (a
+    build is non-conformant only if it produces neither).
+  - **Self-fork as deliberate repudiation (A-3).** A key holder can deliberately self-fork to demote
+    their own trusted history (repudiation of an inconvenient earlier fact). This is a known, bounded,
+    **auditable** act — the fork fact itself is signed evidence of who did it and when — not a new
+    attack surface beyond ordinary key compromise; it is subject to the same R11 bound and the same
+    excise-to-recover path as an attacker-induced fork. **The audit trail survives only until/unless an
+    excise-scope holder removes the fork fact** — which is why fork-recovery excision now requires the
+    higher-privileged `excise-evidence` capability rather than ordinary GDPR-erasure `excise` (§4.5): the
+    same self-forking key holder cannot unilaterally erase their own repudiation evidence.
+- **Reading rule for the rest of this spec:** wherever this spec (or the doc set) says a per-key
+  "`(wall,counter)` chain", "chain link", or "chain gap", the contiguity relation is NORMATIVELY the
+  `seq` sequence of the `(replicaId, key)` pair: a **gap** means a missing `seq` value below the
+  highest relevant `seq` (or below a frontier), and a chain is **complete up to a fact `F`** iff every
+  `seq ∈ [0, F.seq]` of `F`'s pair is held. The `(wall,counter)` stamps ride along for *ordering* only.
+  `seq` is **EXCLUDED from `orderKey` and from every reducer** (it is pair-local, not a global order —
+  the same exclusion discipline as `rxFrom`/loss, C2-1); it is read ONLY by the chain-completeness gate
+  (§3.6), pin-completeness (§4c/m4-1), and the fork/inversion well-formedness demotions above.
+  INV-14/INV-16/INV-19 (§8.4) are stated over `seq` contiguity.
+
 **Anti-poisoning by SET-RESIDENT causal plausibility, NOT a receiver-clock ingest gate (M-2, C3-1,
 corrects OQ-7).** HLC ordering *fairness* (not just readability) does depend on bounding backdating /
 forward-poisoning: a replica that stamps a far-ahead `wall` would win all `lww-hlc` races forever
@@ -1407,10 +1709,10 @@ receiver's wall clock and delivery timing, so honest replicas could admit perman
 `proj` with set-resident causal rules, never at the gate and never against any receiver clock**. The
 **primary** rule (C4-2) is **per-key author-HLC monotonicity, gated on per-key chain completeness**
 (C5-1), which reads the author's *involuntary* footprint in `S` and is not author-forgeable: a fact `F`
-from key `K` projects **trusted** only over a gap-free `(wall,counter)` chain of `K` up to `F` (else
+from key `K` projects **trusted** only over a gap-free `seq` chain of `K` up to `F` (else
 `pending`, §3.6/§4c m4-1), and is demoted if `S` holds a **higher-author-HLC, non-ancestor** fact from
 the **same** `K` (§3.6) — `K` cannot un-emit its own later-stamped facts, and **safety holds via the
-completeness gate alone**: an evicted/cap-evicted link yields a `(wall,counter)` gap ⇒ `pending`, never a
+completeness gate alone**: an evicted/cap-evicted link yields a `seq` gap ⇒ `pending`, never a
 silent trusted backdate (a registered key's chain is `key-chain-durable`, cap-bounded with on-demand
 re-fetch, §3.5a/M6-1 — a *liveness* aid, not the safety mechanism). A **secondary** rule (tightening only)
 demotes `F` if its author-HLC fails to
@@ -1551,7 +1853,7 @@ the C-3/C2-2 fix.
 > **only** for facts **outside any key's relied-upon completeness chain**. The C5-1 case where it would
 > *not* be value-neutral — evicting a **pre-registration same-key** fact that is the
 > monotonicity-contradicting evidence for a *later* same-key fact, thereby flipping that later fact
-> demoted↔trusted — is closed by the chain-completeness gate: the eviction produces a `(wall,counter)`
+> demoted↔trusted — is closed by the chain-completeness gate: the eviction produces a `seq`
 > gap, so the later fact projects **`pending`**, never a silently-flipped trusted value. The **same**
 > reasoning extends to cap-evicted `key-chain-durable` links under M6-1: a registered chain link evicted
 > past `keyChainDurableCapBytes` produces a gap ⇒ dependents `pending`, never a flipped trusted value, and
@@ -1631,7 +1933,7 @@ fact-sets equalize. Any fact that is still *causally implausible* given the curr
 *logical membership* is never lost while it can still be cleared. **Retention of its BYTES, however, is
 bounded (§3.5a, m4-2/m5-4/M6-1):** a quarantined fact from a **trusted (registered) key** is
 `key-chain-durable` — **preferentially retained up to `keyChainDurableCapBytes`**, so an honest transient
-anachronism that clears later is normally recoverable locally and the key's `(wall,counter)` chain — the
+anachronism that clears later is normally recoverable locally and the key's `seq` chain — the
 C5-1 anti-backdating evidence — is normally retained; past the cap the oldest chain links may be evicted
 and **re-fetched on demand** (dependents read `pending` until then — safe). A quarantined fact from an
 **unregistered** key is `quarantined-ttl` — kept under a bounded TTL + per-key byte-cap + **global
@@ -1659,7 +1961,10 @@ short-lived `refs/kip/sessions/<runId>` read-pins.** (T-2 resolved.)
   coordinator).
 - `sync` performs the typed merge (§3.4) replica↔replica or replica→main. Because merge is
   mechanically convergent, *any* merge topology (star via main, or peer-to-peer mesh) converges to
-  the same state — the trunk is a *convenience anchor*, not a correctness requirement.
+  the same state — the trunk is a *convenience anchor*, not a correctness requirement. Concurrent
+  replica→main merges race on the `refs/heads/main` update (a remote compare-and-swap): `sync` resolves
+  this with an **optimistic fetch-merge-push retry loop**; contention affects only the anchor's
+  *freshness*, never correctness (set-union is order-free; any interleaving converges).
 - Branch proliferation (the T-2 cost) is bounded: session branches are ephemeral (deleted after
   rollup), and replica branches are O(agents), not O(writes). gc reclaims merged session branches.
 - *Rejected:* pure single-trunk (Datomic) — serializes writes, can't branch-from-past. *Rejected:*
@@ -1684,17 +1989,29 @@ assembly (N1).
 ```ts
 // The DURABLE frontier is author-HLC space only — NO commit CIDs (C2-3, M2-2). dagTips dropped.
 type PinStatus = "pin-complete" | "pin-incomplete";  // (M3-2) incomplete until all sub-frontier facts present
-type Frontier = { perReplicaHlc: Record<ReplicaId, HlcStamp> }; // author-HLC frontier; survives concurrent excision
-// A replicaId ABSENT from perReplicaHlc means "−∞ for that replica" (m3-3): facts authored by a replica
-// not in the map are NOT ≤-frontier and are EXCLUDED. A pin thus captures exactly the replicas it
-// enumerated at pin time; a later-joining replica's low-author-HLC facts fall OUTSIDE the pin (they are
-// absent ⇒ −∞ ⇒ excluded), so the pinned subset is deterministic and not silently grown by new replicas.
+type ChainId = string;                               // "<replicaId>/<keyFpr>" — one authored chain (§4b.1/m7-1)
+                                                      // NORMATIVE (A-3): replicaId MUST exclude "/" (else this
+                                                      // rendering is ambiguous to parse) and MUST be chosen so no
+                                                      // two concurrently-writing processes share a (replicaId,key)
+                                                      // pair — a collision self-inflicts a fork (§4b.1); see docs
+                                                      // 21's ReplicaId definition for the full normative text.
+type Frontier = {
+  perReplicaHlc: Record<ReplicaId, HlcStamp>;        // coarse author-HLC cut (subscribe cursors, m-5); survives concurrent excision
+  chainSeq: Record<ChainId, number>;                 // NORMATIVE pin selector (m7-2): highest seq per (replicaId,key) chain at pin time
+};
+// A replicaId ABSENT from perReplicaHlc means "−∞ for that replica" (m3-3), and a chain ABSENT from
+// chainSeq means "excluded" (m3-3 extended, m7-2): facts of a chain not in the map are NOT ≤-frontier
+// and are EXCLUDED. A pin thus captures exactly the (replicaId, key) chains it enumerated at pin time;
+// a later-joining replica's/key's facts fall OUTSIDE the pin (absent ⇒ excluded), so the pinned subset
+// is deterministic, not silently grown by new replicas or keys — and an ENTIRELY-ABSENT chain can never
+// make completeness undecidable (it is simply not in the pin).
 
 interface SnapshotRef {
   scope: ScopeRef;
-  frontier: Frontier;                 // author-HLC frontier of the pinned fact-set (no commit CIDs)
-  // (M3-2) A pin DENOTES the deterministically-selected subset { f ∈ S : f.authorHlc ≤ frontier[f.replicaId] }
-  //   (replicaId absent ⇒ excluded, m3-3). factSetDigest is the order-independent merkle root (over orderKey)
+  frontier: Frontier;                 // author-HLC + per-chain seq frontier of the pinned fact-set (no commit CIDs)
+  // (M3-2/m7-2) A pin DENOTES the deterministically-selected subset
+  //   { f ∈ S : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }
+  //   (chain absent ⇒ excluded, m3-3/m7-2). factSetDigest is the order-independent merkle root (over orderKey)
   //   of THAT subset — recomputed from the current set, NOT a snapshot hash of "the set as it was when pinned".
   factSetDigest: CID;                 // merkle root of the sub-frontier subset; THE durable resolution target — re-resolves after any rewrite (C-4, C2-3, M3-2)
   // NOTE: dagTips: CID[] is intentionally ABSENT. Commit CIDs are transport, not identity; under
@@ -1723,8 +2040,8 @@ dangling on a stale or non-canonical commit CID. The pin contract carries **no c
 
 **Pin resolution and stability as the set grows (M3-2).** A pin does **not** denote "the bytes of the
 set at pin time"; it denotes the **deterministically-selected subset**
-`{ f ∈ S_current : f.authorHlc ≤ frontier[f.replicaId] }` (a replicaId absent from the frontier map is
-treated as `−∞` ⇒ that replica's facts are excluded, m3-3). `factSetDigest` is the **order-independent
+`{ f ∈ S_current : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }` (a chain
+absent from the frontier map is excluded, m3-3/m7-2). `factSetDigest` is the **order-independent
 merkle root over `orderKey`** of *that subset*, recomputed from whatever set the resolving replica
 currently holds. Because HLC is **not globally monotone**, a *late-arriving* fact whose author-HLC is
 ≤ the pinned frontier was not present when the pin was taken but **is** ≤-frontier once received — so a
@@ -1733,17 +2050,40 @@ typed `PinStatus`:
 
 - **`pin-incomplete`** — the replica has **not** yet received every sub-frontier fact (it cannot yet
   prove the subset is final). Resolution returns the `pin-incomplete` status, **never a silent partial
-  read** (N5). Completion is **monotone**: once a sub-frontier fact arrives it is never removed, so a
-  pin transitions `incomplete → complete` exactly once and never back.
-  - **Completeness is LOCALLY DECIDABLE via the per-replica HLC-counter contiguity rule (m4-1).** A
-    replica decides "I hold every fact `≤ frontier[R]` from replica `R`" **without** enumerating facts it
-    has never seen, because HLC counters are **per-(replicaId,key) monotone and gap-free by
-    construction**: each `(replicaId, key)` stamps a contiguous `hlc.counter` chain (carrying into
-    `wall+1` on overflow, §4b.1). Completeness for `R` therefore holds **iff** the replica holds an
-    **unbroken `(wall, counter)` chain from `R`'s genesis up to `frontier[R]`** with no missing counter.
-    A detected gap (a missing counter below the frontier) ⇒ `pin-incomplete`; a contiguous chain ⇒
-    complete for `R`. This makes `pin-incomplete → pin-complete` decidable from local state alone, so
-    INV-14 is testable.
+  read** (N5). Completion is **monotone UNDER NORMAL RECEIPT**: once a sub-frontier fact arrives it is
+  never removed **by ordinary receipt/fold**, so under normal operation a pin transitions
+  `incomplete → complete` exactly once and never back. **A-7 — this is NOT an unconditional guarantee
+  against retention-driven eviction.** §3.5a eviction MAY reclaim the bytes of a pinned sub-frontier
+  fact (a cap-evicted `key-chain-durable` link, or an evicted `quarantined-ttl` fact), which **MAY
+  regress a `pin-complete` pin back to `pin-incomplete` pending re-fetch** (the promisor re-fetch path,
+  §3.5a/m7-3) — this is the **same bounded liveness residual as R3** (§9), not a new guarantee
+  violation: the pin is never *wrong* (it never reports `pin-complete` with a stale/incorrect digest),
+  it simply reverts to the honest `pin-incomplete` state until the evicted link is re-fetched, exactly
+  as an ordinary chain-completeness gap does. INV-14/INV-14a's evict-then-restore-then-recheck fixture
+  (§8.4) is **correct behavior under this reading**, not a bug: evicting a pinned chain link and
+  observing the pin regress to `pin-incomplete`, then restoring the link and observing it return to
+  `pin-complete` with the **original** `factSetDigest`, is exactly what A-7 predicts.
+  - **Completeness is LOCALLY DECIDABLE via the per-`(replicaId,key)` `seq`-contiguity rule (m4-1,
+    restated over `seq` — m7-1/m7-2).** A replica decides "I hold every pinned fact of chain `C`"
+    **without** enumerating facts it has never seen, because the signed per-`(replicaId, key)` chain
+    sequence `seq` is **monotone and gap-free by construction at the author** (§4b.1/m7-1 — the HLC
+    `(wall,counter)` pair is NOT the witness; the receive-advance rule legitimately perforates it).
+    Completeness is decided **per chain, unioned over every chain the pin enumerates**: for each
+    `chainId ∈ frontier.chainSeq`, the replica must hold **every `seq ∈ [0, frontier.chainSeq[chainId]]`**
+    of that `(replicaId, key)` pair — `seq = 0` is the pair's **chain genesis** (§4b.1). A detected gap
+    (a missing `seq` below the chain's pinned frontier) on **any** enumerated chain ⇒ `pin-incomplete`;
+    all chains contiguous ⇒ complete. `(wall, counter)` values on the links play no contiguity role and
+    never collide across keys (chains are keyed by `(replicaId, keyFpr)`, not by stamps). This makes
+    `pin-incomplete → pin-complete` decidable from local state alone, so INV-14 is testable.
+    - **A physically-excised slot counts as held, not missing (A-1).** If `seq` was excised (§4.5), the
+      slot is covered by a **present, signature-valid `excision` marker** naming `(chainId, seq)` via
+      its `excisedChainId`/`excisedSeq` fields (docs 40 `ExcisionMarker`) — the marker is the signed
+      witness that the slot's absence is authorized and accounted for, so it satisfies the contiguity
+      check for that `seq` exactly as if the (now-gone) fact were held. Without this, excising any
+      mid-chain fact would permanently pin-incomplete every pin enumerating that chain, contradicting
+      "pin survives excision" (§4.5). `factSetDigest` for such a pin is the merkle root over the
+      **surviving** sub-frontier subset (the excised member simply is not folded in, same as any
+      excised fact); the excision marker satisfies completeness but is not itself a digested member.
 - **`pin-complete`** — every fact ≤ frontier is present; the subset is final and its `factSetDigest`
   matches. **Two replicas that have both reached completeness for the same frontier compute the
   identical subset ⇒ identical `factSetDigest` ⇒ the pin resolves to the same logical state on every
@@ -1775,7 +2115,12 @@ flowchart LR
 
 ```ts
 interface RecallQuery {
-  text?: string;                      // → embedding → ANN candidates
+  text?: string;                      // ADVISORY: exact/keyword graph seeding only. kip NEVER embeds it (N2).
+  embedding?: ReadonlyArray<number>;  // CALLER-SUPPLIED query vector (N2: kip consumes embeddings, never
+                                      //   produces them) — the ANN candidate seed. The vector half runs iff
+                                      //   present (its model identity MUST match the set-resident
+                                      //   kip:embedding-model fact, §5.4/M-7.2); absent ⇒ graph half only,
+                                      //   stated, never a silent in-kip embedding call (N5).
   filters?: { kind?: NodeKind[]; props?: Record<PropKey, PropValue>; edgeKinds?: EdgeKind[] };
   scope?: ScopeRef;                   // tenant / namespace / pinned snapshot
   asOf?: AsOf;
@@ -1859,7 +2204,10 @@ centrality.
 asOf.txTime` count. A `recall` at a fixed `asOf` is therefore a **pure function of the as-of fact-set**
 and reproducible; the read-event a `recall` itself emits has a *later* `rxFrom` and so cannot affect
 its own (or any equal-`asOf`) ranking. With fixed reducer weights/seeds, salience is a *deterministic*
-projection (§5.3).
+projection (§5.3). **`recency(hlcAge)`'s reference instant is pinned (m7-9):** `hlcAge` is measured
+against the query's **resolved `asOf` frontier** (the max author-HLC `wall` of the as-of-selected set)
+minus the fact's own author-HLC `wall` — **never an evaluation wall clock**, which would make
+deterministic-class salience replica-local and contradict the §5.3 layer-② byte-identity contract.
 
 **Embedding-model identity is a fact (M-7.2).** The embedding model id + version used to build the
 vector projection is recorded as a `kip:embedding-model` fact, so the accelerator projection's cache
@@ -2438,6 +2786,13 @@ function converged(s: LearnerLoopState): "accept" | "exhausted" | "continue" {
 }
 ```
 
+**Declared test seams (m7-18 — so INV-A5 is not a sleep-based flaky test).** The loop's wall-time axis
+reads an **injectable monotonic clock** (the source of `elapsedMs`; production default = the process
+monotonic clock — the clock is a *loop-driver* input, never a `proj` input, so determinism of the
+substrate is untouched), and the harness MAY register **stub microagent manifests** whose scripted
+behaviors (hang, fail, timeout, fixed loss sequence) drive the budget/failure paths deterministically.
+INV-A5(b)/INV-A12 name these seams in their recipes.
+
 **Manifest selection is explicit (N5), mirroring `registerFunctionality`.** Before the loop runs, the
 orchestrator MUST know *which* encode/decode/learner/loss microagents realize it for this artifact. kip
 does **not** infer them from `rawKind` or any heuristic — the caller **names** each by `(name, version)`
@@ -2697,22 +3052,40 @@ The core is deliberately small. Everything else (context assembly, LLM extractio
 client of these seams.
 
 ```ts
-/** The signed-fact AUTHORING inputs (the substrate's only writable shapes, §4.1). An author supplies the
- *  intent fields of a `Fact` (§4.1: `target`, `value?`, valid-time, `causedBy?`, `provenance`, …) AND
- *  stamps and signs the schema version `v` (it is part of the canonical signed payload, §2.4); kip fills
- *  only the derived `id`/`FactId` (= CID of the canonical payload) and the audit-only `rxFrom` annotation
- *  — never `v`. `AssertInput` carries `type: "assert"`, `RetractInput`
+/** The signed-fact AUTHORING inputs (the substrate's only writable shapes, §4.1). KIP — NOT the caller —
+ *  stamps `hlc` and `seq` and produces the `signature`, using the keyring supplied at `open()`
+ *  (`OpenOptions.keyring`, §4b.1/m7-1/A-3/A-5). An author supplies ONLY the intent fields of a `Fact`
+ *  (§4.1: `target`, `value?`, valid-time, `causedBy?`, the non-derived parts of `provenance`, …) and the
+ *  schema version `v` (part of the canonical signed payload, §2.4); kip fills the derived `id`/`FactId`
+ *  (= CID of the canonical payload), the author-stamped `hlc` and the per-`(replicaId,key)` chain
+ *  sequence `seq` (minted at txn-commit boundary, A-5), the `signature`, and the audit-only `rxFrom`
+ *  annotation — never `v`. `AssertInput` carries `type: "assert"`, `RetractInput`
  *  `type: "retract"` (a bounded `validTo`). Both are the spec's ESTABLISHED assert/retract-input
  *  convention — §5b REUSES these names (it does NOT invent its own): `EncodeAgent`/`DecodeAgent`/
  *  `LearnerAgent` outputs, `LearnerLoopState.candidate`, and `AcquisitionResult.proposed` are all typed
  *  in terms of them. Defined here once (where `assertFact`/`retractFact` consume them) so every §5b
  *  reference resolves. */
-type AssertInput = Omit<Fact, "id" | "type"> & { type: "assert" };
-type RetractInput = Omit<Fact, "id" | "type"> & { type: "retract" };
+// Each input is narrowed per discriminant: supersedes is legal ONLY on type==="supersede" and reAttests
+// ONLY on type==="re-attest" (§4.1), so the constraint is structural, not a runtime check.
+type AssertInput   = Omit<Fact, "id" | "hlc" | "seq" | "type" | "supersedes" | "reAttests"> & { type: "assert" };
+type RetractInput  = Omit<Fact, "id" | "hlc" | "seq" | "type" | "supersedes" | "reAttests"> & { type: "retract" };
+type SupersedeInput = Omit<Fact, "id" | "hlc" | "seq" | "type" | "reAttests"> & { type: "supersede"; supersedes: NonNullable<Fact["supersedes"]> };
+type ReAttestInput  = Omit<Fact, "id" | "hlc" | "seq" | "type" | "supersedes"> & { type: "re-attest"; reAttests: FactId };
 
 interface Kip {
   // --- lifecycle / substrate ---
   open(opts: OpenOptions): Promise<Repo>;          // open/clone a memory repo (git dir + manifest)
+}
+
+/** The transaction handle: the WRITE sub-surface of Repo whose facts batch into the txn's ONE commit
+ *  (§3.2 commit granularity). No reads-with-side-effects, no nested txn. */
+interface Tx {
+  assertFact(input: AssertInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" }>;   // durable at txn commit
+  retractFact(input: RetractInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" }>;
+  supersedeFact(input: SupersedeInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" }>; // §4b.3/C-3
+  reAttestFact(input: ReAttestInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" }>; // §8.1 M5-3 re-attest mechanism
+  putNode(node: NodePut): Promise<EID>;
+  putEdge(edge: EdgePut): Promise<EID>;
 }
 
 interface Repo {
@@ -2720,12 +3093,25 @@ interface Repo {
   withScope(scope: ScopeRef): Repo;                 // tenant/namespace lens (§8)
 
   // --- transactional writes (facts are the ONLY writable thing) ---
+  // seq is minted in COMMIT order at this publish boundary (A-5, §4b.1/m7-1) — never at intent-
+  // construction/buffering time inside `fn` — so an aborted/rolled-back txn never burns a seq value
+  // and the committed chain stays gap-free by construction, not by convention.
   txn<T>(fn: (tx: Tx) => Promise<T>): Promise<{ result: T; commit: CID }>; // one commit per txn
   commit(message?: string): Promise<CID>;           // flush auto-batched facts
 
   // --- facts ---  (author signs incl. HLC; ingest GATE = SIGNATURE VALIDITY ONLY; key-registration, authority, revocation, drift/backdating are ALL proj-time demotions, NOT gates; schema is NOT a gate)
-  assertFact(input: AssertInput): Promise<{ factId: FactId; status: "pending" | "durable" }>; // m-9
-  retractFact(input: RetractInput): Promise<{ factId: FactId; status: "pending" | "durable" }>;
+  //   Return type echoes the stamped envelope fields (id/hlc/seq) back to the caller — kip stamps these
+  //   at commit time (§4b.1/A-5) and the caller otherwise has no way to learn the assigned values.
+  assertFact(input: AssertInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }>; // m-9
+  retractFact(input: RetractInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }>;
+  supersedeFact(input: SupersedeInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }>; // §4b.3/C-3
+  reAttestFact(input: ReAttestInput): Promise<Pick<Fact, "id" | "hlc" | "seq"> & { status: "pending" | "durable" }>; // §8.1 M5-3 re-attest mechanism
+
+  // --- gate-observable ingest seam (B-2) — accepts an ALREADY-SIGNED fact (e.g. from sync/import, or a
+  //   hand-built test fixture) and reports the GATE VERDICT without throwing (rejection is expected/tested
+  //   behavior here, not an error); distinct from assertFact/retractFact/etc, which stamp+sign on the
+  //   caller's behalf. This is the seam INV-6a/INV-13a drive.
+  ingest(f: Fact): Promise<{ admitted: boolean; reason?: "malformed" | "signature-invalid" }>;
 
   // --- convenience folds over facts (sugar; emit facts under the hood) ---
   putNode(node: NodePut): Promise<EID>;             // → assert node-existence + prop facts
@@ -2740,6 +3126,7 @@ interface Repo {
 
   // --- distribution ---
   pin(scope: ScopeRef, asOf?: AsOf): Promise<SnapshotRef>;          // frontier-addressed snapshot (survives excision)
+  resolvePin(ref: SnapshotRef): Promise<{ status: PinStatus; factSetDigest: CID }>; // re-resolve a pin against the CURRENT set: pin-incomplete while any enumerated chain has a seq gap (§4c/m4-1/m7-2), pin-complete with the recomputed digest once every sub-frontier fact is held — the observable INV-14 tests drive
   sync(remote: RemoteRef, opts?: SyncOptions): Promise<SyncReport>; // fetch/push facts + set-union merge
   merge(from: BranchRef, opts?: MergeOptions): Promise<MergeReport>;// explicit merge (convergent; heads regen-not-merge)
   subscribe(scope: ScopeRef, since?: Frontier): AsyncIterable<FactDelta>; // frontier cursor (m-5)
@@ -2754,9 +3141,29 @@ interface Repo {
 
   // --- active knowledge (§5b) — thin clients that COMPILE TO FACTS (like putNode/putEdge) ---
   registerFunctionality(edgeKind: EdgeKind, manifest: MicroagentManifest): Promise<FactId>; // → signed microagent-registration + EdgeKind FunctionalityBinding facts; ADDITIVE — N realizers MAY bind one (edgeKind,sourceKind,targetKind), enumerated as Segment.alternatives, never silently picked (N5, INV-A7); descriptor is advisory selection only, NOT a gate (§5b.1)
-  runContextualQuery(q: ContextualQuery): Promise<AnswerGraph>;                              // compile+match = PURE READ over proj at q.asOf (default now); execute = dispatch bound microagents; emits signed assert + derived_from facts that RECORD the resolved asOf in provenance; AnswerGraph is the derived_from subgraph read back (§5b.1, INV-A8). Multiple segments ⇒ typed choice, never auto-picked (N5, INV-A7). Reproducible only against the recorded asOf (R5).
+  compileContextualQuery(q: ContextualQuery): Promise<Segment>;                              // PHASE 1 ONLY — the pure read over proj at q.asOf: compile + match, alternatives enumerated on the returned Segment (Segment.alternatives), NO dispatch, NO fact authored (§5b.1, INV-A2). This is the API channel through which the typed multi-segment/multi-realizer choice is SURFACED (INV-A7).
+  executeSegment(segment: Segment, opts?: { asOf?: AsOf }): Promise<AnswerGraph>;            // PHASE 2 ONLY — execute ONE caller-chosen segment (topological order over deps); dispatches bound microagents and emits signed assert + derived_from facts recording the resolved asOf; AnswerGraph = the derived_from subgraph read back (§5b.1, INV-A8)
+  runContextualQuery(q: ContextualQuery): Promise<AnswerGraph | { kind: "choice"; segments: Segment[] }>; // convenience compile+execute: exactly ONE matching segment ⇒ executes it and returns the AnswerGraph; MULTIPLE matches ⇒ returns the DISCRIMINATED typed choice { kind:"choice", segments } and executes NOTHING until the caller picks one and calls executeSegment (N5, INV-A7 — never auto-picked). Reproducible only against the recorded asOf (R5).
   runAcquisition(manifest: MicroagentManifest, input: unknown, opts?: { asOf?: AsOf }): Promise<{ facts: FactId[] }>; // dispatches a STANDALONE Miner/Discoverer/Ingestor/RDF family microagent (not edge-bound) and commits its AcquisitionResult.proposed as signed facts (quarantined until trusted; same_as → signed same_as facts); orchestrator-only assertFact path (§5b.3, INV-A1)
   learn(rawRef: BlobRef, opts: LearnOptions): Promise<{ facts: FactId[]; loss: number; status: "accept" | "exhausted" }>; // SELECTS the encode/decode/learner/loss microagents explicitly from LearnOptions.{encode,decode,learner,loss} (name+version of registered manifests — NEVER a heuristic pick by rawKind, N5; the §5b.2 dual of registerFunctionality) and threads LearnOptions.rawKind unchanged into DecodeAgent.rawKind; seeds LearnerLoopState.threshold from LearnOptions.threshold and LearnerLoopState.budget from {maxIterations,maxWallMs,maxInvocations} (the two MUST agree — they name one contract); runs the autoencoding loop OUTSIDE proj under that budget cap (disjunctive: ANY axis); on accept, commits a signed kip:learn fact naming inputs (rawRef + the selected manifest (name,version)s) + achieved loss; on exhausted, commits a signed kip:learn-exhausted marker and NO accept fact (§5b.2)
+}
+
+interface FsckReport {
+  ok: boolean;
+  headsMatch: boolean;                        // heads == proj(facts)
+  mergeDriverInstalled: boolean;              // m7-4 provisioning check
+  manifestGenesisCidMatch: boolean;           // m7-4 genesis-CID check
+  badSignatures: FactId[];                    // fact-signature failures (commit sigs NOT checked, M2-2)
+  authorityViolations: FactId[];              // author key fails genesis chaining at its author-HLC
+  excisionResidue: EID[];                     // post-excision residue found in /heads (MUST be empty)
+  missingDurable: FactId[];                   // durable blobs missing locally — integrity FAILURE (m7-3)
+  missingNonDurable: FactId[];                // promisor-missing non-durable blobs — HEALTHY (m7-3)
+  promisorMissingDurable: FactId[];           // ALIAS/cross-ref for `missingDurable` under the promisor-remote
+                                               //   framing: a promisor-covered durable blob reported missing
+                                               //   locally is the SAME integrity failure `missingDurable` names
+                                               //   (§3.5a) — `kip fsck` reports a promisor-missing DURABLE blob
+                                               //   as an integrity failure and a promisor-missing NON-durable
+                                               //   blob as healthy (`missingNonDurable`).
 }
 
 interface LearnOptions {
@@ -2770,7 +3177,9 @@ interface LearnOptions {
    *  manifest by `rawKind` or any heuristic (N5) — the caller names exactly which agents realize the loop,
    *  and those `(name,version)` pairs are the very ones recorded in the `kip:learn` fact's key
    *  `(rawRef, ontologyAsOf, encode/decode/learner-manifest)` (§5b.2). An unregistered/unsigned named
-   *  manifest is rejected, never substituted. */
+   *  manifest is rejected BEFORE the loop runs, never substituted — surfaced by learn() THROWING a
+   *  typed KipError (code ERR_UNREGISTERED_MANIFEST; the caller-input rejection channel, §6 design
+   *  notes / docs 40 "Errors") with no dispatch and no kip:learn/kip:learn-exhausted fact (INV-A13). */
   encode: { name: string; version: string };
   decode: { name: string; version: string };
   learner: { name: string; version: string };
@@ -2781,6 +3190,13 @@ interface SyncReport { received: number; sent: number; merged: number; conflicts
 ```
 
 Design notes:
+- **Error model — two channels, never mixed (m7-10).** Domain outcomes that are *data* (a `pending`
+  status, `pin-incomplete`, a `conflict` segment, an empty `AnswerGraph`, `"exhausted"`) are returned as
+  **typed values**, never thrown — they are part of the deterministic read model (§27 taxonomy).
+  **Caller-input rejections** (malformed input, a cyclic/ill-typed compile, an unregistered manifest
+  name, an out-of-scope authoring attempt, an unauthorized excision) are surfaced by **throwing a typed
+  `KipError`** (`{ code, message, context }`); the normative code taxonomy and the per-method
+  throws-vs-returns table live in docs/40 "Errors". No method rejects silently (N5).
 - **`assertFact`/`retractFact` are the substrate**; `putNode`/`putEdge` are thin sugar that compile to
   facts. There is exactly one way to change state: append a signed fact. The author stamps and signs
   the HLC; kip's **only** hard ingest gate is **signature validity** (a pure function of the fact's
@@ -2848,10 +3264,15 @@ Design notes:
 The trust set is **not** a flat, freely-writable global ref. kip defines a real PKI-style model:
 
 - **Root of trust (C-6.4).** Each tenant has a **genesis root key set** pinned in the immutable
-  `manifest.json` (established at repo creation, never edited thereafter — m2-5/M2-3). The trusted-key
-  ref `refs/kip/keys/<tenant>/trusted` is **append-only and itself a fact log**: a key-authorization
-  fact (`type:"assert"`, `target:{kind:"key"}`) is **valid (trusted by `proj`) only if its
-  *authorizing* key chains, at the key-add fact's author-HLC, to the genesis root** for that namespace.
+  `manifest.json` (established at repo creation, never edited thereafter — m2-5/M2-3).
+  **Key-authorization and revocation facts have exactly ONE home (m7-5): they are ordinary facts in
+  `/facts/**`** (`type:"assert"`/`"revoke-key"`, `target:{kind:"key"}`, §4.1) — signed, gated, synced,
+  and folded like every other fact, and read by `proj` from `/facts` **only**. The ref
+  `refs/kip/keys/<tenant>/trusted` is a **derived, regenerable INDEX** over those facts (a local
+  convenience view, like a projection cache): never authoritative, never synced, never read by `proj`,
+  droppable and rebuilt at any time (§3.1). A key-authorization fact is **valid (trusted by `proj`)
+  only if its *authorizing* key chains, at the key-add fact's author-HLC, to the genesis root** for
+  that namespace.
   A key-add whose chain does not reach the genesis root is **demoted-untrusted by `proj`** (set-pure,
   author-HLC keyed) — so a `key` authorizing a forger key never *grants* authority, on every replica
   identically. (A fact signed by an **unregistered** key — one with no set-resident `KeyAuthorization`
@@ -2861,22 +3282,48 @@ The trust set is **not** a flat, freely-writable global ref. kip defines a real 
   ahead of its key's registration is never lost.) So a replica that can merely `push` **cannot**
   self-authorize forgery: its key-add is admitted to the set but folds to *no authority*. The genesis
   root set itself is permanent (manifest-frozen); routine rotation moves *current* signing authority via
-  the chain without ever touching the genesis root.
+  the chain without ever touching the genesis root. **Rotation SHOULD retire the old key explicitly
+  (m7-11):** a routine rotation pairs the new `KeyAuthorization` with an **`ordinary-cutoff`
+  `revoke-key` on the old fingerprint, `effectiveFrom` = the handover author-HLC** — preserving all
+  pre-handover history as trusted (M2-3) while retiring the old key's forward authority. A rotation
+  that only authorizes the new key leaves the old key **trusted indefinitely** — a stolen
+  "rotated-away" key could still mint trusted facts (INV-17 exercises the paired flow).
+
+- **Genesis-root compromise — honest bound and the re-genesis path (m7-12, R7).** Revocation chains
+  terminate at the genesis root, so **no in-band mechanism can revoke the root itself**: an attacker
+  holding a genesis root key can mint `KeyAuthorization`s and counter-revocations indefinitely, and no
+  fact the honest operator can author out-demotes it. This is intrinsic to a manifest-frozen root
+  (rotating the root in-band would just move the same problem one key up). The spec therefore states
+  it as an **accepted residual (R7, §9)** with an explicit **out-of-band recovery path — re-genesis**:
+  create a new repo/manifest with a fresh root set; migrate by having keys authorized under the new
+  root **re-attest / re-import** the old repo's still-wanted facts (the m5-3 `re-attest` primitive
+  and/or the §5b.3 Ingestor path — old signatures remain historically verifiable; trust is re-derived
+  under the new root), and record the old repo's tip `factSetDigest` in the new genesis metadata for
+  audit continuity. Mitigations (operational, SHOULD): keep root keys offline and used **only** to
+  delegate; split custody of the root set; delegate day-to-day authority to revocable keys immediately
+  after genesis.
 
 - **Scoped authority (C-6.3, C-5, M3-1).** A key authorization binds `key → { namespaces:
-  EIDNamespace[]; ops: ("write" | "delegate" | "excise" | "revoke" | "resolve")[] }`. A key may write
+  EIDNamespace[]; ops: ("write" | "delegate" | "excise" | "revoke" | "resolve" | "excise-evidence")[] }`. A key may write
   only EIDs in its authorized namespaces (the C-5 write-authority binding); `excise`/`revoke`/`resolve`
   are **separately scoped capabilities** (a write key cannot excise, revoke, or adjudicate conflicts).
   `resolve` is the **single-writer adjudication scope** that lets a key author a *dominating* `supersede`
   which clears a `kip:conflict` (§3.4, M3-1) — so contradictory concurrent resolutions cannot both be
-  authoritative. Multi-tenant isolation is structural: a tenant-A key is never an authority for a
-  tenant-B namespace.
+  authoritative. Multi-tenant isolation is structural **for WRITE authority** (a tenant-A key is never
+  an authority for a tenant-B namespace — enforced set-purely by `proj` on every replica). **Read
+  confidentiality is NOT structural** in a shared repo — see the m4-5 read extension in §8.3b.
+  `excise-evidence` is a **separately scoped capability** from ordinary `excise`: an `excise()` call
+  whose target fact carries a fork- or well-formedness-demotion status (§4.5, §4b.1, R11) requires the
+  excising key's `KeyAuthorization.ops` to include `excise-evidence`; lacking it, the excision is
+  **rejected** with `ERR_EXCISE_EVIDENCE_REQUIRED` (docs/40 "Errors") rather than silently downgraded to
+  an ordinary excision — this is enforced as a `proj`-time authorization check, the same set-pure
+  demotion mechanism as every other scoped-authority question in this section (N5).
 
 ```ts
 interface KeyAuthorization {                 // recorded as a signed fact, target.kind === "key"
   keyFpr: string;                            // SHA-256 of the authorized pubkey
   namespaces: string[];                      // STABLE namespaceIds this key may write (M2-3); authority transfers across keys for a FIXED namespace
-  ops: ("write" | "delegate" | "excise" | "revoke" | "resolve")[]; // resolve = single-writer conflict adjudication (M3-1)
+  ops: ("write" | "delegate" | "excise" | "revoke" | "resolve" | "excise-evidence")[]; // resolve = single-writer conflict adjudication (M3-1)
   authorizedBy: string;                      // fingerprint of the delegating key (chains to genesis root)
   effectiveFrom: HlcStamp;                   // AUTHOR-HLC: a fact is authorized iff its author-HLC ≥ this and < any later revocation (set-pure, proj decision)
 }
@@ -2947,7 +3394,7 @@ interface KeyRevocation {                    // type:"revoke-key" fact; demotes,
   (C4-2):
   1. **PRIMARY — per-key author-HLC monotonicity, GATED ON CHAIN COMPLETENESS (§3.6, §4b.1, C4-2 +
      C5-1).** A fact `F` from key `K` projects **trusted** only over a **complete, gap-free
-     `(wall,counter)` chain of `K` up to `F`** (the §4c/m4-1 contiguity rule, reused); if a lower same-key
+     `seq` chain of `K` up to `F`** (the §4c/m4-1 contiguity rule, reused); if a lower same-key
      fact is missing/evicted/unreplicated, `F` is **`pending`** (not trusted, not rejected) until the chain
      completes (C5-1). Once complete, `F` is demoted `untrusted-anachronistic` iff `S` holds a
      **higher-author-HLC, non-ancestor** fact from the **same** `K`. This reads `K`'s *involuntary* same-key
@@ -2986,6 +3433,28 @@ interface KeyRevocation {                    // type:"revoke-key" fact; demotes,
   *liveness* aid that keeps the chain completable; safety does **not** depend on it. The defense is
   therefore a *real, set-pure, non-forgeable, eviction-safe bound*, not a complete prohibition — stated
   precisely rather than over-claimed.
+
+  **Forward-dating — the analysis the backdating rules imply (m7-13, R9).** The mirror attack is a
+  registered (or briefly-compromised) key stamping a **far-future author-HLC** — the "monotonic
+  poisoning" OQ-7's promotion names. Its effects and bounds, stated exactly:
+  - **(a) Head capture.** A far-future-stamped trusted fact wins every `lww-hlc` race on the cells it
+    covers against all later honest writes (their author-HLCs sit below the forged stamp) **until a
+    revocation lands**. No set-pure rule can demote it pre-revocation: a future stamp contradicts no
+    same-key history (the monotonicity rule reads *higher* same-key facts, which by construction do not
+    exist yet), so **the pre-revocation head-capture window is a genuine residual (R9, §9)** —
+    per-cell, visible (provenance shows the implausible stamp), never silent.
+  - **(b) Self-wedging (attacker-costly, defender-relevant).** The forged stamp becomes the key's
+    chain maximum: **every subsequent honest fact from the same key projects
+    `untrusted-anachronistic`** (lower-stamped, non-ancestor — the ordinary monotonicity demotion), so
+    the key wedges itself until recovered. An operator whose own key was briefly hijacked inherits this
+    wedge.
+  - **(c) Recovery.** An **`ordinary-cutoff` `revoke-key` with `effectiveFrom` below the forged stamp**
+    demotes every fact from the key with author-HLC ≥ `effectiveFrom` — **including all future-dated
+    stamps** (the cutoff is a ≥-comparison in author-HLC space, so forward-dating cannot outrun it).
+    Honest same-key facts caught in the ≥-band are casualties restored via **`re-attest`** under a
+    fresh key (m5-3); the fresh key starts a clean chain. Head capture ends at revocation propagation.
+  So forward-dating is bounded by **revocation latency** (window (a)) plus the m5-3 restoration cost —
+  the same honest bound-shape as the trusted-flood DoS (§3.5a/§8.3b) — and is never unrecoverable.
 
   **Anti-backdating is preserved under eviction & partial replication (INV-18(c)/INV-19).** The per-key
   trust decision is **monotone** (a fact moves `pending → trusted/demoted` exactly once as `K`'s chain
@@ -3038,16 +3507,48 @@ interface KeyRevocation {                    // type:"revoke-key" fact; demotes,
   reaches the set is uniformly demoted everywhere, not kept on some replicas and dropped on others.
   Cross-tenant reads require explicit `grant` facts (a tenant-A key may *reference* tenant-B's frozen
   `namespaceId` but never *write* it, M2-3).
-- **Access policy** is data: `allow`/`deny` facts over (scope, actor, capability), as-of-queryable and
-  auditable. Reads outside policy return nothing (no partial leak).
+- **Access policy** is data: `policy` facts over (scope, actor, capability, decision), as-of-queryable and
+  auditable. Reads outside policy return nothing (no partial leak) — **through the SDK read path only**
+  (see the m4-5 read extension in §8.3b: the read filter, like the write guard, is client-side).
+- **`Grant` and `AccessPolicy` fact shapes (normative, minimal).** `type FactType` (§4.1) includes
+  `"grant"` and `"policy"` as real fact kinds, with a matching `Target` variant
+  (`{ kind: "policy"; scope: ScopeRef; actor: ActorId; capability: string }`) so both are resolvable
+  types, not merely prose. `type ActorId = string;` (a stable actor identifier — a key fingerprint or an
+  operator-assigned principal id; opaque to kip). The two shapes:
+  ```ts
+  interface Grant {                            // type:"grant" fact, target.kind === "policy" (scope-only; no actor/capability)
+    namespaceId: string;                       // the FOREIGN (frozen genesis) namespaceId this grant authorizes a reference to
+    grantedTo: string;                         // keyFpr or namespaceId of the referencing tenant
+  }
+  interface AccessPolicy {                     // type:"policy" fact, target.kind === "policy"
+    scope: ScopeRef; actor: ActorId; capability: string;
+    decision: "allow" | "deny";                // subsumes the former separate allow/deny FactTypes into one kind
+  }
+  ```
+  `Grant` authorizes a **reference** only — it never confers write authority (M2-3, the C-5 write-authority
+  binding remains key→namespace via `KeyAuthorization`, §8.1). `AccessPolicy` is the read/capability gate
+  `withScope`'s read filter consults (client-side, §8.3b); `decision` replaces two separate `"allow"`/
+  `"deny"` fact kinds with one kind carrying a discriminated field, keeping the `FactType` union small.
 
 ### 8.3 Privacy / secrets / redaction / erasure
 
 - **Secret redaction** on export by key-name regex (adapters/tasks) — `token|secret|password|...`
-  cells are redacted at read for unprivileged scopes.
+  cells are redacted at read for unprivileged scopes. **Honest residuals (m7-14) — redaction is a
+  courtesy read filter, NOT a privacy guarantee:** (a) it is a *name-pattern heuristic with false
+  negatives* — a secret stored under a non-matching key name, inside a value string, or in a `BlobRef`
+  payload is never redacted; (b) the plaintext secret bytes are **signed, committed, and replicated to
+  every replica** (including unregistered-key quarantine peers) regardless of any read-time redaction.
+  For real secrets the correct primitive is **not writing them into the substrate at all**, or
+  **field-level encryption by the author before the fact is signed** (the ciphertext is then the fact
+  value); redaction only reduces casual over-exposure on export.
 - **Erasure**: tombstone (logical, signature-preserving) + excise (physical, GDPR, `excise`-scoped,
   re-folds `/heads`, marker uses a **non-content-derived nonce** so it is not a PII fingerprint) per
   §4.5. The two are distinct mechanisms with the strength/cost tradeoff stated plainly there.
+  **Distributed-erasure residual (m7-15):** excision guarantees residue-free `/heads` and byte
+  reclamation **on replicas that apply the marker**. A non-compliant/hostile replica, a peer holding
+  `quarantined-ttl` copies until TTL expiry, or **any clone taken before the excision** retains the
+  bytes outside kip's reach — the erasure guarantee is *organizational* (over the replica set an
+  operator controls or contracts with), not *cryptographic*.
 
 ### 8.3a Auditability
 
@@ -3090,14 +3591,20 @@ creates, and its bound:
   **aggregate** `quarantined-ttl` pool by a manifest-pinned **global `quarantinePoolBytes` budget** with
   LRU/TTL eviction across **all** unregistered keys (§3.5a), so an `N`-key flood cannot multiply the
   ceiling or refill faster than TTL/LRU drains.
-- **Residual / honest bound (registered-key DoS now genuinely bounded — M6-1).** This bounds the
-  **unregistered-key** (unlimited-identity) vector via the global pool. An attacker with a **registered**
-  key is the insider threat, bounded by **(i)** the per-registered-key `keyChainDurableCapBytes` cap on the
+- **Residual / honest bound (registered-key DoS — the cap covers the CHAIN pool; the TRUSTED flood is
+  revocation-latency-bounded — M6-1, scoped honestly).** This bounds the **unregistered-key**
+  (unlimited-identity) vector via the global pool. An attacker with a **registered** key is the insider
+  threat, bounded by **(i)** the per-registered-key `keyChainDurableCapBytes` cap on the
   `key-chain-durable` pool — **a real eviction cap (M6-1)**: past the cap the oldest chain links are
-  evicted (re-fetched on demand if later needed), so a registered or **compromised-registered** key can
-  **no longer** force unbounded non-evictable durable bytes on every replica (the former "never-evict /
-  never-quota-drop" wording was an internal contradiction with the "bounded by per-key quota" claim and is
-  retracted; the cap makes the quota *true* and enforceable); **(ii)** revocation (§8.1); and **(iii)** the
+  evicted (re-fetched on demand if later needed), so a registered or **compromised-registered** key
+  cannot grow the *chain-anchor* pool without bound (the former "never-evict / never-quota-drop"
+  wording was an internal contradiction with the "bounded by per-key quota" claim and is retracted; the
+  cap makes that quota *true* and enforceable). **The cap does NOT cover the key's TRUSTED facts** —
+  those are `durable`, never evicted, by definition (§3.5a) — so a compromised registered key flooding
+  valid in-namespace facts forces durable growth at its trusted-write rate **until a `revoke-key`
+  lands**: for the trusted-flood vector, **the real bound is revocation latency** (detect + issue +
+  propagate; deployment-dependent, unquantified here), optionally tightened by the MAY per-key
+  transport quota (§3.5a). **(ii)** revocation (§8.1); and **(iii)** the
   per-key chain-completeness anti-backdating gate (C5-1), which `pending`s/demotes any backdate that
   contradicts the key's own chain — so a registered insider cannot silently backdate a trusted fact onto a
   victim by inducing eviction/non-replication of its higher facts. A replica that *opts out* of retention
@@ -3110,12 +3617,27 @@ creates, and its bound:
   same-key facts stay **`pending` permanently** — never a wrong *trusted* value, but a permanent liveness
   loss for that key. Mitigation (operational): size `keyChainDurableCapBytes`/`quarantineTtlMs` to the
   working set and register keys before their pre-registration facts age out. Listed honestly in §9.
-- **`withScope` is advisory (m4-5).** The client-side `withScope` write guard (§3.6/§8.2) is the *only*
-  thing stopping an **honest** client from authoring out-of-scope/excess facts; an attacker simply does
-  not run it. It is **not** a DoS control — the authoritative cross-replica bound is the set-pure proj
-  demotion (for *value*) plus §3.5a retention (for *bytes*). The "real PKI-style" claim (§8.1) is now
-  consistent with this section: unlimited unauthenticated keys can *push*, but cannot force unbounded
-  *durable* growth or affect any trusted head.
+- **`withScope` is advisory — for WRITES *and* READS (m4-5, extended m7-16).** The client-side
+  `withScope` write guard (§3.6/§8.2) is the *only* thing stopping an **honest** client from authoring
+  out-of-scope/excess facts; an attacker simply does not run it. It is **not** a DoS control — the
+  authoritative cross-replica bound is the set-pure proj demotion (for *value*) plus §3.5a retention
+  (for *bytes*). **The READ side is equally advisory:** the `withScope` read filter and the
+  `allow`/`deny` policy facts (§8.2) are enforced in the SDK read path only — **any principal with git
+  fetch access to a shared multi-tenant repo reads every tenant's fact blobs raw**, bypassing the SDK
+  entirely. "Reads outside policy return nothing (no partial leak)" therefore holds **only through the
+  SDK read path**. **Deployment requirement:** confidentiality across mutually-untrusting tenants
+  REQUIRES per-tenant repos/remotes (transport-scoped fetch access) or author-side payload encryption
+  — sharing one repo across such tenants leaks by construction. (OQ-5's deferred federation transport
+  inherits this consequence and MUST NOT be read as providing read isolation.) The "real PKI-style"
+  claim (§8.1) is consistent with this section: unlimited unauthenticated keys can *push*, but cannot
+  force unbounded *durable* growth or affect any trusted head — and PKI-style *write* authority never
+  implied *read* confidentiality inside one repo.
+- **Re-fetch churn amplification (noted; contract deferred to OQ-8).** Evict/re-fetch cycling is a
+  bandwidth-amplification surface: an attacker who can induce cap pressure can make victims repeatedly
+  re-fetch evicted chain links, and a late registration flipping a large `quarantined-ttl` corpus to
+  `key-chain-durable` (§3.5a) triggers a correlated fetch storm. Neither cost is bounded by this spec;
+  the serving/rate-limit/backoff contract that would bound them is **OQ-8** (§9). Until then operators
+  SHOULD rate-limit promisor fetches at the transport.
 
 ### 8.4 Testability — conformance invariants (the suite kip ships)
 
@@ -3162,6 +3684,28 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   verifiability of remaining **fact** signatures and re-folds `/heads` so no excised residue survives.
   **Commit signatures are NOT a trust anchor and are NOT checked** (M2-2); the regenerated DAG is
   **unsigned** with a fixed sentinel committer and commit-author ≠ fact-author, which is allowed (M3-3).
+  The malformed-rejection recipe includes a **`signedFields`-mismatch fixture** (a fact whose declared
+  `signedFields` differs from the §2.4 canonical list MUST be rejected-malformed, never verified over
+  the declared subset — m7-6) and a **driver-less-merge fixture** (a bare `git merge` in a clone without
+  the kip-regen driver: the text-merged `/manifest.json` MUST fail the genesis-CID check as a hard
+  error, and the stale `/heads` MUST be re-folded on first read — m7-4).
+  - **M0 scope note for the gate-only sub-case (INV-6a — accepted residual R12, §9).** At M0, before the
+    §8.1 fact-based trust overlay exists, a replica's local key-registry (its own identity,
+    explicitly-configured genesis `rootKeys`, or independently-imported peer keys) MAY legitimately
+    cause a genuinely-unregistered-fingerprint fact and a registered-fingerprint fact carrying a
+    matching-format placeholder signature to receive **different** admit/reject verdicts across
+    replicas with different local registries — a deliberate, bounded exception to INV-6a's "no
+    key-registration predicate" clause (docs/60 §5), required so real cryptographic verification
+    (which MUST always win once a replica has independently established real key material for a
+    fingerprint) is never defeated by a forgeable placeholder fallback. This does **not** weaken
+    INV-6's own guarantee above (the ingest gate still rejects only signature-invalid/malformed facts,
+    identically on every replica, for every fact whose fingerprint IS locally registered — the
+    exception is scoped strictly to the M0-only, gate-observable comparison across genuinely
+    unregistered fingerprints). Full byte-pure INV-6a purity — verdicts independent of ANY
+    replica-local state, including key registration — is restored once M8's fact-based trust overlay
+    (§8.1: `KeyAuthorization` facts admitted through the same substrate, so "is this key registered"
+    becomes a set-pure function of the admitted fact set, not per-replica local config) lands. Tracked
+    as accepted residual **R12** (§9).
 - **INV-7 (idempotent ingestion).** Re-ingesting any fact set is a no-op — CID dedup holds because the
   author-stamped, signed HLC is part of the CID (M-4), so the same logical fact has one CID on all
   replicas (no double-count under `pncounter`).
@@ -3210,14 +3754,41 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   signature-only** (the v3-draft clock/key-log gate made it false); its passing is the conformance-level
   proof that the SEC antecedent (equal admitted sets, modulo §3.5a retention) is actually reachable, not
   vacuous.
-- **INV-14 (pin completeness & stability — M3-2/m3-3).** A pin resolves to the deterministically-selected
-  subset `{ f ∈ S : f.authorHlc ≤ frontier[f.replicaId] }` (replicaId absent ⇒ excluded). The suite
-  takes a pin, then delivers a **late-arriving sub-frontier fact** to one replica only, and asserts the
-  lagging replica reports **`pin-incomplete`** (never a silent partial digest mismatch); after the fact
-  syncs to all replicas, every replica reports **`pin-complete`** with the **identical** `factSetDigest`.
-  A causal anachronism or key-registration race must not change the pinned subset's digest once complete.
-  Completeness is decided by the **per-replica HLC-counter contiguity rule** (an unbroken `(wall,counter)`
-  chain up to `frontier[R]`, m4-1); a build that cannot locally decide completeness **fails**.
+- **INV-14 (pin completeness & stability — M3-2/m3-3/m7-2).** A pin resolves to the
+  deterministically-selected subset
+  `{ f ∈ S : chainId(f) ∈ frontier.chainSeq ∧ f.seq ≤ frontier.chainSeq[chainId(f)] }` (chain absent ⇒
+  excluded). The suite drives **`resolvePin(ref)`** (§6): it takes a pin, then delivers a
+  **late-arriving sub-frontier fact** to one replica only, and asserts the lagging replica's
+  `resolvePin` returns **`status: "pin-incomplete"`** (never a silent partial digest mismatch); after
+  the fact syncs to all replicas, every replica's `resolvePin` returns **`"pin-complete"`** with the
+  **identical** `factSetDigest`. A causal anachronism or key-registration race must not change the
+  pinned subset's digest once complete. Completeness is decided by the **per-`(replicaId,key)`
+  `seq`-contiguity rule** (every `seq ∈ [0, frontier.chainSeq[chain]]` held, for every enumerated
+  chain — §4b.1/m7-1, §4c/m4-1); the suite includes a **receive-advance fixture** (the author ingests a
+  higher-counter foreign fact mid-chain, so its own `hlc.counter` stream jumps) and asserts the jump
+  does **NOT** read as a gap (contiguity is over `seq`, never `hlc.counter`). A build that cannot
+  locally decide completeness, or that decides it over `(wall,counter)`, **fails**.
+  - **Eviction MAY regress a pin (A-7 — correct behavior, not a bug).** The suite additionally: evicts a
+    pinned sub-frontier chain link past `keyChainDurableCapBytes` (§3.5a) on a replica that had
+    previously resolved the pin `pin-complete`, and asserts `resolvePin` now correctly reports
+    **`pin-incomplete`** (the same bounded liveness residual as R3, §9 — never a wrong `pin-complete`);
+    it then restores/re-fetches the link and asserts `resolvePin` returns to **`pin-complete`** with the
+    **original** `factSetDigest`. A build that either (a) keeps reporting `pin-complete` after the
+    eviction (silently stale) or (b) recomputes a *different* digest after restoration **fails**; a
+    build that correctly regresses to `pin-incomplete` and then recovers is **conformant** — this
+    evict-then-restore-then-recheck fixture is the *expected* behavior A-7 describes, not evidence of a
+    monotonicity violation.
+- **INV-14b (excised chain slot is an attested hole, not a gap — A-1, closes the excision×seq
+  interaction).** A physically-excised (§4.5) mid-chain fact's `seq` slot is satisfied by a **present,
+  signature-valid `excision` marker** naming that `(chainId, seq)` (docs 40 `ExcisionMarker.
+  excisedChainId`/`excisedSeq`), both for the chain-completeness gate (§3.6 step (i)) and for
+  pin-completeness (§4c/m4-1). The suite: (1) authors a same-pair chain of ≥3 facts from a registered
+  key `K`; (2) excises the mid-chain fact and asserts (a) later same-pair facts remain locally decidable
+  — trusted or demoted per the ordinary monotonicity rule, **never stuck `pending`** — and (b) a pin
+  enumerating that chain, taken before or after the excision, re-resolves **`pin-complete`** with a
+  recomputed `factSetDigest` over the surviving subset. A build in which excising a mid-chain fact
+  leaves every later same-pair fact permanently `pending`, or permanently pin-incompletes an enumerating
+  pin, **fails** (the pre-A-1 bricking bug).
 - **INV-15 (`causedBy` well-formedness — set-pure, M4-2).** A fact whose any `causedBy` parent resolved in
   `S` has author-HLC **>** the fact's own author-HLC is demoted `untrusted-malformed`; a `causedBy` cycle
   is demoted-malformed; an unresolved (not-yet-in-`S`) `causedBy` parent leaves the fact **pending** (not
@@ -3226,7 +3797,7 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   replica identically. Acyclicity guarantees the closure walk terminates.
 - **INV-16 (per-key anti-backdating from INVOLUNTARY footprint, GATED ON CHAIN COMPLETENESS — C4-2 +
   C5-1, m5-5).** A signature-valid fact `F` from key `K` projects **trusted** only over a complete gap-free
-  `(wall,counter)` chain of `K` up to `F` (else `pending`), and once complete is demoted
+  `seq` chain of `K` up to `F` (else `pending`), and once complete is demoted
   `untrusted-anachronistic` iff `S` holds a higher-author-HLC, non-ancestor fact from the **same** `K` IN
   THE COMPLETE DURABLE CHAIN — **independent of whether `F` declares `causedBy`**. The suite asserts:
   - **(C4-2)** authors a registered, non-revoked key's higher-stamped fact, then a `causedBy`-LESS
@@ -3271,7 +3842,9 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
     `durable`/`key-chain-durable` subset (§4b.4 corollary); **and** evicting a **pre-registration same-key**
     fact does **NOT** flip a later same-key fact from demoted to trusted — it instead yields a chain gap so
     the later fact projects **`pending`** (a build that flips it to trusted — the C5-1 hole — **fails**);
-  - **(d)** `RetentionClass` is computed identically on every replica (set-pure), and a **registered key's
+  - **(d)** `RetentionClass` is computed identically on every replica **holding the same set** (set-pure
+    — the suite equalizes held sets before asserting class identity; a replica still missing the key's
+    registration fact legitimately computes `quarantined-ttl` until it arrives, monotonically), and a **registered key's
     chain is `key-chain-durable` — preferentially retained UP TO `keyChainDurableCapBytes`, NOT
     never-evicted (M6-1)**. The suite asserts: (d1) within the cap, a registered key's chain links are
     retained and its honest facts project trusted without re-fetch; (d2) **past the cap, the oldest
@@ -3299,6 +3872,16 @@ Determinism is the testing strategy. The conformance suite asserts (each INV upd
   links (m6-1). A build in which any eviction or selective non-replication flips a same-key backdate from
   `pending`/`demoted` to `trusted`, or in which the `pending → demoted/trusted` transition reverses under
   cap-bounded retention, **fails**.
+  - **Scope of "never reverses" (A-2/A-9 — two sanctioned exceptions, not weakenings of the eviction
+    claim above).** The non-reversal claim above is about the **eviction/re-fetch** path specifically
+    (steps 2–4): trusted/demoted decisions do not reverse due to **local eviction of already-known
+    chains** (m6-2 frontier pinning), and a **newly-DISCOVERED** chain (one this replica has never seen
+    before) arriving and revealing a gap below an already-trusted fact's author-HLC is the safe,
+    expected direction of change (`trusted → pending`, never the reverse) — this is not covered by, and
+    does not contradict, the eviction non-reversal claim (A-9). Separately, **fork-demoted cells are
+    explicitly excluded from this invariant's non-reversal claim (A-2/R11, §9):** a late-arriving second
+    fork branch is the one case where `trusted → demoted` is the expected, sanctioned direction on later
+    information — it is not an eviction-route reversal and is governed by R11, not by this invariant.
 
 **Active-layer conformance invariants (§5b — the suite ships these too).** INV-A1 (§5b) is the prose
 load-bearing rule; INV-A2..INV-A14 are its §8.4-style testable counterparts, each with an adversarial
@@ -3345,7 +3928,10 @@ touching the convergence core.
   which `proj` re-invokes any accelerator-class agent (so B without the model diverges or errors) **fails**.
 - **INV-A5 (budget-cap termination over ALL THREE axes + exhausted marker).** The suite runs three
   sub-cases, each forcing `loss ≥ threshold` forever: (a) tiny `maxIterations`, (b) tiny `maxWallMs` with
-  a slow/hung decode call, (c) tiny `maxInvocations` with high per-iteration fan-out. In each it asserts
+  a slow/hung decode call, (c) tiny `maxInvocations` with high per-iteration fan-out. Sub-case (b) is
+  driven **deterministically, never by sleeping**, through the two declared test seams (§5b.2 /
+  docs 32): the loop's **injectable monotonic clock** and a harness-registered **stub microagent
+  manifest** with scripted hang/fail/timeout behavior. In each it asserts
   `converged()` returns `"exhausted"`, **no `accept` fact** is authored, a single signed
   `kip:learn-exhausted` marker **is** authored, and the cells stay `Unknown`. A build whose `converged`
   ignores `maxWallMs` or `maxInvocations` (so (b)/(c) loop unbounded) **fails**.
@@ -3356,8 +3942,11 @@ touching the convergence core.
 - **INV-A7 (multi-segment AND multi-realizer typed choice — never auto-picked).** The suite authors
   **two** segments that both satisfy a query (with differing declared `weight`), AND separately binds
   **two** `FunctionalityBinding` realizers to one `(edgeKind,sourceKind,targetKind)` hop, and asserts
-  `runContextualQuery` surfaces a **typed choice** (`Segment.alternatives` non-empty, ordered by `weight`
-  then the §3.4 tiebreak) and executes **no** segment/realizer until the caller chooses — mirroring
+  the choice through the **named API channel (§6)**: `compileContextualQuery` returns a `Segment` with
+  non-empty `alternatives` (ordered by `weight` then the §3.4 tiebreak); `runContextualQuery` returns
+  the **discriminated typed choice** `{ kind: "choice", segments }` and dispatches **no**
+  segment/realizer (zero microagent invocations, zero facts authored); execution happens **only** via
+  `executeSegment(chosenSegment)` after the caller picks — mirroring
   `kip:conflict`. It further asserts a binding registered with a `NaN`/`±Infinity` `weight` (or a
   `NaN`/`±Infinity` numeric `range`/`cmp` comparand) is **rejected at registration** (malformed declared
   data ⇒ a non-total presentation/guard order ⇒ N5 silent-default). A build that auto-executes the
@@ -3431,8 +4020,10 @@ touching the convergence core.
   manifest chosen by inspecting `rawKind` or any content heuristic (it perturbs `rawKind` while holding
   the selectors fixed and asserts the dispatched agents are unchanged). It then drives `learn()` with a
   `LearnOptions.{encode|decode|learner|loss}` naming a manifest that is **unregistered** (or registered
-  but **unsigned**) and asserts `learn()` is **rejected before the loop runs** — **no** dispatch, **no**
-  `kip:learn`/`kip:learn-exhausted` fact authored, and the cells stay `Unknown`. A build that selects a
+  but **unsigned** — i.e. no signature-valid registration fact for that `(name,version)` is
+  set-resident) and asserts `learn()` is **rejected before the loop runs, by throwing a typed
+  `KipError` with code `ERR_UNREGISTERED_MANIFEST`** (§6 design notes / docs 40 "Errors") — **no**
+  dispatch, **no** `kip:learn`/`kip:learn-exhausted` fact authored, and the cells stay `Unknown`. A build that selects a
   manifest by `rawKind`/heuristic when the named one is absent, silently substitutes a registered
   manifest for an unregistered name, or runs the loop on an unselected manifest, **fails** (N5).
 - **INV-A14 (rawKind declared ONCE, threaded UNCHANGED into every decode).** The suite drives a
@@ -3450,6 +4041,13 @@ Determinism (author-stamped HLC, fixed reducer seeds, fixed replicaIds, content-
 
 ## 9. Open questions (non-core — explicitly deferred)
 
+**§9a — doc-level normative ids (m7-19 through m7-28).** This SPEC.md's own m7-id list runs `m7-1`
+through `m7-18` (§3–§8 above). Normative ids `m7-19` through `m7-28` are cited across the decomposition
+docs (`packages/kip-sdk/docs/`) for edits made during documentation-hardening passes; they are **not
+currently mirrored** in this file's m-id list. Where a doc cites one of these ids, treat the **doc as
+authoritative** for that specific rule until it is backported into SPEC.md proper. This is an honest,
+minimal note — not a claim that the ids are already backported here.
+
 **Accepted residual bounds (honest, intrinsic to set-purity — NOT bugs, NOT unresolved CRITICALs).**
 These are stated plainly throughout the spec and are the irreducible floor of a coordinator-free,
 set-pure, bounded-storage design. They never yield a wrong *trusted* value; the worst case is a
@@ -3458,7 +4056,10 @@ labeled `pending` or a self-dated lone first-emission. They are accepted, not op
 - **R1 — lone-first-emission self-dating (§3.6/§8.1).** A key that has emitted **nothing higher in its
   chain** can self-date a genuine first-emission fact freely (no conflicting same-key history to poison;
   resolved against other authors by ordinary `orderKey`). The irreducible floor of any set-pure
-  anti-backdating rule. **NOT eviction-reachable** (the C5-1 gate closes the eviction route).
+  anti-backdating rule. **NOT eviction-reachable** (the C5-1 gate closes the eviction route). **Key
+  rotation cross-reference (A-8):** each rotation opens a **fresh** `(replicaId, key)` chain at `seq = 0`
+  (or a fresh `(newReplicaId, newKey)` pair, §8.1), **re-opening the R1 first-emission self-dating window
+  for the new chain** — the same irreducible floor applies again at every rotation, not just at genesis.
 - **R2 — ordinary-cutoff sub-`effectiveFrom` backdate (§8.1, M5-2 impossibility).** No set-pure
   revocation mode both demotes a compromised key's sub-`effectiveFrom` backdates **and** preserves that
   key's honest concurrent sub-`effectiveFrom` work — they are set-indistinguishable. `ordinary-cutoff`
@@ -3490,8 +4091,73 @@ labeled `pending` or a self-dated lone first-emission. They are accepted, not op
   dual-acceptance — pin `asOf` for a single authoritative result). `proj` **never** re-runs the loop.
   **Safe**; only the recorded fact is substrate.
 
-These six are the only honestly-accepted residuals; none hides a CRITICAL (verified in the round-6
-adversarial audit). The genuinely deferred (ops/context-layer) questions follow.
+- **R7 — genesis-root compromise is not in-band recoverable (§8.1/m7-12).** Revocation chains terminate
+  at the manifest-frozen genesis root, so the root itself cannot be revoked in-band; a compromised root
+  key can mint authorizations/counter-revocations indefinitely. Recovery is the explicit out-of-band
+  **re-genesis** path (new manifest/root set + re-attest/re-import migration, §8.1). Mitigations:
+  offline/split-custody root used only to delegate.
+- **R8 — entirely-absent chain undetectability (§3.6/m6-1, BROADENED by A-6).** The per-key trust gate
+  can demand contiguity only of chains it has *evidence exist*: a `(replicaId, key)` chain withheld in
+  its entirety is locally undetectable, so it can *delay* a demotion (hide higher same-key evidence) —
+  never flip `pending` to `trusted` — and resolves monotonically when any link arrives. The per-key
+  analogue of R1; pins are immune (explicit chain enumeration, m7-2). **Extended (A-6):** an
+  entirely-withheld chain on a **different** `(replicaId, key)` pair of the **same** key `K` is equally
+  undetectable as a chain that is *totally* absent — the gate's cross-pair reach is bounded by local
+  knowledge of which pairs `K` used, so the "never silently flip a backdate to trusted" guarantee is
+  precise only **within the same `(replicaId, key)` pair** as the evidence actually held; it is the same
+  undetectability class as the total-absence case above, not a new residual.
+- **R9 — pre-revocation forward-dating head capture (§8.1/m7-13).** A far-future author-HLC stamp from
+  a registered/compromised key captures `lww-hlc` heads (and wedges the key's own later honest facts
+  anachronistic) until an `ordinary-cutoff` revocation with `effectiveFrom` below the forged stamp
+  lands; casualties are restored by `re-attest`. Bounded by revocation latency — visible in provenance,
+  never silent, never unrecoverable.
+- **R10 — capacity parameters are genesis-final (§3.1/§3.5a).** `quarantineTtlMs`,
+  `quarantineKeyCapBytes`, `quarantinePoolBytes`, `keyChainDurableCapBytes`, and `shardDepth` are
+  manifest-pinned with **no in-repo migration/re-tuning path**; mis-sizing (including outgrowing the
+  R3 mitigation's "size the cap to the working set") requires **re-genesis + fact re-import**. Size
+  every knob with headroom to the ceiling working set.
+- **R11 — fork demotion is a bounded, replica-local, resolvable divergence (§4b.1/m7-1, A-2).** Fork
+  demotion ("byte-identical on every replica" was over-claimed in an earlier draft) is
+  **per-shared-subset**, mirroring the ordinary §4b.4 SEC caveat: a replica missing one fork branch
+  under partial replication legitimately trusts the chain until the second branch propagates — an
+  explicit, bounded divergence, not a broken guarantee — until the fork **resolves**, either by
+  propagation (the second branch arrives everywhere) or by excision (§4.5, using A-1's attested-hole
+  treatment) of the fork/duplicate fact. This is the one case where a previously-**trusted** fact is
+  expected to become **demoted** on later information (a late-arriving second branch) — see the scoped
+  INV-19 non-reversal clause (§8.4). A key holder self-forking to repudiate their own history is a
+  known, bounded, auditable instance of this same bound (the fork fact is signed evidence of who did
+  it), not a new attack surface. **Mitigation (excise-evidence safeguard, §4.5):** because the
+  fork-recovery excision above physically destroys the fork fact — the evidence of the misbehavior —
+  excising a fork/well-formedness-demoted fact requires the higher-privileged `excise-evidence`
+  capability, distinct from ordinary GDPR-erasure `excise`, so the same key that forked (or a colluding
+  ordinary-excise-scope holder) cannot unilaterally erase the evidence of the fork.
+- **R12 — M0's local-registry-dependent verification is a bounded, intentional INV-6a exception, not a
+  violation (§8.4 INV-6/INV-6a, §8.1, M0/M8).** Provenance (§4.1) carries only a one-way SHA-256
+  fingerprint of the signer's public key, never the raw key material — so verifying a signature from a
+  genuinely-unregistered fingerprint is cryptographically impossible from the fact's bytes alone; there
+  is no key to check the signature against. At M0, before M8's fact-based trust overlay exists, the
+  ingest gate MUST consult its local key-registry (own identity, genesis `rootKeys`, imported peer keys)
+  to decide whether real Ed25519 verification or the conformance-suite's placeholder-signature
+  convention applies — **real verification always wins** whenever a key is registered, so the
+  placeholder convention can never forge a fact against a key this replica actually trusts. This makes
+  the gate's admit/reject verdict depend on per-replica key-registry state for genuinely-unregistered
+  fingerprints, a bounded exception to INV-6a's "no key-registration predicate" clause (never to INV-6's
+  parent guarantee, and never to a REGISTERED fingerprint's verdict, which is always real-crypto-decided
+  identically everywhere). **Safe** (never admits a forged fact against a registered key; the exception
+  only ever narrows *which* genuinely-unregistered-fingerprint fixtures a given replica's placeholder
+  path can exercise) and **bounded** (resolves automatically once M8's fact-based trust overlay, §8.1,
+  makes key-registration a set-pure function of the admitted fact set rather than per-replica local
+  config, restoring full byte-pure INV-6a purity). Identified during M0's TDD implementation (real
+  Ed25519 verification via `verifySignature` beats a forgeable placeholder fallback for any fingerprint
+  this replica has independently established trust in) rather than during the earlier documentation-only
+  hardening rounds.
+
+R1–R6 were verified non-CRITICAL in the round-6 adversarial audit; R7–R11 were added by the round-7
+documentation-hardening pass as honest namings of bounds the design already implied; R12 was added
+during M0's TDD implementation phase (Phase D) when the tension between real-crypto-must-win and
+INV-6a's literal "no key-registration predicate" text surfaced in the ingest-gate code — none hides a
+CRITICAL, none weakens an existing guarantee. The genuinely deferred (ops/context-layer) questions
+follow.
 
 These are out of the *core* and belong to the context layer or to ops tuning; the core is complete
 without resolving them:
@@ -3504,6 +4170,25 @@ without resolving them:
 - **OQ-5.** Cross-tenant federation transport (beyond git remotes) — deployment concern (N4).
 - **OQ-6.** Concrete ANN index choice (HNSW vs IVF vs DiskANN) per scale tier — core fixes the
   pluggable index interface, not the implementation.
+- **OQ-8.** The **re-fetch / promisor serving contract** (§3.5a/m7-3): peer selection and ask-order,
+  authorization to serve, retry/backoff, and rate limits for on-demand chain-link re-fetch — including
+  bounding the evict/re-fetch **churn-amplification** and late-registration **fetch-storm** costs noted
+  in §8.3b. The *mechanism* (content-addressed lazy object fetch over promisor remotes) is core; the
+  *protocol policy* is deployment-shaped and deferred. **Re-verification on re-fetch (security, not
+  deferred):** every re-fetched object goes through the ordinary §3.2 INGEST-GATE signature-verification
+  check before being trusted, exactly like any other object — a malicious serving peer cannot inject a
+  fabricated chain-completing blob, because a fabricated blob fails signature verification like any other
+  forged fact. Only the *serving protocol policy* (peer selection, rate limits) is deferred here, never
+  the trust check on the bytes received.
+  **Repack/eviction cadence** is also an undetermined operational knob in this deferred scope — see OQ-9.
+- **OQ-9.** A **quantitative capacity model**: target envelopes (facts, keys, tenants, replicas),
+  per-mechanism complexity bounds (`proj` fold, chain-completeness gate cost per key, incremental
+  excision worst case per m3-5, Ed25519 verify rate at ingest), and default sizings/formulas for the
+  four retention caps and `shardDepth`, **plus repack/eviction cadence (new operational knob from A-11a
+  promisor eviction mechanics — see A-11a's debounced-sweep recommendation)**. NFR group F (docs 11) is
+  deliberately qualitative until this is resolved; the only pinned number today is the ≲10⁷-fact band of
+  the default 2+2 sharding (§3.1). A capacity planner cannot yet size a replica, quarantine pool, or
+  rollup cadence from this spec — declared, not hidden.
 
 **Promoted to core (no longer deferred — they are correctness, not ops):**
 - ~~OQ-2~~ → **core (§4b.3, C-3, C2-2).** Supersession's convergence is a *core* guarantee: the LLM

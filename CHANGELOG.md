@@ -1,5 +1,109 @@
 # Changelog
 
+## [Unreleased] - 2026-07-18
+
+### New Features
+- 6ebdb6215 feat(kip-sdk): graph-qa-live (converged min=88, acceptance PASS) (Tal Muskal, 12 hours ago)
+
+### Documentation
+- 2a404745f docs(kip-sdk): model-wiring ADR for live graph-QA (Tal Muskal, 15 hours ago)
+
+### Tests
+- 85b69f301 test(kip-sdk): frozen graph-qa-live tests (spec-driven, pre-implementation) (Tal Muskal, 14 hours ago)
+
+## [Unreleased] - 2026-07-15
+
+### Maintenance
+- cf4889860 chore(atlas): update upstream tracker summary (a5c automation, 18 hours ago)
+- 4cf911509 chore(graph): track upstream agent versions (a5c automation, 19 hours ago)
+
+## [Unreleased] - 2026-07-13
+
+### Features
+- feat(kip-sdk): D-32 implementation (TDD converged min=91, acceptance PASS) (91469eb94, Tal Muskal, 4 hours ago)
+- feat(kip-sdk): M6 implementation (TDD converged min=63, acceptance PASS) (3891f6d2f, Tal Muskal, 15 hours ago)
+- feat(kip-sdk): M5 implementation (TDD converged min=33, acceptance GAPS) (87f65b505, Tal Muskal, 17 hours ago)
+- feat(kip-sdk): close M4/T5.4 gap (bounded graph expansion) — M5 dependency audit (24b7b5ff1, Tal Muskal, 20 hours ago)
+
+### Bug Fixes
+- fix(kip-sdk): close D-37 (review score=92) (af3c07584, Tal Muskal, 5 hours ago)
+- fix(kip-sdk): close D-35 (review score=92) (f8de43dcd, Tal Muskal, 5 hours ago)
+- fix(kip-sdk): close D-34 (review score=96) (8b1e0fa7b, Tal Muskal, 6 hours ago)
+- fix(kip-sdk): close D-33 (review score=95) (00af28689, Tal Muskal, 6 hours ago)
+
+### Documentation
+- docs(kip-sdk): M5+M6 final build report + integration verification (f5b8539eb, Tal Muskal, 11 hours ago)
+- docs(kip-sdk): log D-32 — signing-identity durability gap breaks cross-replica sync after restart (fea09ea51, Tal Muskal, 21 hours ago)
+
+### Tests
+- test(kip-sdk): frozen D-36 tests (spec-driven, pre-implementation) (ad3bd42cf, Tal Muskal, 4 hours ago)
+- test(kip-sdk): frozen D-32 tests (spec-driven, pre-implementation) (e8dbea566, Tal Muskal, 5 hours ago)
+- test(kip-sdk): frozen M6 conformance tests (spec-driven, pre-implementation) (7084b4cc0, Tal Muskal, 17 hours ago)
+- test(kip-sdk): frozen M5 conformance tests (spec-driven, pre-implementation) (9509fbd46, Tal Muskal, 20 hours ago)
+
+## [Unreleased] - 2026-07-08
+
+### Documentation
+- docs: changelog update 2026-07-04 [#1137](https://github.com/a5c-ai/babysitter/pull/1137) (7223934c4, Tal Muskal, 12 hours ago)
+
+### Maintenance
+- Track Claude Sonnet 5 in Atlas graph [#1181](https://github.com/a5c-ai/babysitter/pull/1181) (9e443cbcf, Tal Muskal, 12 hours ago)
+- Track upstream agent CLI versions [#1198](https://github.com/a5c-ai/babysitter/pull/1198) (524760523, Tal Muskal, 12 hours ago)
+
+## [Unreleased] - 2026-07-04
+
+### Features
+- feat(policy): Milestone-E production activation — GATE 3 auto-activation, authorization ALLOW path, code_executor invariant (8bc96607f, Tal Muskal, 14 hours ago)
+- feat(policy): implement Milestone D — tool-layer enforcement gates (GATE 1/2/3 + genty seam) (f72c865f0, Tal Muskal, 17 hours ago)
+- feat(policy): implement Milestone C — evidence producers (signed breakpoints, proxy + in-process attestation, attribution) (15f6e381d, Tal Muskal, 18 hours ago)
+- feat(policy): implement Milestone B — configurable policy engine (trust-chain evaluator + authorization issuance) (8917086be, Tal Muskal, 20 hours ago)
+- feat(policy): Milestone A unified trust core (envelopes, keys, chains) (c7434f541, Tal Muskal, 21 hours ago)
+
+### Bug Fixes
+- fix(policy): wire ALL load-bearing tool-layer gates onto production paths (Milestone D) (93f6d09d6, Tal Muskal, 15 hours ago)
+- fix(policy): wire Milestone-D tool-layer gates onto production paths (5ed5f6a24, Tal Muskal, 17 hours ago)
+- fix(policy): anchor signed-breakpoint enforcement to trusted config + wire streaming proxy attestation (6c237f529, Tal Muskal, 18 hours ago)
+- fix(policy): close global-option argv-evasion bypass in Milestone-B matcher (d52da64f7, Tal Muskal, 19 hours ago)
+- fix(policy): close four Milestone-B authorization-bypass defects + fold-ins (af7cdfbaa, Tal Muskal, 19 hours ago)
+- fix(policy): verify true delegation-chain linkage in trust core (fe759f625, Tal Muskal, 20 hours ago)
+
+### Refactors
+- refactor(trust): extract trust primitives to @a5c-ai/trust-core leaf package (8d360b20c, Tal Muskal, 7 hours ago)
+
+### Documentation
+- docs(policy): document shipped proof-based policy enforcement (Milestones A-E) (32a127734, Tal Muskal, 14 hours ago)
+- docs(policy): promote 4 review notes to required AC-53..56 per owner approval (82468de0d, Tal Muskal, 21 hours ago)
+- docs(security): proof-policy Draft 3 — close 3 residual adversarial-review attacks (0001bf707, Tal Muskal, 21 hours ago)
+- docs(security): revise proof-based policy enforcement spec after adversarial review (ee190ca37, Tal Muskal, 21 hours ago)
+- docs(design): add proof-based policy enforcement spec (a80a75fab, Tal Muskal, 22 hours ago)
+
+### Tests
+- test(policy): fix millisecond-boundary flake in GATE-3 credential wiring test (00ddcdb98, Tal Muskal, 15 hours ago)
+- test(policy): author Milestone E e2e trust-chain suite + example configs (d6b1de16f, Tal Muskal, 15 hours ago)
+- test(policy): fix malformed AC-10.3a GATE-1 fixture to a real sibling-call mismatch (852bccd26, Tal Muskal, 17 hours ago)
+- test(policy): author Milestone D test suite (tool-layer enforcement gates) (ddb5a1945, Tal Muskal, 17 hours ago)
+- test(policy): author Milestone C test suite (evidence producers) from design spec (bacc5085d, Tal Muskal, 19 hours ago)
+- test(policy): author Milestone B test suite (policy-engine) from design spec (3dae881ea, Tal Muskal, 20 hours ago)
+- test(policy): author Milestone A trust-core test suite from design spec (03cb86d42, Tal Muskal, 21 hours ago)
+
+### Maintenance
+- chore(policy): register @a5c-ai/trust-core + @a5c-ai/policy-adapter in lockfile (093029aad, Tal Muskal, 7 hours ago)
+- chore(graph): track upstream agent versions (733e662aa, a5c automation, 18 hours ago)
+- chore(graph): track upstream agent versions (9d8fbf02f, a5c automation, 18 hours ago)
+- Fix observe command failing to load: quote argument-hint value (#1123) (44a5d58b4, Daniel Kalman, 24 hours ago)
+## [Unreleased] - 2026-07-02
+
+### Bug Fixes
+- 040275fa2 fix(docs): update marketplace installation command to use babysitter-codex (Tal Muskal, 16 hours ago)
+- 3838cbc83 fix(codex): emit codex-format .agents/plugins marketplace + document per-repo flow (Tal Muskal, 16 hours ago)
+- bfb75e139 fix(codex): make babysitter-codex marketplace-addable + correct install docs (Tal Muskal, 16 hours ago)
+- bd11c5b1b fix(sdk): expose adapters-hooks + adapters bins so plugin hooks resolve (Tal Muskal, 18 hours ago)
+- 6e8c63e09 fix(marketplace): add required top-level owner object to marketplace.json (Tal Muskal, 19 hours ago)
+
+### CI/CD
+- f17b37f23 ci(fix): correct corrupted tee log path (test-lo.. -> test-logs) in harness build (Tal Muskal, 16 hours ago)
+- cd5326fa4 ci(fix): run Lint/Tests/Package on ubuntu-latest-l to stop OOM in harness build (Tal Muskal, 17 hours ago)
+
 ## [Unreleased]
 
 - No unreleased changes.

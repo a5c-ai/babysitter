@@ -118,3 +118,15 @@ This backlog contains key processes for the Healthcare and Medical Management sp
 - Regulatory processes require ongoing monitoring and continuous compliance
 - Clinical processes should include measurable outcome indicators
 - All processes should support value-based care transformation goals
+
+---
+
+## Anchored by the Clinical Safety and Quality Flagship
+
+`clinical-safety-quality-workflow.js` (`specializations/domains/social-sciences-humanities/healthcare/clinical-safety-quality-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Safety-event intake + harm classification -> immediate containment (gated care-standard suspension, gated PHI handling) -> parallel investigation (clinical review, iterative RCA over fanned-out contributing-factor analyses, harm assessment, conditional proactive FMEA, per-unit practice scans) -> CAPA design + dossier -> adversarial investigation-sufficiency gate -> policy-gated regulatory filing on statutory clocks and policy-gated patient/family disclosure -> policy-gated practice change + PDSA + HRO learning spread -> deadline-audited closure + kip assert.
+
+It composes 13 healthcare point processes in this directory BY NAME (declared as `@composes` tags in its header), never imported. Its statutory reporting clocks are frozen and NOT input-configurable.
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

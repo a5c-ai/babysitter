@@ -1,0 +1,5 @@
+{
+  "description": "D-27 INV-12 golden digest: KipRepo.regenerateHeads() commit-chain oids for the fixed, deterministic 3-fact fixture set built in src/__tests__/inv12-golden-digest.test.ts (2 author-HLC batches: wall=1650000000000 with 2 facts, wall=1660000000000 with 1 fact). Generated ONCE locally by running that test and capturing its real output; committed here as the drift-detection target for .github/workflows/kip-inv12-golden-digest.yml's windows-latest + ubuntu-latest matrix. If regenerateHeads()'s byte recipe ever deliberately changes, regenerate this file the same way.",
+  "commits": ["f494708d7426bf3a4b0a68a0d883c924c04495fa", "73c77eeae17de05358bfb01e0726e2b03f144b6b"],
+  "commitOid": "73c77eeae17de05358bfb01e0726e2b03f144b6b"
+}

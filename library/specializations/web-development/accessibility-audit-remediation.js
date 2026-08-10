@@ -1,5 +1,12 @@
 /**
  * @process specializations/web-development/accessibility-audit-remediation
+ * @deprecated Superseded by the flagship accessibility/wcag-audit-remediation
+ *   (library/specializations/accessibility/wcag-audit-remediation.js). This pre-bar process
+ *   uses a linear ctx.task chain, a single unrouted owner approval breakpoint, and a dead
+ *   3-attempt testing loop with no executed evidence, no policy gating, and no kip. Its sound
+ *   WCAG domain content has been harvested into the flagship, which adds parallel per-surface
+ *   audits, policy-gated routed sign-offs, and an adversarial conformance re-audit gate with
+ *   executed axe evidence. Kept importable for back-compat; prefer the flagship for new work.
  * @description Accessibility Audit and Remediation - Process for auditing web applications for WCAG compliance and implementing accessibility fixes.
  * @inputs { projectName: string, wcagLevel?: string }
  * @outputs { success: boolean, auditResults: object, remediations: array, artifacts: array }

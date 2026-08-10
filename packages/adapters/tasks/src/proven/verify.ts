@@ -1,18 +1,7 @@
-import { createPublicKey, verify as cryptoVerify } from "node:crypto";
-import type { ProvenBreakpointAnswer, ProvenVerificationResult, BreakpointAnswer } from "../types.js";
+import { createHash, createPublicKey, verify as cryptoVerify } from "node:crypto";
+import type { ProvenBreakpointAnswer, ProvenVerificationResult } from "../types.js";
 import { loadTrustedPublicKeys } from "./keys.js";
-
-/**
- * Rebuild the canonical signing payload for verification.
- */
-function buildSigningPayload(answer: BreakpointAnswer, signedFields: string[]): Buffer {
-  const parts: string[] = [];
-  for (const field of signedFields) {
-    const value = answer[field as keyof BreakpointAnswer];
-    parts.push(`${field}=${value ?? ""}`);
-  }
-  return Buffer.from(parts.join("\n"), "utf-8");
-}
+import { buildHardenedSigningPayload, buildLegacySigningPayload } from "./sign.js";
 
 /**
  * Verify a proven breakpoint answer against trusted public keys.
@@ -35,6 +24,27 @@ export async function verifyAnswer(
     };
   }
 
+  // Bind the fingerprint to the key material BEFORE trusting the key. The stored
+  // key is resolved by `metadata.fingerprint === publicKeyFingerprint`, but that
+  // metadata field is attacker-influenceable — a malicious trusted-key record
+  // could claim a victim's fingerprint while carrying attacker key material, or a
+  // record's metadata could be desynced from its bytes. Recompute the fingerprint
+  // as sha256(public-key DER) — the exact rule the key generator uses
+  // (`keys.ts:18`) and that `verify-envelope-trusted.ts:252` enforces — and deny
+  // unless it equals the claimed fingerprint. This is the signature check behind
+  // bridgeProvenAnswer's human guarantee; fail closed on any mismatch.
+  const publicKeyDer = Buffer.from(matchingKey.publicKey, "base64");
+  const boundFingerprint = createHash("sha256").update(publicKeyDer).digest("hex");
+  if (boundFingerprint !== provenAnswer.publicKeyFingerprint) {
+    return {
+      valid: false,
+      publicKeyFingerprint: provenAnswer.publicKeyFingerprint,
+      responderName: matchingKey.metadata.responderName,
+      reason: "Public key fingerprint does not match key material (sha256(DER) mismatch)",
+      verifiedAt: new Date().toISOString(),
+    };
+  }
+
   // Check key expiration
   if (matchingKey.metadata.expiresAt) {
     const expiresAt = new Date(matchingKey.metadata.expiresAt);
@@ -52,15 +62,22 @@ export async function verifyAnswer(
 
   // Verify signature
   const publicKey = createPublicKey({
-    key: Buffer.from(matchingKey.publicKey, "base64"),
+    key: publicKeyDer,
     format: "der",
     type: "spki",
   });
 
-  const payload = buildSigningPayload(provenAnswer, provenAnswer.signedFields);
   const signatureBuffer = Buffer.from(provenAnswer.signature, "base64");
 
-  const isValid = cryptoVerify(null, payload, publicKey, signatureBuffer);
+  // Dual-read (AC-54): accept the hardened canonical form (produced by the
+  // current signer) OR the legacy `field=value\n` form (for signatures produced
+  // before hardening). This is NOT a security fallback — both are exact,
+  // cryptographically verified byte forms; a tampered answer matches neither.
+  const hardenedPayload = buildHardenedSigningPayload(provenAnswer, provenAnswer.signedFields);
+  const legacyPayload = buildLegacySigningPayload(provenAnswer, provenAnswer.signedFields);
+  const isValid =
+    cryptoVerify(null, hardenedPayload, publicKey, signatureBuffer) ||
+    cryptoVerify(null, legacyPayload, publicKey, signatureBuffer);
 
   return {
     valid: isValid,

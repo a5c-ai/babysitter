@@ -222,6 +222,28 @@ export type {
 } from './runtime-hooks.js';
 export { RuntimeHookDispatcher, RuntimeHookDispatcher as PerRunRuntimeHookDispatcher } from './runtime-hook-dispatcher.js';
 
+// GATE 2 — runtime preToolUse policy handler (Milestone D, AC-23b/AC-49)
+export { createPolicyPreToolUseHook } from './policy-pretooluse-hook.js';
+export type {
+  PolicyPreToolUsePayload,
+  CreatePolicyPreToolUseHookOptions,
+} from './policy-pretooluse-hook.js';
+
+// GATE 3 — credential-injection backstop (Milestone D, AC-23a/AC-40/AC-50)
+export { gateCredentialInjection } from './policy-credential-gate.js';
+export type {
+  ScopedCredential,
+  CredentialChannel,
+  GateCredentialInjectionInput,
+  GateCredentialInjectionResult,
+} from './policy-credential-gate.js';
+export type { Gate3Options } from './spawn-invocation.js';
+export { resolveSpawnGate3, __resetSpawnGateCache } from './policy-spawn-gate.js';
+export type {
+  SpawnScopedCredentials,
+  SpawnGateBinding,
+} from './policy-spawn-gate.js';
+
 // Tool classification
 export type { ToolClassification } from './tools/index.js';
 export { classifyTool } from './tools/index.js';

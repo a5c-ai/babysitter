@@ -4,7 +4,7 @@ import * as path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildPrimaryLiveStackCommands, buildPrompt, executeChildProcessCommand, runPrimaryLiveStackScenario } from './primary-live-runner';
+import { buildPrimaryLiveStackCommands, buildPrompt, executeChildProcessCommand, isInfrastructureArtifactFault, runPrimaryLiveStackScenario } from './primary-live-runner';
 import type { LiveStackScenario } from './scenario-contract';
 import { liveStackScenarioFromEnv, primaryLiveStackScenario } from './scenario-contract';
 
@@ -1288,5 +1288,85 @@ describe('buildPrompt — BP-mode invocation hardening (issue #947)', () => {
     const vanilla = claudeScenarioFor(gptMiniCase, 'vanilla');
     const prompt = buildPrompt(vanilla, 'trace-947', {});
     expect(prompt).not.toContain('ORCHESTRATION REQUIRED');
+  });
+});
+
+describe('infrastructure-artifact fault detection (RC-2)', () => {
+  it('detects a missing/truncated dist module as an infra fault', () => {
+    expect(
+      isInfrastructureArtifactFault({
+        status: 1,
+        stdout: '',
+        stderr: "Error: Cannot find module '/x/packages/genty/cli/dist/cli/main.js'",
+      }),
+    ).toBe(true);
+  });
+
+  it('detects a GENTY STARTUP FAILED banner as an infra fault', () => {
+    expect(
+      isInfrastructureArtifactFault({ status: 1, stdout: 'GENTY STARTUP FAILED', stderr: '' }),
+    ).toBe(true);
+  });
+
+  it('does NOT flag an ordinary non-zero postinstall exit as an infra fault', () => {
+    expect(
+      isInfrastructureArtifactFault({
+        status: 1,
+        stdout: '',
+        stderr: 'npm warn lifecycle postinstall script exited with code 1',
+      }),
+    ).toBe(false);
+  });
+
+  it('fails the scenario fast on a truncated build artifact instead of swallowing it', async () => {
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'live-stack-infra-fault-'));
+    const artifactsDir = path.join(cwd, 'artifacts');
+    const result = await runPrimaryLiveStackScenario({
+      cwd,
+      artifactsDir,
+      executeLiveProvider: true,
+      env: {
+        AZURE_API_KEY: 'sk-live-secret',
+        AGENT_MUX_API_BASE: 'https://foundry.example.test',
+        LIVE_STACK_TRACE_ID: 'trace-infra-fault',
+      },
+      // The nonFatal `adapters install` command hits a truncated dist bundle.
+      // Before the fix this was swallowed as "non-fatal — continuing" and the
+      // scenario resurfaced a confusing product-looking failure later.
+      executeCommand: async (command) => {
+        if (command.args.includes('install')) {
+          return {
+            status: 1,
+            stdout: '',
+            stderr: "GENTY STARTUP FAILED\nError: Cannot find module '/x/packages/genty/cli/dist/cli/main.js'",
+          };
+        }
+        return { status: 0, stdout: '{}', stderr: '' };
+      },
+    });
+    expect(result.status).toBe('failed');
+    expect(result.failure).toContain('infrastructure fault');
+  });
+});
+
+describe('RC-1: runner de-collides adapters-hooks global bin', () => {
+  it('emits the hooks-adapter-cli global install with --force in the executed command list', () => {
+    // Guards the RUNNER's actually-executed install list (not only the contract
+    // spec). babysitter-sdk and @a5c-ai/hooks-adapter-cli both declare an
+    // `adapters-hooks` bin; without --force the second global install EEXISTs
+    // and every babysitter-plugin install-mode lane fails at setup (RC-1).
+    const commands = buildPrimaryLiveStackCommands(geminiPluginScenario(), {
+      cwd: '/repo',
+      timeoutMs: 1000,
+      env: { GOOGLE_API_KEY: 'google-secret', LIVE_STACK_TRACE_ID: 'trace-rc1' },
+    });
+    const hooksCliInstall = commands.find(
+      (c) => c.command === 'npm'
+        && c.args.includes('install')
+        && c.args.some((a) => a.includes('adapters/hooks/cli')),
+    );
+    expect(hooksCliInstall, 'expected a hooks-adapter-cli global install command').toBeDefined();
+    expect(hooksCliInstall?.args).toContain('--global');
+    expect(hooksCliInstall?.args).toContain('--force');
   });
 });

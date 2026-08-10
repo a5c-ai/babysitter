@@ -16,7 +16,7 @@ kip is a **library, not a runtime**: memory is the substrate; agents (and the co
 
 ## 2. The layering
 
-kip is a strict stack. Each layer is a **pure consumer** of the layer beneath it; nothing below ever depends on anything above.
+kip is a layered stack with one direction of dependency: **each layer consumes only layers below it (possibly skipping — ④ consumes ② *and* ③; ⑤ consumes ②/③/④), and nothing below ever depends on anything above.** The single upward edge is fact *authoring*: the active layer re-enters layer ① only as signed facts (INV-A1, the dashed edge in the diagram).
 
 ```mermaid
 flowchart TB
@@ -97,7 +97,7 @@ The whole architecture rests on three bright lines:
 | **Retrieval** | ② / ③ | Hybrid vector → graph-expansion → RRF fusion; typed as-of traversal; derived/incremental indexing; salience projection (single owning view: [§5.4](./26-retrieval.md#54-salience-projection)). | [26-retrieval.md](./26-retrieval.md) |
 | **Accelerator projections** | ③ accelerator | ANN/embedding indexes and floating-centrality salience — best-effort, recall-equivalent, model-id-keyed. | [26](./26-retrieval.md), §5.3 |
 | **Active knowledge** | ④ active | Contextual functionalities, knowledge autoencoding, mining/discovery/ingestion — all emit signed facts (INV-A1). | [30](./30-active-knowledge-overview.md), [31](./31-contextual-functionalities.md), [32](./32-knowledge-autoencoding.md), [33](./33-mining-discovery-ingestion.md) |
-| **Context-enablement seams** | ④→⑤ | `pin`/`asOf`/`recall`/`subscribe`/`provenanceOf` — what the context layer consumes (kip provides seams, not the layer; N1). | [25-context-enablement-seams.md](./25-context-enablement-seams.md) |
+| **Context-enablement seams** | ②/③/④→⑤ | `pin`/`asOf`/`subscribe`/`provenanceOf` are layer-①/② services, `recall` spans ②/③, and the §5b seams are ④ — all consumed by layer ⑤ (kip provides seams, not the layer; N1). Matches the §2 diagram's ②/③/④→⑤ edges. | [25-context-enablement-seams.md](./25-context-enablement-seams.md) |
 | **SDK API surface** | all | The `Kip`/`Repo` interface: lifecycle, facts, reads, distribution, provenance/ops, and the §5b active-layer seams. | [40-sdk-api-surface.md](./40-sdk-api-surface.md) |
 | **Security, trust & tenancy** | ① / ② | Root-of-trust, scoped authority, revocation, tenancy/scoping, privacy/redaction/erasure, auditability, DoS threat model. | [50-security-trust-tenancy.md](./50-security-trust-tenancy.md) |
 
@@ -127,7 +127,7 @@ flowchart LR
 
 Notes on the flow (all normative):
 
-- **Write is a commit; `/heads` is lazy.** `ingest(f)` verifies the signature, writes `/facts/<shard>/<id>.json`, and commits on the replica branch; `/heads` and projections are rebuilt **lazily** (on read, on snapshot, or by the merge driver), re-folding only the cells the new fact touched (§3.2 step 6). A commit is **transport, not trust**.
+- **Write is a commit; `/heads` is lazy.** `ingest(f)` verifies the signature, writes `/facts/<shard>/<id>.json`, and commits on the replica branch; `/heads` and projections are rebuilt **lazily** (on read, on snapshot, or by the merge driver), re-folding only the cells the new fact touched (§3.2 step 6). Committed `/heads` state is written only at txn-commit boundaries and by the merge driver; read-triggered re-folds stay in an uncommitted local cache until the next commit (the m7-17 commit policy, [git substrate §1.4](./22-git-substrate.md)). A commit is **transport, not trust**.
 - **Membership is decided once, by signature; everything else is `proj`.** Key-registration, namespace authority, revocation, and anti-backdating (causal plausibility) are **never** gates — they are set-pure demotions inside `proj` keyed on author-HLC (§3.2, §3.6, §8.1). A demoted fact is `untrusted`/`quarantined`, never dropped, and re-evaluated monotonically as facts arrive.
 - **Merge regenerates, never 3-way-merges `/heads`.** The `kip-regen` merge driver discards both sides of `/heads` and recomputes from the unioned `/facts`, so any merge topology converges to the same state (§3.1, §4b.5).
 - **Determinism stops at the accelerator boundary.** `/heads` and fixed-weight/exact-algorithm salience are byte-identical; ANN/embeddings and floating-centrality salience are recall-equivalent only (§5.3). Salience's conditional layer membership has a [single owning view in retrieval §5.4](./26-retrieval.md#54-salience-projection).

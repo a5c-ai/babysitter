@@ -64,13 +64,17 @@ describe('generateClaudeCodeHooksJson', () => {
 });
 
 describe('generateCodexHooksJson', () => {
-  it('should generate codex format with matcher and direct script path', () => {
+  it('should generate env-guarded commands referencing the codex entry shims', () => {
     const json = generateCodexHooksJson(MANIFEST, CODEX_PROFILE);
     const parsed = JSON.parse(json);
 
-    expect(parsed.hooks.SessionStart[0].matcher).toBe('.*');
+    // Codex ignores matchers on lifecycle events; none is emitted.
+    expect(parsed.hooks.SessionStart[0].matcher).toBeUndefined();
     const cmd = parsed.hooks.SessionStart[0].hooks[0].command;
-    expect(cmd).toContain('hooks/session-start.sh');
+    // Commands resolve through the plugin-root env Codex sets for
+    // plugin-sourced hooks, and no-op when neither variable is present.
+    expect(cmd).toContain('${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT:-}}');
+    expect(cmd).toContain('hooks/test-plugin-codex-session-start.sh');
     expect(cmd).not.toContain('ADAPTER_NAME');
   });
 });

@@ -1,0 +1,18 @@
+extendsNode:
+  nodeKind: ModelTransportProtocol
+  id: model-transport:anthropic-messages
+edges:
+  spoken_by:
+    - model:claude-sonnet-5@current
+  served_by:
+    - provider:anthropic
+    - provider:aws-bedrock
+---
+extendsNode:
+  nodeKind: ModelTransportProtocol
+  id: model-transport:vertex-anthropic-messages
+edges:
+  spoken_by:
+    - model:claude-sonnet-5@current
+  served_by:
+    - provider:gcp-vertex

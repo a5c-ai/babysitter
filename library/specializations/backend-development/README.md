@@ -13,6 +13,12 @@ This specialization emphasizes practices that produce well-structured, evolvable
 - **Outside-In TDD** — Driving feature development from acceptance tests inward, letting design emerge from working code
 - **Fast Feedback** — Sub-second test suites using in-memory fakes, enabling confident refactoring at any time
 
+## Processes
+
+| Process | Description |
+|---------|-------------|
+| [backend-service-delivery.js](./backend-service-delivery.js) | Flagship end-to-end backend service delivery — contract-first API design, outside-in TDD slices, adversarial security/performance/contract gates, and kip decision memory |
+
 ## Available Skills
 
 | Skill | Description |

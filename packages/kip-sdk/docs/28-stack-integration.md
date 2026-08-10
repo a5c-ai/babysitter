@@ -20,9 +20,16 @@ packages: `packages/babysitter-sdk/src/`, `packages/genty/{core,platform}/src/`,
 
 ---
 
+> **Citation style note (m7-28).** Symbol citations below carry `file:line` hints for convenience;
+> **the symbol name is the citation, the line number is advisory** — code churn moves lines without
+> notice (all were re-verified against the current sources in this pass; treat any future drift as a
+> hint-refresh chore, not a grounding failure). When adding new citations, prefer symbol-name-only.
+
 ## Table of contents
 
 - [Where kip sits in the stack](#where-kip-sits-in-the-stack)
+- [Implementation wiring (repo-level)](#implementation-wiring-repo-level)
+- [Integration: trust-core](#integration-trust-core)
 - [Integration: babysitter-sdk](#integration-babysitter-sdk)
 - [Integration: genty](#integration-genty)
 - [Integration: adapters](#integration-adapters)
@@ -54,7 +61,7 @@ flowchart TB
     SUB["① Git substrate /facts — signed temporal facts (§3)"]
     PROJ["② proj(factSet) → /heads — deterministic fold (§3.4)"]
     ACT["④ Active layer — microagents as clients (§5b, INV-A1)"]
-    SEAMS["§4c seams: pin / asOf / recall / subscribe / provenanceOf<br/>§6 API: assertFact / runAcquisition / runContextualQuery / learn"]
+    SEAMS["§4c seams: pin / asOf / recall / subscribe / provenanceOf<br/>§6 API: assertFact / ingest / runAcquisition / runContextualQuery / learn"]
     SUB --> PROJ --> SEAMS
     PROJ --> ACT --> SEAMS
   end
@@ -80,6 +87,87 @@ flowchart TB
 
 ---
 
+## Implementation wiring (repo-level)
+
+How `packages/kip-sdk` becomes a *buildable monorepo member* — the executable path the seam-conceptual
+sections below assume. Today the package contains only `SPEC.md`, `PRIOR-ART.md`, `SCORECARD.md`,
+`docs/`, and `scripts/`; when implementation starts (roadmap M0 / [81a T1.x](./81a-tasks-m0.md)):
+
+- **Package name:** **`@a5c-ai/kip-sdk`** (reserved by this doc; consistent with the
+  `@a5c-ai/babysitter-sdk` / `@a5c-ai/trust-core` naming). `private: true` until first publish, like
+  trust-core.
+- **Workspace entry:** add `packages/kip-sdk` to the root `package.json` `workspaces` array. ⚠️
+  **Known hazard:** adding a `packages/*` workspace member desyncs the root lockfile — regenerate
+  `package-lock.json` on Linux/CI (never on Windows, which pins win32 native bindings non-optional and
+  breaks Linux `npm ci` with EBADPLATFORM), in its own commit.
+- **Build-chain position:** the root `build:sdk` script is an ordered chain (`trust-core → atlas →
+  tasks-adapter → babysitter-sdk`); kip-sdk slots **immediately after `@a5c-ai/trust-core`** (its only
+  in-repo build dependency — see [Integration: trust-core](#integration-trust-core)) and before atlas:
+  `trust-core → kip-sdk → atlas → …`.
+- **Script conventions:** `npm run build -w @a5c-ai/kip-sdk` (tsc, `dist/` output, `type` per repo
+  norm), `npm run test -w @a5c-ai/kip-sdk` (vitest, colocated `*.test.ts` like trust-core); the
+  conformance suite (INV-\*) lives under `packages/kip-sdk/src/**` and is the package's test entry, so
+  the milestone exit gates run in ordinary CI. Register mocks under the real default provider names
+  when tests touch orchestration (repo-known vitest OOM hazard).
+- **Docs gate:** the [kip-docs link-check workflow](../scripts/check-doc-links.mjs)
+  (`.github/workflows/kip-docs-link-check.yml`) already runs on every PR touching the package.
+
+Status: **GROUNDED-NEW** (the root `package.json` workspaces/build-chain shapes are real; the kip-sdk
+entry itself is the to-be-made change this section specifies).
+
+---
+
+## Integration: trust-core
+
+### (a) The component's real entities / capabilities
+
+`@a5c-ai/trust-core` (`packages/trust-core/src/`, package description: "Pure Ed25519 signing,
+signed-envelope, model-decision, and trust-chain primitives shared across the trust boundary") is the
+**first package in the root `build:sdk` chain** and the repo's home for exactly the cryptographic
+primitives kip's substrate is made of:
+
+- `createKeyPair` / `signPayload` / `verifySignature` (`src/signing.ts`) — Ed25519 keygen +
+  sign/verify over canonicalized payloads (`src/signing.ts (canonicalize/deepSortKeys, lines 74-95)`
+  owns the deterministic canonicalization — **not** a `canonical-form.ts` module: no such file exists
+  in the package, only `canonical-form.test.ts`).
+- `createAgentIdentity` / `createToolIdentity` (`src/identity.ts`) — key-fingerprint-anchored
+  identities.
+- `verifyTrustChain` + `TrustChainLink`/`ChainVerificationResult` (`src/chain.ts`) — delegation-chain
+  validation to a trust root.
+- Signed-envelope families (`signModelDecision`/`MODEL_DECISION_SIGNED_FIELDS`,
+  `signAgentRequest`/`signPrompt`, `signToolResult`/`signPermissionEvidence`) — the repo's established
+  pattern of **explicit signed-field lists over canonical payloads**, i.e. the same
+  `signedFields`-discipline kip's §2.4 envelope normativizes.
+
+### (b) What kip CONSUMES
+
+kip's substrate is Ed25519-signed facts, key fingerprints, delegation chains, and revocation
+(§2.4/§3.2/§8.1) — trust-core is the **single most plausible concrete code dependency**: `signPayload`/
+`verifySignature` for the INGEST-GATE's sole membership predicate; `src/signing.ts` (canonicalize/deepSortKeys, lines 74-95) as the
+foundation for the §2.4 canonical-payload builder (kip pins its own field list, m7-6);
+`verifyTrustChain` as the mechanical core of the §8.1 genesis-root chaining decision (kip supplies the
+author-HLC-interval semantics on top); identity fingerprints for `publicKeyFingerprint`/`keyFpr`.
+
+### (c) What kip PROVIDES back
+
+Nothing at the code level (trust-core is dependency-free by design); kip is a downstream consumer that
+gives the primitives a durable, bitemporal home.
+
+### (d) The seams used
+
+- §3.2 INGEST-GATE (verify-only membership) ← `verifySignature`.
+- §2.4 canonical payload + `signedFields` ← `src/signing.ts` (canonicalize/deepSortKeys, lines 74-95) + the `*_SIGNED_FIELDS` pattern.
+- §8.1 authority chaining / revocation demotion inside `proj` ← `verifyTrustChain` (kip adds the
+  set-pure author-HLC keying; trust-core stays clock-free, which is exactly what §3.6 requires).
+
+### (f) Status
+
+**GROUNDED-NEW** — the package, exports, and build-chain position are real (verified against
+`packages/trust-core/src/index.ts`); SPEC does not name trust-core (its §2.4/§8.1 primitives are
+specified self-contained), so the reuse is the natural wiring, not yet a spec commitment.
+
+---
+
 ## Integration: babysitter-sdk
 
 ### (a) The component's real entities / capabilities
@@ -87,12 +175,12 @@ flowchart TB
 `@a5c-ai/babysitter-sdk` (`packages/babysitter-sdk/src/`) is the event-sourced run/journal/task
 substrate. The episodic unit kip ingests is a **run journal**:
 
-- `JournalEvent` — `src/storage/types.ts:99` — one persisted episodic record
+- `JournalEvent` — `src/storage/types.ts:107` — one persisted episodic record
   `{ seq, ulid, filename, path, type, recordedAt, sdkVersion?, data, checksum? }`, read back by
   `loadJournal` (`src/storage/journal.ts:111`), appended by `appendEvent` (`:51`).
 - `RunMetadata` — `src/storage/types.ts:10` — the `run.json` header (`runId`, `request`, `harness`,
   `entrypoint`, `processCodeHash`, `createdAt`, …).
-- `StoredTaskResult` — `src/storage/types.ts:111` — per-effect result file with
+- `StoredTaskResult` — `src/storage/types.ts:119` — per-effect result file with
   `status: "ok"|"error"|"cancelled"`, `result?`, `metadata?`.
 - Real event-`type` vocabulary: `RUN_CREATED` (`src/runtime/createRun.ts:101`), `EFFECT_REQUESTED`
   (`src/runtime/orchestrateIteration.ts:230`), `EFFECT_RESOLVED` / `EFFECT_CANCELLED`
@@ -111,8 +199,14 @@ substrate. The episodic unit kip ingests is a **run journal**:
 kip ingests the run journal as **episodic** facts (`episode`/`observation`/`run`/`event` node kinds,
 [21-data-model.md §4](./21-data-model.md)). The concrete source unit is `JournalEvent[]` +
 `RunMetadata` read via `loadJournal(runDir)`. Per SPEC the import is **summary-only, never raw**
-(`../SPEC.md:352`): kip maps the summary onto `StoredTaskResult.result`/`metadata` plus the
-lifecycle event types — never full effect blobs.
+(`../SPEC.md:356`) — and the **normative summary rule for the kip Ingestor is
+GROUNDED-NEW (not yet in SPEC.md):** ingest
+**summary fields only**, mirroring kradle `parseJournalForImport`'s `{ summary, keyEvents,
+effectSummary }` reduction (the contract the SPEC's rule is modeled on) — per-effect payloads are
+reduced to `{ kind, result-summary }`, **never** `StoredTaskResult.result` verbatim (that field is the
+*full* per-effect result payload and would re-import raw data), and **`BlobRef`-externalized payloads
+(`TaskBuildContext.createBlobRef`) are never dereferenced into fact values**. Lifecycle event types
+and metadata are ingested as-is (they are already summaries).
 
 ### (c) What kip PROVIDES back
 
@@ -130,7 +224,9 @@ lifecycle event types — never full effect blobs.
 ### (d) The seams used
 
 - Ingest path: an **Ingestor** microagent (§5b.3, [33-mining-discovery-ingestion.md](./33-mining-discovery-ingestion.md))
-  reads the journal, returns an `AcquisitionResult`; the orchestrator commits it via
+  reads the journal, returns an `AcquisitionResult` **whose proposed facts obey the GROUNDED-NEW summary
+  rule above** (summary fields only; `{ kind, result-summary }` per effect; BlobRef payloads never
+  dereferenced); the orchestrator commits it via
   **`runAcquisition`** (§6, [40-sdk-api-surface.md](./40-sdk-api-surface.md)) as signed episodic
   `assert` facts (quarantined-until-trusted), with later episodic→semantic consolidation linked by
   `derived_from`.
@@ -153,7 +249,7 @@ babysitter run → orchestrate loop emits EFFECT_REQUESTED/EFFECT_RESOLVED
 ### (f) Status
 
 - Journal → episodic facts, **summary-only** — **ALREADY-IN-SPEC** as a generic reference
-  (`../SPEC.md:352`, `:2615` Ingestor turns artifact into episodic facts; `derived_from` for
+  (`../SPEC.md:356`, `:2615` Ingestor turns artifact into episodic facts; `derived_from` for
   consolidation).
 - The exact event-`type` vocabulary (`RUN_CREATED` / `EFFECT_REQUESTED` / `EFFECT_RESOLVED` / …) —
   **GROUNDED-NEW**: real in `babysitter-sdk/src/runtime/` and `src/storage/`, not enumerated in SPEC.
@@ -187,7 +283,8 @@ genty supplies the **microagent contract** kip's active layer is built on. genty
 - `MicroagentRunner` — `core/src/microagents/runner.ts:21` — spawns `runtime.entrypoint` as a node
   subprocess, validates input against `inputSchema`, parses stdout, validates against `outputSchema`,
   returns a `MicroagentResult` (`runner.ts:179`) — never writes a graph. The orchestrator then consumes
-  only `output`/`exitCode`/`input`/effective `timeout` from it (`../SPEC.md:1918`).
+  only `output`/`exitCode`/`input`/effective `timeout` from it (`../SPEC.md` §5b.1 "Contextual-relation
+  functionalities", the `MicroagentResult` execution-path comment).
 
 genty-platform (`packages/genty/platform/src/`):
 
@@ -214,13 +311,13 @@ genty-platform (`packages/genty/platform/src/`):
   **competing realizers** for a hop (the `Segment.alternatives`/INV-A7 case), whereas the registry's
   no-name first-of-many is ordinary provider defaulting.
 - Confirmed wiring (gated): a babysitter `agent:` effect dispatches a registered microagent —
-  `tryDispatchMicroagent` (`platform/src/harness/internal/createRun/orchestration/effects.ts:425`,
-  invoked at `:372`, `kind === "agent"` at `:367`). This fires **only when `BABYSITTER_CROSS_SUBAGENTS`
-  is enabled** (`crossSubagentsEnabled()`, `effects.ts:249`); when off, the agent effect is emitted
+  `tryDispatchMicroagent` (`platform/src/harness/internal/createRun/orchestration/effects.ts:439`,
+  invoked at `:386`, `kind === "agent"` at `:381`). This fires **only when `BABYSITTER_CROSS_SUBAGENTS`
+  is enabled** (`crossSubagentsEnabled()`, `effects.ts:263`); when off, the agent effect is emitted
   pending and **no microagent dispatch occurs**. Note the asymmetry: `EffectKind`
   (`interfaces.ts:27`) is `"agent"|"skill"|"shell"|"breakpoint"|"sleep"`, and the
-  `BABYSITTER_CROSS_SUBAGENTS` gate fires on `kind === "agent" || kind === "skill"` (`effects.ts:249`),
-  but **only `kind === "agent"` reaches `tryDispatchMicroagent`** (`:367` → `:372`); a `skill:` effect
+  `BABYSITTER_CROSS_SUBAGENTS` gate fires on `kind === "agent" || kind === "skill"` (`effects.ts:263`),
+  but **only `kind === "agent"` reaches `tryDispatchMicroagent`** (`:381` → `:386`); a `skill:` effect
   is gated identically yet is **not** routed to microagent dispatch (it falls through to the skill
   path, `:412`). So microagent dispatch is an `agent:`-effect-only path today — not a `skill:` one. The
   dispatch surface is formally declared by the seam manifest (`platform/src/seams/contract.ts:122`),
@@ -242,7 +339,8 @@ kip dispatches microagents the *same way* genty does, but wrapped by INV-A1: the
 validates `MicroagentResult.output` against the manifest `outputSchema` (`runner.ts:165-179`,
 `SCHEMA_MISMATCH` on failure), and the orchestrator then receives the validated `output` and authors
 signed `assert` + `derived_from` facts. Per SPEC the orchestrator's execution path reads ONLY
-`output`/`exitCode`/`input`/effective `timeout` (`../SPEC.md:1918`); it does not re-run schema
+`output`/`exitCode`/`input`/effective `timeout` (`../SPEC.md` §5b.1 "Contextual-relation functionalities",
+the `MicroagentResult` execution-path comment); it does not re-run schema
 validation. The microagent gains a **substrate-backed, signed, bitemporal**
 home for its outputs — and a `FunctionalityBinding` ([31-contextual-functionalities.md](./31-contextual-functionalities.md))
 that binds it to an `EdgeKind` so traversing a relation can dispatch it.
@@ -282,7 +380,7 @@ flowchart LR
   `createMicroagentSystem`, `OrchestrationProvider`/`JournalProvider`/`OrchestrationRegistry`) and the
   `agent:`-effect → `tryDispatchMicroagent` path — **GROUNDED-NEW**: real in `genty/platform/src/`, but
   SPEC cites only the genty-core contract types, not the platform dispatch/provider symbols. Note the
-  `agent:`-effect dispatch is **gated behind `BABYSITTER_CROSS_SUBAGENTS`** (`effects.ts:249`); the
+  `agent:`-effect dispatch is **gated behind `BABYSITTER_CROSS_SUBAGENTS`** (`effects.ts:263`); the
   wiring is confirmed-present but off by default for embedded/host runs — genty's autonomous
   entrypoint flips the flag ON for standalone runs (`createRun/index.ts:63`).
 - Learner/encode/decode/loss **manifests** for autoencoding (§5b.2) — **SPECULATIVE**: the
@@ -346,7 +444,7 @@ into `Provenance.author` / `source.uri` ([21-data-model.md §5](./21-data-model.
 - §6 **`runAcquisition`** for hook-event ingest (orchestrator commits the Ingestor's
   `AcquisitionResult`).
 - §4c **`recall`** for the recall a harness would surface.
-- Note on transport: kip's **own** replication transport is **git** (`../SPEC.md:205`, `:1488`); the
+- Note on transport: kip's **own** replication transport is **git** (`../SPEC.md:423`, `:1790`); the
   adapter transport layer is a **delivery/ingest channel**, not kip's convergence transport.
 
 ### (e) Data flow
@@ -365,10 +463,10 @@ harness process → adapter (codecs) → runtime-hooks socket / hooks-core norma
 ### (f) Status
 
 - kip's transport is git, not the adapter transport; adapters are a client-side delivery concern —
-  **ALREADY-IN-SPEC** (`../SPEC.md:205`, `:1488`); the adapters-as-channel mapping is **GROUNDED-NEW**.
+  **ALREADY-IN-SPEC** (`../SPEC.md:423`, `:1790`); the adapters-as-channel mapping is **GROUNDED-NEW**.
 - `UnifiedHookEvent` → episodic facts, and harness/session identity for provenance — **GROUNDED-NEW**:
   real `hooks/core` seams (`UnifiedHookEvent`, `detectHarness`, session markers), mirroring SPEC's
-  "journal → episodic" intent (`../SPEC.md:352`) but via the hook stream rather than the journal file;
+  "journal → episodic" intent (`../SPEC.md:356`) but via the hook stream rather than the journal file;
   not explicitly in SPEC.
 - kip delivered as a plugin/MCP target via the extension-mux — **GROUNDED-NEW** (real `compile`/
   `compileAll`, `generateMcpConfig`; not yet in SPEC).
@@ -391,7 +489,7 @@ harness process → adapter (codecs) → runtime-hooks socket / hooks-core norma
 - `buildIndex({ catalogDir, outFile? }): IndexShape` (`packages/atlas/src/indexer.ts`) — walks YAML →
   prebuilt `dist/index.json`; `deriveAttributeEdges` already synthesizes
   `RunJournalEvent → aliases_journal_event → journal-event:babysitter-<event>`
-  (`indexer.ts:239`).
+  (`indexer.ts:240`).
 - `AtlasGraph.getNeighbors(id, depth=1): NeighborResult` (`packages/atlas/src/index.ts`) — a bounded
   BFS over in+out adjacency with a `seen` set — the exact "lineage" kip cites; plus
   `searchRecords(query, …)`.
@@ -440,7 +538,7 @@ graph/**.yaml → buildIndex → dist/index.json (IndexShape) → AtlasGraph rec
   `getNeighbors` lineage = kip graph-half retrieval — **ALREADY-IN-SPEC** (`../SPEC.md:246`, `:336`,
   `:1790`, `:1799`).
 - kip ingesting the prebuilt `IndexShape` as semantic facts — **GROUNDED-NEW**: the alias machinery
-  (`indexer.ts:239`) is real; the kip ingestion of it is not yet in SPEC.
+  (`indexer.ts:240`) is real; the kip ingestion of it is not yet in SPEC.
 - kip `/heads` re-emitted as atlas YAML records — **SPECULATIVE**: atlas is build-time / read-only
   (`assertGraphFileCoverage` is a no-op); there is no write-back API.
 
@@ -457,18 +555,18 @@ graph/**.yaml → buildIndex → dist/index.json (IndexShape) → AtlasGraph rec
 
 `packages/kradle/core/src/` (re-exported via `packages/kradle/sdk/src/index.js`):
 
-- `AgentMemoryOntology` — real CRD kind, `resource-model.js:70`; validated by `validateOntology`
+- `AgentMemoryOntology` — real CRD kind, `resource-model.js:72`; validated by `validateOntology`
   (`agent-memory-import.js:258`; controller `agent-memory-controller.js:301`). Declares
   `nodeKinds`/`edgeKinds`/required fields/allowed edge kinds.
 - `parseJournalForImport(journal)` — real exported function, `agent-memory-import.js:32`
   (SDK `index.js:253`) — parses a babysitter `.a5c` journal into a **summary-only** payload
   `{ summary, keyEvents, effectSummary }`, stripping raw effect payloads to `{ kind, result }`.
-- `AgentMemorySnapshot` — real CRD kind, `resource-model.js:72`; pure `createMemorySnapshot`
+- `AgentMemorySnapshot` — real CRD kind, `resource-model.js:74`; pure `createMemorySnapshot`
   (`agent-memory-import.js:201`) + controller variant (`agent-memory-controller.js:32`). An immutable
   dispatch-time pin = a resolved **Git commit CID** + record/doc/query digests.
 - `resolveTimeTravel({ mode, requestedRef, … })` — `agent-memory-controller.js:176` — `current |
   explicit-ref | ref-at-time | snapshot-tag`.
-- `queryMemory` / `searchGraph` / `searchGrep` — `agent-memory-query.js`; graph+grep, scored.
+- `queryMemory` / `queryGraph` / `queryGrep` — `agent-memory-query.js`; graph+grep, scored.
 - Org path-scoping — `org-scoping.js` (`orgNamespaceName` / `normalizeOrgSlug`, SDK `index.js:47`).
 
 ### (b) What kip CONSUMES (by analogy — no code path)
@@ -477,7 +575,7 @@ graph/**.yaml → buildIndex → dist/index.json (IndexShape) → AtlasGraph rec
   (`../SPEC.md:293`) — kip stores schema *as facts*; kradle stores it as a CRD pointer to an
   `ontologyPath` in Git ([21-data-model.md §3](./21-data-model.md)).
 - kradle's **`parseJournalForImport` summary-only contract** is the same shape kip's babysitter
-  episodic import echoes (`../SPEC.md:352`) — both consume the same `.a5c` journal
+  episodic import echoes (`../SPEC.md:356`) — both consume the same `.a5c` journal
   (run_start/task_completed/run_end + effect kind/result). This is the strongest concrete *alignment*,
   but it is shape-alignment, not a wired import.
 - kradle's **snapshot/time-travel** model inspires kip's pin/asOf seams.
@@ -487,7 +585,7 @@ graph/**.yaml → buildIndex → dist/index.json (IndexShape) → AtlasGraph rec
 kip proposes itself as the **bitemporal fact substrate beneath** kradle's ontology+snapshot model.
 The load-bearing divergence: kradle's `AgentMemorySnapshot` pins a **commit CID + content digests**;
 kip's `pin()`/`SnapshotRef` deliberately content-addresses the **fact-set frontier (author-HLC) and
-drops commit CIDs** (`../SPEC.md:1693`; [25-context-enablement-seams.md](./25-context-enablement-seams.md)),
+drops commit CIDs** (`../SPEC.md:1519`; [25-context-enablement-seams.md](./25-context-enablement-seams.md)),
 so a kip pin **survives excision rebase** where a kradle commit-pin would dangle. Same concept,
 stronger kip contract.
 
@@ -496,7 +594,7 @@ stronger kip contract.
 - §4c **`pin(scope, asOf) → SnapshotRef`** ↔ kradle `AgentMemorySnapshot` (frontier-addressed vs
   commit-CID).
 - §4c **`asOf`** ↔ kradle `resolveTimeTravel` (kip pins a frontier; kradle resolves a commit).
-- §4c **`recall`** ↔ kradle `queryMemory`/`searchGraph`/`searchGrep`.
+- §4c **`recall`** ↔ kradle `queryMemory`/`queryGraph`/`queryGrep`.
 - §6 **`runAcquisition`** (Ingestor) ↔ kradle `parseJournalForImport` + `AgentRunMemoryImport`.
 - Tenancy: §6 kip `withScope(ScopeRef)` (scoping semantics defined in §8) ↔ kradle org path-scoping.
 
@@ -517,7 +615,7 @@ babysitter run journal (.a5c)
 ### (f) Status
 
 - Ontology analogy, journal-import analogy, snapshot/pin analogy, path-scoping analogy —
-  **ALREADY-IN-SPEC (as analogy)** (`../SPEC.md:293`, `:352`, `:423`, `:549`, `:1677`, `:3033`). The
+  **ALREADY-IN-SPEC (as analogy)** (`../SPEC.md:293`, `:356`, `:423`, `:549`, `:1677`, `:3033`). The
   named kradle symbols are real code (verified), but the *integration* is conceptual; cite them as
   analogies, never as an importable kip dependency.
 - `recall` ↔ kradle `queryMemory` role correspondence — **GROUNDED-NEW**: the kradle capability is
@@ -550,7 +648,12 @@ courtesies — they are the conditions under which an integration is *conformant
   kradle-shaped imports all become **signed `assert`/`retract`/`derived_from`/`same_as` facts** —
   there is exactly one way to change state: append a signed fact. `assertFact`/`retractFact` are the
   substrate; `putNode`/`putEdge`/`registerFunctionality`/`runContextualQuery`/`runAcquisition`/`learn`
-  are thin clients that compile to facts ([40-sdk-api-surface.md](./40-sdk-api-surface.md)).
+  are thin clients that compile to facts ([40-sdk-api-surface.md](./40-sdk-api-surface.md)). **`ingest()`**
+  is the seam for **already-signed foreign facts** (sync/import/test-fixture path) — it reports the gate
+  verdict for a fact constructed and signed *outside* this call (§3.2's INGEST-GATE, entered directly),
+  distinct from the `assertFact`/`retractFact` caller-intent path, which constructs+signs the fact and
+  then invokes the same underlying procedure. Both paths still append only a signed fact; `ingest()` adds
+  no new way to change state, only a second entry point into the one procedure.
 
 - **Integrations never bypass `proj`.** Trust (key-registration, namespace authority, revocation,
   causal plausibility) is decided **inside `proj`** keyed on author-HLC, never at an ingest boundary;

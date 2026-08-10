@@ -761,6 +761,28 @@
         "../packages/adapters/hooks/README.md"
       ],
       "note": "README is the canonical package-level contract."
+    },
+    {
+      "surface": "packages/trust-core",
+      "packageName": "@a5c-ai/trust-core",
+      "description": "Pure Ed25519 signing, signed-envelope, model-decision, and trust-chain primitives shared across the trust boundary.",
+      "hasReadme": true,
+      "status": "Public package",
+      "canonicalHome": "../packages/trust-core/README.md",
+      "supporting": [],
+      "note": "Published because it is a runtime dependency of policy-adapter / comm-adapter / tools-adapter / transport-adapter."
+    },
+    {
+      "surface": "packages/adapters/policy",
+      "packageName": "@a5c-ai/policy-adapter",
+      "description": "Proof-based policy enforcement trust core: unified signed envelopes, trusted-store key resolution, config-integrity manifest, and the proven bridge.",
+      "hasReadme": true,
+      "status": "Public family package",
+      "canonicalHome": "../packages/adapters/policy/README.md",
+      "supporting": [
+        "./adapters/README.md"
+      ],
+      "note": "Published because it is a runtime dependency of comm-adapter / tools-adapter / transport-adapter."
     }
   ]
 }

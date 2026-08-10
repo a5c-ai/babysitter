@@ -266,11 +266,18 @@ jobs:
           set -euo pipefail
           echo "Installing published packages with tag: @${NPM_TAG}"
 
-          # Install the adapters CLI (includes transport-adapter, atlas catalog, etc.)
-          npm install -g @a5c-ai/adapters@${NPM_TAG}
-
-          # Install the babysitter SDK CLI
+          # Install the babysitter SDK CLI first. It re-exports `adapters` and
+          # `adapters-hooks` as its own bins (bd11c5b1b) so a standalone SDK install
+          # still puts them on PATH, which collides with the packages that own those
+          # names — `npm i -g` refuses to overwrite an existing bin (EEXIST).
           npm install -g @a5c-ai/babysitter-sdk@${NPM_TAG}
+
+          # Install the adapters CLI (includes transport-adapter, atlas catalog, etc.).
+          # --force lets the canonical owner take the `adapters` bin back from the SDK
+          # shim. Order matters: the SDK's own dependency range is ^6.0.0, which does
+          # NOT match a 6.0.x-<channel>.* prerelease, so leaving the shim in place would
+          # silently exercise the last RELEASED adapters instead of the channel build.
+          npm install -g --force @a5c-ai/adapters@${NPM_TAG}
 
           # Install the genty runtime CLI — required for genty (runtime-cli) scenarios;
           # the adapters launcher spawns `genty`, which must be on PATH (source-build
@@ -278,8 +285,9 @@ jobs:
           # genty cells fail with `ENOENT: spawn genty`.
           npm install -g @a5c-ai/genty@${NPM_TAG}
 
-          # Install hooks-adapter CLI
-          npm install -g @a5c-ai/hooks-adapter-cli@${NPM_TAG}
+          # Install hooks-adapter CLI — same bin collision as adapters above, on
+          # `adapters-hooks`, so the canonical owner also needs --force.
+          npm install -g --force @a5c-ai/hooks-adapter-cli@${NPM_TAG}
 
           # Install node-pty for interactive modes
           npm install -g node-pty || echo "node-pty install failed (optional)"

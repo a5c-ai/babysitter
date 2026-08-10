@@ -42,6 +42,7 @@ import {
   runUnderstandIntentPhase,
 } from "./understandIntent";
 import { validateProcessExport } from "./validation";
+import { withPolicyGate } from "../orchestration/policy-enforcement-wiring";
 
 export type { RunPlanProcessPhaseArgs } from "./phaseTypes";
 
@@ -135,7 +136,9 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
     workspaceAssessment.kind === "empty"
       ? "default"
       : "coding";
-  sessionRef.current = createAgentCoreSession({
+  // §9.4 / AC-49 — the plan-process session executes file/bash tools, so it MUST carry the
+  // load-bearing policy tool gate (unpinned anchor → undefined, path unchanged).
+  sessionRef.current = createAgentCoreSession(await withPolicyGate({
     workspace: args.workspace,
     model: args.model,
     backend: resolvedBackend,
@@ -146,7 +149,7 @@ export async function runPlanProcessPhase(args: import("./phaseTypes").RunPlanPr
     systemPrompt: processDefinitionSystemPrompt,
     isolated: true,
     ephemeral: true,
-  });
+  }, args.workspace));
   try {
     await sessionRef.current.initialize();
     let unsubscribe: (() => void) | null = null;

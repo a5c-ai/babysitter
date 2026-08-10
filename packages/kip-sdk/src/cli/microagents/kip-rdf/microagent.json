@@ -1,0 +1,27 @@
+{
+  "name": "kip-rdf",
+  "version": "1.0.0",
+  "description": "D-67 deterministic RDF / linked-data ingestion (N-Triples). Given the text of a local .nt file, returns signed, reversible kip facts as an AcquisitionResult: IRIs are global eids verbatim, owl:sameAs becomes a reversible same_as edge (proj union-find), rdf:type sets the subject node kind (and stays a lossless edge), other IRI/blank predicates become edges (edgeKind = predicate IRI), and literals become node props (datatype/lang as adjacent props). Blank nodes are skolemized to a stable per-file namespace. Pure and total (INV-A1): reads only its input, authors nothing; malformed lines fail loud (N5) unless skipMalformed. Only runAcquisition writes.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["ntriples"],
+    "additionalProperties": false,
+    "properties": {
+      "ntriples": { "type": "string" },
+      "graph": { "type": "string" },
+      "source": { "type": "string" },
+      "skipMalformed": { "type": "boolean" }
+    }
+  },
+  "outputSchema": {
+    "type": "object"
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-rdf.mjs",
+    "timeout": 120000,
+    "tools": []
+  },
+  "tags": ["kip", "rdf", "linked-data", "ntriples", "acquisition", "read-only"],
+  "builtIn": false
+}

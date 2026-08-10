@@ -2185,7 +2185,7 @@ export const environmentManagementScriptsTask = defineTask('environment-manageme
 }));
 
 // Task 10.3: Documentation Generation
-export const documentationGenerationTask = defineTask('documentation-generation', (args, taskCtx) => ({
+export const documentationGenerationTask = defineTask('environment-management.documentation-generation', (args, taskCtx) => ({
   kind: 'agent',
   title: `Generate documentation - ${args.projectName}`,
   agent: {

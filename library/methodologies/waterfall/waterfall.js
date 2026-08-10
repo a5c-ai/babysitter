@@ -1,8 +1,9 @@
 /**
  * @process methodologies/waterfall
  * @description Waterfall - Sequential SDLC methodology with distinct phases: Requirements, Design, Implementation, Testing, Deployment, Maintenance
- * @inputs { projectName: string, projectDescription: string, stakeholders?: array, requirementsSource?: string, testingStrategy?: string, deploymentTarget?: string }
- * @outputs { success: boolean, requirements: object, design: object, implementation: object, testing: object, deployment: object, maintenance: object, artifacts: object }
+ * @inputs { projectName: string, projectDescription: string, stakeholders?: array, requirementsSource?: string, testingStrategy?: string, deploymentTarget?: string, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, requirements: object, design: object, implementation: object, testing: object, deployment: object, maintenance: object, artifacts: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract A project sponsor can open the signed phase gate record for any phase and see the exact baselined deliverable that phase froze as the next phase's input.
    * @graph
  *   domains: [domain:devops]
  *   specializations: [specialization:devops-sre-platform]
@@ -13,6 +14,24 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated Waterfall ceremonies. Waterfall has exactly ONE ceremony type —
+ * the phase sign-off — raised once per phase gate. The phase being frozen is
+ * carried in the payload and in the provenance `scope` field rather than by
+ * minting six invented actionIds. The final project-closure review is a
+ * reporting checkpoint, not a baseline freeze, and stays plain.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.waterfall.phase-signoff',
+    expert: 'project-sponsor',
+    description: 'Sign off a waterfall phase, freezing its deliverable as the input baseline for the next phase (waterfall/waterfall.js).',
+  },
+];
 
 /**
  * Waterfall Process
@@ -60,13 +79,52 @@ export async function process(inputs, ctx) {
     testingStrategy = 'comprehensive',
     deploymentTarget = 'production',
     includeVModel = true,
-    regulatoryCompliance = null
+    regulatoryCompliance = null,
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
 
   // Validate required inputs
   if (!projectName || !projectDescription) {
     throw new Error('projectName and projectDescription are required');
   }
+
+  // Recall what prior waterfall projects learned about phase-gate discipline.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'Waterfall phase-gate practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per phase sign-off raise.
+  const ceremonyDecisions = [];
+
+  /**
+   * Record a phase sign-off decision against the single declared actionId.
+   *
+   * @param {string} phase - The phase whose deliverable this sign-off freezes
+   * @param {object} decision - The BreakpointResult from routedBreakpoint
+   */
+  const recordPhaseSignoff = (phase, decision) => {
+    ceremonyDecisions.push({
+      actionId: 'methodology-retrofit.waterfall.phase-signoff',
+      expert: 'project-sponsor',
+      description: policyGatedActions[0].description,
+      scope: { phase },
+      approved: decision.approved === true,
+      autoApproved: decision.autoApproved === true,
+      decidedAt: ctx.now()
+    });
+  };
+
+  /** Routing metadata shared by all six phase sign-off raises. */
+  const phaseSignoffRouting = {
+    breakpointId: 'methodology-retrofit.waterfall.phase-signoff',
+    expert: 'project-sponsor',
+    tags: ['policy-gated', 'methodology', 'waterfall'],
+    strategy: 'single'
+  };
 
   // ============================================================================
   // PHASE 1: REQUIREMENTS GATHERING AND ANALYSIS
@@ -77,11 +135,12 @@ export async function process(inputs, ctx) {
     projectDescription,
     stakeholders,
     requirementsSource,
-    regulatoryCompliance
+    regulatoryCompliance,
+    priorPractice: priorPractice.insights
   });
 
   // Phase Gate 1: Requirements Review and Approval
-  await ctx.breakpoint({
+  const phaseGate1Decision = await routedBreakpoint(ctx, {
     question: `Requirements phase complete for "${projectName}". Documented ${requirementsResult.functionalRequirements.length} functional and ${requirementsResult.nonFunctionalRequirements.length} non-functional requirements. Requirements specification (SRS) created with ${requirementsResult.totalPages} pages. All stakeholders reviewed. Approve requirements and proceed to design phase?`,
     title: 'Phase Gate 1: Requirements Approval',
     context: {
@@ -91,8 +150,11 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/phase-1-requirements/requirements.json', format: 'code', language: 'json', label: 'Requirements Data' },
         { path: 'artifacts/waterfall/phase-1-requirements/stakeholder-signoffs.md', format: 'markdown', label: 'Stakeholder Sign-offs' }
       ]
-    }
-  });
+    },
+    phase: 'requirements'
+  }, phaseSignoffRouting);
+
+  recordPhaseSignoff('requirements', phaseGate1Decision);
 
   // ============================================================================
   // PHASE 2: SYSTEM AND SOFTWARE DESIGN
@@ -106,7 +168,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase Gate 2: Design Review and Approval
-  await ctx.breakpoint({
+  const phaseGate2Decision = await routedBreakpoint(ctx, {
     question: `Design phase complete. Created high-level architecture with ${designResult.components.length} components, ${designResult.databaseTables.length} database tables, and ${designResult.interfaces.length} interfaces. Software Design Document (SDD) generated. Design reviews completed. Approve design and proceed to implementation?`,
     title: 'Phase Gate 2: Design Approval',
     context: {
@@ -117,8 +179,11 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/phase-2-design/database-schema.md', format: 'markdown', label: 'Database Schema' },
         { path: 'artifacts/waterfall/phase-2-design/interface-specifications.json', format: 'code', language: 'json', label: 'Interface Specs' }
       ]
-    }
-  });
+    },
+    phase: 'design'
+  }, phaseSignoffRouting);
+
+  recordPhaseSignoff('design', phaseGate2Decision);
 
   // ============================================================================
   // PHASE 3: IMPLEMENTATION (CODING)
@@ -132,7 +197,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase Gate 3: Code Review and Unit Test Approval
-  await ctx.breakpoint({
+  const phaseGate3Decision = await routedBreakpoint(ctx, {
     question: `Implementation phase complete. Developed ${implementationResult.modules.length} modules (${implementationResult.totalLinesOfCode} LOC). All modules code-reviewed. ${implementationResult.unitTests.passed}/${implementationResult.unitTests.total} unit tests passing. Code meets design specifications. Approve implementation and proceed to testing phase?`,
     title: 'Phase Gate 3: Implementation Approval',
     context: {
@@ -143,8 +208,11 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/phase-3-implementation/unit-test-report.md', format: 'markdown', label: 'Unit Test Report' },
         { path: 'artifacts/waterfall/phase-3-implementation/modules.json', format: 'code', language: 'json', label: 'Module Details' }
       ]
-    }
-  });
+    },
+    phase: 'implementation'
+  }, phaseSignoffRouting);
+
+  recordPhaseSignoff('implementation', phaseGate3Decision);
 
   // ============================================================================
   // PHASE 4: TESTING (INTEGRATION, SYSTEM, UAT)
@@ -159,8 +227,46 @@ export async function process(inputs, ctx) {
     includeVModel
   });
 
+  // Quality gate at waterfall's natural quality checkpoint: the testing-to-
+  // deployment boundary, the last point where a defect is cheaper than a
+  // rollback. Its verdict is threaded into the Phase Gate 4 sign-off payload
+  // (the sign-off it protects) and again into Phase Gate 5 before release.
+  const testPhaseExitGate = await adversarialGate(ctx, {
+    gateId: 'methodologies.waterfall.test-phase-exit',
+    artifact: {
+      path: 'artifacts/waterfall/testing/test-report.md',
+      description: 'Test phase report and requirements traceability for the frozen requirements baseline'
+    },
+    critics: [
+      {
+        name: 'requirements-traceability-critic',
+        role: 'QA lead auditing requirement-to-test coverage',
+        focus: 'every baselined requirement traces to at least one executed test case with a recorded result'
+      },
+      {
+        name: 'baseline-integrity-critic',
+        role: 'Project sponsor proxy auditing baseline discipline',
+        focus: 'no requirement changed after its phase sign-off without a recorded change-control decision'
+      }
+    ],
+    ironLaw: [
+      'Open artifacts/waterfall/requirements/*.md and artifacts/waterfall/testing/test-report.md and produce the requirement-id to test-case-id to executed-result mapping yourself, citing file:line for each row.',
+      'A baselined requirement with no test case, or a test case with no recorded execution result, is a high-severity issue.',
+      'A requirement whose text differs from the version approved at Phase Gate 1 without a documented change-control record is a high-severity issue — the baseline is the whole point of waterfall.',
+      'Do not accept testingPhaseTask pass counts; recount from the report rows.'
+    ],
+    maxFixAttempts: 2,
+    fixer: {},
+    context: {
+      projectName,
+      testingStrategy,
+      regulatoryCompliance,
+      signedOffPhases: ceremonyDecisions.map(d => d.scope.phase)
+    }
+  });
+
   // Phase Gate 4: Testing Sign-off
-  await ctx.breakpoint({
+  const phaseGate4Decision = await routedBreakpoint(ctx, {
     question: `Testing phase complete. Integration testing: ${testingResult.integrationTests.passed}/${testingResult.integrationTests.total} passed. System testing: ${testingResult.systemTests.passed}/${testingResult.systemTests.total} passed. UAT: ${testingResult.uat.status}. ${testingResult.defects.critical} critical, ${testingResult.defects.high} high, ${testingResult.defects.medium} medium defects. All critical defects resolved. System ready for deployment?`,
     title: 'Phase Gate 4: Testing Sign-off',
     context: {
@@ -172,8 +278,18 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/phase-4-testing/uat-report.md', format: 'markdown', label: 'UAT Report' },
         { path: 'artifacts/waterfall/phase-4-testing/defect-log.json', format: 'code', language: 'json', label: 'Defect Log' }
       ]
+    },
+    phase: 'testing',
+    qualityGate: {
+      passed: testPhaseExitGate.passed,
+      issues: testPhaseExitGate.issues,
+      evidence: testPhaseExitGate.evidence,
+      attempts: testPhaseExitGate.attempts,
+      escalated: testPhaseExitGate.escalated
     }
-  });
+  }, phaseSignoffRouting);
+
+  recordPhaseSignoff('testing', phaseGate4Decision);
 
   // ============================================================================
   // PHASE 5: DEPLOYMENT
@@ -189,7 +305,7 @@ export async function process(inputs, ctx) {
   });
 
   // Phase Gate 5: Production Release Approval
-  await ctx.breakpoint({
+  const phaseGate5Decision = await routedBreakpoint(ctx, {
     question: `Deployment phase complete. ${deploymentResult.deploymentType} deployment to ${deploymentTarget} executed. ${deploymentResult.verificationTests.passed}/${deploymentResult.verificationTests.total} post-deployment verification tests passed. System operational. Production environment verified. ${deploymentResult.rollbackPlan ? 'Rollback plan in place.' : ''} Release to users?`,
     title: 'Phase Gate 5: Production Release Approval',
     context: {
@@ -200,8 +316,18 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/phase-5-deployment/verification-results.md', format: 'markdown', label: 'Verification Results' },
         { path: 'artifacts/waterfall/phase-5-deployment/release-notes.md', format: 'markdown', label: 'Release Notes' }
       ]
+    },
+    phase: 'deployment',
+    qualityGate: {
+      passed: testPhaseExitGate.passed,
+      issues: testPhaseExitGate.issues,
+      evidence: testPhaseExitGate.evidence,
+      attempts: testPhaseExitGate.attempts,
+      escalated: testPhaseExitGate.escalated
     }
-  });
+  }, phaseSignoffRouting);
+
+  recordPhaseSignoff('deployment', phaseGate5Decision);
 
   // ============================================================================
   // PHASE 6: MAINTENANCE PLANNING
@@ -216,7 +342,7 @@ export async function process(inputs, ctx) {
   });
 
   // Final Phase Gate: Maintenance Plan Approval and Project Closure
-  await ctx.breakpoint({
+  const phaseGate6Decision = await routedBreakpoint(ctx, {
     question: `Maintenance phase planning complete. Support procedures established with SLA: ${maintenanceResult.sla.responseTime}. Bug tracking process defined. Update procedures documented. ${maintenanceResult.trainingDocuments.length} training documents created. End-of-life plan defined. Approve maintenance plan and close project?`,
     title: 'Phase Gate 6: Maintenance Plan Approval & Project Closure',
     context: {
@@ -227,8 +353,11 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/phase-6-maintenance/training-materials.md', format: 'markdown', label: 'Training Materials' },
         { path: 'artifacts/waterfall/phase-6-maintenance/eol-plan.md', format: 'markdown', label: 'End-of-Life Plan' }
       ]
-    }
-  });
+    },
+    phase: 'maintenance'
+  }, phaseSignoffRouting);
+
+  recordPhaseSignoff('maintenance', phaseGate6Decision);
 
   // ============================================================================
   // PROJECT SUMMARY AND CLOSURE
@@ -256,6 +385,49 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/waterfall/final-documentation-index.md', format: 'markdown', label: 'Documentation Index' }
       ]
     }
+  });
+
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:waterfall',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.waterfall.phase-signoff',
+        props: {
+          raises: ceremonyDecisions.length,
+          phases: ceremonyDecisions.map(d => d.scope.phase)
+        }
+      },
+      {
+        subject: 'methodology:waterfall',
+        predicate: 'quality-gate-verdict',
+        object: String(testPhaseExitGate.passed),
+        props: {
+          gateId: 'methodologies.waterfall.test-phase-exit',
+          attempts: testPhaseExitGate.attempts,
+          escalated: testPhaseExitGate.escalated
+        }
+      },
+      {
+        subject: 'methodology:waterfall',
+        predicate: 'requirements-count',
+        object: String(requirementsResult.functionalRequirements.length + requirementsResult.nonFunctionalRequirements.length),
+        props: { projectName, regulatoryCompliance }
+      },
+      {
+        subject: 'methodology:waterfall',
+        predicate: 'defect-escape',
+        object: String(testingResult.defects.critical + testingResult.defects.high),
+        props: {
+          critical: testingResult.defects.critical,
+          high: testingResult.defects.high,
+          totalTestsExecuted: testingResult.totalTestsExecuted
+        }
+      }
+    ]
   });
 
   return {
@@ -298,6 +470,13 @@ export async function process(inputs, ctx) {
       includeVModel,
       regulatoryCompliance,
       timestamp: ctx.now()
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: testPhaseExitGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

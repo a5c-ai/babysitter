@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for Cursor:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin cursor
+npx --yes github:a5c-ai/atlas-cursor install --global
+npx --yes github:a5c-ai/atlas-cursor install --workspace <path>
 ```
 
 ## License

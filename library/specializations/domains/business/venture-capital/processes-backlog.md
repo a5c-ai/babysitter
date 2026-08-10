@@ -93,3 +93,15 @@ This document contains the backlog of processes to be implemented for the Ventur
 ---
 
 *Last Updated: January 2026*
+
+---
+
+## Anchored by the Investment Lifecycle Flagship
+
+`investment-lifecycle-workflow.js` (`venture-capital/investment-lifecycle-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Sourcing intake and thesis fit -> kip recall of prior passes -> evidence-backed screening -> declared diligence plan -> six parallel diligence workstreams -> adversarial diligence-completeness gate -> parallel valuation triangulation (comparables, DCF, VC-method) + ownership/cap-table model -> investment memo -> adversarial bear-case gate -> IC decision routed through a FROZEN check-size authority matrix -> policy-gated term-sheet issuance -> bounded negotiation loop -> syndication and definitive documents -> policy-gated irreversible capital wiring -> portfolio-monitoring cadence -> follow-on/reserve decisions -> kip assert.
+
+It composes the 21 point processes in this directory BY NAME (prompt prose only — this module never imports or orchestrates any of them).
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

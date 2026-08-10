@@ -26,8 +26,8 @@ Atlas commands delegate orchestration to Babysitter, so install the Babysitter
 CLI once, then install this plugin for OpenCode:
 
 ```bash
-npm install -g @a5c-ai/babysitter
-babysitter harness:install-plugin opencode
+npx --yes github:a5c-ai/atlas-opencode install --global
+npx --yes github:a5c-ai/atlas-opencode install --workspace <path>
 ```
 
 ## License

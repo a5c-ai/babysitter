@@ -1,8 +1,9 @@
 /**
  * @process methodologies/v-model
  * @description V-Model SDLC - Verification and Validation model with parallel test design
- * @inputs { projectRequirements: string, safetyLevel: string, traceabilityRequired: boolean, testingRigor: string }
- * @outputs { success: boolean, requirements: object, systemDesign: object, architecture: object, moduleDesign: object, implementation: object, testResults: object, traceabilityMatrix: object }
+ * @inputs { projectRequirements: string, safetyLevel: string, traceabilityRequired: boolean, testingRigor: string, kipDir?: string, kipModel?: string }
+ * @outputs { success: boolean, requirements: object, systemDesign: object, architecture: object, moduleDesign: object, implementation: object, testResults: object, traceabilityMatrix: object, policyGatedActions: array, qualityGate: object, knowledge: object }
+ * @productionContract An auditor can pick any specification item on the left arm of the V and see the executed test result at its paired level on the right arm.
    * @graph
  *   domains: [domain:software-engineering]
  *   specializations: [specialization:qa-testing-automation]
@@ -13,6 +14,23 @@
  */
 
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { routedBreakpoint, adversarialGate, kipRecall, kipAssert } from '../../specializations/common-utilities/routed-gate-combinators.js';
+
+/**
+ * Policy-gated V-Model ceremonies. The V has exactly one: approving the
+ * verification/validation levels against their paired specification levels.
+ * The four left-arm reviews are design approvals and the traceability-matrix
+ * review is a reporting checkpoint, so none of them is declared here.
+ *
+ * @type {Array<{actionId: string, expert: string, description: string}>}
+ */
+export const policyGatedActions = [
+  {
+    actionId: 'methodology-retrofit.v-model.verification-gate',
+    expert: 'qa-lead',
+    description: 'Approve a verification/validation level against its paired specification level (v-model/v-model.js).',
+  },
+];
 
 /**
  * V-Model Process
@@ -62,12 +80,25 @@ export async function process(inputs, ctx) {
     traceabilityRequired = true,
     testingRigor = 'thorough',
     existingArtifacts = null,
-    complianceStandards = []
+    complianceStandards = [],
+    kipDir = '.a5c/kip',
+    kipModel = 'sonnet'
   } = inputs;
 
   if (!projectRequirements || projectRequirements.trim().length === 0) {
     throw new Error('Project requirements are required for V-Model process');
   }
+
+  // Recall what prior V-Model runs learned about verification discipline.
+  const priorPractice = await kipRecall(ctx, {
+    kipDir,
+    topic: 'V-Model verification and validation practice',
+    kipModel,
+    kind: 'methodology-practice'
+  });
+
+  // Ceremony decision provenance — one entry per raise of a declared actionId.
+  const ceremonyDecisions = [];
 
   const processStartTime = ctx.now();
 
@@ -83,7 +114,8 @@ export async function process(inputs, ctx) {
     projectRequirements,
     safetyLevel,
     complianceStandards,
-    existingArtifacts
+    existingArtifacts,
+    priorPractice: priorPractice.insights
   });
 
   const requirements = requirementsPhase.requirements;
@@ -315,8 +347,44 @@ export async function process(inputs, ctx) {
     testResults.systemTests.passed &&
     testResults.acceptanceTests.passed;
 
-  // Breakpoint: Review test results
-  await ctx.breakpoint({
+  // Quality gate: does each right-arm level actually verify its paired
+  // left-arm specification level, with EXECUTED results rather than designs?
+  const levelPairingGate = await adversarialGate(ctx, {
+    gateId: 'methodologies.v-model.level-pairing-traceability',
+    artifact: {
+      path: 'artifacts/v-model/test-results/test-execution-report.md',
+      description: 'Executed results for unit, integration, system and acceptance levels against their paired specification levels'
+    },
+    critics: [
+      {
+        name: 'level-pairing-critic',
+        role: 'V-Model verification auditor',
+        focus: 'each right-arm test level actually verifies its paired left-arm specification level'
+      },
+      {
+        name: 'execution-evidence-critic',
+        role: 'Safety-case evidence auditor',
+        focus: 'designed-but-not-executed tests are never counted as verification'
+      }
+    ],
+    ironLaw: [
+      'For each of the four V levels, cite file:line in the paired specification artifact AND in the test-execution report for the tests that verify it.',
+      'A test level that was designed on the left arm but has no executed result on the right arm is a high-severity issue — designed is not verified.',
+      'A specification item with no test at its OWN level (covered only by a higher level) is an issue; V-Model pairing is level-to-level.',
+      'Recompute pass/fail counts per level from the report rows; do not accept executeTestsTask summary. At the declared safetyLevel, an unexplained count mismatch is high severity.'
+    ],
+    maxFixAttempts: 2,
+    fixer: {},
+    context: {
+      safetyLevel,
+      testingRigor,
+      complianceStandards,
+      levels: ['unit', 'integration', 'system', 'acceptance']
+    }
+  });
+
+  // Ceremony: approve the verification levels. Routed to the QA lead.
+  const verificationDecision = await routedBreakpoint(ctx, {
     question: `Testing Complete:
 - Unit Tests: ${testResults.unitTests.passedCount}/${testResults.unitTests.totalCount} passed (${testResults.unitTests.passed ? 'PASS' : 'FAIL'})
 - Integration Tests: ${testResults.integrationTests.passedCount}/${testResults.integrationTests.totalCount} passed (${testResults.integrationTests.passed ? 'PASS' : 'FAIL'})
@@ -360,7 +428,28 @@ Review test results and ${allTestsPassed ? 'proceed to traceability' : 'address 
           label: 'Acceptance Test Results'
         }
       ]
+    },
+    qualityGate: {
+      passed: levelPairingGate.passed,
+      issues: levelPairingGate.issues,
+      evidence: levelPairingGate.evidence,
+      attempts: levelPairingGate.attempts,
+      escalated: levelPairingGate.escalated
     }
+  }, {
+    breakpointId: 'methodology-retrofit.v-model.verification-gate',
+    expert: 'qa-lead',
+    tags: ['policy-gated', 'methodology', 'v-model'],
+    strategy: 'single'
+  });
+
+  ceremonyDecisions.push({
+    actionId: 'methodology-retrofit.v-model.verification-gate',
+    expert: 'qa-lead',
+    description: policyGatedActions[0].description,
+    approved: verificationDecision.approved === true,
+    autoApproved: verificationDecision.autoApproved === true,
+    decidedAt: ctx.now()
   });
 
   // ============================================================================
@@ -432,6 +521,42 @@ Review traceability matrix and ${traceabilityMatrix.gaps.length === 0 ? 'finaliz
 
   const processEndTime = ctx.now();
   const durationMinutes = (processEndTime - processStartTime) / (1000 * 60);
+
+  const knowledge = await kipAssert(ctx, {
+    kipDir,
+    kipModel,
+    kind: 'methodology-practice',
+    facts: [
+      {
+        subject: 'methodology:v-model',
+        predicate: 'ceremony-gated',
+        object: 'methodology-retrofit.v-model.verification-gate',
+        props: { raises: ceremonyDecisions.length }
+      },
+      {
+        subject: 'methodology:v-model',
+        predicate: 'quality-gate-verdict',
+        object: String(levelPairingGate.passed),
+        props: {
+          gateId: 'methodologies.v-model.level-pairing-traceability',
+          attempts: levelPairingGate.attempts,
+          escalated: levelPairingGate.escalated
+        }
+      },
+      {
+        subject: 'methodology:v-model',
+        predicate: 'traceability-coverage',
+        object: String(traceabilityRequired ? traceabilityMatrix.requirementsCoverage : 'not-required'),
+        props: { traceabilityRequired, testingRigor }
+      },
+      {
+        subject: 'methodology:v-model',
+        predicate: 'safety-level',
+        object: String(safetyLevel),
+        props: { complianceStandards, allTestsPassed }
+      }
+    ]
+  });
 
   return {
     success: allTestsPassed,
@@ -508,6 +633,13 @@ Review traceability matrix and ${traceabilityMatrix.gaps.length === 0 ? 'finaliz
         'Acceptance Testing',
         'Traceability Matrix'
       ]
+    },
+    policyGatedActions: ceremonyDecisions,
+    qualityGate: levelPairingGate,
+    knowledge: {
+      recalledFactCount: priorPractice.factCount,
+      storeInitialized: priorPractice.storeInitialized,
+      asserted: knowledge.asserted
     }
   };
 }

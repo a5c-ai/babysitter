@@ -35,6 +35,11 @@ interface Fact {
   validTo: HlcOrTime | null;   // null = still valid; a retract sets a bounded interval (gaps legal, M-9)
   // CAUSAL/ORDERING anchor — AUTHOR-STAMPED and SIGNED (M-4): part of the canonical payload & of id.
   hlc: HlcStamp;
+  // PER-KEY CHAIN-CONTIGUITY witness — AUTHOR-STAMPED and SIGNED (m7-1, [convergence §1.2a]): this fact's
+  seq: number;                 //   position in its (replicaId, key) chain — 0 at the pair's chain genesis,
+                               //   exactly previous+1 thereafter. Chain-/pin-completeness are decided over
+                               //   seq, NEVER over hlc.counter (the receive-advance rule may skip it).
+                               //   In the canonical payload; EXCLUDED from orderKey.
   // Concurrency hints. Detection ALSO uses the git commit DAG (the causal history git already stores):
   causedBy?: FactId[];         // OPTIONAL same-replica causal parents. A LOWER BOUND on real causality
                                //   (author-supplied: may omit real predecessors, M4-2). Anti-backdating's

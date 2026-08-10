@@ -1386,7 +1386,7 @@ export const remediationPlanTask = defineTask('remediation-plan', (args, taskCtx
 }));
 
 // Phase 12: CI/CD Integration
-export const cicdIntegrationTask = defineTask('cicd-integration', (args, taskCtx) => ({
+export const cicdIntegrationTask = defineTask('accessibility-testing.cicd-integration', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 12: CI/CD Integration - ${args.projectName}`,
   agent: {

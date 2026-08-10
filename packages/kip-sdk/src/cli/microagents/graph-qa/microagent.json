@@ -1,0 +1,67 @@
+{
+  "name": "kip-graph-qa",
+  "version": "1.0.0",
+  "description": "Answers a natural-language question over the kip knowledge graph. Retrieves supporting facts via recall/query/asOf/getNode (READ-ONLY), synthesizes an answer with runtime.model, and returns the answer with per-claim citations back to signed factIds/EIDs. Writes nothing (INV-A1). Abstains when no supporting facts are found (N5 — never fabricates).",
+  "inputSchema": {
+    "type": "object",
+    "required": ["question"],
+    "additionalProperties": false,
+    "properties": {
+      "question": { "type": "string", "minLength": 1 },
+      "asOf": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "validTime": { "type": ["string", "object"] },
+          "txTime": { "type": "object" },
+          "believer": { "type": "string" }
+        }
+      },
+      "scope": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tenant": { "type": "string" },
+          "namespace": { "type": "string" },
+          "snapshot": { "type": "object" }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": ["answer", "citations", "usedFacts"],
+    "additionalProperties": false,
+    "properties": {
+      "answer": { "type": "string" },
+      "abstained": { "type": "boolean" },
+      "citations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["factId"],
+          "additionalProperties": false,
+          "properties": {
+            "factId": { "type": "string" },
+            "eid": { "type": "string" },
+            "edgeKind": { "type": "string" },
+            "prop": { "type": "string" },
+            "quote": { "type": "string" }
+          }
+        }
+      },
+      "usedFacts": { "type": "array", "items": { "type": "string" } },
+      "model": { "type": "string" },
+      "error": { "type": "string" }
+    }
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-graph-qa.mjs",
+    "model": "kip-graph-qa-default",
+    "timeout": 90000,
+    "tools": ["kip-read"]
+  },
+  "tags": ["kip", "qa", "read-only"],
+  "builtIn": false
+}

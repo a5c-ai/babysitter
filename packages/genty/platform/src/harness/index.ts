@@ -74,6 +74,22 @@ export {
 } from "./internal/createRun/utils";
 export { assessRun, discoverRuns } from "./internal/createRun/resumeState";
 export { normalizeBuiltInHarnessName } from "./builtInHarness";
+// Milestone D (§9.4 / AC-49) — centralized session-gate wiring, exported so out-of-package
+// tool-executing session sites (e.g. genty-cli resume) route through the same gate.
+export {
+  resolveRunPolicyGates,
+  withPolicyGate,
+  applyPolicyGateSync,
+  __resetRunPolicyGatesCache,
+  // Milestone E (ALLOW path, §5 / AC-9 / AC-49) — register the run's authorization-store
+  // resolver so the load-bearing gates can ALLOW a legitimately-authorized covered action.
+  registerRunAuthorizationResolver,
+  unregisterRunAuthorizationResolver,
+} from "./internal/createRun/orchestration/policy-enforcement-wiring";
+export type {
+  RunPolicyGates,
+  PolicyGatedSessionOptions,
+} from "./internal/createRun/orchestration/policy-enforcement-wiring";
 export {
   invokeViaAgentMux,
   type AdapterBridgeOptions,

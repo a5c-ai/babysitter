@@ -1,0 +1,74 @@
+{
+  "name": "@a5c-ai/policy-adapter",
+  "version": "6.0.0",
+  "description": "Proof-based policy enforcement trust core: unified signed envelopes, trusted-store key resolution, config-integrity manifest, and the proven bridge.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./trust": {
+      "types": "./dist/verify-envelope-trusted.d.ts",
+      "default": "./dist/verify-envelope-trusted.js"
+    },
+    "./config-manifest": {
+      "types": "./dist/config-manifest.d.ts",
+      "default": "./dist/config-manifest.js"
+    },
+    "./proven-bridge": {
+      "types": "./dist/proven-bridge.d.ts",
+      "default": "./dist/proven-bridge.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "author": "a5c.ai",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/adapters/policy"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/adapters/policy#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  },
+  "dependencies": {
+    "@a5c-ai/tasks-adapter": "6.0.0",
+    "@a5c-ai/trust-core": "6.0.0",
+    "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@a5c-ai/genty-core": "6.0.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "eslint": "^9.39.4",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.6"
+  },
+  "atlas": {
+    "layers": [
+      "L9"
+    ],
+    "muxes": [
+      "policy-adapter"
+    ]
+  }
+}

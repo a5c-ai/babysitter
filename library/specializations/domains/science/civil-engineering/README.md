@@ -223,3 +223,93 @@ The Civil Engineering specialization provides comprehensive AI-assisted workflow
 - Inspection and maintenance schedules
 - Record drawings
 - Warranty documentation
+
+## Design-to-Construction Workflow (flagship)
+
+`design-to-construction-workflow.js` is the end-to-end statutory-gate flagship for this
+domain. It composes 18 civil-engineering point processes BY NAME (task factories only —
+ingredient `process()` functions are never imported, so ingredient-internal breakpoints and
+fix loops never double-fire) and adds the `d2c.*` inline task set, the statutory-approval
+guard, and the stage-exit contract.
+
+### Phase spine
+
+| Phase | Work | Stage exit |
+| --- | --- | --- |
+| 0 | kip recall (`kind: civil-design-record`) | — |
+| 1 | Project brief + siting constraints, requirement/code-clause register, geotechnical site investigation, slope-stability + stormwater hydrology (parallel) | `d2c.stage-exit.site-investigation` |
+| 2 | Concept design + structural element inventory, five parallel load analyses, seismic design chain | `d2c.stage-exit.concept-and-analysis` |
+| 3 | Parallel discipline design (structural, geotechnical, MEP, drainage) + per-element EXECUTED capacity checks (`ctx.parallel.map`) | `d2c.stage-exit.discipline-design` |
+| 4 | Specifications, BIM coordination, cost, schedule (parallel) then the permit package | `d2c.stage-exit.documentation` |
+| 5 | INDEPENDENT structural peer review + two adversarial gates | `d2c.stage-exit.design-review` |
+| 6 | Engineer-of-record stamp, permit submission, construction release, QC planning | `d2c.stage-exit.construction-release` |
+| 7 | Shop-drawing review + fabrication release (`ctx.parallel.map` over submittals) | — |
+| 8 | Construction hold points (SEQUENTIAL) + RFI / field-deviation handling | `d2c.stage-exit.construction` |
+| 9 | As-built reconciliation + handover dossier | `d2c.stage-exit.handover` |
+| 10 | kip assert | — |
+
+Every stage exit runs the same contract: an EXECUTED requirement/code-clause ->
+drawing/calculation trace diff (`artifacts/d2c/<stage>/trace-diff.json`), an adversarial
+`d2c.<stage>.traceability` gate over that computed diff, then a routed sign-off. A failed
+gate or a rejected sign-off throws — there is no pass-anyway path.
+
+### Policy-gated actions
+
+`breakpointId === actionId` exactly (that is what `adapters/policy` YAML matches on);
+per-instance uniqueness is carried by the instanceId tag, the routing label, and the
+per-instance `breakpointEventId` in the statutory-approval log.
+
+| actionId | expert | never auto-approves |
+| --- | --- | --- |
+| `design-to-construction.engineer-of-record-stamp` | `engineer-of-record` | yes |
+| `design-to-construction.permit-submission` | `engineer-of-record` | yes |
+| `design-to-construction.shop-drawing-approval` | `engineer-of-record` | anomaly surfaced |
+| `design-to-construction.hold-point-release` | `construction-quality-manager` | yes |
+| `design-to-construction.design-deviation-acceptance` | `engineer-of-record` | anomaly surfaced |
+
+`requireStatutoryApproval` never passes `autoApproveAfterN` or `presentAlwaysApprove`. A
+non-interactive auto-approval is recorded as an explicit anomaly record in
+`metadata.autoApprovalAnomalies` *before* anything else, and on the three public-safety
+actions it then stops the run. A rejection throws.
+
+### Adversarial gates
+
+- `d2c.design-review.independent` — the independent structural peer review is EXECUTED
+  first (composed by name, structurally independent of every designing task); the gate then
+  audits its executed output. Critics must recompute governing load combinations, open
+  `artifacts/d2c/elements/<elementId>/check.json`, and cite `file:line`.
+- `d2c.constructability.bim-clash` — critics re-run clash detection over the aggregated
+  model and diff against the recorded clash reports.
+- `d2c.shop-drawings.conformance`, `d2c.as-built.conformance`, and the per-stage
+  `d2c.<stage>.traceability` gates.
+
+Both Phase-5 gates are checked with `passed !== true -> throw` **before** the stamp
+breakpoint in straight-line control flow, so the seal is unreachable without them. A
+structural element that still fails its governing load combination after the fix budget
+throws: there is no reduced-scope stamp path.
+
+### Hold points and deviations
+
+Hold points come from the QC plan's inspection protocols and are processed **sequentially** —
+construction sequence is physical, and parallel release would authorize covering work out of
+order. Non-conformances surviving the bounded re-inspection loop are routed through RFI
+triage and, when they are true departures, through an EXECUTED deviation assessment; an
+engineering-unacceptable deviation is rejected before any approver sees it. A revision that
+touches sealed content is surfaced in `metadata.restampRequired` — the process never
+silently re-seals.
+
+### Usage
+
+```js
+import { process as designToConstruction } from './design-to-construction-workflow.js';
+
+const result = await designToConstruction({
+  projectId: 'PRJ-2031',
+  projectBrief: 'Three-storey mixed-occupancy building on a sloping infill parcel',
+  siteLocation: { lat: 37.77, lon: -122.42, parcel: 'APN 1234-567' },
+  projectType: 'building',
+  occupancyCategory: 'II',
+  jurisdiction: { agency: 'City Department of Building Inspection', state: 'CA' },
+  shopDrawingSubmittals: [{ submittalId: 'SD-001', scope: 'structural steel' }],
+}, ctx);
+```

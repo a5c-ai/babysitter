@@ -506,3 +506,34 @@ This document contains identified processes, methodologies, work patterns, flows
 5. Add examples and documentation
 6. Test each process thoroughly
 7. Integrate with existing tooling and workflows
+
+---
+
+## Anchored by the Security Attestation Flagship
+
+`security-attestation-workflow.js` (`specializations/security-compliance/security-attestation-workflow`) is the certification and attestation end-to-end flagship for this specialization. It composes the following point processes BY NAME rather than re-implementing them, so each is now anchored in an end-to-end flow instead of standing alone:
+
+- `soc2-compliance`
+- `iso27001-implementation`
+- `security-policies`
+- `data-classification`
+- `iam-access-control`
+- `secrets-management`
+- `encryption-standards`
+- `security-logging-monitoring`
+- `vulnerability-management`
+- `sast-pipeline`
+- `dast-process`
+- `sca-dependency-management`
+- `container-security`
+- `iac-security-review`
+- `codebase-security-audit`
+- `penetration-testing`
+- `stride-threat-modeling`
+- `third-party-risk`
+- `business-continuity`
+- `disaster-recovery-testing`
+- `security-training`
+- `incident-response`
+
+See the "Flagship Workflow: Security Attestation" section of `README.md` for the composition table (control family -> composed processes), the five policy-gated actions, and the two adversarial gates.

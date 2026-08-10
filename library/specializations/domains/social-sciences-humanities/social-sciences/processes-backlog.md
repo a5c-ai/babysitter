@@ -90,3 +90,15 @@ This document contains the backlog of processes to be implemented for the Social
 - Integration of policy analysis and applied research processes
 - Support for open science and reproducibility practices
 - Cross-disciplinary applicability across psychology, sociology, political science, economics, and anthropology
+
+---
+
+## Anchored by the Empirical Study Lifecycle Flagship
+
+`empirical-study-lifecycle-workflow.js` (`social-sciences/empirical-study-lifecycle-workflow`) is the end-to-end flagship for this specialization.
+
+**Shape:** Research question and design-family selection -> literature lane -> instrument development/validation -> locked pre-registration -> IRB determination -> fieldwork/administration -> executed analyses diffed against the registered plan -> manuscript.
+
+This is the FIRST end-to-end flagship in the social-sciences-humanities tier and establishes the tier contract (routed-gate-combinator reuse, per-domain kip kind, policy-gated executors, fail-closed terminals). It composes 20 point processes BY NAME (the 19 required plus `literature-review-synthesis.js`), never imported. Boundary: this is a primary-data human-subjects pipeline; external claim/citation re-fetch verification is deferred to `specializations/research/research-publication-workflow.js` as a separate run.
+
+**Scope note:** the flagship does not close any individual entry above — those entries remain the per-point-process tracker. See `README.md` for the flagship's phase shape, policy-gated actions and adversarial gates.

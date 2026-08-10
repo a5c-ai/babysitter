@@ -1,0 +1,34 @@
+# Milestone E — CONFIGURABILITY scenario policy document.
+#
+# A SECOND, structurally different trust-chain shape expressed in the SAME policy
+# document format WITHOUT any code change (§7 / AC-19a): a distinct-holder
+# 2-human quorum with NO model-decision condition. This proves the policy
+# component is not hardcoded to the human+opus flow — the same evaluator, issuer,
+# and gates authorize an entirely different chain shape.
+#
+# Satisfied  => allow  (two DISTINCT human identities approve scope aws:prod:s3).
+# One human, two keys => deny  (AC-41 distinct-HOLDER rule: two keys owned by one
+# trusted identity count as ONE holder, so a 2-of quorum is not met).
+version: 1
+authorizationTtlSeconds: 120
+commandDefaultAllow: false
+actions:
+  - id: aws-prod-write-quorum
+    match:
+      tool: "Bash"
+      argv:
+        program: "aws"
+        subcommandEquals: ["s3 cp", "s3 rm", "s3 sync"]
+        recognizedPrograms: ["aws"]
+    # No credentialScope on this action → proxy attestation NOT required by default;
+    # the quorum is a pure human chain with no model condition.
+    chains:
+      - id: two-human-quorum
+        requirements:
+          - quorum:
+              of: "human-approval"
+              min: 2
+              trustedIdentities: ["role:sre-oncall"]
+              conditions:
+                scopeEquals: "aws:prod:s3"
+                notExpired: true

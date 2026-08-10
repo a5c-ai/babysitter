@@ -10,6 +10,7 @@ import type {
 } from './types.js';
 import type { ToolHookBridge } from './hooks.js';
 import type { ToolRegistry } from './registry.js';
+import { loadPolicyVerifierBridge, composePolicyBridge } from './policy-verifier-wiring.js';
 
 /* ------------------------------------------------------------------ */
 /*  Minimal glob matcher (no external deps)                            */
@@ -44,6 +45,21 @@ export interface ToolDispatcherOptions {
   policy?: ToolDispatchPolicy;
   executionPolicy?: ToolExecutionPolicy;
   hooks?: ToolHookBridge;
+  /**
+   * Milestone D (§9.1 / AC-49) — the project root anchoring the `.policy` config dir for
+   * GATE-1 enforcement. Only consulted by the async `ToolDispatcher.create` factory. When
+   * the off-workspace config anchor (`POLICY_CONFIG_ROOT_FP`) is pinned the factory
+   * installs the load-bearing `PolicyVerifierHookBridge` in FRONT of `hooks` so a covered
+   * action without a valid CommandAuthorization is denied BEFORE the executor runs.
+   */
+  policyProjectRoot?: string;
+  /** Optional authorization store threaded into GATE 1 (the run's issued authorizations). */
+  policyResolveAuthorization?: (context: {
+    toolName: string;
+    toolCallId: string | undefined;
+    sessionId: string | undefined;
+    runId: string | undefined;
+  }) => unknown;
 }
 
 /**
@@ -65,6 +81,26 @@ export class ToolDispatcher {
       defaultMaxOutputBytes: 50 * 1024 * 1024,
     };
     this.hooks = options.hooks;
+  }
+
+  /**
+   * Milestone D (§9.1 / AC-49) — PRODUCTION factory. Constructs a `ToolDispatcher` with
+   * GATE 1 (`PolicyVerifierHookBridge`, via the shared `loadPolicyEnforcementGate`) installed
+   * in FRONT of any caller-supplied `hooks` when the off-workspace config anchor
+   * (`POLICY_CONFIG_ROOT_FP`) is pinned. A policy deny short-circuits execution and is
+   * un-bypassable by a later bridge (CompositeToolHookBridge). When the anchor is not pinned
+   * the dispatcher is constructed with the caller's hooks unchanged (back-compat). Fail
+   * closed: an unloadable adapter while the anchor is pinned installs a deny-all bridge.
+   *
+   * Every production construction of a ToolDispatcher SHOULD route through this factory so
+   * GATE 1 is active by default; the synchronous `new ToolDispatcher(...)` remains for
+   * back-compat and tests that inject their own bridge.
+   */
+  static async create(options: ToolDispatcherOptions): Promise<ToolDispatcher> {
+    const projectRoot = options.policyProjectRoot ?? process.cwd();
+    const policyBridge = await loadPolicyVerifierBridge(projectRoot, options.policyResolveAuthorization);
+    const hooks = composePolicyBridge(policyBridge, options.hooks);
+    return new ToolDispatcher({ ...options, ...(hooks ? { hooks } : {}) });
   }
 
   /* ---------------------------------------------------------------- */

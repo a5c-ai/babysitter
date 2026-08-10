@@ -604,6 +604,14 @@ Product Management integrates with various disciplines and processes:
 
 ---
 
+## Processes
+
+- **product-lifecycle-e2e.js** — the composing end-to-end workflow over the point-method processes in this directory (rice-prioritization, moscow-prioritization, jtbd-analysis, feature-definition-prd, task-to-prd, user-story-mapping, competitive-analysis, metrics-dashboard, retention-cohort-analysis, conversion-funnel-analysis, product-market-fit, quarterly-roadmap, prd-to-spec, product-launch-gtm, beta-program, stakeholder-alignment, product-council-review, ...). It runs parallel discovery gathering, synthesizes testable hypotheses, authors the PRD, attacks it with an adversarial spec-review gate (testability + edge-case critics with executed criteria-to-check evidence), prioritizes via RICE + MoSCoW, hands off via prd-to-spec, and closes with a post-launch retro that adjudicates every hypothesis.
+- Three policy-gated sign-offs guard the run: **spec-signoff** (product-lead), **roadmap-commit** (head-of-product), and **launch-go-no-go** (head-of-product, whose no-go is final).
+- Launch outcomes, hypothesis adjudications, gate findings, and metric deltas are asserted into kip under the `product-management` kind, and prior retros/research are recalled at run start.
+
+---
+
 ## Recommended Reading
 
 To deepen expertise in this specialization, see:

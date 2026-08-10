@@ -26,6 +26,7 @@ import {
 import {
   assessRun,
   discoverRuns,
+  withPolicyGate,
 } from "@a5c-ai/genty-platform/harness";
 
 export interface SessionResumeArgs {
@@ -323,7 +324,9 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
   let session: AgentCoreSessionHandle | null = null;
 
   try {
-    session = createAgentCoreSession({
+    // §9.4 / AC-49 — the resume session executes coding tools during run discovery, so it
+    // MUST carry the load-bearing policy tool gate (unpinned anchor → undefined, unchanged).
+    session = createAgentCoreSession(await withPolicyGate({
       workspace: args.workspace,
       model: args.model,
       thinkingLevel: "low",
@@ -332,7 +335,7 @@ export async function handleHarnessResumeRun(args: SessionResumeArgs): Promise<n
       systemPrompt,
       isolated: true,
       ephemeral: true,
-    });
+    }, args.workspace));
 
     await session.initialize();
 

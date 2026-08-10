@@ -13,6 +13,7 @@ import {
   isBuiltInHarnessName,
   normalizeBuiltInHarnessName,
 } from "../../../builtInHarness";
+import { withPolicyGate } from "../orchestration/policy-enforcement-wiring";
 
 function resolveSkillFileCandidates(workspace: string, skillRef: string): string[] {
   const trimmed = skillRef.trim();
@@ -129,7 +130,9 @@ export async function runDelegatedHarnessTask(args: {
           ),
           ...(args.customTools ?? []),
         ];
-    const session = createAgentCoreSession({
+    // §9.4 / AC-49 — the delegated worker executes coding tools, so it MUST carry the
+    // load-bearing policy tool gate (unpinned anchor → undefined, path unchanged).
+    const session = createAgentCoreSession(await withPolicyGate({
       workspace,
       model: args.model,
       timeout: args.timeout,
@@ -152,7 +155,7 @@ export async function runDelegatedHarnessTask(args: {
         ? { thinkingLevel: args.thinkingLevel }
         : {}),
       ...(skillInstructions.length > 0 ? { appendSystemPrompt: [skillInstructions.join("\n\n---\n\n")] } : {}),
-    });
+    }, workspace));
     try {
       await session.initialize();
       const result = await promptPiWithRetry({

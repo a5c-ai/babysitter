@@ -2075,7 +2075,7 @@ export const setupTestDataManagementTask = defineTask('setup-test-data-managemen
 }));
 
 // Phase 11: Monitoring Setup
-export const setupMonitoringTask = defineTask('setup-monitoring', (args, taskCtx) => ({
+export const setupMonitoringTask = defineTask('continuous-testing.setup-monitoring', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 11: Monitoring and Observability Setup - ${args.projectPath}`,
   agent: {
@@ -2494,7 +2494,7 @@ export const executeFinalPipelineTask = defineTask('execute-final-pipeline', (ar
 }));
 
 // Phase 17: Continuous Improvement Setup
-export const setupContinuousImprovementTask = defineTask('setup-continuous-improvement', (args, taskCtx) => ({
+export const setupContinuousImprovementTask = defineTask('continuous-testing.setup-continuous-improvement', (args, taskCtx) => ({
   kind: 'agent',
   title: `Phase 17: Continuous Improvement Setup - ${args.projectPath}`,
   agent: {

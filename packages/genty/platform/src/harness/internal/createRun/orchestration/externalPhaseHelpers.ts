@@ -18,6 +18,7 @@ import {
 } from "../utils";
 import { subscribeVerbosePiEvents } from "./verbose";
 import { enhanceWorkerSessionOptions } from "./workerSessionEnhancer";
+import { withPolicyGate } from "./policy-enforcement-wiring";
 import type { RunOrchestrationPhaseArgs } from "./types";
 
 export function extractErrorMessage(error: unknown): string {
@@ -51,8 +52,10 @@ export async function recoverExternalProcessError(args: {
     workspace: args.args.workspace,
     model: args.args.model,
   });
+  // §9.4 / AC-49 — the recovery worker edits the process file (tool-executing), so it MUST
+  // carry the load-bearing policy tool gate.
   const recoverySession = args.registerPiSession(createAgentCoreSession(
-    enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext),
+    await withPolicyGate(enhanceWorkerSessionOptions(baseOpts, args.args.gentyContext), args.args.workspace),
   ));
   const recoveryUnsub = subscribeVerbosePiEvents(recoverySession, "recovery", args.args);
   try {

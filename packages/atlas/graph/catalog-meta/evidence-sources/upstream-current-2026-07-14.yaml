@@ -1,0 +1,289 @@
+# Evidence captured during the 2026-07-14 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1784014549-g51e7e3-2026-07-14
+attributes:
+  displayName: "Amp CLI 0.0.1784014549-g51e7e3 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784014549-g51e7e3"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1784014549-g51e7e3"
+  locator: "npm @ampcode/cli v0.0.1784014549-g51e7e3"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-14T07:42:56Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli version 0.0.1784014549-g51e7e3 as the
+    latest dist-tag, published and modified on 2026-07-14. The package
+    description identifies it as the Amp frontier coding agent CLI and exposes
+    the amp binary through bin/amp.exe. No public build-specific changelog,
+    CLI flag, transport/API, model, package-name, install-method, or migration
+    change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1784014549-g51e7e3
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-2-2026-07-14
+attributes:
+  displayName: "Antigravity CLI 1.1.2 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.2"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.2"
+  locator: "google-antigravity/antigravity-cli release 1.1.2"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-13T23:26:02Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.2 release notes document create-file full-diff
+    review shortcut f, print-mode OAuth code entry through the controlling
+    terminal, fail-fast behavior for headless OAuth, large-conversation
+    responsiveness fixes, non-zero print-mode failures for unresolved --model,
+    nested command allowlist permission fixes, keybinding default persistence,
+    clean builtin tool headers, MCP standalone schema path fixes, MCP subprocess
+    cleanup, and subagent state race fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-2
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-209-2026-07-14
+attributes:
+  displayName: "Claude Code v2.1.209 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.209"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.209"
+  locator: "anthropics/claude-code release v2.1.209"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-14T06:36:28Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official Claude Code 2.1.209 release notes document a fix for /model and
+    other dialogs being blocked in claude agents background sessions by
+    reverting an overly broad guard.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-209
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-209-2026-07-14
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.209 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.209"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.209"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.209"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-14T06:36:10Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.209 release notes document parity
+    with Claude Code v2.1.209 and list npm, yarn, pnpm, and bun update commands
+    for @anthropic-ai/claude-agent-sdk@0.3.209.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-209
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-144-4-2026-07-14
+attributes:
+  displayName: "Codex CLI rust-v0.144.4 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.4"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.144.4"
+  locator: "openai/codex release rust-v0.144.4"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-14T05:08:11Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official Codex CLI rust-v0.144.4 release notes state that there are no
+    user-facing changes in this patch release and link the full changelog from
+    rust-v0.144.3 to rust-v0.144.4.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.144.4
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-171-0-2026-07-14
+attributes:
+  displayName: "Factory Droid CLI 0.171.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.171.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.171.0"
+  locator: "npm @factory/cli v0.171.0"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-14T00:05:24Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    npm metadata reports @factory/cli version 0.171.0 as the latest dist-tag,
+    identifies the package as Factory Droid CLI, exposes the droid binary,
+    requires Node >=20.0.0, and points repository metadata at Factory-AI/factory
+    under apps/cli. No public version-specific CLI flag, transport/API, model,
+    package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-171-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:openclaw-2026-7-1-2026-07-14
+attributes:
+  displayName: "OpenClaw v2026.7.1 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.7.1"
+  sourcePathOrUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.7.1"
+  locator: "openclaw/openclaw release v2026.7.1"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-13T22:33:14Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official OpenClaw 2026.7.1 release notes document Control UI and onboarding
+    overhauls, official iOS/Android/macOS app updates, GPT-5.6 compatibility,
+    Tencent Hy3 and Meta Muse Spark 1.1 support, openclaw attach for Claude
+    Code session access, Codex delegation and native subagent result tracking,
+    Copilot provider expansion, channel updates for Telegram/Slack/Discord/
+    Apple Messages, Gateway crash-loop repair paths, scheduled-work wake
+    changes, remote browser tab pairing and download handling, guarded
+    terminals, plugin packaging, and security hardening. npm metadata reports
+    the openclaw binary and a tightened Node engine range.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:openclaw:2026-7-1
+    - agent:openclaw
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-17-20-2026-07-14
+attributes:
+  displayName: "OpenCode v1.17.20 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.20"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.17.20"
+  locator: "anomalyco/opencode release v1.17.20"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-13T21:07:14Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official OpenCode 1.17.20 release notes document removal of an obsolete
+    Codex workaround that could interfere with OpenAI Luna Responses Lite
+    requests and updated Azure AI support for GPT-5.6.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-17-20
+    - agent:opencode
+---
+nodeKind: EvidenceSource
+id: evidence:omp-16-5-0-2026-07-14
+attributes:
+  displayName: "Oh-My-Pi v16.5.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.5.0"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v16.5.0"
+  locator: "can1357/oh-my-pi release v16.5.0"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-14T00:37:59Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official Oh-My-Pi 16.5.0 release notes document the breaking replacement
+    of --reasoning-slide-* flags with --prewalk, --prewalk-into <model>, and
+    --no-prewalk; prewalk model handoff flow; project-scoped launch tool and
+    detached launches; auth-gateway diagnostic response headers; Google
+    provider streamGenerateContent changes; removal of interactions chaining
+    options; auto-compaction image-drop rescue and warnings; JSON log payload
+    changes; compacted-history display controls; Alt+P session model picker;
+    Agent Hub card redesign; @agentclientprotocol/sdk 1.2.1 upgrade; and shell
+    builtin portability fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:16-5-0
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-19-10-2026-07-14
+attributes:
+  displayName: "Qwen Code v0.19.10 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.10"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.19.10"
+  locator: "QwenLM/qwen-code release v0.19.10"
+  capturedAt: "2026-07-14T08:45:00Z"
+  observedAt: "2026-07-13T13:47:49Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-07-14T08:45:00Z"
+  notes: |
+    Official Qwen Code 0.19.10 release notes document multi-workspace support
+    across ACP transport, daemon workers, split-view sessions, and
+    workspace-aware actions; Web Shell artifact/review panel, modernized
+    sidebar/settings UI, and user-level model configuration; resilient
+    malformed-stream, leaked-protocol-turn, OAuth-expiry, and daemon-restart
+    recovery; subagent live command context, transcript paths, timelines, and
+    inherited Explore models; project-scoped prompt stashes, Git branch chips,
+    configurable shell timeouts, and safer memory pressure handling; SDK and
+    daemon controls for effort, models, usage, context, transport, and runtime
+    channels; xAI Grok provider preset; extension management v2; and no known
+    breaking changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-19-10
+    - agent:qwen

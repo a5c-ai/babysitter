@@ -1,0 +1,50 @@
+{
+  "name": "@a5c-ai/kip-sdk",
+  "version": "0.0.1",
+  "description": "kip — a signed, content-addressed, git-substrate typed property graph memory SDK (M0-M3 scaffold).",
+  "private": true,
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "kip": "dist/cli/kip.js",
+    "kip-mcp": "dist/mcp/server.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc && node scripts/bundle-microagents.cjs",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "isomorphic-git": "^1.38.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "rimraf": "^6.1.3",
+    "typescript": "^5.4.2",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a5c-ai/babysitter.git",
+    "directory": "packages/kip-sdk"
+  },
+  "homepage": "https://github.com/a5c-ai/babysitter/tree/main/packages/kip-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/a5c-ai/babysitter/issues"
+  }
+}

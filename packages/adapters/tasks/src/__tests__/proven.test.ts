@@ -892,6 +892,61 @@ describe("Proven Breakpoints (Cryptographic Signing)", () => {
         expect(result.valid).toBe(false);
         expect(result.verifiedAt).toBeDefined();
       });
+
+      // ── Fingerprint-binding coverage (added). verifyAnswer resolves the trusted
+      // key by metadata.fingerprint === publicKeyFingerprint. That metadata field
+      // is attacker-influenceable: a malicious/desynced trusted-key record can
+      // CLAIM a victim's fingerprint while carrying attacker key material. The
+      // verifier now recomputes sha256(DER) of the resolved key and denies unless
+      // it equals the claimed fingerprint — so a fingerprint/material mismatch is
+      // rejected even when the attacker's own signature over the answer is valid.
+      it("denies when the trusted key's metadata.fingerprint mismatches its material (sha256(DER) binding)", async () => {
+        // Attacker signs an answer with their OWN key.
+        const attacker = generateKeyPair("mallory", "Mallory");
+        await savePrivateKey(attacker.privateKeyRecord, tmpDir);
+        const answer = makeAnswer({ responderId: "tal", responderName: "Tal M" });
+        const proven = await signAnswer(
+          answer,
+          attacker.privateKeyRecord.fingerprint,
+          tmpDir,
+        );
+
+        // The victim's real fingerprint the attacker wants to impersonate.
+        const victim = generateKeyPair("tal", "Tal M");
+        const victimFingerprint = victim.publicKeyRecord.metadata.fingerprint;
+
+        // A poisoned trusted-key record: attacker's public key BYTES, but metadata
+        // claims the victim's fingerprint (and the answer claims that fingerprint).
+        const poisoned = {
+          publicKey: attacker.publicKeyRecord.publicKey,
+          metadata: {
+            ...attacker.publicKeyRecord.metadata,
+            fingerprint: victimFingerprint,
+            responderId: "tal",
+            responderName: "Tal M",
+          },
+        };
+        const trustedDir = path.join(tmpDir, ".keys", "trusted");
+        await fs.mkdir(trustedDir, { recursive: true });
+        await fs.writeFile(
+          path.join(trustedDir, `${victimFingerprint}.pub.json`),
+          JSON.stringify(poisoned, null, 2) + "\n",
+          "utf-8",
+        );
+
+        // The answer claims the victim's fingerprint so resolution finds the poisoned record.
+        const forged: ProvenBreakpointAnswer = {
+          ...proven,
+          publicKeyFingerprint: victimFingerprint,
+        };
+
+        const result = await verifyAnswer(forged, tmpDir);
+        // Even though the attacker's signature is internally valid against their
+        // own key material, sha256(attacker DER) !== victimFingerprint → deny.
+        expect(result.valid).toBe(false);
+        expect(result.reason).toBeDefined();
+        expect(result.reason!.toLowerCase()).toMatch(/fingerprint|match|material/);
+      });
     });
   });
 

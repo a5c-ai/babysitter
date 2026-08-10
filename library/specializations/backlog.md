@@ -15,15 +15,15 @@ Software and R&D Specializations (give a proper name to each specialization) - i
     # library/specializations/product-management/
 [x] DevOps, SRE, Platform Engineering
     # library/specializations/devops-sre-platform/
-[x] Security, Compliance, Risk Management
+[x] Security, Compliance, Risk Management - now has an end-to-end flagship: scope/boundary definition, framework control mapping, parallel control + scan evidence collection, evidence-sufficiency gate, policy-gated exceptions/sign-off/external release (flagship process: security-attestation-workflow.js; anchors the 22 point processes BY NAME)
     # library/specializations/security-compliance/
 [x] Software Architecture, Design Patterns
     # library/specializations/software-architecture/
-[x] Monitoring, Ingestions, ETL, Analytics, BI, Data Engineering, Data-Driven Decision Making, A/B Testing
+[x] Monitoring, Ingestions, ETL, Analytics, BI, Data Engineering, Data-Driven Decision Making, A/B Testing - now has an end-to-end flagship: data-contract definition, source profiling, model/pipeline build, executed quality + reconciliation gates, policy-gated backfill/cutover/deprecation (flagship process: data-product-lifecycle-workflow.js)
     # library/specializations/data-engineering-analytics/
 [x] UX/UI Design, User Experience, User Interface
     # library/specializations/ux-ui-design/
-[x] QA, Testing Automation, Testing
+[x] QA, Testing Automation, Testing - now has an end-to-end flagship: risk-based strategy, coverage/gap analysis, environment+test-data fidelity gate, parallel multi-tier execution, false-green gate, policy-gated waivers/quarantines, release quality certificate (flagship process: release-quality-assurance-workflow.js; owns the EVIDENCE, release-engineering/release-lifecycle.js owns the ACT)
     # library/specializations/qa-testing-automation/
 [x] Documentation, Technical Writing, Technical Communication, Specifications, Standards
     # library/specializations/technical-documentation/
@@ -49,6 +49,32 @@ Engineering Specializations (give a proper name to each specialization): (not un
 [x] Porting, Refactoring, Modernization, Migration, etc.
 [x] Performance Optimization, Profiling, Benchmarking, Memory Management, Memory Leaks, Memory Leak Detection, Memory Leak Fixing, etc.
 [x] Security Research, Vulnerability Research, Vulnerability Detection, Vulnerability Fixing, etc.
+[x] Backend Development, APIs, Domain-Driven Systems - now has its first process (backend-service-delivery.js)
+    # library/specializations/backend-development/
+[x] Shared Cross-Domain Assets - home for assets useful across many specializations (first skill: kip-librarian)
+    # library/specializations/shared/
+[x] Customer Support - support operations specialization (flagship process: ticket-lifecycle.js)
+    # library/specializations/customer-support/
+[x] Incident Management - incident response specialization consolidating three prior incident files (flagship process: incident-lifecycle.js)
+    # library/specializations/incident-management/
+[x] Release Engineering - release management specialization covering versioning, changelogs, release trains, and rollout gates (flagship process: release-lifecycle.js)
+    # library/specializations/release-engineering/
+[x] Data Privacy Compliance - privacy operations specialization covering DSAR handling, consent, and data-protection workflows (flagship process: dsar-lifecycle.js)
+    # library/specializations/data-privacy-compliance/
+[x] Communication - internal/external communication specialization, now with README and flagship multi-audience announcement pipeline (flagship process: multi-audience-announcement-pipeline.js)
+    # library/specializations/communication/
+[x] Authoring - long-form content authoring and editorial operations; README added in the hollow-spec consolidation pass (processes: editorial-lifecycle.js, documenter.js)
+    # library/specializations/authoring/
+[x] Collaboration - code review and repository collaboration assets; README added in the hollow-spec consolidation pass (assets: code-review/, github/, skills/six-dimension-code-review)
+    # library/specializations/collaboration/
+[x] Media - generative media production; README added in the hollow-spec consolidation pass (flagship process: media-production-pipeline.js; skill: generative-media-prompting)
+    # library/specializations/media/
+[x] Research - research, scanning and publication specialization; now also the home of the folded sourcing pipeline (processes: research-publication-workflow.js, news-intelligence-pipeline.js, novelties-scanner.js, standards-gap-audit.js)
+    # library/specializations/research/
+
+Folded vestigial directories (header-only @deprecated re-export pointers, kept so existing process ids keep resolving):
+[x] sourcing/ -> research/ - specializations/sourcing/news-intelligence-pipeline.js is a pointer to specializations/research/news-intelligence-pipeline.js
+[x] business/ -> domains/business/business-strategy/ - specializations/business/revenue.js is a pointer to specializations/domains/business/business-strategy/revenue.js
 
 Science Specializations (give a proper name to each specialization): each in process/specializations/domains/science/[specialization-name-slugified]/
 
@@ -62,13 +88,15 @@ Science Specializations (give a proper name to each specialization): each in pro
 [x] Mechanical Engineering
 [x] Electrical Engineering
 [x] Chemical Engineering
-[x] Biomedical Engineering
+[x] Biomedical Engineering - now has an end-to-end flagship: design-control intake, ISO 14971 risk management, parallel design characterization, policy-gated design freeze, V&V, DHF sufficiency gate, policy-gated submission, post-market surveillance with severity-routed CAPA (flagship process: medical-device-tplc-workflow.js; composes the 14 point processes BY NAME)
+    # library/specializations/domains/science/biomedical-engineering/
 [x] Environmental Engineering
 [x] Industrial Engineering
 [x] Computer Science
 [x] Mathematics
 [x] Physics
-[x] Civil Engineering
+[x] Civil Engineering - now has an end-to-end flagship: concept design and load/seismic analysis, parallel discipline design, specs + BIM coordination + permit package, independent adversarial structural peer review, engineer-of-record stamp, construction release, QC hold points, handover/as-built reconciliation (flagship process: design-to-construction-workflow.js)
+    # library/specializations/domains/science/civil-engineering/
 
 Business and Finance Specializations (give a proper name to each specialization): each in process/specializations/domains/business/[specialization-name-slugified]/
 
@@ -79,24 +107,41 @@ Business and Finance Specializations (give a proper name to each specialization)
 [x] Legal
 [x] Human Resources
 [x] Customer Service, Support, Customer Success, Customer Experience
-[x] General Purpose Project Management, Leadership, etc.
+[x] General Purpose Project Management, Leadership, etc. - now has an end-to-end flagship: business case + charter, WBS/scope baseline, parallel core and supporting planning, estimate-and-risk-realism gate, stage-gated execution with EVM checkpoints, status-integrity (watermelon) gate, bounded change-control-board loop, steering phase gates, closure and benefits realization (flagship process: program-delivery-workflow.js)
+    # library/specializations/domains/business/project-management/
 [x] Supply Chain Management
 [x] Logistics, Transportation, Shipping, Freight, Warehousing, Inventory Management
-[x] VCs, investments and Due Diligence processes (processes for evaluating and selecting investments, due diligence, valuation, monitoring and tracking, allocation, risk management, portfolio management, deal flow management, deal structuring, etc.)
+[x] VCs, investments and Due Diligence processes (processes for evaluating and selecting investments, due diligence, valuation, monitoring and tracking, allocation, risk management, portfolio management, deal flow management, deal structuring, etc.) - now has an end-to-end flagship: sourcing/thesis-fit screening, six parallel diligence workstreams, diligence-completeness gate, valuation triangulation + ownership model, memo with an adversarial bear-case gate, check-size-matrix-routed IC decision, policy-gated term sheet/wiring, portfolio monitoring and follow-on reserves (flagship process: investment-lifecycle-workflow.js; composes the 21 point processes BY NAME)
+    # library/specializations/domains/business/venture-capital/
 [x] Enterpreneurship and Startup Processes (presentations, pitch decks, business plans, market research, funding, investor relations, etc.)
 [x] Business Strategy
 [x] Operations
 [x] Business Analysis and Consulting
 [x] Intelligence, Decision Support and Decision Making
-[x] Knowledge Management
+[x] Knowledge Management - now has an end-to-end flagship: kip corpus recall, multi-method intake, curation, parallel dedupe/enrichment/classification, adversarial accuracy-and-freshness gate, merge adjudication, policy-gated taxonomy change and KB publish, decay monitoring, policy-gated retirement (flagship process: knowledge-lifecycle-workflow.js)
+    # library/specializations/domains/business/knowledge-management/
 [x] Advertising, Social Media, Content Marketing,  Influencer Marketing, etc.
 [x] Public Relations, etc.
+[x] Procurement - sourcing, vendor selection, and purchase-order operations (flagship process: procurement-lifecycle.js)
+    # library/specializations/domains/business/procurement/
+[x] Observability - SLO design, instrumentation, alert tuning, error-budget review (flagship process: slo-lifecycle.js; incident-lifecycle.js is a deprecation pointer to the incident-management specialization)
+    # library/specializations/observability/
+[x] Accessibility - WCAG audit, remediation, re-audit gate, conformance-statement publish (flagship process: wcag-audit-remediation.js; supersedes web-development/accessibility-audit-remediation.js)
+    # library/specializations/accessibility/
+[x] Internationalization - string extraction, per-locale translation QA, locale regression sweeps, locale release (flagship process: localization-lifecycle.js)
+    # library/specializations/internationalization/
+[x] MLOps - model eval harnesses, promotion gates, drift monitoring, dataset governance (flagship process: model-lifecycle.js)
+    # library/specializations/mlops/
+[x] Developer Relations - docs-driven sample apps, accuracy gates, multi-channel content, community triage (flagship process: devrel-campaign.js)
+    # library/specializations/developer-relations/
 
 Social Sciences and Humanities Specializations (give a proper name to each specialization): each in process/specializations/domains/social-sciences-humanities/[specialization-name-slugified]/
 
-[x] Healthcare, Medical, Healthcare Management, Medical Management
+[x] Healthcare, Medical, Healthcare Management, Medical Management - now has an end-to-end flagship: safety-event intake + harm classification, gated containment, parallel investigation (clinical review, iterative RCA, harm assessment, conditional FMEA), CAPA dossier, investigation-sufficiency gate, statutory-clock regulatory filing and patient/family disclosure, PDSA practice change, deadline-audited closure (flagship process: clinical-safety-quality-workflow.js; composes 13 point processes BY NAME)
+    # library/specializations/domains/social-sciences-humanities/healthcare/
 [x] Education, Teaching, Learning, Learning Management System, Learning Management System
-[x] Social Sciences
+[x] Social Sciences - FIRST end-to-end flagship in the social-sciences-humanities tier (establishes the tier contract: routed-gate-combinator reuse, per-domain kip kind, policy-gated executors, fail-closed terminals): research question, design selection, instrument validation, locked pre-registration, IRB determination, fieldwork, executed analyses, manuscript (flagship process: empirical-study-lifecycle-workflow.js; composes 20 point processes BY NAME)
+    # library/specializations/domains/social-sciences-humanities/social-sciences/
 [x] Humanities and anthropology
 [x] Philosophy, Theology
 [x] Arts and culture

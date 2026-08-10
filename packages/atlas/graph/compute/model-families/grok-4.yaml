@@ -13,5 +13,6 @@ edges:
   realizes:
     - target: layer:1-model
   has_version:
+    - model:grok-4-5@current
     - model:grok-4-3@current
     - model:grok-build-0-1@current

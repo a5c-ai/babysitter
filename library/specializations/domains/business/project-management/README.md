@@ -968,3 +968,82 @@ The Project Management and Leadership specialization provides comprehensive guid
 Whether leading traditional waterfall projects, Agile product development, or large-scale programs, the frameworks, processes, and skills in this specialization enable effective planning, execution, and delivery. Success requires both technical project management expertise and the leadership capabilities to inspire teams, manage stakeholders, and drive organizational change.
 
 The integration of predictive and adaptive approaches, combined with a focus on value delivery and continuous improvement, positions project leaders to succeed in today's dynamic business environment.
+
+---
+
+## Flagship Process: Program Delivery Workflow
+
+`program-delivery-workflow.js` is the end-to-end flagship for this specialization. It governs an
+ALREADY-AUTHORIZED program from charter to benefits realization: business case and program charter
+-> scope baseline and WBS -> parallel core planning (schedule/CPM, budget, risk register,
+stakeholder map) and parallel supporting planning (resource, procurement, quality, dependency map)
+-> deterministic integrated-baseline coverage verification -> adversarial estimate-and-risk-realism
+gate -> sponsor baseline approval -> stage-gated execution with earned-value checkpoints, a
+workstream status rollup and an adversarial status-integrity (watermelon) gate -> bounded
+change-control-board loop -> issue and dependency escalation -> per-stage steering-committee phase
+gates -> benefits realization measured against the business-case baseline -> program closure,
+lessons learned and portfolio feedback.
+
+**Boundary.** This is program/portfolio delivery governance, not product discovery. The sibling
+style reference `product-management/product-lifecycle-e2e.js` asks "should we build this and did the
+hypotheses hold". This workflow asks "is the committed scope/schedule/cost baseline being delivered,
+is reported status true, and were the promised benefits actually realized". No user research, no
+PRD, no RICE/MoSCoW prioritization, no launch go/no-go. Where a program delivers a product, this
+workflow consumes the product decision as an input artifact and never re-litigates it.
+
+### Policy-gated actions
+
+| Action | Breakpoint id | Expert | Auto-approve |
+| --- | --- | --- | --- |
+| Baseline approval | `program-delivery.baseline-approval` | project-sponsor | never |
+| Scope change approval | `program-delivery.scope-change-approval.cr-<crId>.round-<n>` | change-control-board | only when the CR is strictly under the declared `changeThreshold` on both cost and schedule AND needs no re-baseline |
+| Budget/schedule re-baseline | `program-delivery.budget-rebaseline.cr-<crId>` | project-sponsor | never |
+| Phase gate go/no-go | `program-delivery.phase-gate-go-no-go.stage-<stageId>` | steering-committee | never |
+| Project cancellation | `program-delivery.project-cancellation.stage-<stageId>` | project-sponsor | never |
+| Program closure | `program-delivery.program-closure` | project-sponsor | never |
+
+Per-stage and per-CR-per-round breakpoint ids are unique by construction so replay never collapses
+two decisions into one. A gate that returns neither `approved === true` nor `approved === false`
+throws: an absent decision is never read as approval.
+
+### Adversarial quality gates
+
+- `pdw.estimate-realism` — estimate-realism-critic + risk-contingency-critic, with EXECUTED
+  WBS-to-schedule-to-budget traceability, reserve reconciliation against the register's quantified
+  exposure, and critical-path float recomputation.
+- `pdw.status-integrity.stage-<stageId>` — the watermelon detector. status-integrity-critic +
+  ev-arithmetic-critic must OPEN every cited artifact and RUN the stated acceptance check, re-derive
+  each workstream RAG, recompute EV, and confirm the aggregate equals the WORST constituent status.
+- `pdw.benefits-realization` — benefits-realization-critic + measurement-method-critic must EXECUTE
+  a benefit-by-benefit comparison of the report against the business case with `file:line` citations.
+
+### Reusable stages exported for other flagships
+
+Other flagships (portfolio, finance, vendor) compose these instead of copying the file:
+
+- `changeControlStageTask` (task id `pdw.change-control-stage`) + `runChangeControlStage(ctx, options)`
+- `stageGateReviewTask` (task id `pdw.stage-gate-review`) + `runStageGateReview(ctx, options)`
+
+Each is exported twice — the agent unit as a `defineTask` with a stable id, and an async
+orchestration helper that wraps the task plus its routed breakpoints (a breakpoint cannot live
+inside a `defineTask`, so the helper is what makes the stage reusable end to end). Both helpers
+require the caller's `recordPolicyDecision` and, for change control, an explicit `changeThreshold`
+— there is no default threshold.
+
+### Composed point processes
+
+The workflow composes nineteen point processes from this specialization BY NAME inside agent prompt
+instructions (never by JS import): `project-charter-development.js`, `business-case-development.js`,
+`stakeholder-analysis-engagement.js`, `wbs-development.js`, `schedule-development-cpm.js`,
+`budget-development.js`, `resource-planning-allocation.js`, `risk-planning-assessment.js`,
+`risk-monitoring-response.js`, `change-control-management.js`, `earned-value-management.js`,
+`issue-management-escalation.js`, `program-dependency-management.js`,
+`status-reporting-communication.js`, `quality-assurance-implementation.js`,
+`vendor-procurement-management.js`, `portfolio-prioritization.js`, `lessons-learned-knowledge.js`,
+and `benefits-realization.js`. Run those processes directly for the full standalone treatment.
+
+### Memory
+
+Recalls and asserts `kind: 'program-delivery'` facts via kip: closure outcome, baseline approval,
+per-stage gate decisions, per-benefit outcomes, change dispositions, status-integrity findings, and
+the estimate-accuracy ratio the next program's planning phase recalls to calibrate its estimates.

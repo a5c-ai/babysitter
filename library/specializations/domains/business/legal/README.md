@@ -1048,6 +1048,10 @@ Non-hourly billing approaches for legal services:
 - Trademarks registered
 - Training completion rate
 
+## Processes
+
+- `contract-lifecycle-workflow.js` — flagship contract lifecycle process for this specialization (intake through renewal/termination). Supersedes the deprecated `contract-lifecycle-management.js`.
+
 ## Conclusion
 
 Legal and Compliance is a foundational business specialization that enables organizations to operate effectively within legal and regulatory frameworks while managing risk and protecting assets. Success requires combining deep legal expertise with business acumen, technology proficiency, and operational excellence.

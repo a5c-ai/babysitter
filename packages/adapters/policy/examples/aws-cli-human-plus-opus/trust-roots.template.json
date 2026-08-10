@@ -1,0 +1,51 @@
+{
+  "_comment": [
+    "Milestone E — trust-roots TEMPLATE for the canonical aws-cli scenario.",
+    "Public key material only (private keys are NEVER git-tracked, AC-26).",
+    "This is a TEMPLATE: the e2e fixture builder generates real Ed25519 keys at",
+    "run time and substitutes their fingerprints + SPKI public keys into the",
+    "`fingerprint`/`publicKey` fields below, then hashes the concrete file into",
+    "the signed config-manifest (AC-46). The shapes here match the TrustRoot",
+    "record (AC-6): every root carries its own key material and a declared kind.",
+    "",
+    "Roles referenced by the policy (`role:sre-oncall`) resolve to the fingerprints",
+    "of the human roots whose identityId is the on-call identity."
+  ],
+  "trustRoots": [
+    {
+      "fingerprint": "<sha256(alice SPKI public key)>",
+      "kind": "human",
+      "identityId": "sre-oncall:alice",
+      "label": "role:sre-oncall",
+      "publicKey": "<alice SPKI PEM>"
+    },
+    {
+      "fingerprint": "<sha256(bob SPKI public key)>",
+      "kind": "human",
+      "identityId": "sre-oncall:bob",
+      "label": "role:sre-oncall",
+      "publicKey": "<bob SPKI PEM>"
+    },
+    {
+      "fingerprint": "<sha256(proxy engine SPKI public key)>",
+      "kind": "engine",
+      "producer": "proxy",
+      "label": "transport-proxy-attestation",
+      "publicKey": "<proxy SPKI PEM>"
+    },
+    {
+      "fingerprint": "<sha256(in-process genty SPKI public key)>",
+      "kind": "engine",
+      "producer": "in-process",
+      "label": "genty-in-process-attestation",
+      "publicKey": "<in-process SPKI PEM>"
+    },
+    {
+      "fingerprint": "<sha256(issuer SPKI public key)>",
+      "kind": "engine",
+      "label": "policy-adapter-issuer",
+      "publicKey": "<issuer SPKI PEM>"
+    }
+  ],
+  "revoked": []
+}

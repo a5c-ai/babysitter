@@ -18,6 +18,44 @@ edges:
     - trust-level:vendor-doc
 ---
 nodeKind: EvidenceSource
+id: evidence:xai-grok-4-5-model-docs
+attributes:
+  displayName: xAI Grok 4.5 model documentation
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.x.ai/developers/models/grok-4-5
+  sourcePathOrUrl: https://docs.x.ai/developers/models/grok-4-5
+  locator: Grok 4.5 model page and model configuration snippets for model ID, context window, max output, and API backend
+  capturedAt: '2026-07-11T00:00:00Z'
+  observedAt: '2026-07-11T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-07-11T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:xai-grok-4-5-issue-1258
+attributes:
+  displayName: GitHub issue #1258 Grok 4.5 tracker
+  kindLabel: issue
+  trustLevel: trust-level:repo-maintainer
+  sourceUrl: https://github.com/a5c-ai/babysitter/issues/1258
+  sourcePathOrUrl: https://github.com/a5c-ai/babysitter/issues/1258
+  locator: Reopened model-version-update issue with xAI docs links, model ID, context, max completion tokens, API-family notes, and graph checklist
+  capturedAt: '2026-07-11T00:00:00Z'
+  observedAt: '2026-07-11T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-07-11T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:repo-maintainer
+---
+nodeKind: EvidenceSource
 id: evidence:xai-api-reference-docs
 attributes:
   displayName: xAI Inference REST API documentation

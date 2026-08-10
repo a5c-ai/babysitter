@@ -1,0 +1,42 @@
+{
+  "name": "kip-linker",
+  "version": "1.0.0",
+  "description": "The deterministic Layer-1 entity linker (ADR-B11): given a node inventory of live code:*/doc:* nodes, connects the code and docs islands by returning signed, reversible link edges as an AcquisitionResult (documents edges for concept->code exact identifier matches; same_as pairs for cross-doc same-entity exact matches). Exact whole-string equality only, abstain otherwise (N5); no model, no clock, no random. Reads the graph nothing (INV-A1); only runAcquisition authors its facts.",
+  "inputSchema": {
+    "type": "object",
+    "required": ["nodes"],
+    "additionalProperties": false,
+    "properties": {
+      "nodes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["eid", "kind", "props"],
+          "properties": {
+            "eid": { "type": "string", "minLength": 1 },
+            "kind": { "type": "string" },
+            "props": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["key", "value"],
+                "properties": { "key": { "type": "string" }, "value": {} }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object"
+  },
+  "isolation": "subprocess",
+  "runtime": {
+    "entrypoint": "kip-linker.mjs",
+    "timeout": 120000,
+    "tools": ["kip-read"]
+  },
+  "tags": ["kip", "linker", "entity-linker", "acquisition", "read-only"],
+  "builtIn": false
+}

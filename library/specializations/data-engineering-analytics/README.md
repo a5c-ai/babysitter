@@ -4,6 +4,200 @@
 
 The Data Engineering, Analytics, and BI specialization encompasses the end-to-end lifecycle of transforming raw data into actionable insights. This specialization bridges the gap between data collection and business decision-making, combining technical infrastructure (data engineering), analytical modeling (analytics engineering), and visualization (business intelligence).
 
+## Flagship process — `data-product-lifecycle-workflow.js`
+
+`data-product-lifecycle-workflow.js` is the spine of this directory: requirement + data-contract
+definition → source discovery/profiling + lineage mapping → model/pipeline build → EXECUTED
+data-quality and contract test families → two adversarial gates → policy-gated destructive
+backfill, PII exposure, contract-breaking-change and production cutover → catalog/contract
+publish → SLA + freshness monitoring → policy-gated irreversible dataset deprecation →
+kip-backed `data-product` memory.
+
+### Composition map — callable point-task stages (NOT superseded)
+
+The 18 modules below are point tasks that build one model, one pipeline, one dashboard. The
+flagship sequences them and adds the governance/gate/monitoring surface none of them owns
+individually. It composes them **by name** through frozen lookup tables and **imports none of
+them** — they remain independently callable stages.
+
+| Composed module | Role in the lifecycle | Routed via |
+| --- | --- | --- |
+| `data-catalog.js` | Source discovery + the catalog/contract publish surface | `INGREDIENT_MODULES.catalog` |
+| `data-lineage.js` | Upstream/downstream lineage map + the live consumer inventory | `INGREDIENT_MODULES.lineage` |
+| `data-quality-framework.js` | The test-family spine (one run per family) | `INGREDIENT_MODULES.quality` |
+| `data-warehouse-setup.js` | Target warehouse platform scaffold | `INGREDIENT_MODULES.warehouse` |
+| `dbt-project-setup.js` | Transformation-project scaffold | `INGREDIENT_MODULES.dbtProject` |
+| `metrics-layer.js` | Semantic metric definitions the reconciliation critic recomputes against | `INGREDIENT_MODULES.metrics` |
+| `query-optimization.js` | Executed EXPLAIN/cost evidence before cutover | `INGREDIENT_MODULES.queryOptimization` |
+| `dimensional-model.js` | Model pattern `dimensional` | `MODEL_PATTERN_MODULES` |
+| `obt-creation.js` | Model pattern `obt` | `MODEL_PATTERN_MODULES` |
+| `scd-implementation.js` | Model pattern `scd` | `MODEL_PATTERN_MODULES` |
+| `incremental-model.js` | Model pattern `incremental` | `MODEL_PATTERN_MODULES` |
+| `dbt-model-development.js` | Model pattern `dbt` (per-model authoring) | `MODEL_PATTERN_MODULES` |
+| `etl-elt-pipeline.js` | Pipeline mode `batch` | `PIPELINE_MODE_MODULES` |
+| `streaming-pipeline.js` | Pipeline mode `streaming` | `PIPELINE_MODE_MODULES` |
+| `pipeline-migration.js` | Pipeline mode `migration` | `PIPELINE_MODE_MODULES` |
+| `bi-dashboard.js` | Serving surface kind `dashboard` | `SERVING_SURFACE_MODULES` |
+| `feature-store.js` | Serving surface kind `feature-store` | `SERVING_SURFACE_MODULES` |
+| `ab-testing-pipeline.js` | Serving surface kind `experiment` | `SERVING_SURFACE_MODULES` |
+
+Shape references: `methodologies/composition-open-source-data-validation/` (validation spine),
+`methodologies/composition-saas-analytics-dashboard/` (serving/consumption end), and
+`specializations/backend-development/backend-service-delivery.js` (overall delivery shape).
+
+### Boundary vs `../mlops/model-lifecycle.js`
+
+`model-lifecycle.js` owns the lifecycle **around a trained model artifact**: dataset-governance
+intake for training sets, eval harness + executed eval runs, promotion between `MODEL_STAGES`,
+drift monitoring, rollback and model retirement. `data-product-lifecycle-workflow` owns the
+lifecycle of a **dataset / pipeline / published data contract**: contract definition, source
+profiling, model+pipeline build, data-quality and contract test suites, backfill, production
+cutover of consumers, freshness/SLA monitoring and dataset deprecation.
+
+The two meet at exactly one seam and neither supersedes the other: a gold-tier data product
+produced here (typically a feature-store or holdout serving surface) is a legitimate entry in
+`model-lifecycle`'s `datasets` input, and `model-lifecycle`'s dataset-governance
+lineage/consent/retention checks consume the lineage map and contract published here. This
+process **never** trains, evaluates, promotes, or retires a model; `model-lifecycle` **never**
+defines a data contract, profiles a source, runs a dbt/quality suite, or deprecates a dataset.
+
+### Frozen tables (verbatim)
+
+```js
+PRODUCT_TIERS = ['bronze', 'silver', 'gold', 'platinum']
+
+SOURCE_PROFILE_CHECKS = ['schema', 'volume', 'nullability', 'distribution', 'freshness']
+
+TEST_FAMILIES = [
+  'schema-contract',
+  'row-count-reconciliation',
+  'metric-value-reconciliation',
+  'uniqueness-referential',
+  'freshness-sla',
+]
+
+MODEL_PATTERN_MODULES = {
+  dimensional: 'dimensional-model.js',
+  obt:         'obt-creation.js',
+  scd:         'scd-implementation.js',
+  incremental: 'incremental-model.js',
+  dbt:         'dbt-model-development.js',
+}
+
+SLA_BREACH_ROUTING = {
+  SEV1: { escalationPath: 'immediate-remediation', escalationExpert: null },
+  SEV2: { escalationPath: 'immediate-remediation', escalationExpert: null },
+  SEV3: { escalationPath: 'remediation-choice',    escalationExpert: 'analytics-engineering-lead' },
+  SEV4: { escalationPath: 'remediation-choice',    escalationExpert: 'analytics-engineering-lead' },
+}
+```
+
+`TIER_POLICY` drives which families are mandatory and whether a serving surface is permitted:
+`bronze` → `schema-contract` (no serving); `silver` → `schema-contract`,
+`row-count-reconciliation`, `uniqueness-referential` (no serving); `gold` and `platinum` → all
+five families, serving allowed. Declaring a `servingSurfaces` entry on a non-serving tier
+**throws** at input validation — there is no silent downgrade.
+
+### Policy-gated actions
+
+| actionId (= breakpointId) | Expert | Phase | Irreversible? |
+| --- | --- | --- | --- |
+| `data-product.pii-field-exposure` | `data-privacy-officer` | P3.5 | No, but rejection fails the run closed |
+| `data-product.destructive-backfill` | `data-platform-lead` | P5 | **Yes** — overwrites/deletes warehouse data |
+| `data-product.contract-breaking-change` | `analytics-engineering-lead` | P5 | Yes for consumers — breaks the published contract |
+| `data-product.production-cutover` | `data-platform-lead` | P5 | Yes — repoints live consumers |
+| `data-product.dataset-deprecation` | `data-platform-lead` | P7 | **Yes** — drops a dataset with live consumers |
+
+None of these carries `autoApproveAfterN`. Each executor (`backfill`, `cutover`, `deprecation`)
+has exactly **one** call site, physically inside its `if (gate.approved === true)` block. A
+rejection ends the branch with the state surfaced and the executor never invoked.
+
+The single non-policy breakpoint is `dpl.sla.remediation-choice` (P6, SEV3/SEV4 only) — the
+accept-and-fix-forward vs remediate-now call is genuinely ambiguous. SEV1/SEV2 route straight to
+remediation.
+
+### Quality gates
+
+#### `dpl.correctness-and-reconciliation` (P4)
+
+Three independent critics — `quality-suite-reexecution-critic`, `reconciliation-critic`,
+`profile-recomputation-critic`. Demanded evidence: the critics must **re-execute** the quality
+checks themselves, **re-compute** row counts and headline metric values against the source of
+truth, and **re-compute** the P2 profile statistics from real sample data, citing the actual
+query text and output plus `file:line` for every model/metric definition. A green dbt run
+reported by the builder is not evidence; quoting the quality report is not evidence. The
+characteristic failure of this domain is a silently **wrong answer**, not a crash.
+
+#### `dpl.lineage-and-contract-conformance` (P4)
+
+Three independent critics — `contract-conformance-critic`, `lineage-traversal-critic`,
+`pii-classification-critic`. Demanded evidence: query the built product and prove every contract
+field exists with the declared type/nullability/grain; traverse the lineage graph from each
+contract field back to a profiled source column and forward to every declared consumer; inspect
+actual (redacted) sample values and challenge every declared classification. Reading the contract
+or the lineage document is not evidence.
+
+Either gate failing means the `data-product.production-cutover` gate is **never raised**. Both
+gates run sequentially (never nested inside a `ctx.parallel`, because each may raise an
+escalation breakpoint), and both escalate to `owner` via
+`<gateId>.gate-escalation` when the fix budget is exhausted.
+
+### Inputs / outputs reference
+
+See the `@inputs` / `@outputs` JSDoc blocks at the top of
+`data-product-lifecycle-workflow.js` — they are the authoritative contract. Required:
+`dataProduct { name, version, tier, owner }`, non-empty `sources`, `models`, `pipelines`,
+`contractFields`, and `sla { freshnessMinutes, availabilityTarget }`. Optional:
+`servingSurfaces`, `backfill`, `cutoverStrategy` (`dual-run` | `blue-green` | `in-place`,
+default `dual-run`), `deprecation`, `maxFixAttempts` (2), `maxRemediationAttempts` (1),
+`kipEnabled` (true), `kipDir` (`.a5c/kip`), `kipModel` (`sonnet`), `artifactsDir`.
+
+No fallbacks anywhere: unknown tier / model pattern / pipeline mode / serving-surface kind /
+field classification / cutover strategy / test family / SLA severity all **throw** naming the
+source; a source that cannot be profiled **fails the run** rather than proceeding on an assumed
+schema; an unresolved consumer inventory fails rather than assuming zero consumers.
+
+### Usage
+
+```js
+await orchestrate('specializations/data-engineering-analytics/data-product-lifecycle-workflow', {
+  dataProduct: {
+    name: 'orders-gold',
+    version: '2.0.0',
+    tier: 'gold',
+    owner: 'analytics-platform',
+    warehouse: 'snowflake',
+    publishedContractRef: 'contracts/orders-gold@1.4.0.md',
+  },
+  sources: [
+    { name: 'raw_orders', uri: 'raw.public.orders', system: 'postgres-cdc', expectedGrain: 'one row per order' },
+    { name: 'raw_customers', uri: 'raw.public.customers', system: 'postgres-cdc' },
+  ],
+  models: [
+    { name: 'dim_customer', pattern: 'scd', grain: 'one row per customer version', sources: ['raw_customers'] },
+    { name: 'fct_orders', pattern: 'dimensional', grain: 'one row per order', sources: ['raw_orders'] },
+  ],
+  pipelines: [{ name: 'orders_elt', mode: 'batch', schedule: '0 * * * *', models: ['dim_customer', 'fct_orders'] }],
+  contractFields: [
+    { field: 'order_id', type: 'string', classification: 'internal', semantics: 'natural order key' },
+    { field: 'customer_email', type: 'string', classification: 'pii', semantics: 'contact address' },
+  ],
+  servingSurfaces: [{ name: 'orders-exec-dashboard', kind: 'dashboard' }],
+  sla: { freshnessMinutes: 60, availabilityTarget: 0.999, completenessTarget: 0.995 },
+  backfill: { requested: true, window: '2024-01-01/2024-06-30', destructive: true },
+  cutoverStrategy: 'blue-green',
+});
+```
+
+### Non-interactive runs
+
+Every policy gate in this process is fail-closed: with no approver present the run ends with the
+state surfaced and no executor invoked. `autoApprovals` is **always** present in the output
+(possibly empty) so any harness-level auto-approval of a policy-gated breakpoint is visible in the
+result rather than silent. Do not add `autoApproveAfterN` to make a non-interactive run proceed —
+a destructive backfill, a PII exposure, a production cutover and a dataset deprecation must never
+auto-approve.
+
 ## Core Roles
 
 ### Data Engineer

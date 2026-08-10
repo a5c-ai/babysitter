@@ -423,7 +423,14 @@ export const invokeCommand: CommandModule<object, InvokeArgs> = {
       degradedFields: adapted.degradedFields,
     });
     const finalOutput: Record<string, unknown> = { ...adapted.output };
-    if (Object.keys(adapted.output).length === 0) {
+    // Only synthesize a `decision` field on the renderer-less fallback path.
+    // When an adapter renderer is present it is authoritative about which
+    // native fields are valid: re-adding `decision` here re-injects the internal
+    // "noop" sentinel (and fields the renderer intentionally dropped). Strict
+    // harnesses like Codex reject an unknown `decision` enum value ("noop") and
+    // report "hook returned invalid <event> JSON output" — which broke Codex
+    // SessionStart/UserPromptSubmit, whose native output is a no-op.
+    if (!loaded.renderer && Object.keys(adapted.output).length === 0) {
       finalOutput.decision = merged.decision;
     }
     if (Object.keys(merged.persistEnv).length > 0) {

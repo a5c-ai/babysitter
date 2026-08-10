@@ -179,7 +179,7 @@ The monorepo is one core engine surrounded by a family of components. Start with
 | [genty](./ecosystem/genty.md) | The unified agent runtime and `genty` CLI (GA) |
 | [observer-dashboard](./ecosystem/observer-dashboard.md) | Real-time SSE run dashboard (GA) |
 | [kradle](./ecosystem/kradle.md) | Kubernetes-native Git forge with per-org assistant (**MVP**) |
-| [kip-sdk](./ecosystem/kip-sdk.md) | Intended memory substrate — **spec/design only, no shipping code** |
+| [kip-sdk](./ecosystem/kip-sdk.md) | Signed, git-substrate, bitemporal typed property-graph memory SDK — **built & runnable, but `private`/`0.0.1` unpublished** (workspace/`dist/`, not `npm install`) |
 
 ---
 
