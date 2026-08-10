@@ -41,11 +41,14 @@ const LEGACY_HOOK_SCRIPT_NAMES = [
   'babysitter-stop-hook.sh',
   'user-prompt-submit.sh',
 ];
-const MANAGED_HOOK_SCRIPT_NAMES = [
-  'babysitter-proxied-session-start.sh',
-  'babysitter-proxied-stop.sh',
-  'babysitter-proxied-user-prompt-submit.sh',
-];
+// Prefixes identifying files/commands the managed .codex surface owns:
+// babysitter-codex-* are the compiler-generated entry shims + runtime lib,
+// babysitter-proxied-* are the handler scripts (and the command format used
+// by older releases, which the idempotent merge must also replace).
+const MANAGED_HOOK_FILE_PREFIXES = ['babysitter-codex-', 'babysitter-proxied-'];
+// Marker consumed by the hook runtime lib: when a managed .codex surface is
+// installed, exactly one copy (the owning surface) handles each event.
+const MANAGED_SURFACE_MARKER = '.babysitter-managed-surface';
 const DEFAULT_MARKETPLACE = {
   name: 'local-plugins',
   interface: {
@@ -61,6 +64,7 @@ const PLUGIN_BUNDLE_ENTRIES = [
   'skills',
   '.app.json',
   'plugin.lock.json',
+  'versions.json',
   'README.md',
 ];
 
@@ -141,7 +145,9 @@ function copyPluginBundle(packageRoot, pluginRoot) {
   fs.rmSync(pluginRoot, { recursive: true, force: true });
   fs.mkdirSync(pluginRoot, { recursive: true });
   for (const entry of PLUGIN_BUNDLE_ENTRIES) {
-    copyRecursive(path.join(packageRoot, entry), path.join(pluginRoot, entry));
+    const src = path.join(packageRoot, entry);
+    if (!fs.existsSync(src)) continue;
+    copyRecursive(src, path.join(pluginRoot, entry));
   }
 }
 
@@ -386,7 +392,7 @@ function removeMarketplaceEntry(marketplacePath) {
     return;
   }
   const marketplace = readJson(marketplacePath);
-  if (!Array.isArray(marketplace.plugins)) {
+  if (!marketplace || !Array.isArray(marketplace.plugins)) {
     return;
   }
   marketplace.plugins = marketplace.plugins.filter((entry) => (
@@ -397,53 +403,58 @@ function removeMarketplaceEntry(marketplacePath) {
   writeJson(marketplacePath, marketplace);
 }
 
+function isManagedOrLegacyHook(hook) {
+  const command = String((hook && hook.command) || '');
+  return MANAGED_HOOK_FILE_PREFIXES.some((prefix) => command.includes(prefix)) ||
+    LEGACY_HOOK_SCRIPT_NAMES.some((name) => command.includes(name));
+}
+
+// Removes our hook entries from a matcher-group list. Entries with a shape we
+// do not recognize are not ours and pass through untouched.
+function stripManagedHooks(matchers) {
+  return (Array.isArray(matchers) ? matchers : [])
+    .map((matcher) => {
+      if (!matcher || typeof matcher !== 'object' || !Array.isArray(matcher.hooks)) {
+        return matcher;
+      }
+      const keptHooks = matcher.hooks.filter((hook) => !isManagedOrLegacyHook(hook));
+      return keptHooks.length > 0 ? { ...matcher, hooks: keptHooks } : null;
+    })
+    .filter(Boolean);
+}
+
+// Deletion guard for legacy skill/prompt names: only remove an artifact when
+// its content identifies it as ours, so a user's unrelated ~/.codex/skills/plan
+// or prompts/plan.md never gets purged just for sharing a generic name.
+function looksLikeBabysitterArtifact(artifactPath) {
+  try {
+    const stat = fs.statSync(artifactPath);
+    const probe = stat.isDirectory() ? path.join(artifactPath, 'SKILL.md') : artifactPath;
+    return /babysitter|a5c/i.test(fs.readFileSync(probe, 'utf8'));
+  } catch {
+    return false;
+  }
+}
+
 function removeLegacyCodexSurface(codexHome) {
   for (const skillName of LEGACY_SKILL_NAMES) {
-    fs.rmSync(path.join(codexHome, 'skills', skillName), { recursive: true, force: true });
+    const skillPath = path.join(codexHome, 'skills', skillName);
+    if (looksLikeBabysitterArtifact(skillPath)) {
+      fs.rmSync(skillPath, { recursive: true, force: true });
+    }
   }
   for (const promptName of LEGACY_PROMPT_NAMES) {
-    fs.rmSync(path.join(codexHome, 'prompts', promptName), { force: true });
+    const promptPath = path.join(codexHome, 'prompts', promptName);
+    if (looksLikeBabysitterArtifact(promptPath)) {
+      fs.rmSync(promptPath, { force: true });
+    }
   }
   for (const hookName of LEGACY_HOOK_SCRIPT_NAMES) {
     fs.rmSync(path.join(codexHome, 'hooks', hookName), { force: true });
   }
-
-  const hooksConfigPath = path.join(codexHome, 'hooks.json');
-  if (!fs.existsSync(hooksConfigPath)) {
-    return;
-  }
-  let hooksConfig;
-  try {
-    hooksConfig = readJson(hooksConfigPath);
-  } catch {
-    return;
-  }
-  if (!hooksConfig.hooks || typeof hooksConfig.hooks !== 'object') {
-    return;
-  }
-  for (const eventName of ['SessionStart', 'UserPromptSubmit', 'Stop']) {
-    const eventHooks = Array.isArray(hooksConfig.hooks[eventName]) ? hooksConfig.hooks[eventName] : [];
-    const filteredMatchers = eventHooks
-      .map((matcher) => {
-        const hooks = Array.isArray(matcher.hooks) ? matcher.hooks : [];
-        const keptHooks = hooks.filter((hook) => {
-          const command = String(hook.command || '');
-          return !LEGACY_HOOK_SCRIPT_NAMES.some((name) => command.includes(name));
-        });
-        return keptHooks.length > 0 ? { ...matcher, hooks: keptHooks } : null;
-      })
-      .filter(Boolean);
-    if (filteredMatchers.length > 0) {
-      hooksConfig.hooks[eventName] = filteredMatchers;
-    } else {
-      delete hooksConfig.hooks[eventName];
-    }
-  }
-  if (Object.keys(hooksConfig.hooks).length === 0) {
-    fs.rmSync(hooksConfigPath, { force: true });
-  } else {
-    writeJson(hooksConfigPath, hooksConfig);
-  }
+  // Legacy hooks.json entries are cleaned by mergeManagedHooksConfig
+  // (isManagedOrLegacyHook covers LEGACY_HOOK_SCRIPT_NAMES) in a single
+  // read-modify-write, so no separate pass happens here.
 }
 
 function installManagedSkills(packageRoot, codexHome) {
@@ -460,32 +471,66 @@ function installManagedSkills(packageRoot, codexHome) {
   }
 }
 
-function mergeManagedHooksConfig(packageRoot, codexHome) {
-  const managedHooks = readJson(path.join(packageRoot, 'hooks.json')).hooks || {};
+// Rewrites a managed hook command so a surface install references its own
+// entry-shim copy (the shipped command targets the plugin bundle via
+// ${CLAUDE_PLUGIN_ROOT}, which Codex only sets for plugin-sourced hooks).
+// Throws rather than writing a broken command into the user's hooks.json.
+function rewriteManagedHookCommand(command, hooksDir) {
+  const match = String(command || '').match(/babysitter-codex-[A-Za-z0-9_-]+\.sh/);
+  if (!match) {
+    throw new Error(`Managed hook command references no babysitter-codex-*.sh entry shim: ${command}`);
+  }
+  const normalizedDir = String(hooksDir).replace(/\\/g, '/');
+  if (/["$`\\]/.test(normalizedDir)) {
+    throw new Error(`Hooks directory contains characters unsafe for a shell command: ${normalizedDir}`);
+  }
+  return `bash "${normalizedDir}/${match[0]}"`;
+}
+
+// Merges the managed hook entries from hooks.json into <codexHome>/hooks.json.
+// Idempotent: previously installed managed/legacy entries are replaced, user
+// entries — including event values with shapes we don't recognize — are
+// preserved, as are unrelated top-level keys of the document.
+function mergeManagedHooksConfig(packageRoot, codexHome, hooksDir) {
+  const managedHooks = (readJson(path.join(packageRoot, 'hooks.json')) || {}).hooks || {};
   const hooksConfigPath = path.join(codexHome, 'hooks.json');
-  const existing = fs.existsSync(hooksConfigPath)
-    ? readJson(hooksConfigPath)
-    : { hooks: {} };
+  const existing = readJson(hooksConfigPath) || { hooks: {} };
   if (!existing.hooks || typeof existing.hooks !== 'object') {
     existing.hooks = {};
   }
 
-  for (const [eventName, matchers] of Object.entries(managedHooks)) {
-    const existingMatchers = Array.isArray(existing.hooks[eventName]) ? existing.hooks[eventName] : [];
-    const filteredMatchers = existingMatchers
-      .map((matcher) => {
-        const hooks = Array.isArray(matcher.hooks) ? matcher.hooks : [];
-        const keptHooks = hooks.filter((hook) => {
-          const command = String(hook.command || '');
-          return !LEGACY_HOOK_SCRIPT_NAMES.some((name) => command.includes(name));
-        });
-        return keptHooks.length > 0 ? { ...matcher, hooks: keptHooks } : null;
-      })
-      .filter(Boolean);
-    existing.hooks[eventName] = [...filteredMatchers, ...matchers];
+  const eventNames = new Set([
+    ...Object.keys(existing.hooks),
+    ...Object.keys(managedHooks),
+  ]);
+  for (const eventName of eventNames) {
+    const existingValue = existing.hooks[eventName];
+    if (existingValue !== undefined && !Array.isArray(existingValue)) {
+      continue;
+    }
+    const keptMatchers = stripManagedHooks(existingValue || []);
+    const managedMatchers = (managedHooks[eventName] || []).map((matcher) => ({
+      ...matcher,
+      hooks: (Array.isArray(matcher.hooks) ? matcher.hooks : []).map((hook) => (
+        hook && hook.command
+          ? { ...hook, command: rewriteManagedHookCommand(hook.command, hooksDir) }
+          : hook
+      )),
+    }));
+    const nextMatchers = [...keptMatchers, ...managedMatchers];
+    if (nextMatchers.length > 0) {
+      existing.hooks[eventName] = nextMatchers;
+    } else if (existingValue !== undefined) {
+      delete existing.hooks[eventName];
+    }
   }
 
   writeJson(hooksConfigPath, existing);
+}
+
+function isManagedHookFileName(fileName) {
+  return MANAGED_HOOK_FILE_PREFIXES.some((prefix) => fileName.startsWith(prefix)) ||
+    fileName === 'versions.json';
 }
 
 function installManagedHooks(packageRoot, codexHome) {
@@ -493,14 +538,86 @@ function installManagedHooks(packageRoot, codexHome) {
   const targetRoot = path.join(codexHome, 'hooks');
   fs.mkdirSync(targetRoot, { recursive: true });
 
-  for (const scriptName of MANAGED_HOOK_SCRIPT_NAMES) {
-    const sourcePath = path.join(sourceRoot, scriptName);
-    const targetPath = path.join(targetRoot, scriptName);
-    copyRecursive(sourcePath, targetPath);
-    ensureExecutable(targetPath);
+  // Copy everything the bundle ships under hooks/ (entry shims, the runtime
+  // lib, and the handler scripts the shims delegate to) so the surface can
+  // never reference a script that was not installed.
+  const copied = [];
+  for (const entry of fs.readdirSync(sourceRoot, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const targetPath = path.join(targetRoot, entry.name);
+    fs.copyFileSync(path.join(sourceRoot, entry.name), targetPath);
+    if (entry.name.endsWith('.sh')) ensureExecutable(targetPath);
+    copied.push(entry.name);
   }
 
-  mergeManagedHooksConfig(packageRoot, codexHome);
+  // The hook runtime reads the pinned SDK version from versions.json next to
+  // the scripts when a surface copy runs outside the plugin bundle.
+  const versionsSource = path.join(packageRoot, 'versions.json');
+  if (fs.existsSync(versionsSource)) {
+    fs.copyFileSync(versionsSource, path.join(targetRoot, 'versions.json'));
+    copied.push('versions.json');
+  }
+  writeJson(path.join(targetRoot, MANAGED_SURFACE_MARKER), {
+    installedBy: '@a5c-ai/babysitter-codex',
+    files: copied,
+  });
+
+  // Commands are absolute: <codexHome>/hooks.json is evaluated against the
+  // Codex session cwd, which may be anywhere (including a workspace subdir).
+  // These files are machine-local — teammates rerun the installer.
+  mergeManagedHooksConfig(packageRoot, codexHome, targetRoot);
+}
+
+function removeManagedCodexSurface(codexHome, packageRoot) {
+  const targetRoot = path.join(codexHome, 'hooks');
+  const markerPath = path.join(targetRoot, MANAGED_SURFACE_MARKER);
+  const marker = readJson(markerPath);
+  // Marker first: if a later removal fails partway, the plugin-bundle hook
+  // copies stop deferring to this surface and events keep firing.
+  fs.rmSync(markerPath, { force: true });
+
+  const installedFiles = marker && Array.isArray(marker.files) ? marker.files : [];
+  const candidates = new Set(installedFiles.map((name) => path.basename(String(name))));
+  if (fs.existsSync(targetRoot)) {
+    for (const entry of fs.readdirSync(targetRoot)) {
+      if (isManagedHookFileName(entry)) candidates.add(entry);
+    }
+  }
+  for (const name of candidates) {
+    fs.rmSync(path.join(targetRoot, name), { force: true });
+  }
+
+  if (packageRoot) {
+    const skillsRoot = path.join(packageRoot, 'skills');
+    if (fs.existsSync(skillsRoot)) {
+      for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const installedSkill = path.join(codexHome, 'skills', entry.name);
+        if (looksLikeBabysitterArtifact(installedSkill)) {
+          fs.rmSync(installedSkill, { recursive: true, force: true });
+        }
+      }
+    }
+  }
+
+  const hooksConfigPath = path.join(codexHome, 'hooks.json');
+  const hooksConfig = readJson(hooksConfigPath);
+  if (!hooksConfig || !hooksConfig.hooks || typeof hooksConfig.hooks !== 'object') {
+    return;
+  }
+  for (const eventName of Object.keys(hooksConfig.hooks)) {
+    const existingValue = hooksConfig.hooks[eventName];
+    if (!Array.isArray(existingValue)) continue;
+    const keptMatchers = stripManagedHooks(existingValue);
+    if (keptMatchers.length > 0) {
+      hooksConfig.hooks[eventName] = keptMatchers;
+    } else {
+      delete hooksConfig.hooks[eventName];
+    }
+  }
+  // Write the document back even when hooks is empty: deleting the file would
+  // discard unrelated top-level keys the user (or Codex) may keep in it.
+  writeJson(hooksConfigPath, hooksConfig);
 }
 
 function installCodexSurface(packageRoot, codexHome) {
@@ -543,10 +660,20 @@ function harnessTeamInstall(packageRoot, pluginRoot, workspace) {
 }
 
 function harnessInstall(packageRoot, _pluginRoot) {
-  const codexConfigPath = path.join(getCodexHome(), 'config.toml');
+  const codexHome = getCodexHome();
+  const codexConfigPath = path.join(codexHome, 'config.toml');
   mergeCodexConfigFile(codexConfigPath);
+  // Global surface: install hooks into the Codex home so they fire even when
+  // the plugin bundle is only registered (not added) in the marketplace.
+  installCodexSurface(packageRoot, codexHome);
   ensureGlobalProcessLibrary(packageRoot);
   warnWindowsHooks();
+}
+
+function harnessUninstall(packageRoot) {
+  removeMarketplaceEntry(getHomeMarketplacePath());
+  removeManagedCodexSurface(getCodexHome(), packageRoot);
+  console.log('[' + PLUGIN_NAME + '] Removed managed Codex hooks and skills.');
 }
 
 function warnWindowsHooks() {
