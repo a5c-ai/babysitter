@@ -325,14 +325,34 @@ describe('live stack scenario contract primitives', () => {
       jobs: [
         { name: 'Build All', conclusion: 'success' },
         { name: 'Live Stack (ubuntu, bp/create, omp/gpt-5.5, non-interactive)', conclusion: 'success' },
+        { name: 'Live Stack (macos, vanilla, codex/gpt-5.5, interactive)', conclusion: 'success' },
       ],
       checkouts: [
         { jobName: 'Build All', conclusion: 'success', headSha: expectedHeadSha },
         { jobName: 'Live Stack (ubuntu, bp/create, omp/gpt-5.5, non-interactive)', conclusion: 'success', headSha: expectedHeadSha },
+        { jobName: 'Live Stack (macos, vanilla, codex/gpt-5.5, interactive)', conclusion: 'success', headSha: expectedHeadSha },
       ],
     };
 
     expect(normalizeLiveQaResult(success)).toMatchObject({ allPassed: true, exactHeadVerified: true });
+    const omittedScenarioCheckout = {
+      ...success,
+      checkouts: success.checkouts.filter((checkout) => checkout.jobName !== success.jobs[2].name),
+    };
+    expect(normalizeLiveQaResult(omittedScenarioCheckout)).toMatchObject({
+      allPassed: false,
+      exactHeadVerified: false,
+    });
+    expect(normalizeLiveQaResult({
+      ...success,
+      checkouts: [...success.checkouts, success.checkouts[0]],
+    })).toMatchObject({ allPassed: false, exactHeadVerified: false });
+    expect(normalizeLiveQaResult({
+      ...success,
+      checkouts: success.checkouts.map((checkout, index) => index === 2
+        ? { ...checkout, jobName: 'Unexpected Job' }
+        : checkout),
+    })).toMatchObject({ allPassed: false, exactHeadVerified: false });
     expect(normalizeLiveQaResult({ ...success, conclusion: 'failure' }).allPassed).toBe(false);
     expect(normalizeLiveQaResult({ ...success, jobs: [] }).allPassed).toBe(false);
     expect(normalizeLiveQaResult({

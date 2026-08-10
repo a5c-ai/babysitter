@@ -68,16 +68,35 @@ export function normalizeLiveQaResult(input) {
   const checkouts = Array.isArray(input?.checkouts) ? input.checkouts : [];
   const conclusion = typeof input?.conclusion === 'string' ? input.conclusion : 'unknown';
   const expectedHeadSha = input?.expectedHeadSha;
+  const expectedHeadShaLower = isCommitSha(expectedHeadSha) ? expectedHeadSha.toLowerCase() : null;
   const allJobsPassed = jobs.length > 0 && jobs.every((job) => job
     && typeof job === 'object'
     && job.conclusion === 'success');
+  const buildJobs = jobs.filter((job) => job?.name === 'Build All');
   const scenarioJobs = jobs.filter((job) => typeof job?.name === 'string' && job.name.startsWith('Live Stack ('));
-  const exactHeadVerified = isCommitSha(expectedHeadSha)
-    && checkouts.length > 0
-    && checkouts.every((checkout) => checkout
-      && typeof checkout === 'object'
-      && checkout.conclusion === 'success'
-      && checkout.headSha === expectedHeadSha);
+  const requiredJobs = [...buildJobs, ...scenarioJobs];
+  const requiredJobNames = new Set(requiredJobs.map((job) => job.name));
+  const checkoutCounts = new Map();
+  const checkoutEvidenceValid = checkouts.every((checkout) => {
+    if (!checkout
+      || typeof checkout !== 'object'
+      || typeof checkout.jobName !== 'string'
+      || !requiredJobNames.has(checkout.jobName)
+      || checkout.conclusion !== 'success'
+      || !isCommitSha(checkout.headSha)
+      || checkout.headSha.toLowerCase() !== expectedHeadShaLower) {
+      return false;
+    }
+    checkoutCounts.set(checkout.jobName, (checkoutCounts.get(checkout.jobName) ?? 0) + 1);
+    return true;
+  });
+  const exactHeadVerified = expectedHeadShaLower !== null
+    && buildJobs.length === 1
+    && scenarioJobs.length > 0
+    && requiredJobNames.size === requiredJobs.length
+    && checkouts.length === requiredJobNames.size
+    && checkoutEvidenceValid
+    && [...requiredJobNames].every((jobName) => checkoutCounts.get(jobName) === 1);
 
   return {
     allPassed: conclusion === 'success'
