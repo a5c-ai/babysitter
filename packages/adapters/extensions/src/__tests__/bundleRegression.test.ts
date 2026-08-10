@@ -60,7 +60,7 @@ describe('bundle regression coverage', () => {
     expect(codexResult.verificationChecklist).toEqual(expect.arrayContaining([
       expect.stringContaining('package.json bin target exists: bin/cli.js'),
       expect.stringContaining('package.json script target exists: scripts/team-install.js'),
-      expect.stringContaining('hooks.json command target exists: hooks/babysitter-proxied-stop.sh'),
+      expect.stringContaining('hooks.json command target exists: hooks/babysitter-codex-stop.sh'),
       expect.stringContaining('.agents/plugins/marketplace.json marketplace entry source exists'),
     ]));
     expect(ompResult.verificationChecklist).toEqual(expect.arrayContaining([
