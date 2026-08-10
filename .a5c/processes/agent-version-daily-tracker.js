@@ -131,6 +131,7 @@ const verifyTask = defineTask('agent-version-tracker.verify', (args, taskCtx) =>
     command: [
       'set -euo pipefail',
       'git diff --check',
+      'npm run verify:metadata',
       'npm run build --workspace=@a5c-ai/atlas',
       'printf "\\n--- summary artifact ---\\n"',
       'test -f artifacts/agent-version-tracker/summary.json && cat artifacts/agent-version-tracker/summary.json || true',
