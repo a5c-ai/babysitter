@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-observer-dashboard",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "description": "Real-time observability dashboard for babysitter orchestration runs",
   "private": false,
   "publishConfig": {
@@ -90,6 +90,7 @@
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.5.2",
