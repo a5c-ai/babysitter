@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 import * as path from "node:path";
 import { initI18n, t } from "./i18n.js";
@@ -123,6 +124,7 @@ export default function activate(pi: ExtensionAPI): void {
   let projectionFlushPromise: Promise<void> | undefined;
   let projectionRefreshFailedOperationId: string | undefined;
   let driveQueue = Promise.resolve();
+  const driveContext = new AsyncLocalStorage<ExtensionContext | undefined>();
 
   const enqueueDrive = async <T>(operation: () => Promise<T>): Promise<T> => {
     const predecessor = driveQueue;
@@ -294,7 +296,7 @@ export default function activate(pi: ExtensionAPI): void {
     cwd: process.cwd(),
     runCli: async (args, timeoutMs, signal) => {
       const result = await pi.exec("babysitter", args, {
-        cwd: activeContext?.cwd ?? process.cwd(),
+        cwd: driveContext.getStore()?.cwd ?? activeContext?.cwd ?? process.cwd(),
         timeout: timeoutMs ?? 120_000,
         signal,
       });
@@ -362,10 +364,13 @@ export default function activate(pi: ExtensionAPI): void {
       }
       const continuation = await enqueueDrive(async () => {
         activeContext = ctx;
-        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
+        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd());
         const continuationOperationId = projectionOwner?.operationId;
         try {
-          return await driver.drive(params.runDir, undefined, continuationOperationId);
+          return await driveContext.run(
+            ctx,
+            () => driver.drive(params.runDir, undefined, continuationOperationId),
+          );
         } finally {
           await flushProjectionProgress(continuationOperationId);
         }
@@ -414,7 +419,7 @@ export default function activate(pi: ExtensionAPI): void {
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
       return await enqueueDrive(async () => {
         activeContext = ctx;
-        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
+        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd());
         latestProgress = undefined;
         pendingProjectionProgress = undefined;
         projectionFlushQueued = false;
@@ -438,7 +443,10 @@ export default function activate(pi: ExtensionAPI): void {
           });
         });
         try {
-          const result = await driver.drive(params.runDir, signal, operationId);
+          const result = await driveContext.run(
+            ctx,
+            () => driver.drive(params.runDir, signal, operationId),
+          );
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
             details: {
@@ -494,26 +502,49 @@ export default function activate(pi: ExtensionAPI): void {
     }
   });
 
-  pi.on("tool_result", async (event) => {
+  pi.on("tool_result", async (event, ctx) => {
     if (event.toolName !== "task") return;
     const operationId = projectionOwner?.operationId;
+    const completionContext = ctx ?? activeContext;
     try {
       const completion = await driver.withProgressOperation(
         operationId,
-        () => driver.completeAgentToolCall({
+        () => driveContext.run(completionContext, () => driver.completeAgentToolCall({
           toolCallId: event.toolCallId,
           input: event.input,
           details: event.details,
           isError: event.isError,
-        }),
+        })),
       );
       if (!completion.handled) return;
-      const message = completion.continuation
-        ? `Babysitter deterministic continuation:\n${JSON.stringify(completion.continuation, null, 2)}`
-        : completion.reason;
-      if (!message) return;
+      if (completion.continuationRunDir) {
+        const continuationRunDir = completion.continuationRunDir;
+        void enqueueDrive(async () => {
+          activeContext = completionContext;
+          driver.setWorkspaceCwd(
+            typeof completionContext?.cwd === "string" ? completionContext.cwd : process.cwd(),
+          );
+          const continuationOperationId = projectionOwner?.operationId;
+          try {
+            const continuation = await driveContext.run(
+              completionContext,
+              () => driver.drive(continuationRunDir, undefined, continuationOperationId),
+            );
+            await flushProjectionProgress(continuationOperationId);
+            pi.sendUserMessage(
+              `Babysitter deterministic continuation:\n${JSON.stringify(continuation, null, 2)}`,
+            );
+          } catch (error) {
+            await flushProjectionProgress(continuationOperationId);
+            pi.sendUserMessage(
+              `Babysitter driver stopped: ${sanitizeDiagnosticText(error instanceof Error ? error.message : String(error))}`,
+            );
+          }
+        });
+      }
+      if (!completion.reason) return;
       return {
-        content: [...event.content, { type: "text", text: message }],
+        content: [...event.content, { type: "text", text: completion.reason }],
       };
     } catch (error) {
       return {

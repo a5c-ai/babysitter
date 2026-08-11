@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
-import { promises as fs } from "node:fs";
+import { constants as fsConstants, promises as fs } from "node:fs";
 import * as path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { fromJSONSchema } from "zod";
@@ -83,6 +83,7 @@ interface ShellCommandOutput {
 interface ResolvedShellValue {
   value: unknown;
   outputAlreadyDurable: boolean;
+  outputBytes?: Buffer;
 }
 
 export type DriverProgressStage =
@@ -254,7 +255,7 @@ export interface AgentToolResultEvent {
 export interface AgentToolCompletion {
   handled: boolean;
   posted?: boolean;
-  continuation?: DriverResult;
+  continuationRunDir?: string;
   reason?: string;
 }
 
@@ -732,10 +733,8 @@ export class OmpDeterministicDriver {
       `Agent attempt ${completed.attempt ?? 1} completed durably`,
       completed,
     );
-
     const posted = await this.postCompletedCheckpoint(descriptor.runDir, completed);
-    const continuation = await this.drive(descriptor.runDir);
-    return { handled: true, posted, continuation };
+    return { handled: true, posted, continuationRunDir: descriptor.runDir };
   }
 
   async cancelAgentAttempt(input: AgentCancelInput): Promise<AgentAttemptTransition> {
@@ -883,20 +882,19 @@ export class OmpDeterministicDriver {
     await writeTextAtomic(stderrPath, shellResult.stderr);
 
     const outputPath = await resolveRunRelativeReal(runDir, taskRelativeRef(action.effectId, "output.json"));
-    const resolvedValue = await shellResultValue(runDir, action, shellResult, commandOutput, outputPath);
+    const resolvedValue = await shellResultValue(runDir, action, shellResult, commandOutput);
     const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
     const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
     const resultStatus = shellResult.timedOut || shellResult.exitCode !== expectedExitCode ? "error" : "ok";
-    if (!resolvedValue.outputAlreadyDurable) {
-      await writeImmutableJson(outputPath, resolvedValue.value);
-    }
-    const outputBytes = await fs.readFile(outputPath);
+    const durableOutputBytes = resolvedValue.outputBytes
+      ?? Buffer.from(JSON.stringify(resolvedValue.value, null, 2) + "\n", "utf8");
+    await writeImmutableBytes(outputPath, durableOutputBytes);
     checkpoint = {
       ...checkpoint,
       state: "completed",
       finishedAt: shellResult.finishedAt,
       outputRef: taskRelativeRef(action.effectId, "output.json"),
-      outputSha256: sha256(outputBytes),
+      outputSha256: sha256(durableOutputBytes),
       stdoutRef: taskRelativeRef(action.effectId, "stdout.log"),
       stderrRef: taskRelativeRef(action.effectId, "stderr.log"),
       resultStatus,
@@ -1865,18 +1863,8 @@ async function shellCommandOutputFingerprint(
   runDir: string,
   action: EffectAction,
 ): Promise<ShellCommandOutput | null> {
-  const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const io = readObject(action.taskDef?.io);
-  const publicRef = typeof io?.outputJsonPath === "string" ? io.outputJsonPath : undefined;
-  const legacyRef = typeof shell.outputPath === "string" ? shell.outputPath : undefined;
-  if (publicRef && legacyRef) {
-    const publicPath = resolveRunRelative(runDir, publicRef);
-    const legacyPath = resolveRunRelative(runDir, legacyRef);
-    if (publicPath !== legacyPath) {
-      throw new DriverError(`Ambiguous shell output paths for effect ${action.effectId}`, action.effectId);
-    }
-  }
-  const selectedRef = publicRef ?? legacyRef;
+  const selectedRef = typeof io?.outputJsonPath === "string" ? io.outputJsonPath : undefined;
   if (!selectedRef) return null;
 
   const outputPath = await resolveRunRelativeReal(runDir, selectedRef);
@@ -1887,7 +1875,7 @@ async function shellCommandOutputFingerprint(
     : outputPath === canonicalResult
       ? "canonical_result"
       : "external";
-  const beforeSnapshot = await shellOutputSnapshot(outputPath, action.effectId);
+  const beforeSnapshot = await shellOutputSnapshot(runDir, selectedRef, action.effectId);
   return {
     ref: selectedRef,
     path: outputPath,
@@ -1898,24 +1886,45 @@ async function shellCommandOutputFingerprint(
 }
 
 async function shellOutputSnapshot(
-  filePath: string,
+  runDir: string,
+  ref: string,
   effectId: string,
 ): Promise<{ fingerprint: string; bytes: Buffer } | null> {
-  let bytes: Buffer;
-  let stat;
+  const filePath = await resolveRunRelativeReal(runDir, ref);
+  let handle;
   try {
-    [bytes, stat] = await Promise.all([fs.readFile(filePath), fs.stat(filePath)]);
+    handle = await fs.open(filePath, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
   } catch (error) {
     if (isNotFound(error)) return null;
     throw error;
   }
-  if (bytes.length > MAX_CAPTURE_BYTES) {
-    throw new DriverError(`Shell output JSON for effect ${effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, effectId);
+  try {
+    const before = await handle.stat();
+    const bytes = await fs.readFile(handle);
+    const after = await handle.stat();
+    await resolveRunRelativeReal(runDir, ref);
+    const current = await fs.stat(filePath);
+    if (
+      before.dev !== after.dev ||
+      before.ino !== after.ino ||
+      before.size !== after.size ||
+      before.mtimeMs !== after.mtimeMs ||
+      before.ctimeMs !== after.ctimeMs ||
+      current.dev !== after.dev ||
+      current.ino !== after.ino
+    ) {
+      throw new DriverError(`Shell output JSON for effect ${effectId} changed or was replaced during authenticated read`, effectId);
+    }
+    if (bytes.length > MAX_CAPTURE_BYTES) {
+      throw new DriverError(`Shell output JSON for effect ${effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, effectId);
+    }
+    return {
+      fingerprint: `${after.dev}:${after.ino}:${after.size}:${after.mtimeMs}:${after.ctimeMs}:${sha256(bytes)}`,
+      bytes,
+    };
+  } finally {
+    await handle.close();
   }
-  return {
-    fingerprint: `${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}:${sha256(bytes)}`,
-    bytes,
-  };
 }
 
 
@@ -1924,7 +1933,6 @@ async function shellResultValue(
   action: EffectAction,
   result: ShellExecutionResult,
   commandOutput: ShellCommandOutput | null,
-  outputPath: string,
 ): Promise<ResolvedShellValue> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
@@ -1943,37 +1951,24 @@ async function shellResultValue(
   };
 
   if (commandOutput) {
-    await resolveRunRelativeReal(runDir, commandOutput.ref);
-    const after = (await shellOutputSnapshot(commandOutput.path, action.effectId))?.fingerprint ?? null;
-    const changed = after !== null && after !== commandOutput.before;
-    if (failed) {
-      if (commandOutput.kind === "canonical_result" && changed) {
-        await restoreTransientShellResult(commandOutput);
-      }
+    const afterSnapshot = await shellOutputSnapshot(runDir, commandOutput.ref, action.effectId);
+    const changed = afterSnapshot !== null && afterSnapshot.fingerprint !== commandOutput.before;
+    if (commandOutput.kind !== "external") {
+      if (changed) await restoreTransientShellResult(commandOutput);
+      if (failed) return { value: failedValue, outputAlreadyDurable: false };
+    } else if (failed) {
       return { value: failedValue, outputAlreadyDurable: false };
-    }
-    if (changed) {
+    } else if (changed && afterSnapshot) {
       let value: unknown;
       try {
-        value = JSON.parse(await fs.readFile(commandOutput.path, "utf8"));
-        if (commandOutput.kind === "canonical_result") {
-          await writeImmutableJson(outputPath, value);
-        }
+        value = JSON.parse(afterSnapshot.bytes.toString("utf8"));
       } catch (error) {
         throw new DriverError(
           `Shell output JSON for effect ${action.effectId} is invalid JSON: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
           action.effectId,
         );
-      } finally {
-        if (commandOutput.kind === "canonical_result") {
-          await restoreTransientShellResult(commandOutput);
-        }
       }
-      return {
-        value,
-        outputAlreadyDurable:
-          commandOutput.kind === "canonical_output" || commandOutput.kind === "canonical_result",
-      };
+      return { value, outputAlreadyDurable: false, outputBytes: afterSnapshot.bytes };
     }
     if (commandOutput.kind === "external") {
       throw new DriverError(
@@ -1991,12 +1986,6 @@ async function shellResultValue(
     } catch (error) {
       throw new DriverError(
         `Shell stdout for effect ${action.effectId} must be valid JSON when io.outputJsonPath is declared: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
-        action.effectId,
-      );
-    }
-    if (!readObject(value) && !Array.isArray(value)) {
-      throw new DriverError(
-        `Shell stdout for effect ${action.effectId} must be a JSON object or array when io.outputJsonPath is declared`,
         action.effectId,
       );
     }
@@ -2268,6 +2257,31 @@ async function writeImmutableJson(filePath: string, value: unknown): Promise<voi
     if (existing !== bytes) {
       throw new DriverError(`Refusing to overwrite immutable result artifact ${filePath}`);
     }
+  }
+}
+
+async function writeImmutableBytes(filePath: string, bytes: Buffer): Promise<void> {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  const temp = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+  const handle = await fs.open(temp, "wx");
+  try {
+    await handle.writeFile(bytes);
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+  try {
+    await fs.link(temp, filePath);
+  } catch (error) {
+    if (!isAlreadyExists(error)) throw error;
+    const existing = await fs.readFile(filePath);
+    if (!existing.equals(bytes)) {
+      throw new DriverError(`Refusing to overwrite immutable result artifact ${filePath}`);
+    }
+  } finally {
+    await fs.unlink(temp).catch((error: unknown) => {
+      if (!isNotFound(error)) throw error;
+    });
   }
 }
 
