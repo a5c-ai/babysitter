@@ -169,12 +169,20 @@ export default function activate(pi: ExtensionAPI): void {
   const refreshProjection = async (
     runDir: string,
     generation: number,
+    operationId: string,
     stage: "session_restore" | "operation_flush",
   ): Promise<boolean> => {
+    const stillOwnsProjection = (): boolean => {
+      const owner = projectionOwner;
+      return generation === projectionGeneration &&
+        owner?.generation === generation &&
+        owner.operationId === operationId &&
+        owner.runDir === path.resolve(runDir);
+    };
     try {
       const gate = getTodoProjectionGate(projectionApi);
       const phases = await reconstructBabysitterProjection(runDir);
-      if (generation !== projectionGeneration) return false;
+      if (!stillOwnsProjection()) return false;
       if (gate !== "available") {
         const fallback = latestProgress && latestProgress.runDir === runDir
           ? progressText(latestProgress)
@@ -195,7 +203,7 @@ export default function activate(pi: ExtensionAPI): void {
       projectionApi.setTodoProjection?.(PROJECTION_NAMESPACE, phases);
       return true;
     } catch (error) {
-      if (generation === projectionGeneration) {
+      if (stillOwnsProjection()) {
         clearNativeProjection(stage);
         reportProjectionFailure(error, stage);
       }
@@ -223,7 +231,7 @@ export default function activate(pi: ExtensionAPI): void {
       reportProjectionFailure(error, "operation_flush");
     }
     if (projectionRefreshFailedOperationId === operationId) return;
-    const refreshed = await refreshProjection(progress.runDir, owner.generation, "operation_flush");
+    const refreshed = await refreshProjection(progress.runDir, owner.generation, owner.operationId, "operation_flush");
     if (!refreshed) projectionRefreshFailedOperationId = operationId;
   };
 
@@ -546,11 +554,13 @@ export default function activate(pi: ExtensionAPI): void {
         operationId: `restore:${generation}:${++projectionOperationSequence}`,
       };
     }
-    if (runDir) {
-      const restored = await refreshProjection(runDir, generation, "session_restore");
+    if (runDir && projectionOwner?.generation === generation) {
+      const owner = projectionOwner;
+      const restored = await refreshProjection(runDir, generation, owner.operationId, "session_restore");
       if (
         !restored &&
         projectionOwner?.generation === generation &&
+        projectionOwner.operationId === owner.operationId &&
         projectionOwner.runDir === path.resolve(runDir)
       ) {
         projectionOwner = undefined;

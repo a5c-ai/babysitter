@@ -4,10 +4,11 @@ import { promises as fs } from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { compile } from '../compiler.js';
 import {
+  type AgentRetryInput,
   type DriverProgress,
   executeBoundedShell,
   OmpDeterministicDriver,
@@ -36,6 +37,27 @@ async function writeJson(file: string, value: unknown): Promise<void> {
   await fs.writeFile(file, JSON.stringify(value, null, 2) + '\n');
 }
 
+async function within<T>(promise: Promise<T>, label: string): Promise<T> {
+  let settled = false;
+  let value: T | undefined;
+  let failure: unknown;
+  void promise.then(
+    (resolved) => {
+      value = resolved;
+      settled = true;
+    },
+    (error) => {
+      failure = error;
+      settled = true;
+    },
+  );
+  await vi.waitFor(() => {
+    expect(settled, label).toBe(true);
+  }, { timeout: 2_000, interval: 5 });
+  if (failure !== undefined) throw failure;
+  return value as T;
+}
+
 function waiting(action: Action): string {
   return JSON.stringify({ status: 'waiting', nextActions: [action] });
 }
@@ -44,11 +66,11 @@ function action(kind: string, taskDef: Record<string, unknown> = {}): Action {
   return { effectId: `effect-${kind}`, invocationKey: `invocation-${kind}`, kind, taskDef };
 }
 
-function bridgeDescriptor(prompt: string): Record<string, unknown> {
+function bridgeDescriptor(prompt: string): Omit<AgentRetryInput, 'reason'> {
   const prefix = 'BABYSITTER_OMP_BRIDGE ';
   const bridgeLine = prompt.split(/\r?\n/).find((line) => line.trim().startsWith(prefix));
   if (!bridgeLine) throw new Error('missing bridge descriptor');
-  return JSON.parse(bridgeLine.trim().slice(prefix.length)) as Record<string, unknown>;
+  return JSON.parse(bridgeLine.trim().slice(prefix.length)) as Omit<AgentRetryInput, 'reason'>;
 }
 
 async function recordCommittedResult(runDir: string, effect: Action, value: unknown): Promise<void> {
@@ -346,9 +368,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(runIterateSignal).toBe(driveAbort.signal);
     expect(process.cwd()).not.toBe('/workspace-drive');
     expect(runIterateCwd).toBe('/workspace-drive');
-    expect(uiStatusWrites).toHaveLength(2);
-    expect(uiWidgetWrites).toHaveLength(2);
-    expect(projectionWrites).toHaveLength(2);
+    expect(uiStatusWrites.some(([, value]) => String(value).includes('waiting'))).toBe(true);
+    expect(uiWidgetWrites.some(([, value]) => String(value).includes('waiting'))).toBe(true);
+    expect(projectionWrites.some(([namespace]) => namespace === 'babysitter')).toBe(true);
     expect(String(uiStatusWrites.at(-1)?.[1])).toContain('waiting');
     const pendingShellRun = await tempRun('omp-pending-shell-progress-');
     shellProgressRunDir = pendingShellRun;
@@ -378,8 +400,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         },
       },
     ).finally(() => { pendingShellSettled = true; });
-    await shellProgressObserved.promise;
-    await pendingProjectionWrite.promise;
+    await within(shellProgressObserved.promise, 'pending shell progress');
+    await within(pendingProjectionWrite.promise, 'pending projection write');
     expect(pendingShellUpdates).not.toHaveLength(0);
     expect(pendingShellSettled).toBe(false);
     expect(projectionWrites.length).toBeGreaterThan(pendingShellProjectionBoundary);
@@ -471,7 +493,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       undefined,
       { ui: { setStatus: () => undefined, setWidget: () => undefined } },
     ).finally(() => { staleDriveSettled = true; });
-    await runIterateStarted.promise;
+    await within(runIterateStarted.promise, 'stale drive iteration');
     expect(staleDriveSettled).toBe(false);
     sessionStateRunDir = output;
     await sessionSwitch({}, {
@@ -492,6 +514,87 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     pendingRunIterate = undefined;
     sessionStateRunDir = undefined;
     notifyRunIterate = undefined;
+
+    const inFlightProjectionRun = await tempRun('omp-in-flight-old-projection-');
+    await writeJson(path.join(inFlightProjectionRun, 'journal', '0001.json'), {
+      type: 'EFFECT_REQUESTED',
+      data: {
+        effectId: pendingShellEffect.effectId,
+        invocationKey: pendingShellEffect.invocationKey,
+        kind: 'shell',
+        taskId: 'stale projection effect',
+      },
+    });
+    const projectionReadStarted = Promise.withResolvers<void>();
+    const releaseProjectionRead = Promise.withResolvers<void>();
+    const originalReaddir = fs.readdir.bind(fs);
+    let delayedProjectionRead = false;
+    const readdirSpy = vi.spyOn(fs, 'readdir').mockImplementation((async (...args: unknown[]) => {
+      const target = args[0];
+      if (
+        !delayedProjectionRead &&
+        String(target) === path.join(inFlightProjectionRun, 'journal')
+      ) {
+        delayedProjectionRead = true;
+        projectionReadStarted.resolve();
+        await releaseProjectionRead.promise;
+      }
+      return await Reflect.apply(originalReaddir, fs, args);
+    }) as typeof fs.readdir);
+    const inFlightAbort = new AbortController();
+    const inFlightProgress = Promise.withResolvers<void>();
+    shellProgressRunDir = inFlightProjectionRun;
+    const oldProjectionDrive = driveTool.execute(
+      'tool-call-in-flight-old-projection',
+      { i: 'hold an old projection reconstruction', runDir: inFlightProjectionRun },
+      inFlightAbort.signal,
+      (update: Record<string, unknown>) => {
+        const details = update.details as { progress?: { stage?: string } } | undefined;
+        if (details?.progress?.stage === 'shell_progress') inFlightProgress.resolve();
+      },
+      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+    );
+    try {
+      await within(inFlightProgress.promise, 'in-flight shell progress');
+      await within(projectionReadStarted.promise, 'in-flight projection reconstruction');
+      const newerDriveStarted = Promise.withResolvers<void>();
+      notifyRunIterate = newerDriveStarted.resolve;
+      pendingRunIterate = Promise.resolve({
+        code: 0,
+        stdout: JSON.stringify({ status: 'waiting', nextActions: [] }),
+        stderr: '',
+      });
+      const newerDrive = driveTool.execute(
+        'tool-call-newer-projection-owner',
+        { i: 'replace the old projection owner', runDir: output },
+        undefined,
+        undefined,
+        { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+      );
+      await within(newerDriveStarted.promise, 'newer projection owner');
+      const newerOwnerBoundary = projectionWrites.length;
+      releaseProjectionRead.resolve();
+      await newerDrive;
+      const staleRunProjectionId = `run:${path.basename(inFlightProjectionRun)}`;
+      expect(
+        projectionWrites.slice(newerOwnerBoundary).some(([, phases]) =>
+          Array.isArray(phases) && phases.some((phase) =>
+            typeof phase === 'object' &&
+            phase !== null &&
+            'id' in phase &&
+            phase.id === staleRunProjectionId
+          )
+        ),
+      ).toBe(false);
+    } finally {
+      releaseProjectionRead.resolve();
+      inFlightAbort.abort(new DOMException('test abort', 'AbortError'));
+      await oldProjectionDrive;
+      readdirSpy.mockRestore();
+      shellProgressRunDir = undefined;
+      pendingRunIterate = undefined;
+      notifyRunIterate = undefined;
+    }
 
     runIterateFailure = true;
     const failedDrive = await driveTool.execute(
@@ -794,7 +897,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   it('persists stdout when outputJsonPath names the canonical driver-owned artifact', async () => {
     const runDir = await tempRun('omp-shell-canonical-output-');
     const effect = action('shell', {
-      shell: { command: 'emit-only-stdout', outputPath: 'tasks/effect-shell/output.json' },
+      shell: { command: 'emit-only-stdout' },
       io: { outputJsonPath: 'tasks/effect-shell/output.json' },
     });
     const stdout = '{"captured":"stdout"}';
@@ -838,11 +941,128 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     ).resolves.toEqual(value);
   });
 
+  it.each([
+    'tasks/effect-shell/output.json',
+    'tasks/effect-shell/result.json',
+  ])('consumes command-created JSON from canonical io.outputJsonPath %s', async (outputRef) => {
+    const runDir = await tempRun('omp-shell-canonical-command-output-');
+    const effect = action('shell', {
+      shell: { command: 'write-canonical-json' },
+      io: { outputJsonPath: outputRef },
+    });
+    const value = { source: 'command artifact', outputRef };
+    let iterations = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        await fs.mkdir(path.dirname(path.join(runDir, outputRef)), { recursive: true });
+        await fs.writeFile(path.join(runDir, outputRef), JSON.stringify(value));
+        return {
+          exitCode: 0,
+          stdout: '{"mustNotWin":"stdout"}',
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-11T00:00:00.000Z',
+          finishedAt: '2026-08-11T00:00:01.000Z',
+        };
+      },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+        }
+        await recordCommittedResult(runDir, effect, value);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toEqual(value);
+  });
+
+  it('consumes newly created JSON from a noncanonical io.outputJsonPath', async () => {
+    const runDir = await tempRun('omp-shell-external-command-output-');
+    const outputRef = 'artifacts/command-output.json';
+    const effect = action('shell', {
+      shell: { command: 'write-external-json' },
+      io: { outputJsonPath: outputRef },
+    });
+    const value = { source: 'external command artifact' };
+    let iterations = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        await writeJson(path.join(runDir, outputRef), value);
+        return {
+          exitCode: 0,
+          stdout: '{"mustNotWin":"stdout"}',
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-11T00:00:00.000Z',
+          finishedAt: '2026-08-11T00:00:01.000Z',
+        };
+      },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+        }
+        await recordCommittedResult(runDir, effect, value);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toEqual(value);
+  });
+
+  it('rejects conflicting public and legacy shell output declarations', async () => {
+    const runDir = await tempRun('omp-shell-conflicting-output-declarations-');
+    const effect = action('shell', {
+      shell: { command: 'ambiguous-output', outputPath: 'legacy/output.json' },
+      io: { outputJsonPath: 'public/output.json' },
+    });
+    let executions = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        executions += 1;
+        throw new Error('must reject before execution');
+      },
+      runCli: async () => ({ code: 0, stdout: waiting(effect), stderr: '' }),
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow('Ambiguous shell output paths');
+    expect(executions).toBe(0);
+  });
+
   it('owns result.json and posts valid stdout JSON exactly once after durable output', async () => {
     const runDir = await tempRun('omp-shell-result-json-');
     const outputRef = 'tasks/effect-shell/result.json';
     const effect = action('shell', {
-      shell: { command: 'stdout-json-command', outputPath: outputRef },
+      shell: { command: 'stdout-json-command' },
       io: { outputJsonPath: outputRef },
     });
     const value = { passed: true };
@@ -897,7 +1117,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   it('fails closed when an explicit command-owned output artifact is absent', async () => {
     const runDir = await tempRun('omp-shell-missing-command-output-');
     const effect = action('shell', {
-      shell: { command: 'omit-command-owned-json', outputPath: 'artifacts/command-output.json' },
+      shell: { command: 'omit-command-owned-json' },
       io: { outputJsonPath: 'artifacts/command-output.json' },
     });
     const cliCalls: string[][] = [];
@@ -1010,7 +1230,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   it('fails closed when an explicit command-owned output artifact is stale', async () => {
     const runDir = await tempRun('omp-shell-stale-command-output-');
     const effect = action('shell', {
-      shell: { command: 'leave-stale-command-owned-json', outputPath: 'artifacts/command-output.json' },
+      shell: { command: 'leave-stale-command-owned-json' },
       io: { outputJsonPath: 'artifacts/command-output.json' },
     });
     await writeJson(path.join(runDir, 'artifacts', 'command-output.json'), { stale: true });
@@ -1128,6 +1348,198 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(fs.readFile(path.join(taskDir, 'execution.json'), 'utf8')).resolves.toContain('"state": "completed"');
   });
 
+  it.each([
+    { label: 'traversal', outputRef: '../sibling-output.json' },
+    { label: 'absolute', outputRef: path.join(os.tmpdir(), 'omp-absolute-output.json') },
+  ])('rejects $label checkpoint output refs during stale recovery', async ({ outputRef }) => {
+    const runDir = await tempRun('omp-shell-unsafe-output-ref-');
+    const effect = action('shell', { shell: { command: 'must-not-run' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    const value = { unsafe: outputRef };
+    const outputPath = path.isAbsolute(outputRef) ? outputRef : path.resolve(runDir, outputRef);
+    tempDirs.push(outputPath);
+    await writeJson(outputPath, value);
+    const outputBytes = await fs.readFile(outputPath);
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'shell',
+      state: 'in_progress',
+      startedAt: '2026-08-11T00:00:00.000Z',
+      outputRef,
+      outputSha256: createHash('sha256').update(outputBytes).digest('hex'),
+    });
+    await recordCommittedResult(runDir, effect, value);
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => { throw new Error('shell was rerun'); },
+      runCli: async (args) => {
+        if (args[0] === 'task:show') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({
+              effect: { status: 'resolved_ok', resultRef: `tasks/${effect.effectId}/result.json` },
+            }),
+            stderr: '',
+          };
+        }
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(/ref|path|run directory/i);
+  });
+
+  it.each([
+    {
+      label: 'traversal blob',
+      resultRef: '../sibling-result.json',
+    },
+    {
+      label: 'absolute blob',
+      resultRef: path.join(os.tmpdir(), 'omp-absolute-result.json'),
+    },
+    {
+      label: 'wrong effect blob',
+      resultRef: 'tasks/effect-other/blobs/result-placeholder.json',
+    },
+    {
+      label: 'wrong hash filename',
+      resultRef: `tasks/effect-shell/blobs/result-${'0'.repeat(64)}.json`,
+    },
+  ])('rejects a committed $label during stale recovery', async ({ resultRef: configuredResultRef }) => {
+    const runDir = await tempRun('omp-shell-unsafe-result-ref-');
+    const effect = action('shell', { shell: { command: 'must-not-run' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    const value = { recovered: true };
+    const outputBytes = Buffer.from(JSON.stringify(value, null, 2) + '\n');
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'shell',
+      state: 'in_progress',
+      startedAt: '2026-08-11T00:00:00.000Z',
+      outputRef: `tasks/${effect.effectId}/output.json`,
+      outputSha256: createHash('sha256').update(outputBytes).digest('hex'),
+    });
+    await fs.writeFile(path.join(taskDir, 'output.json'), outputBytes);
+    const resultRef = configuredResultRef.includes('placeholder')
+      ? configuredResultRef.replace('placeholder', createHash('sha256').update(outputBytes).digest('hex'))
+      : configuredResultRef;
+    const resultPath = path.isAbsolute(resultRef) ? resultRef : path.resolve(runDir, resultRef);
+    tempDirs.push(resultPath);
+    await writeJson(resultPath, value);
+    await writeJson(path.join(taskDir, 'result.json'), {
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      status: 'ok',
+      resultRef,
+    });
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => { throw new Error('shell was rerun'); },
+      runCli: async () => ({ code: 0, stdout: waiting(effect), stderr: '' }),
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(/resultRef|blob|path|run directory/i);
+  });
+
+  it('rejects task:show evidence bound to a different committed result', async () => {
+    const runDir = await tempRun('omp-shell-wrong-shown-result-');
+    const effect = action('shell', { shell: { command: 'must-not-run' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    const value = { recovered: true };
+    const outputBytes = Buffer.from(JSON.stringify(value, null, 2) + '\n');
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'shell',
+      state: 'in_progress',
+      startedAt: '2026-08-11T00:00:00.000Z',
+      outputRef: `tasks/${effect.effectId}/output.json`,
+      outputSha256: createHash('sha256').update(outputBytes).digest('hex'),
+    });
+    await fs.writeFile(path.join(taskDir, 'output.json'), outputBytes);
+    await recordCommittedResult(runDir, effect, value);
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => { throw new Error('shell was rerun'); },
+      runCli: async (args) => {
+        if (args[0] === 'task:show') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({
+              effect: { status: 'resolved_ok', resultRef: 'tasks/effect-other/result.json' },
+            }),
+            stderr: '',
+          };
+        }
+        return { code: 0, stdout: waiting(effect), stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(/task:show|resultRef|committed result/i);
+  });
+
+  it('reconciles a canonical hash-bound large result spill', async () => {
+    const runDir = await tempRun('omp-shell-canonical-result-spill-');
+    const effect = action('shell', { shell: { command: 'must-not-run' } });
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    const value = { recovered: 'canonical spill' };
+    const outputBytes = Buffer.from(JSON.stringify(value, null, 2) + '\n');
+    const blobHash = createHash('sha256').update(outputBytes).digest('hex');
+    const blobRef = `tasks/${effect.effectId}/blobs/result-${blobHash}.json`;
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'shell',
+      state: 'in_progress',
+      startedAt: '2026-08-11T00:00:00.000Z',
+      outputRef: `tasks/${effect.effectId}/output.json`,
+      outputSha256: blobHash,
+    });
+    await fs.mkdir(path.dirname(path.join(runDir, blobRef)), { recursive: true });
+    await fs.writeFile(path.join(taskDir, 'output.json'), outputBytes);
+    await fs.writeFile(path.join(runDir, blobRef), outputBytes);
+    await writeJson(path.join(taskDir, 'result.json'), {
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      status: 'ok',
+      resultRef: blobRef,
+    });
+    let iterations = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => { throw new Error('shell was rerun'); },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        return {
+          code: 0,
+          stdout: JSON.stringify({
+            effect: {
+              status: 'resolved_ok',
+              resultRef: `tasks/${effect.effectId}/result.json`,
+            },
+          }),
+          stderr: '',
+        };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+  });
+
   it('posts a matching orphaned result artifact when the journal still owns a requested effect', async () => {
     const runDir = await tempRun('omp-shell-orphaned-result-');
     const effect = action('shell');
@@ -1209,10 +1621,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       model: 'openai-codex/gpt-5.6-sol:high',
     });
 
-    await expect(driver.drive(runDir)).resolves.toEqual(dispatch);
+    await expect(driver.drive(runDir)).resolves.toMatchObject({
+      state: 'operator_attention',
+      effectId: effect.effectId,
+      reason: expect.stringContaining('orphaned'),
+    });
   });
 
-  it('re-enters skill effects before claim, under retained ownership, and from completed durable output', async () => {
+  it('does not redispatch orphaned skill effects and still recovers owned or completed output', async () => {
     const ownedRunDir = await tempRun('omp-skill-reentry-owned-');
     const ownedEffect = action('skill', { agent: { prompt: 'Execute the skill effect' } });
     const ownedDriver = new OmpDeterministicDriver({
@@ -1224,7 +1640,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const dispatch = await ownedDriver.drive(ownedRunDir);
     expect(dispatch.state).toBe('agent');
     if (dispatch.state !== 'agent') throw new Error('expected skill-backed agent dispatch');
-    await expect(ownedDriver.drive(ownedRunDir)).resolves.toEqual(dispatch);
+    await expect(ownedDriver.drive(ownedRunDir)).resolves.toMatchObject({
+      state: 'operator_attention',
+      effectId: ownedEffect.effectId,
+      reason: expect.stringContaining('orphaned'),
+    });
     const input = dispatch.task as unknown as Record<string, unknown>;
     await expect(ownedDriver.claimAgentToolCall(input, 'skill-owner-call')).resolves.toEqual({ handled: true });
     await expect(ownedDriver.drive(ownedRunDir)).resolves.toMatchObject({
@@ -1489,7 +1909,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       () => { executionSettled = true; },
     );
     nowMs = 250;
-    await outputObserved.promise;
+    await within(outputObserved.promise, 'incremental shell output');
 
     expect(progress[0]).toMatchObject({ state: 'running', reason: 'start', elapsedMs: 0 });
     expect(progress).toContainEqual(expect.objectContaining({
@@ -1510,9 +1930,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
 
   it('reports a silent shell heartbeat and removes the progress timer after completion', async () => {
     const callbacks = new Set<() => void>();
+    const scheduledIntervals: number[] = [];
     const scheduler = {
-      setInterval: (callback: () => void) => {
+      setInterval: (callback: () => void, intervalMs: number) => {
         callbacks.add(callback);
+        scheduledIntervals.push(intervalMs);
         return callback;
       },
       clearInterval: (callback: unknown) => { callbacks.delete(callback as () => void); },
@@ -1553,10 +1975,37 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       scheduler,
     });
     expect(completed.exitCode).toBe(0);
+    expect(scheduledIntervals.every((intervalMs) => intervalMs >= 250)).toBe(true);
     expect(callbacks.size).toBe(0);
     const updateCount = completionProgress.length;
     for (const callback of callbacks) callback();
     expect(completionProgress).toHaveLength(updateCount);
+  });
+
+  it('cleans progress scheduling and listeners after spawn errors', async () => {
+    const callbacks = new Set<() => void>();
+    const progress: Array<Record<string, unknown>> = [];
+    const execution = executeBoundedShell(action('shell', {
+      shell: {
+        command: path.join(os.tmpdir(), 'missing-omp-shell-command'),
+        args: ['force-direct-spawn'],
+      },
+    }), process.cwd(), undefined, {
+      onProgress: (update) => { progress.push(update as unknown as Record<string, unknown>); },
+      scheduler: {
+        setInterval: (callback) => {
+          callbacks.add(callback);
+          return callback;
+        },
+        clearInterval: (callback) => { callbacks.delete(callback as () => void); },
+      },
+    });
+
+    await expect(execution).rejects.toMatchObject({ code: 'ENOENT' });
+    expect(callbacks.size).toBe(0);
+    const updateCount = progress.length;
+    for (const callback of callbacks) callback();
+    expect(progress).toHaveLength(updateCount);
   });
 
   it('retains the interrupted blocking agent owner and refuses a duplicate dispatch or writer', async () => {
@@ -2038,7 +2487,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     });
     let settled = false;
     const drive = driver.drive(runDir).finally(() => { settled = true; });
-    await progressObserved.promise;
+    await within(progressObserved.promise, 'queued driver progress');
 
     const shellProgress = snapshots.find((snapshot) => snapshot.stage === 'shell_progress');
     expect(shellProgress).toMatchObject({
