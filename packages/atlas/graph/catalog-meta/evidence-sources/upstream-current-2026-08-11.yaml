@@ -1,0 +1,200 @@
+# Evidence captured during the 2026-08-11 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1786422466-g4a3270-2026-08-11
+attributes:
+  displayName: "Amp CLI 0.0.1786422466-g4a3270 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1786422466-g4a3270"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1786422466-g4a3270"
+  locator: "npm @ampcode/cli v0.0.1786422466-g4a3270"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-11T04:38:08Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli latest version
+    0.0.1786422466-g4a3270. The package description identifies it as the Amp
+    frontier coding agent CLI. No public build-specific changelog, CLI flag,
+    transport/API, model, package-name, install-method, or migration change was
+    found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1786422466-g4a3270
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-12-2026-08-11
+attributes:
+  displayName: "Antigravity CLI 1.1.12 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.12"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.12"
+  locator: "google-antigravity/antigravity-cli release 1.1.12"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-11T01:26:58Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.12 release notes document artifact heading
+    outlines opened with t, more print-mode slash-command answers, json and
+    stream-json output for models and agents, disable-slash-command skill
+    frontmatter, alert callout/carousel rendering, terminal hyperlink fixes,
+    tool-call summary headers, higher tool declaration limits, ADC quota project
+    resolution, nested repository detection, headless -p choice handling, --mode
+    handling, atomic config writes, keyring timeout fixes, and read_url_content
+    connection cleanup.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-12
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-227-2026-08-11
+attributes:
+  displayName: "Claude Code v2.1.227 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.227"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.227"
+  locator: "anthropics/claude-code release v2.1.227"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-10T22:56:53Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    Official Claude Code 2.1.227 release notes document fixes for feature flags
+    evaluated without subscription tier after expired login-token session start,
+    Bash failures under claude-code-action with allowed_non_write_users on
+    GitHub-hosted runners, /tui restoring rewound conversations, slash-command
+    menu styling, and event-loop stalls.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-227
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-227-2026-08-11
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.227 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.227"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.227"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.227"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-10T22:56:26Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.227 release notes document parity
+    with Claude Code v2.1.227 and publish npm/yarn/pnpm/bun update commands.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-227
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-79-2026-08-11
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.79 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.79"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.79"
+  locator: "github/copilot-cli release v1.0.79"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-10T16:19:16Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    Official GitHub Copilot CLI 1.0.79 release notes document enterprise
+    allow-auto-only sandbox policy, enterprise proxy policy, sandbox auth
+    setting moves from sandbox.gitAuth/sandbox.ghAuth to sandbox.auth.git and
+    sandbox.auth.gh, breaking allowDevToolCaches to allowDevToolAccess rename,
+    worktreeBaseRef and HEAD defaults, Kimi K3 support, Agent Plugin extensions,
+    --plan with --mode autopilot, /app session opening, session management,
+    plugin auto-update settings, prompt queues, /model session scoping, and
+    sandbox/network fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-79
+    - agent:copilot-cli
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-193-0-2026-08-11
+attributes:
+  displayName: "Factory Droid CLI 0.193.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.193.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.193.0"
+  locator: "npm @factory/cli v0.193.0"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-11T01:12:46Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    npm metadata reports @factory/cli latest version 0.193.0, describes it as
+    Factory Droid CLI, and points repository metadata at Factory-AI/factory
+    apps/cli. No public 0.193.0-specific CLI flag, transport/API, model,
+    package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-193-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-21-9-2026-08-11
+attributes:
+  displayName: "Qwen Code v0.21.9 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.9"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.9"
+  locator: "QwenLM/qwen-code release v0.21.9"
+  capturedAt: "2026-08-11T07:05:00Z"
+  observedAt: "2026-08-10T15:14:22Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-11T07:05:00Z"
+  notes: |
+    Official Qwen Code 0.21.9 release notes document Qoder plugin installs from
+    directories, archives, Git repos, URLs, and npm packages, Local Control QR
+    pairing, daemon Skills batch APIs, qwen review submit URL output, Web Shell
+    image drag/drop and right-panel fullscreen, Wayland copy fixes, macOS
+    microphone entitlements, telemetry startup hardening, code review
+    performance changes, OpenAI API log retention, workspace .env trust
+    isolation, and no known breaking changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-21-9
+    - agent:qwen

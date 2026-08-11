@@ -1,0 +1,257 @@
+# Additive upstream release records from the 2026-08-11 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1786422466-g4a3270
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1786422466-g4a3270"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1786422466-g4a3270"
+  currentVersion: "0.0.1786422466-g4a3270"
+  releasedAt: "2026-08-11"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1786422466-g4a3270"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1786320433-geeee54 to 0.0.1786422466-g4a3270."
+    - "npm metadata identifies @ampcode/cli as the Amp frontier coding agent CLI."
+    - "No public build-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1786422466-g4a3270."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1786422466-g4a3270-2026-08-11
+---
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-1-12
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.1.12"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.1.12"
+  currentVersion: "1.1.12"
+  releasedAt: "2026-08-11"
+  upstreamReleaseTag: "1.1.12"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.12"
+  cliCommand: "antigravity"
+  summary: "Antigravity CLI release adding artifact heading outlines, more print-mode slash-command answers, machine-readable models/agents output, hidden skills, and headless-mode fixes."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 1.1.11 to 1.1.12."
+    - "Artifact viewer now has a heading outline opened with t, affecting artifact navigation metadata."
+    - "Print mode now answers /permissions, /hooks, /help, /changelog, and /config in text, json, and stream-json without starting an agent turn."
+    - "models and agents subcommands gained --output-format json and stream-json; stdout now contains only machine-readable list output."
+    - "SKILL.md frontmatter can set disable-slash-command: true to hide a skill from slash menus while leaving model invocation available."
+    - "Tool declaration headroom was raised for heavy MCP, plugin, and skill setups."
+    - "Headless -p runs now self-resolve choices instead of stalling, and --mode is honored in headless runs."
+    - "config.json writes are atomic, keyring waits five seconds, read_url_content no longer leaks connections, and file citations retain line ranges."
+    - "No package-name or install-method migration was published for the GitHub release distribution."
+  releaseHighlights:
+    - "Artifact heading outline opened with t."
+    - "More print-mode read-only slash-command answers."
+    - "Machine-readable models and agents output."
+    - "disable-slash-command skill frontmatter."
+    - "Higher tool declaration limit."
+    - "Headless -p choice resolution and --mode fix."
+    - "Atomic config writes and keyring/read_url_content fixes."
+  installMethods:
+    - install:github-release
+edges:
+  version_of:
+    - agent:antigravity-cli
+  sourced_from:
+    - evidence:antigravity-1-1-12-2026-08-11
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-227
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.227"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.227"
+  currentVersion: "2.1.227"
+  releasedAt: "2026-08-10"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.227"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.227"
+  cliCommand: "claude"
+  summary: "Claude Code patch release fixing subscription-tier feature flag evaluation, claude-code-action Bash failures, /tui rewind restoration, slash menu styling, and performance stalls."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.226 to 2.1.227."
+    - "Feature flags now evaluate with subscription tier when an expired login token starts a session, affecting plan/credit prompt behavior."
+    - "Bash commands under claude-code-action with allowed_non_write_users on GitHub-hosted runners are fixed, affecting CI action launch behavior."
+    - "/tui no longer restores conversations rewound before the first message."
+    - "Slash-command menu matching and selected-row styling changed, affecting TUI expectations."
+    - "No new CLI flag, transport/API, model, package-name, install-method, or migration change was documented."
+    - "Install command remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "Subscription-tier feature flag fix for expired login tokens."
+    - "claude-code-action Bash command fix with allowed_non_write_users."
+    - "/tui rewind restoration fix."
+    - "Slash-command menu styling improvements."
+    - "File-not-found and at-mention performance improvements."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-227-2026-08-11
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-227
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.227"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.227"
+  currentVersion: "0.3.227"
+  releasedAt: "2026-08-10"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.227"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.227"
+  summary: "Claude Agent SDK TypeScript release updated to parity with Claude Code v2.1.227."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.226 to 0.3.227."
+    - "Release notes document parity with Claude Code v2.1.227."
+    - "Likely affected surfaces mirror Claude Code 2.1.227 compatibility, especially action-runner Bash fixes and feature flag plan/credit behavior."
+    - "No SDK API, transport, package-name, or migration change was documented for this exact version."
+    - "Official update commands remain npm, yarn, pnpm, and bun package upgrade commands for @anthropic-ai/claude-agent-sdk@0.3.227."
+  releaseHighlights:
+    - "Parity with Claude Code v2.1.227."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-227-2026-08-11
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-79
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.79"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.79"
+  currentVersion: "1.0.79"
+  releasedAt: "2026-08-10"
+  sourcePackage: "gh-copilot"
+  upstreamReleaseTag: "v1.0.79"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.79"
+  cliCommand: "gh"
+  summary: "GitHub Copilot CLI release with sandbox policy/auth setting changes, worktree defaults, Kimi K3 support, Agent Plugin extensions, autopilot planning, session management, prompt queuing, and breaking sandbox setting renames."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 1.0.78 to 1.0.79."
+    - "Enterprise allow-auto-only policy enables /allow-all auto while full allow-all remains blocked, affecting approval policy modeling."
+    - "Sandbox auth settings moved from sandbox.gitAuth/sandbox.ghAuth to sandbox.auth.git/sandbox.auth.gh; old SDK requests are rejected as invalid."
+    - "BREAKING: sandbox allowDevToolCaches was renamed allowDevToolAccess; old false opt-outs silently revert to the default."
+    - "worktreeBaseRef controls /worktree, /worktree new, and --worktree; all now default to HEAD."
+    - "Agent Plugins can ship extensions under com.github.copilot/extensions/."
+    - "Kimi K3 model support affects model catalog metadata."
+    - "--plan can combine with --mode autopilot to plan then implement without waiting for approval."
+    - "/model is session-scoped by default; /config model sets future-session defaults."
+    - "Prompt, shell, and supported slash commands can queue in local sessions."
+    - "Install method remains the GitHub Copilot CLI/gh extension distribution; no package-name migration was published."
+  releaseHighlights:
+    - "Enterprise sandbox allow-auto-only and proxy policy controls."
+    - "Auth sandbox setting rename and breaking allowDevToolAccess rename."
+    - "worktreeBaseRef and HEAD default for worktree commands."
+    - "Agent Plugin extension directory support."
+    - "Kimi K3 model support."
+    - "--plan with --mode autopilot."
+    - "Concurrent session management and local prompt queues."
+  installMethods:
+    - install:gh-extension
+edges:
+  version_of:
+    - agent:copilot-cli
+  sourced_from:
+    - evidence:copilot-cli-1-0-79-2026-08-11
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-193-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.193.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.193.0"
+  currentVersion: "0.193.0"
+  releasedAt: "2026-08-11"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.193.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.191.1 to 0.193.0."
+    - "npm metadata identifies @factory/cli as Factory Droid CLI and points repository metadata at Factory-AI/factory apps/cli."
+    - "No public 0.193.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @factory/cli."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.193.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-193-0-2026-08-11
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-21-9
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.21.9"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.21.9"
+  currentVersion: "0.21.9"
+  releasedAt: "2026-08-10"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.21.9"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.9"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding Qoder plugin installs, Local Control QR pairing, batch Skills daemon APIs, Web Shell image drag/drop, review output URLs, telemetry hardening, and workspace trust fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.21.8 to 0.21.9."
+    - "Qoder plugins can install from directories, archives, Git repos, URLs, and npm packages with automatic system-prompt.md loading, affecting plugin install/source modeling."
+    - "Local Control pairing via QR code in CLI and Desktop adds secure LAN control and mobile/Desktop session surfaces."
+    - "Daemon APIs can enable/disable up to 100 Skills in one batch with per-target errors, affecting skill-management adapter modeling."
+    - "qwen review submit now emits direct posted-review URLs on stderr and JSON stdout, affecting review-command parsing."
+    - "Web Shell supports image drag/drop and a fullscreen right panel, affecting attachment and artifact UI capability metadata."
+    - "Unsupported OpenTelemetry exporter env vars are ignored at startup, affecting environment handling."
+    - "Workspace trust now evaluates each project .env separately to prevent untrusted parent .env leakage."
+    - "No known breaking changes were published."
+    - "Install command remains npm install -g @qwen-code/qwen-code."
+  releaseHighlights:
+    - "Native Qoder plugin install support."
+    - "Local Control QR pairing."
+    - "Batch Skills daemon API."
+    - "qwen review submit URL output."
+    - "Web Shell image drag/drop and fullscreen panel."
+    - "Telemetry startup hardening."
+    - "Workspace .env trust isolation."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-21-9-2026-08-11
