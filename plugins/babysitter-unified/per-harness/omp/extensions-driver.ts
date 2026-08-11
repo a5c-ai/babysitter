@@ -73,6 +73,7 @@ export interface ShellExecutionProgressOptions {
 
 interface ShellCommandOutput {
   path: string;
+  ref: string;
   before: string | null;
   beforeBytes: Buffer | null;
   kind: "canonical_output" | "canonical_result" | "external";
@@ -176,6 +177,7 @@ interface ExecutionCheckpoint {
     | "aborted"
     | "cancelled"
     | "awaiting_late_owner"
+    | "orphaned"
     | "retry_authorized"
     | "completed";
   lastOwnerOutcome?: "failed" | "aborted" | "cancelled";
@@ -594,7 +596,8 @@ export class OmpDeterministicDriver {
       checkpoint.attemptState !== "failed" &&
       checkpoint.attemptState !== "aborted" &&
       checkpoint.attemptState !== "cancelled" &&
-      checkpoint.attemptState !== "awaiting_late_owner"
+      checkpoint.attemptState !== "awaiting_late_owner" &&
+      checkpoint.attemptState !== "orphaned"
     ) {
       return {
         handled: true,
@@ -604,19 +607,26 @@ export class OmpDeterministicDriver {
     const ownerPath = agentOwnerPath(descriptor.runDir, descriptor.effectId);
     const owner = await readJsonIfExists<AgentOwner>(ownerPath);
     if (
-      !owner ||
-      owner.invocationKey !== descriptor.invocationKey ||
-      owner.ownerName !== descriptor.ownerName ||
-      owner.dispatchToken !== descriptor.dispatchToken
+      owner &&
+      (
+        owner.invocationKey !== descriptor.invocationKey ||
+        owner.ownerName !== descriptor.ownerName ||
+        owner.dispatchToken !== descriptor.dispatchToken
+      )
     ) {
       return { handled: true, reason: `Retry rejected: retained owner identity does not match effect ${descriptor.effectId}` };
     }
+    if (!owner && checkpoint.attemptState !== "orphaned") {
+      return { handled: true, reason: `Retry rejected: retained owner identity does not match effect ${descriptor.effectId}` };
+    }
 
-    const attempt = checkpoint.attempt ?? owner.attempt ?? 1;
-    await writeImmutableJson(
-      effectArtifactPath(descriptor.runDir, descriptor.effectId, `agent-owner.attempt-${attempt}.json`),
-      owner,
-    );
+    const attempt = checkpoint.attempt ?? owner?.attempt ?? 1;
+    if (owner) {
+      await writeImmutableJson(
+        effectArtifactPath(descriptor.runDir, descriptor.effectId, `agent-owner.attempt-${attempt}.json`),
+        owner,
+      );
+    }
     const updatedAt = this.now().toISOString();
     const updated: ExecutionCheckpoint = {
       ...checkpoint,
@@ -630,7 +640,7 @@ export class OmpDeterministicDriver {
       lastOwnerOutcome: undefined,
     };
     await writeJsonAtomic(executionPath(descriptor.runDir, descriptor.effectId), updated);
-    await fs.unlink(ownerPath);
+    if (owner) await fs.unlink(ownerPath);
     await this.emitProgress(
       descriptor.runDir,
       "retry_authorized",
@@ -660,7 +670,10 @@ export class OmpDeterministicDriver {
       );
     }
 
-    const outputPath = effectArtifactPath(descriptor.runDir, descriptor.effectId, "output.json");
+    const outputPath = await resolveRunRelativeReal(
+      descriptor.runDir,
+      taskRelativeRef(descriptor.effectId, "output.json"),
+    );
     const authenticatedOutputSha256 = sha256(Buffer.from(JSON.stringify(value, null, 2) + "\n", "utf8"));
     const authenticated: ExecutionCheckpoint = {
       ...checkpoint,
@@ -756,8 +769,7 @@ export class OmpDeterministicDriver {
   }
 
   private async resolveShellEffect(runDir: string, action: EffectAction, signal?: AbortSignal): Promise<void> {
-    const taskDir = effectTaskDir(runDir, action.effectId);
-    await fs.mkdir(taskDir, { recursive: true });
+    await ensureEffectTaskDir(runDir, action.effectId);
     const checkpointFile = executionPath(runDir, action.effectId);
     const startedAt = this.now().toISOString();
     const inProgress: ExecutionCheckpoint = {
@@ -776,7 +788,11 @@ export class OmpDeterministicDriver {
       await this.emitProgress(runDir, "shell_start", "running", "Shell effect started durably", action);
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
-      checkpoint = await readJson<ExecutionCheckpoint>(checkpointFile);
+      const existingCheckpoint = await readCheckpoint(runDir, action.effectId);
+      if (!existingCheckpoint) {
+        throw new DriverError(`Missing durable shell checkpoint for effect ${action.effectId}`, action.effectId);
+      }
+      checkpoint = existingCheckpoint;
       validateCheckpointIdentity(checkpoint, action);
       const recovered = await this.recoverCompletedOutput(runDir, checkpoint, signal);
       if (!recovered) {
@@ -821,8 +837,8 @@ export class OmpDeterministicDriver {
     await writeTextAtomic(stdoutPath, shellResult.stdout);
     await writeTextAtomic(stderrPath, shellResult.stderr);
 
-    const resolvedValue = await shellResultValue(action, shellResult, commandOutput);
-    const outputPath = effectArtifactPath(runDir, action.effectId, "output.json");
+    const outputPath = await resolveRunRelativeReal(runDir, taskRelativeRef(action.effectId, "output.json"));
+    const resolvedValue = await shellResultValue(runDir, action, shellResult, commandOutput, outputPath);
     const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
     const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
     const resultStatus = shellResult.timedOut || shellResult.exitCode !== expectedExitCode ? "error" : "ok";
@@ -857,35 +873,36 @@ export class OmpDeterministicDriver {
   }
 
   private async prepareAgentEffect(runDir: string, action: EffectAction, signal?: AbortSignal): Promise<DriverResult | null> {
-    const taskDir = effectTaskDir(runDir, action.effectId);
-    await fs.mkdir(taskDir, { recursive: true });
+    await ensureEffectTaskDir(runDir, action.effectId);
     const checkpointFile = executionPath(runDir, action.effectId);
     const taskDef = action.taskDef ?? {};
     const requestedModel = readRequestedModel(taskDef);
     const ownerName = stableAgentName(action.effectId);
-    const dispatchToken = this.randomId();
-    const checkpoint: ExecutionCheckpoint = {
-      schemaVersion: DRIVER_SCHEMA_VERSION,
-      effectId: action.effectId,
-      invocationKey: action.invocationKey,
-      kind: "agent",
-      state: "in_progress",
-      startedAt: this.now().toISOString(),
-      ownerName,
-      dispatchToken,
-      requestedModel,
-      outputSchema: readOutputSchema(taskDef),
-      attempt: 1,
-      attemptState: "prepared",
-      attemptUpdatedAt: this.now().toISOString(),
-    };
+    let checkpoint: ExecutionCheckpoint;
 
     try {
-      await writeJsonExclusive(checkpointFile, checkpoint);
+      checkpoint = await writeJsonExclusiveFactory(checkpointFile, () => ({
+        schemaVersion: DRIVER_SCHEMA_VERSION,
+        effectId: action.effectId,
+        invocationKey: action.invocationKey,
+        kind: "agent",
+        state: "in_progress",
+        startedAt: this.now().toISOString(),
+        ownerName,
+        dispatchToken: this.randomId(),
+        requestedModel,
+        outputSchema: readOutputSchema(taskDef),
+        attempt: 1,
+        attemptState: "prepared",
+        attemptUpdatedAt: this.now().toISOString(),
+      }));
       await this.emitProgress(runDir, "agent_preparation", "running", "Agent attempt 1 prepared durably", action);
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
-      const existing = await readJson<ExecutionCheckpoint>(checkpointFile);
+      const existing = await readCheckpoint(runDir, action.effectId);
+      if (!existing) {
+        throw new DriverError(`Missing durable agent checkpoint for effect ${action.effectId}`, action.effectId);
+      }
       validateCheckpointIdentity(existing, action);
       const recovered = await this.recoverCompletedOutput(runDir, existing);
       if (recovered) {
@@ -938,12 +955,22 @@ export class OmpDeterministicDriver {
         );
         return await this.buildAgentDispatch(runDir, action, existing);
       }
+      const orphaned = existing.attemptState === "orphaned"
+        ? existing
+        : {
+            ...existing,
+            attemptState: "orphaned" as const,
+            attemptUpdatedAt: this.now().toISOString(),
+          };
+      if (orphaned !== existing) {
+        await writeJsonAtomic(executionPath(runDir, action.effectId), orphaned);
+      }
       await this.emitProgress(
         runDir,
         "attention",
         "operator_attention",
-        `Agent attempt ${existing.attempt ?? 1} is orphaned; explicit retry authorization or supersession is required`,
-        existing,
+        `Agent attempt ${orphaned.attempt ?? 1} is orphaned; explicit retry authorization or supersession is required`,
+        orphaned,
       );
       return {
         state: "operator_attention",
@@ -1010,7 +1037,7 @@ export class OmpDeterministicDriver {
     checkpoint: ExecutionCheckpoint,
     signal?: AbortSignal,
   ): Promise<ExecutionCheckpoint | null> {
-    const outputPath = effectArtifactPath(runDir, checkpoint.effectId, "output.json");
+    const outputPath = await resolveRunRelativeReal(runDir, taskRelativeRef(checkpoint.effectId, "output.json"));
     const hasAuthenticatedAgentOutput = checkpoint.authenticatedOutputSha256 !== undefined && (
       checkpoint.attemptState === "completion_authenticated" ||
       checkpoint.attemptState === "completed"
@@ -1079,27 +1106,31 @@ export class OmpDeterministicDriver {
     const payload = parseCliJson<JsonObject>(shown.stdout, "task:show");
     const shownEffect = readObject(payload.effect);
     const status = shownEffect?.status;
+    if (status !== "resolved_ok" && status !== "resolved_error") return false;
+    const canonicalResultRef = taskRelativeRef(checkpoint.effectId, "result.json");
     if (
-      (typeof shownEffect?.effectId === "string" && shownEffect.effectId !== checkpoint.effectId) ||
-      (typeof shownEffect?.invocationKey === "string" && shownEffect.invocationKey !== checkpoint.invocationKey)
+      shownEffect?.effectId !== checkpoint.effectId ||
+      shownEffect.invocationKey !== checkpoint.invocationKey
     ) {
       throw new DriverError(
         `task:show identity conflicts with committed result for effect ${checkpoint.effectId}`,
         checkpoint.effectId,
       );
     }
-    if (
-      typeof shownEffect?.resultRef === "string" &&
-      shownEffect.resultRef !== taskRelativeRef(checkpoint.effectId, "result.json")
-    ) {
+    if (shownEffect.resultRef !== canonicalResultRef) {
       throw new DriverError(
         `task:show resultRef conflicts with canonical committed result for effect ${checkpoint.effectId}`,
         checkpoint.effectId,
       );
     }
-    return checkpoint.resultStatus === "error"
-      ? status === "resolved_error"
-      : status === "resolved_ok";
+    const expectedStatus = checkpoint.resultStatus === "error" ? "resolved_error" : "resolved_ok";
+    if (status !== expectedStatus) {
+      throw new DriverError(
+        `task:show status conflicts with committed result for effect ${checkpoint.effectId}`,
+        checkpoint.effectId,
+      );
+    }
+    return true;
   }
 
   private async postCompletedCheckpoint(
@@ -1123,7 +1154,7 @@ export class OmpDeterministicDriver {
       "--status",
       resultStatus,
       resultStatus === "error" ? "--error" : "--value",
-      resolveRunRelative(runDir, checkpoint.outputRef),
+      await resolveRunRelativeReal(runDir, checkpoint.outputRef),
       "--invocation-key",
       checkpoint.invocationKey,
       "--started-at",
@@ -1132,8 +1163,12 @@ export class OmpDeterministicDriver {
       checkpoint.finishedAt ?? this.now().toISOString(),
       "--json",
     ];
-    if (checkpoint.stdoutRef) args.push("--stdout-file", resolveRunRelative(runDir, checkpoint.stdoutRef));
-    if (checkpoint.stderrRef) args.push("--stderr-file", resolveRunRelative(runDir, checkpoint.stderrRef));
+    if (checkpoint.stdoutRef) {
+      args.push("--stdout-file", await resolveRunRelativeReal(runDir, checkpoint.stdoutRef));
+    }
+    if (checkpoint.stderrRef) {
+      args.push("--stderr-file", await resolveRunRelativeReal(runDir, checkpoint.stderrRef));
+    }
 
     const result = await this.dependencies.runCli(args, undefined, signal);
     if (result.code !== 0) {
@@ -1795,7 +1830,7 @@ async function shellCommandOutputFingerprint(
   const selectedRef = publicRef ?? legacyRef;
   if (!selectedRef) return null;
 
-  const outputPath = resolveRunRelative(runDir, selectedRef);
+  const outputPath = await resolveRunRelativeReal(runDir, selectedRef);
   const canonicalOutput = effectArtifactPath(runDir, action.effectId, "output.json");
   const canonicalResult = effectArtifactPath(runDir, action.effectId, "result.json");
   const kind = outputPath === canonicalOutput
@@ -1805,6 +1840,7 @@ async function shellCommandOutputFingerprint(
       : "external";
   const beforeSnapshot = await shellOutputSnapshot(outputPath, action.effectId);
   return {
+    ref: selectedRef,
     path: outputPath,
     before: beforeSnapshot?.fingerprint ?? null,
     beforeBytes: beforeSnapshot?.bytes ?? null,
@@ -1835,37 +1871,45 @@ async function shellOutputSnapshot(
 
 
 async function shellResultValue(
+  runDir: string,
   action: EffectAction,
   result: ShellExecutionResult,
   commandOutput: ShellCommandOutput | null,
+  outputPath: string,
 ): Promise<ResolvedShellValue> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
-  if (result.timedOut || result.exitCode !== expectedExitCode) {
-    return {
-      value: {
-        success: false,
-        exitCode: result.exitCode,
-        stdout: result.stdout,
-        stderr: result.stderr,
-        error: result.timedOut
-          ? `Shell command timed out`
-          : `Shell command exited with code ${result.exitCode}; expected ${expectedExitCode}`,
-        timedOut: result.timedOut,
-        stdoutTruncated: result.stdoutTruncated,
-        stderrTruncated: result.stderrTruncated,
-      },
-      outputAlreadyDurable: false,
-    };
-  }
+  const failed = result.timedOut || result.exitCode !== expectedExitCode;
+  const failedValue = {
+    success: false,
+    exitCode: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    error: result.timedOut
+      ? `Shell command timed out`
+      : `Shell command exited with code ${result.exitCode}; expected ${expectedExitCode}`,
+    timedOut: result.timedOut,
+    stdoutTruncated: result.stdoutTruncated,
+    stderrTruncated: result.stderrTruncated,
+  };
 
   if (commandOutput) {
+    await resolveRunRelativeReal(runDir, commandOutput.ref);
     const after = (await shellOutputSnapshot(commandOutput.path, action.effectId))?.fingerprint ?? null;
     const changed = after !== null && after !== commandOutput.before;
+    if (failed) {
+      if (commandOutput.kind === "canonical_result" && changed) {
+        await restoreTransientShellResult(commandOutput);
+      }
+      return { value: failedValue, outputAlreadyDurable: false };
+    }
     if (changed) {
       let value: unknown;
       try {
         value = JSON.parse(await fs.readFile(commandOutput.path, "utf8"));
+        if (commandOutput.kind === "canonical_result") {
+          await writeImmutableJson(outputPath, value);
+        }
       } catch (error) {
         throw new DriverError(
           `Shell output JSON for effect ${action.effectId} is invalid JSON: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
@@ -1873,18 +1917,13 @@ async function shellResultValue(
         );
       } finally {
         if (commandOutput.kind === "canonical_result") {
-          if (commandOutput.beforeBytes) {
-            await fs.writeFile(commandOutput.path, commandOutput.beforeBytes);
-          } else {
-            await fs.unlink(commandOutput.path).catch((error: unknown) => {
-              if (!isNotFound(error)) throw error;
-            });
-          }
+          await restoreTransientShellResult(commandOutput);
         }
       }
       return {
         value,
-        outputAlreadyDurable: commandOutput.kind === "canonical_output",
+        outputAlreadyDurable:
+          commandOutput.kind === "canonical_output" || commandOutput.kind === "canonical_result",
       };
     }
     if (commandOutput.kind === "external") {
@@ -1895,14 +1934,28 @@ async function shellResultValue(
     }
   }
 
+  if (failed) return { value: failedValue, outputAlreadyDurable: false };
   if (typeof readObject(action.taskDef?.io)?.outputJsonPath === "string") {
     try {
       return { value: JSON.parse(result.stdout), outputAlreadyDurable: false };
-    } catch {
-      // Canonical JSON destinations retain scalar stdout compatibility.
+    } catch (error) {
+      throw new DriverError(
+        `Shell stdout for effect ${action.effectId} must be valid JSON when io.outputJsonPath is declared: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
+        action.effectId,
+      );
     }
   }
   return { value: result.stdout, outputAlreadyDurable: false };
+}
+
+async function restoreTransientShellResult(commandOutput: ShellCommandOutput): Promise<void> {
+  if (commandOutput.beforeBytes) {
+    await writeBytesAtomic(commandOutput.path, commandOutput.beforeBytes);
+    return;
+  }
+  await fs.unlink(commandOutput.path).catch((error: unknown) => {
+    if (!isNotFound(error)) throw error;
+  });
 }
 
 async function hasMatchingCommittedArtifact(runDir: string, checkpoint: ExecutionCheckpoint): Promise<boolean> {
@@ -1913,10 +1966,11 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
       checkpoint.effectId,
     );
   }
-  if (checkpoint.stdoutRef) resolveRunRelative(runDir, checkpoint.stdoutRef);
-  if (checkpoint.stderrRef) resolveRunRelative(runDir, checkpoint.stderrRef);
+  if (checkpoint.stdoutRef) await resolveRunRelativeReal(runDir, checkpoint.stdoutRef);
+  if (checkpoint.stderrRef) await resolveRunRelativeReal(runDir, checkpoint.stderrRef);
 
-  const result = await readJsonIfExists<JsonObject>(effectArtifactPath(runDir, checkpoint.effectId, "result.json"));
+  const resultPath = await resolveRunRelativeReal(runDir, taskRelativeRef(checkpoint.effectId, "result.json"));
+  const result = await readJsonIfExists<JsonObject>(resultPath);
   if (!result) return false;
   const expectedStatus = checkpoint.resultStatus ?? "ok";
   if (
@@ -1930,7 +1984,7 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
     );
   }
 
-  const outputPath = resolveRunRelative(runDir, canonicalOutputRef);
+  const outputPath = await resolveRunRelativeReal(runDir, canonicalOutputRef);
   const durableOutput = await readJson<unknown>(outputPath);
   let committedValue: unknown;
   if (expectedStatus === "error") {
@@ -1947,7 +2001,7 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
         checkpoint.effectId,
       );
     }
-    const blobBytes = await fs.readFile(resolveRunRelative(runDir, resultRef));
+    const blobBytes = await fs.readFile(await resolveRunRelativeReal(runDir, resultRef));
     if (sha256(blobBytes) !== hash) {
       throw new DriverError(
         `Committed resultRef hash does not match blob bytes for effect ${checkpoint.effectId}`,
@@ -2090,8 +2144,37 @@ function resolveRunRelative(runDir: string, candidate: string): string {
   return resolved;
 }
 
+async function ensureEffectTaskDir(runDir: string, effectId: string): Promise<void> {
+  const taskRef = `tasks/${effectId}`;
+  const taskDir = await resolveRunRelativeReal(runDir, taskRef);
+  await fs.mkdir(taskDir, { recursive: true });
+  await resolveRunRelativeReal(runDir, taskRef);
+}
+
+async function resolveRunRelativeReal(runDir: string, candidate: string): Promise<string> {
+  const resolved = resolveRunRelative(runDir, candidate);
+  const realRun = await fs.realpath(runDir);
+  let probe = resolved;
+  while (true) {
+    try {
+      const realProbe = await fs.realpath(probe);
+      const relative = path.relative(realRun, realProbe);
+      if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+        throw new DriverError(`Artifact ref real path escapes the run directory: ${JSON.stringify(candidate)}`);
+      }
+      return resolved;
+    } catch (error) {
+      if (!isNotFound(error)) throw error;
+      const parent = path.dirname(probe);
+      if (parent === probe) throw error;
+      probe = parent;
+    }
+  }
+}
+
 async function readCheckpoint(runDir: string, effectId: string): Promise<ExecutionCheckpoint | null> {
-  return await readJsonIfExists<ExecutionCheckpoint>(executionPath(runDir, effectId));
+  const checkpointPath = await resolveRunRelativeReal(runDir, taskRelativeRef(effectId, "execution.json"));
+  return await readJsonIfExists<ExecutionCheckpoint>(checkpointPath);
 }
 
 async function writeJsonExclusive(filePath: string, value: unknown): Promise<void> {
@@ -2100,6 +2183,19 @@ async function writeJsonExclusive(filePath: string, value: unknown): Promise<voi
   try {
     await handle.writeFile(JSON.stringify(value, null, 2) + "\n", "utf8");
     await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
+
+async function writeJsonExclusiveFactory<T>(filePath: string, create: () => T): Promise<T> {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  const handle = await fs.open(filePath, "wx");
+  try {
+    const value = create();
+    await handle.writeFile(JSON.stringify(value, null, 2) + "\n", "utf8");
+    await handle.sync();
+    return value;
   } finally {
     await handle.close();
   }
@@ -2134,11 +2230,15 @@ async function writeJsonAtomic(filePath: string, value: unknown): Promise<void> 
 }
 
 async function writeTextAtomic(filePath: string, value: string): Promise<void> {
+  await writeBytesAtomic(filePath, Buffer.from(value, "utf8"));
+}
+
+async function writeBytesAtomic(filePath: string, value: Buffer): Promise<void> {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   const temp = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
   const handle = await fs.open(temp, "wx");
   try {
-    await handle.writeFile(value, "utf8");
+    await handle.writeFile(value);
     await handle.sync();
   } finally {
     await handle.close();
