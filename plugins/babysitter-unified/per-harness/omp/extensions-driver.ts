@@ -11,6 +11,9 @@ export const DEFAULT_SHELL_TIMEOUT_MS = 120_000;
 export const MAX_CAPTURE_BYTES = 1024 * 1024;
 export const SHELL_TERMINATION_GRACE_MS = 250;
 export const MAX_DRIVER_STEPS = 100;
+export const SHELL_PROGRESS_INTERVAL_MS = 250;
+export const SHELL_HEARTBEAT_INTERVAL_MS = 5_000;
+export const MAX_SHELL_PROGRESS_CONTEXT_CHARS = 500;
 
 interface JsonObject {
   [key: string]: unknown;
@@ -49,12 +52,36 @@ interface ShellExecutionResult {
   startedAt: string;
   finishedAt: string;
 }
+export interface ShellExecutionProgress {
+  state: "running";
+  reason: "start" | "output" | "heartbeat";
+  elapsedMs: number;
+  stdoutTail?: string;
+  stderrTail?: string;
+}
+
+export interface ShellProgressScheduler {
+  setInterval(callback: () => void, intervalMs: number): unknown;
+  clearInterval(handle: unknown): void;
+}
+
+export interface ShellExecutionProgressOptions {
+  onProgress?: (progress: ShellExecutionProgress) => void;
+  now?: () => number;
+  scheduler?: ShellProgressScheduler;
+}
+
+interface ShellCommandOutput {
+  path: string;
+  before: string | null;
+}
 
 export type DriverProgressStage =
   | "iteration"
   | "discovery"
   | "recovery"
   | "shell_start"
+  | "shell_progress"
   | "shell_finish"
   | "post"
   | "agent_preparation"
@@ -90,6 +117,9 @@ export interface DriverProgress {
   state: DriverProgressState;
   message: string;
   observedAt: string;
+  elapsedMs?: number;
+  stdoutTail?: string;
+  stderrTail?: string;
 }
 
 export type DriverProgressListener = (progress: DriverProgress) => void | Promise<void>;
@@ -97,7 +127,12 @@ export type DriverProgressListener = (progress: DriverProgress) => void | Promis
 interface DriverDependencies {
   cwd: string;
   runCli(args: string[], timeoutMs?: number, signal?: AbortSignal): Promise<CliResult>;
-  executeShell?: (action: EffectAction, cwd: string, signal?: AbortSignal) => Promise<ShellExecutionResult>;
+  executeShell?: (
+    action: EffectAction,
+    cwd: string,
+    signal?: AbortSignal,
+    progress?: ShellExecutionProgressOptions,
+  ) => Promise<ShellExecutionResult>;
   now?: () => Date;
   randomId?: () => string;
   onProgress?: DriverProgressListener;
@@ -232,7 +267,12 @@ class DriverError extends Error {
 }
 
 export class OmpDeterministicDriver {
-  private readonly executeShell: (action: EffectAction, cwd: string, signal?: AbortSignal) => Promise<ShellExecutionResult>;
+  private readonly executeShell: (
+    action: EffectAction,
+    cwd: string,
+    signal?: AbortSignal,
+    progress?: ShellExecutionProgressOptions,
+  ) => Promise<ShellExecutionResult>;
   private readonly now: () => Date;
   private readonly randomId: () => string;
   private readonly progressListeners = new Set<DriverProgressListener>();
@@ -729,7 +769,7 @@ export class OmpDeterministicDriver {
       if (!isAlreadyExists(error)) throw error;
       checkpoint = await readJson<ExecutionCheckpoint>(checkpointFile);
       validateCheckpointIdentity(checkpoint, action);
-      const recovered = await this.recoverCompletedOutput(runDir, checkpoint);
+      const recovered = await this.recoverCompletedOutput(runDir, checkpoint, signal);
       if (!recovered) {
         const state = checkpoint.state === "completed" ? "completed" : "in-progress";
         throw new DriverError(
@@ -747,14 +787,32 @@ export class OmpDeterministicDriver {
     }
 
     await this.emitProgress(runDir, "shell_start", "running", "Starting bounded shell effect", action);
-    const commandOutputBefore = await shellCommandOutputFingerprint(runDir, action);
-    const shellResult = await this.executeShell(action, this.workspaceCwd, signal);
+    const commandOutput = await shellCommandOutputFingerprint(runDir, action);
+    let progressQueue = Promise.resolve();
+    let shellResult: ShellExecutionResult;
+    try {
+      shellResult = await this.executeShell(action, this.workspaceCwd, signal, {
+        now: () => this.now().getTime(),
+        onProgress: (progress) => {
+          progressQueue = progressQueue.then(() => this.emitProgress(
+            runDir,
+            "shell_progress",
+            "running",
+            shellProgressMessage(progress),
+            action,
+            progress,
+          ));
+        },
+      });
+    } finally {
+      await progressQueue;
+    }
     const stdoutPath = effectArtifactPath(runDir, action.effectId, "stdout.log");
     const stderrPath = effectArtifactPath(runDir, action.effectId, "stderr.log");
     await writeTextAtomic(stdoutPath, shellResult.stdout);
     await writeTextAtomic(stderrPath, shellResult.stderr);
 
-    const value = await shellResultValue(runDir, action, shellResult, commandOutputBefore);
+    const value = await shellResultValue(action, shellResult, commandOutput);
     const outputPath = effectArtifactPath(runDir, action.effectId, "output.json");
     const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
     const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
@@ -924,8 +982,8 @@ export class OmpDeterministicDriver {
   private async recoverCompletedOutput(
     runDir: string,
     checkpoint: ExecutionCheckpoint,
+    signal?: AbortSignal,
   ): Promise<ExecutionCheckpoint | null> {
-    if (checkpoint.kind === "shell" && checkpoint.state !== "completed") return null;
     const outputPath = effectArtifactPath(runDir, checkpoint.effectId, "output.json");
     const hasAuthenticatedAgentOutput = checkpoint.authenticatedOutputSha256 !== undefined && (
       checkpoint.attemptState === "completion_authenticated" ||
@@ -970,6 +1028,9 @@ export class OmpDeterministicDriver {
       outputRef: checkpoint.outputRef ?? taskRelativeRef(checkpoint.effectId, "output.json"),
       outputSha256,
     };
+    if (checkpoint.kind === "shell" && checkpoint.state !== "completed") {
+      if (!await this.hasCommittedResult(runDir, completed, signal)) return null;
+    }
     if (checkpoint.state !== "completed" || checkpoint.outputRef !== completed.outputRef || !checkpoint.outputSha256) {
       await writeJsonAtomic(executionPath(runDir, checkpoint.effectId), completed);
     }
@@ -1056,12 +1117,15 @@ export class OmpDeterministicDriver {
     state: DriverProgressState,
     message: string,
     identity?: Pick<EffectAction, "effectId" | "invocationKey" | "kind">,
+    shellProgress?: ShellExecutionProgress,
   ): Promise<void> {
     const runId = path.basename(runDir);
     const key = `${runId}:${identity?.effectId ?? "$run"}`;
     const operationId = this.progressOperation.getStore();
     const safeMessage = sanitizeProgressText(message);
-    const signature = `${stage}\u0000${state}\u0000${safeMessage}\u0000${identity?.invocationKey ?? ""}`;
+    const stdoutTail = shellProgress?.stdoutTail ? boundedProgressContext(shellProgress.stdoutTail) : undefined;
+    const stderrTail = shellProgress?.stderrTail ? boundedProgressContext(shellProgress.stderrTail) : undefined;
+    const signature = `${stage}\u0000${state}\u0000${safeMessage}\u0000${stdoutTail ?? ""}\u0000${stderrTail ?? ""}\u0000${identity?.invocationKey ?? ""}`;
     const signatureKey = `${operationId ?? "$unowned"}:${key}`;
     if (this.progressSignatures.get(signatureKey) === signature) return;
     this.progressSignatures.set(signatureKey, signature);
@@ -1078,6 +1142,9 @@ export class OmpDeterministicDriver {
       stage,
       state,
       message: safeMessage,
+      ...(shellProgress ? { elapsedMs: shellProgress.elapsedMs } : {}),
+      ...(stdoutTail ? { stdoutTail } : {}),
+      ...(stderrTail ? { stderrTail } : {}),
       observedAt: this.now().toISOString(),
     };
     this.progressSequences.set(key, progress.sequence);
@@ -1238,6 +1305,7 @@ export async function executeBoundedShell(
   action: EffectAction,
   defaultCwd: string,
   signal?: AbortSignal,
+  progressOptions: ShellExecutionProgressOptions = {},
 ): Promise<ShellExecutionResult> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const command = typeof shell.command === "string" && shell.command.trim() ? shell.command : "echo";
@@ -1245,7 +1313,13 @@ export async function executeBoundedShell(
   const cwd = typeof shell.cwd === "string" ? path.resolve(defaultCwd, shell.cwd) : defaultCwd;
   const timeoutMs = positiveInteger(shell.timeoutMs ?? shell.timeout, DEFAULT_SHELL_TIMEOUT_MS);
   const env = readStringRecord(shell.env);
-  const startedAt = new Date().toISOString();
+  const now = progressOptions.now ?? Date.now;
+  const scheduler = progressOptions.scheduler ?? {
+    setInterval: (callback: () => void, intervalMs: number) => setInterval(callback, intervalMs),
+    clearInterval: (handle: unknown) => clearInterval(handle as NodeJS.Timeout),
+  };
+  const startedAtMs = now();
+  const startedAt = new Date(startedAtMs).toISOString();
 
   return await new Promise<ShellExecutionResult>((resolve, reject) => {
     signal?.throwIfAborted();
@@ -1259,8 +1333,62 @@ export async function executeBoundedShell(
     });
     const stdout = new BoundedCapture(MAX_CAPTURE_BYTES);
     const stderr = new BoundedCapture(MAX_CAPTURE_BYTES);
-    child.stdout?.on("data", (chunk: Buffer) => stdout.add(chunk));
-    child.stderr?.on("data", (chunk: Buffer) => stderr.add(chunk));
+    const stdoutTail = new BoundedTextTail(MAX_SHELL_PROGRESS_CONTEXT_CHARS);
+    const stderrTail = new BoundedTextTail(MAX_SHELL_PROGRESS_CONTEXT_CHARS);
+    let outputChanged = false;
+    let lastProgressAt = startedAtMs;
+    const notifyProgress = (reason: ShellExecutionProgress["reason"]): void => {
+      const observedAt = now();
+      const progress: ShellExecutionProgress = {
+        state: "running",
+        reason,
+        elapsedMs: Math.max(0, observedAt - startedAtMs),
+        ...(stdoutTail.text ? { stdoutTail: stdoutTail.text } : {}),
+        ...(stderrTail.text ? { stderrTail: stderrTail.text } : {}),
+      };
+      lastProgressAt = observedAt;
+      try {
+        progressOptions.onProgress?.(progress);
+      } catch {
+        // Observability is best-effort and must not alter shell execution.
+      }
+    };
+    const progressTimer = progressOptions.onProgress
+      ? scheduler.setInterval(() => {
+        const observedAt = now();
+        if (outputChanged) {
+          outputChanged = false;
+          notifyProgress("output");
+        } else if (observedAt - lastProgressAt >= SHELL_HEARTBEAT_INTERVAL_MS) {
+          notifyProgress("heartbeat");
+        }
+      }, SHELL_PROGRESS_INTERVAL_MS)
+      : undefined;
+    let progressStopped = false;
+    const stopProgress = (): void => {
+      if (progressStopped) return;
+      progressStopped = true;
+      scheduler.clearInterval(progressTimer);
+    };
+    const markOutput = (): void => {
+      outputChanged = true;
+      if (now() - lastProgressAt < SHELL_PROGRESS_INTERVAL_MS) return;
+      outputChanged = false;
+      notifyProgress("output");
+    };
+    const onStdoutData = (chunk: Buffer): void => {
+      stdout.add(chunk);
+      stdoutTail.add(chunk);
+      markOutput();
+    };
+    const onStderrData = (chunk: Buffer): void => {
+      stderr.add(chunk);
+      stderrTail.add(chunk);
+      markOutput();
+    };
+    child.stdout?.on("data", onStdoutData);
+    child.stderr?.on("data", onStderrData);
+    notifyProgress("start");
 
     let timedOut = false;
     let settled = false;
@@ -1273,7 +1401,8 @@ export async function executeBoundedShell(
       clearTimeout(timeoutTimer);
       clearTimeout(escalationTimer);
       clearTimeout(settleTimer);
-      signal?.removeEventListener("abort", abort);
+      if (outputChanged) notifyProgress("output");
+      cleanupObservers();
       resolve({
         exitCode: timedOut ? 124 : (code ?? 1),
         stdout: stdout.text(),
@@ -1282,20 +1411,20 @@ export async function executeBoundedShell(
         stdoutTruncated: stdout.truncated,
         stderrTruncated: stderr.truncated,
         startedAt,
-        finishedAt: new Date().toISOString(),
+        finishedAt: new Date(now()).toISOString(),
       });
     };
     const abort = (): void => {
       if (settled) return;
       settled = true;
       clearTimeout(timeoutTimer);
+      cleanupObservers();
       terminateProcessTree(child.pid, false, child.kill.bind(child));
       escalationTimer = setTimeout(
         () => terminateProcessTree(child.pid, true, child.kill.bind(child)),
         SHELL_TERMINATION_GRACE_MS,
       );
       escalationTimer.unref();
-      signal?.removeEventListener("abort", abort);
       reject(signal?.reason ?? new DOMException("The operation was aborted", "AbortError"));
     };
     signal?.addEventListener("abort", abort, { once: true });
@@ -1311,23 +1440,33 @@ export async function executeBoundedShell(
     }, timeoutMs);
     timeoutTimer.unref();
 
-    child.once("error", (error) => {
+    const onError = (error: Error): void => {
       if (timedOut || settled) return;
       settled = true;
       clearTimeout(timeoutTimer);
       clearTimeout(escalationTimer);
       clearTimeout(settleTimer);
-      signal?.removeEventListener("abort", abort);
+      cleanupObservers();
       reject(error);
-    });
-    child.once("close", (code) => {
+    };
+    const onClose = (code: number | null): void => {
       closedCode = code;
       if (!timedOut) {
         finish(code);
         return;
       }
       if (settleTimer) finish(code);
-    });
+    };
+    const cleanupObservers = (): void => {
+      stopProgress();
+      child.stdout?.removeListener("data", onStdoutData);
+      child.stderr?.removeListener("data", onStderrData);
+      child.removeListener("error", onError);
+      child.removeListener("close", onClose);
+      signal?.removeEventListener("abort", abort);
+    };
+    child.once("error", onError);
+    child.once("close", onClose);
   });
 }
 
@@ -1352,6 +1491,15 @@ class BoundedCapture {
 
   text(): string {
     return Buffer.concat(this.chunks).toString("utf8");
+  }
+}
+class BoundedTextTail {
+  text = "";
+
+  constructor(private readonly limit: number) {}
+
+  add(chunk: Buffer): void {
+    this.text = `${this.text}${chunk.toString("utf8")}`.slice(-this.limit);
   }
 }
 
@@ -1587,83 +1735,89 @@ function validateJsonSchema(value: unknown, schema: JsonObject | undefined): str
 async function shellCommandOutputFingerprint(
   runDir: string,
   action: EffectAction,
-): Promise<string | null | undefined> {
+): Promise<ShellCommandOutput | null> {
+  const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
+  if (typeof shell.outputPath !== "string") return null;
+
+  const outputPath = resolveRunRelative(runDir, shell.outputPath);
   const io = readObject(action.taskDef?.io);
-  if (typeof io?.outputJsonPath !== "string") return undefined;
-  const outputPath = resolveRunRelative(runDir, io.outputJsonPath);
-  const canonicalOutputPath = effectArtifactPath(runDir, action.effectId, "output.json");
-  if (path.resolve(outputPath) === path.resolve(canonicalOutputPath)) return undefined;
+  if (
+    typeof io?.outputJsonPath === "string" &&
+    path.resolve(resolveRunRelative(runDir, io.outputJsonPath)) !== path.resolve(outputPath)
+  ) {
+    throw new DriverError(`Ambiguous shell output paths for effect ${action.effectId}`, action.effectId);
+  }
+  const engineOwnedPaths = [
+    effectArtifactPath(runDir, action.effectId, "output.json"),
+    effectArtifactPath(runDir, action.effectId, "result.json"),
+  ];
+  if (engineOwnedPaths.some((candidate) => path.resolve(candidate) === path.resolve(outputPath))) return null;
+  return { path: outputPath, before: await shellOutputFingerprint(outputPath, action.effectId) };
+}
+
+async function shellOutputFingerprint(filePath: string, effectId: string): Promise<string | null> {
+  let bytes: Buffer;
+  let stat;
   try {
-    const stats = await fs.stat(outputPath, { bigint: true });
-    return [
-      stats.dev,
-      stats.ino,
-      stats.size,
-      stats.mtimeNs,
-      stats.ctimeNs,
-    ].join(":");
+    [bytes, stat] = await Promise.all([fs.readFile(filePath), fs.stat(filePath)]);
   } catch (error) {
     if (isNotFound(error)) return null;
     throw error;
   }
+  if (bytes.length > MAX_CAPTURE_BYTES) {
+    throw new DriverError(`Shell output JSON for effect ${effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, effectId);
+  }
+  return `${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}:${sha256(bytes)}`;
 }
 
 async function shellResultValue(
-  runDir: string,
   action: EffectAction,
   result: ShellExecutionResult,
-  commandOutputBefore: string | null | undefined,
+  commandOutput: ShellCommandOutput | null,
 ): Promise<unknown> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const expectedExitCode = typeof shell.expectedExitCode === "number" ? shell.expectedExitCode : 0;
-  if (!result.timedOut && result.exitCode === expectedExitCode) {
-    const io = readObject(action.taskDef?.io);
-    if (typeof io?.outputJsonPath === "string") {
-      const outputPath = resolveRunRelative(runDir, io.outputJsonPath);
-      const canonicalOutputPath = effectArtifactPath(runDir, action.effectId, "output.json");
-      if (path.resolve(outputPath) === path.resolve(canonicalOutputPath)) return result.stdout;
-      const commandOutputAfter = await shellCommandOutputFingerprint(runDir, action);
-      if (commandOutputAfter === commandOutputBefore) {
-        throw new DriverError(
-          `Shell output JSON for effect ${action.effectId} was not created or updated by the command`,
-          action.effectId,
-        );
-      }
-      let bytes: Buffer;
-      try {
-        bytes = await fs.readFile(outputPath);
-      } catch (error) {
-        throw new DriverError(
-          `Shell output JSON for effect ${action.effectId} could not be read: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
-          action.effectId,
-        );
-      }
-      if (bytes.length > MAX_CAPTURE_BYTES) {
-        throw new DriverError(`Shell output JSON for effect ${action.effectId} exceeds ${MAX_CAPTURE_BYTES} bytes`, action.effectId);
-      }
-      try {
-        return JSON.parse(bytes.toString("utf8"));
-      } catch (error) {
-        throw new DriverError(
-          `Shell output JSON for effect ${action.effectId} is invalid JSON: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
-          action.effectId,
-        );
-      }
-    }
-    return result.stdout;
+  if (result.timedOut || result.exitCode !== expectedExitCode) {
+    return {
+      success: false,
+      exitCode: result.exitCode,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      error: result.timedOut
+        ? `Shell command timed out`
+        : `Shell command exited with code ${result.exitCode}; expected ${expectedExitCode}`,
+      timedOut: result.timedOut,
+      stdoutTruncated: result.stdoutTruncated,
+      stderrTruncated: result.stderrTruncated,
+    };
   }
-  return {
-    success: false,
-    exitCode: result.exitCode,
-    stdout: result.stdout,
-    stderr: result.stderr,
-    error: result.timedOut
-      ? `Shell command timed out`
-      : `Shell command exited with code ${result.exitCode}; expected ${expectedExitCode}`,
-    timedOut: result.timedOut,
-    stdoutTruncated: result.stdoutTruncated,
-    stderrTruncated: result.stderrTruncated,
-  };
+
+  if (commandOutput) {
+    const after = await shellOutputFingerprint(commandOutput.path, action.effectId);
+    if (after === null || after === commandOutput.before) {
+      throw new DriverError(
+        `Shell output JSON for effect ${action.effectId} was not created or updated by the command`,
+        action.effectId,
+      );
+    }
+    try {
+      return JSON.parse(await fs.readFile(commandOutput.path, "utf8"));
+    } catch (error) {
+      throw new DriverError(
+        `Shell output JSON for effect ${action.effectId} is invalid JSON: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
+        action.effectId,
+      );
+    }
+  }
+
+  if (typeof readObject(action.taskDef?.io)?.outputJsonPath === "string") {
+    try {
+      return JSON.parse(result.stdout);
+    } catch {
+      // JSON destinations can still carry scalar command output.
+    }
+  }
+  return result.stdout;
 }
 
 async function hasMatchingCommittedArtifact(runDir: string, checkpoint: ExecutionCheckpoint): Promise<boolean> {
@@ -1910,6 +2064,17 @@ function redactSensitiveText(value: string): string {
 function sanitizeProgressText(value: string): string {
   const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
   return normalized.length > 240 ? `${normalized.slice(0, 240)}…` : normalized;
+}
+function boundedProgressContext(value: string): string {
+  const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
+  if (normalized.length <= MAX_SHELL_PROGRESS_CONTEXT_CHARS) return normalized;
+  return `…${normalized.slice(-(MAX_SHELL_PROGRESS_CONTEXT_CHARS - 1))}`;
+}
+
+function shellProgressMessage(progress: ShellExecutionProgress): string {
+  if (progress.reason === "start") return "Shell command is running";
+  if (progress.reason === "heartbeat") return `Shell command is still running after ${progress.elapsedMs} ms`;
+  return `Shell command produced output after ${progress.elapsedMs} ms`;
 }
 
 export function sanitizeDiagnosticText(value: string): string {

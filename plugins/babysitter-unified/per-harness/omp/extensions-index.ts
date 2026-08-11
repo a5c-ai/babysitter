@@ -14,6 +14,7 @@ const PLUGIN_ROOT = path.resolve(__dirname, "..");
 
 const PROJECTION_NAMESPACE = "babysitter";
 export const TODO_PROJECTION_MIN_OMP_VERSION = "16.5.2";
+const PROJECTION_PROGRESS_INTERVAL_MS = 250;
 
 export type TodoProjectionGate = "available" | "missing_capability" | "version_mismatch";
 
@@ -65,7 +66,8 @@ interface SessionStateCommandResult {
 
 function progressText(progress: DriverProgress): string {
   const effect = progress.effectId ? ` ${progress.effectId}` : "";
-  return `Babysitter${effect} · ${progress.stage.replaceAll("_", " ")} · ${progress.message}`;
+  const context = progress.stderrTail ?? progress.stdoutTail;
+  return `Babysitter${effect} · ${progress.stage.replaceAll("_", " ")} · ${progress.message}${context ? ` · ${context}` : ""}`;
 }
 
 class ReadOnlyProjectionText {
@@ -114,6 +116,11 @@ export default function activate(pi: ExtensionAPI): void {
   let latestProgress: DriverProgress | undefined;
   let projectionOwner: { runDir: string; generation: number; operationId: string } | undefined;
   let pendingProjectionProgress: DriverProgress | undefined;
+  let projectionFlushTimer: NodeJS.Timeout | undefined;
+  let projectionFlushQueued = false;
+  let projectionFlushPromise: Promise<void> | undefined;
+  let projectionRefreshFailedOperationId: string | undefined;
+  let lastProjectionFlushAt = 0;
 
   const reportProjectionFailure = (
     error: unknown,
@@ -144,6 +151,10 @@ export default function activate(pi: ExtensionAPI): void {
     projectionOwner = undefined;
     latestProgress = undefined;
     pendingProjectionProgress = undefined;
+    projectionFlushQueued = false;
+    clearTimeout(projectionFlushTimer);
+    projectionFlushTimer = undefined;
+    projectionRefreshFailedOperationId = undefined;
     projectionGeneration += 1;
     clearNativeProjection("clear");
     const ui = activeContext?.ui;
@@ -192,7 +203,7 @@ export default function activate(pi: ExtensionAPI): void {
     }
   };
 
-  const flushProjectionProgress = async (operationId: string | undefined): Promise<void> => {
+  const performProjectionProgressFlush = async (operationId: string | undefined): Promise<void> => {
     const progress = pendingProjectionProgress;
     if (!progress || !operationId || progress.operationId !== operationId) return;
     pendingProjectionProgress = undefined;
@@ -211,7 +222,48 @@ export default function activate(pi: ExtensionAPI): void {
     } catch (error) {
       reportProjectionFailure(error, "operation_flush");
     }
-    await refreshProjection(progress.runDir, owner.generation, "operation_flush");
+    if (projectionRefreshFailedOperationId === operationId) return;
+    const refreshed = await refreshProjection(progress.runDir, owner.generation, "operation_flush");
+    if (!refreshed) projectionRefreshFailedOperationId = operationId;
+  };
+
+  const startProjectionProgressFlush = (operationId: string): Promise<void> => {
+    if (projectionFlushPromise) return projectionFlushPromise;
+    lastProjectionFlushAt = Date.now();
+    const running = performProjectionProgressFlush(operationId).finally(() => {
+      if (projectionFlushPromise === running) projectionFlushPromise = undefined;
+      const pendingOperationId = pendingProjectionProgress?.operationId;
+      if (pendingOperationId) scheduleProjectionProgressFlush(pendingOperationId);
+    });
+    projectionFlushPromise = running;
+    return running;
+  };
+
+  const scheduleProjectionProgressFlush = (operationId: string): void => {
+    if (projectionFlushPromise || projectionFlushQueued || projectionFlushTimer) return;
+    const remaining = PROJECTION_PROGRESS_INTERVAL_MS - (Date.now() - lastProjectionFlushAt);
+    if (lastProjectionFlushAt === 0 || remaining <= 0) {
+      projectionFlushQueued = true;
+      queueMicrotask(() => {
+        if (!projectionFlushQueued) return;
+        projectionFlushQueued = false;
+        void startProjectionProgressFlush(operationId);
+      });
+      return;
+    }
+    projectionFlushTimer = setTimeout(() => {
+      projectionFlushTimer = undefined;
+      void startProjectionProgressFlush(operationId);
+    }, remaining);
+    projectionFlushTimer.unref();
+  };
+
+  const flushProjectionProgress = async (operationId: string | undefined): Promise<void> => {
+    projectionFlushQueued = false;
+    clearTimeout(projectionFlushTimer);
+    projectionFlushTimer = undefined;
+    if (projectionFlushPromise) await projectionFlushPromise;
+    await performProjectionProgressFlush(operationId);
   };
 
   const driver = new OmpDeterministicDriver({
@@ -238,6 +290,7 @@ export default function activate(pi: ExtensionAPI): void {
         owner.runDir !== path.resolve(progress.runDir)
       ) return;
       pendingProjectionProgress = progress;
+      scheduleProjectionProgressFlush(owner.operationId);
     },
     onProgressError: (error, progress) => {
       try {
@@ -335,6 +388,11 @@ export default function activate(pi: ExtensionAPI): void {
       driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
       latestProgress = undefined;
       pendingProjectionProgress = undefined;
+      projectionFlushQueued = false;
+      clearTimeout(projectionFlushTimer);
+      projectionFlushTimer = undefined;
+      lastProjectionFlushAt = 0;
+      projectionRefreshFailedOperationId = undefined;
       const operationId = `drive:${projectionGeneration}:${++projectionOperationSequence}`;
       projectionOwner = {
         runDir: path.resolve(params.runDir),
