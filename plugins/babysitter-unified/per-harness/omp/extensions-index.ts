@@ -66,8 +66,10 @@ interface SessionStateCommandResult {
 
 function progressText(progress: DriverProgress): string {
   const effect = progress.effectId ? ` ${progress.effectId}` : "";
-  const context = progress.stderrTail ?? progress.stdoutTail;
-  return `Babysitter${effect} · ${progress.stage.replaceAll("_", " ")} · ${progress.message}${context ? ` · ${context}` : ""}`;
+  const counters = progress.stdoutBytes !== undefined || progress.stderrBytes !== undefined
+    ? ` · stdout ${progress.stdoutBytes ?? 0} B${progress.stdoutTruncated ? "+" : ""} · stderr ${progress.stderrBytes ?? 0} B${progress.stderrTruncated ? "+" : ""}`
+    : "";
+  return `Babysitter${effect} · ${progress.stage.replaceAll("_", " ")} · ${progress.message}${counters}`;
 }
 
 class ReadOnlyProjectionText {
@@ -120,6 +122,20 @@ export default function activate(pi: ExtensionAPI): void {
   let projectionFlushQueued = false;
   let projectionFlushPromise: Promise<void> | undefined;
   let projectionRefreshFailedOperationId: string | undefined;
+  let driveQueue = Promise.resolve();
+
+  const enqueueDrive = async <T>(operation: () => Promise<T>): Promise<T> => {
+    const predecessor = driveQueue;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    driveQueue = predecessor.catch(() => undefined).then(() => gate);
+    await predecessor.catch(() => undefined);
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
+  };
   let lastProjectionFlushAt = 0;
 
   const reportProjectionFailure = (
@@ -331,29 +347,33 @@ export default function activate(pi: ExtensionAPI): void {
     parameters: agentRetryParameters,
     approval: "exec",
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      activeContext = ctx;
-      driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
-      const operationId = projectionOwner?.operationId;
-      try {
-        const authorization = await driver.withProgressOperation(
-          operationId,
-          () => driver.authorizeAgentRetry(params),
-        );
-        if (!authorization.handled || authorization.reason) {
-          return {
-            content: [{ type: "text", text: authorization.reason ?? "Retry authorization was not handled" }],
-            details: authorization,
-            isError: true,
-          };
-        }
-        const continuation = await driver.drive(params.runDir, undefined, operationId);
+      const authorizationOperationId = projectionOwner?.operationId;
+      const authorization = await driver.withProgressOperation(
+        authorizationOperationId,
+        () => driver.authorizeAgentRetry(params),
+      );
+      await flushProjectionProgress(authorizationOperationId);
+      if (!authorization.handled || authorization.reason) {
         return {
-          content: [{ type: "text", text: JSON.stringify(continuation, null, 2) }],
-          details: { ...authorization, continuation },
+          content: [{ type: "text", text: authorization.reason ?? "Retry authorization was not handled" }],
+          details: authorization,
+          isError: true,
         };
-      } finally {
-        await flushProjectionProgress(operationId);
       }
+      const continuation = await enqueueDrive(async () => {
+        activeContext = ctx;
+        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
+        const continuationOperationId = projectionOwner?.operationId;
+        try {
+          return await driver.drive(params.runDir, undefined, continuationOperationId);
+        } finally {
+          await flushProjectionProgress(continuationOperationId);
+        }
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(continuation, null, 2) }],
+        details: { ...authorization, continuation },
+      };
     },
   });
 
@@ -392,55 +412,57 @@ export default function activate(pi: ExtensionAPI): void {
     parameters: driveParameters,
     approval: "exec",
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
-      activeContext = ctx;
-      driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
-      latestProgress = undefined;
-      pendingProjectionProgress = undefined;
-      projectionFlushQueued = false;
-      clearTimeout(projectionFlushTimer);
-      projectionFlushTimer = undefined;
-      lastProjectionFlushAt = 0;
-      projectionRefreshFailedOperationId = undefined;
-      const operationId = `drive:${projectionGeneration}:${++projectionOperationSequence}`;
-      projectionOwner = {
-        runDir: path.resolve(params.runDir),
-        generation: projectionGeneration,
-        operationId,
-      };
-      let toolProgress: DriverProgress | undefined;
-      const unsubscribe = driver.onProgress((progress) => {
-        if (progress.operationId !== operationId) return;
-        toolProgress = progress;
-        onUpdate?.({
-          content: [{ type: "text", text: progressText(progress) }],
-          details: { state: "running", progress } satisfies DriverToolDetails,
+      return await enqueueDrive(async () => {
+        activeContext = ctx;
+        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : activeContext?.cwd ?? process.cwd());
+        latestProgress = undefined;
+        pendingProjectionProgress = undefined;
+        projectionFlushQueued = false;
+        clearTimeout(projectionFlushTimer);
+        projectionFlushTimer = undefined;
+        lastProjectionFlushAt = 0;
+        projectionRefreshFailedOperationId = undefined;
+        const operationId = `drive:${projectionGeneration}:${++projectionOperationSequence}`;
+        projectionOwner = {
+          runDir: path.resolve(params.runDir),
+          generation: projectionGeneration,
+          operationId,
+        };
+        let toolProgress: DriverProgress | undefined;
+        const unsubscribe = driver.onProgress((progress) => {
+          if (progress.operationId !== operationId) return;
+          toolProgress = progress;
+          onUpdate?.({
+            content: [{ type: "text", text: progressText(progress) }],
+            details: { state: "running", progress } satisfies DriverToolDetails,
+          });
         });
+        try {
+          const result = await driver.drive(params.runDir, signal, operationId);
+          return {
+            content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+            details: {
+              state: result.state,
+              ...(toolProgress ? { progress: toolProgress } : {}),
+            } satisfies DriverToolDetails,
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: "text",
+              text: sanitizeDiagnosticText(error instanceof Error ? error.message : String(error)),
+            }],
+            details: {
+              state: "operator_attention",
+              ...(toolProgress ? { progress: toolProgress } : {}),
+            } satisfies DriverToolDetails,
+            isError: true,
+          };
+        } finally {
+          await flushProjectionProgress(operationId);
+          unsubscribe();
+        }
       });
-      try {
-        const result = await driver.drive(params.runDir, signal, operationId);
-        return {
-          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-          details: {
-            state: result.state,
-            ...(toolProgress ? { progress: toolProgress } : {}),
-          } satisfies DriverToolDetails,
-        };
-      } catch (error) {
-        return {
-          content: [{
-            type: "text",
-            text: sanitizeDiagnosticText(error instanceof Error ? error.message : String(error)),
-          }],
-          details: {
-            state: "operator_attention",
-            ...(toolProgress ? { progress: toolProgress } : {}),
-          } satisfies DriverToolDetails,
-          isError: true,
-        };
-      } finally {
-        await flushProjectionProgress(operationId);
-        unsubscribe();
-      }
     },
     renderCall(args) {
       return new ReadOnlyProjectionText(`Babysitter deterministic driver · ${path.basename(args.runDir)}`);

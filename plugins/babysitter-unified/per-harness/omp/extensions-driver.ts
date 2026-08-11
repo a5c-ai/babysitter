@@ -13,7 +13,6 @@ export const SHELL_TERMINATION_GRACE_MS = 250;
 export const MAX_DRIVER_STEPS = 100;
 export const SHELL_PROGRESS_INTERVAL_MS = 250;
 export const SHELL_HEARTBEAT_INTERVAL_MS = 5_000;
-export const MAX_SHELL_PROGRESS_CONTEXT_CHARS = 500;
 
 interface JsonObject {
   [key: string]: unknown;
@@ -56,8 +55,10 @@ export interface ShellExecutionProgress {
   state: "running";
   reason: "start" | "output" | "heartbeat";
   elapsedMs: number;
-  stdoutTail?: string;
-  stderrTail?: string;
+  stdoutBytes: number;
+  stderrBytes: number;
+  stdoutTruncated: boolean;
+  stderrTruncated: boolean;
 }
 
 export interface ShellProgressScheduler {
@@ -119,15 +120,15 @@ export interface DriverProgress {
   runDir: string;
   operationId?: string;
   effectId?: string;
-  invocationKey?: string;
-  kind?: string;
   stage: DriverProgressStage;
   state: DriverProgressState;
   message: string;
   observedAt: string;
   elapsedMs?: number;
-  stdoutTail?: string;
-  stderrTail?: string;
+  stdoutBytes?: number;
+  stderrBytes?: number;
+  stdoutTruncated?: boolean;
+  stderrTruncated?: boolean;
 }
 
 export type DriverProgressListener = (progress: DriverProgress) => void | Promise<void>;
@@ -145,6 +146,12 @@ interface DriverDependencies {
   randomId?: () => string;
   onProgress?: DriverProgressListener;
   onProgressError?: (error: unknown, progress: DriverProgress) => void | Promise<void>;
+}
+
+interface ProgressOperationScope {
+  operationId?: string;
+  sequenceKeys: Set<string>;
+  signatureKeys: Set<string>;
 }
 
 interface ExecutionCheckpoint {
@@ -288,7 +295,7 @@ export class OmpDeterministicDriver {
   private readonly progressListeners = new Set<DriverProgressListener>();
   private readonly progressSequences = new Map<string, number>();
   private readonly progressSignatures = new Map<string, string>();
-  private readonly progressOperation = new AsyncLocalStorage<string>();
+  private readonly progressOperation = new AsyncLocalStorage<ProgressOperationScope>();
   private readonly effectLocks = new Map<string, Promise<void>>();
   private workspaceCwd: string;
 
@@ -309,8 +316,17 @@ export class OmpDeterministicDriver {
   }
 
   async withProgressOperation<T>(operationId: string | undefined, operation: () => Promise<T>): Promise<T> {
-    if (!operationId) return await operation();
-    return await this.progressOperation.run(operationId, operation);
+    const scope: ProgressOperationScope = {
+      ...(operationId ? { operationId } : {}),
+      sequenceKeys: new Set(),
+      signatureKeys: new Set(),
+    };
+    try {
+      return await this.progressOperation.run(scope, operation);
+    } finally {
+      for (const key of scope.sequenceKeys) this.progressSequences.delete(key);
+      for (const key of scope.signatureKeys) this.progressSignatures.delete(key);
+    }
   }
 
   async drive(runDirInput: string, signal?: AbortSignal, operationId?: string): Promise<DriverResult> {
@@ -323,14 +339,19 @@ export class OmpDeterministicDriver {
       for (let step = 0; step < MAX_DRIVER_STEPS; step += 1) {
         signal?.throwIfAborted();
         const iteration = await this.runIteration(runDir, signal);
-        await this.emitProgress(runDir, "iteration", "running", `Iteration ${step + 1} observed ${iteration.status}`);
+        await this.emitProgress(runDir, "iteration", "running", `Iteration ${step + 1} observed`);
         if (iteration.status === "completed") {
           await this.emitProgress(runDir, "iteration", "completed", "Run completed");
           return { state: "completed", completionProof: iteration.completionProof };
         }
         if (iteration.status === "halted" || iteration.status === "failed") {
           const reason = `Babysitter iteration stopped with status ${iteration.status}${iteration.reason ? `: ${iteration.reason}` : ""}`;
-          await this.emitProgress(runDir, "attention", "operator_attention", reason);
+          await this.emitProgress(
+            runDir,
+            "attention",
+            "operator_attention",
+            "Babysitter iteration requires operator attention",
+          );
           return { state: "operator_attention", reason };
         }
 
@@ -342,7 +363,7 @@ export class OmpDeterministicDriver {
           actions.length > 0 ? `Discovered ${actions.length} durable action${actions.length === 1 ? "" : "s"}` : "No runnable action discovered",
         );
         if (actions.length === 0) {
-          await this.emitProgress(runDir, "waiting", "waiting", iteration.reason ?? "Waiting for Babysitter state to advance");
+          await this.emitProgress(runDir, "waiting", "waiting", "Waiting for Babysitter state to advance");
           return { state: "waiting", reason: iteration.reason };
         }
 
@@ -361,11 +382,17 @@ export class OmpDeterministicDriver {
             progressed = true;
             continue;
           }
-          await this.emitProgress(runDir, "interaction", "waiting", `Interaction required for ${action.kind}`, action);
+          await this.emitProgress(
+            runDir,
+            "interaction",
+            "waiting",
+            "Interaction required for unsupported effect kind",
+            { effectId: action.effectId, invocationKey: "", kind: "interaction" },
+          );
           return { state: "interaction", effect: action };
         }
         if (!progressed) {
-          await this.emitProgress(runDir, "waiting", "waiting", iteration.reason ?? "Waiting for Babysitter state to advance");
+          await this.emitProgress(runDir, "waiting", "waiting", "Waiting for Babysitter state to advance");
           return { state: "waiting", reason: iteration.reason };
         }
       }
@@ -377,7 +404,7 @@ export class OmpDeterministicDriver {
         runDir,
         "failure",
         "failed",
-        error instanceof Error ? error.message : "Driver failed",
+        "Deterministic driver failed",
         error instanceof DriverError && error.effectId ? { effectId: error.effectId, invocationKey: "", kind: "unknown" } : undefined,
       );
       throw error;
@@ -813,24 +840,42 @@ export class OmpDeterministicDriver {
 
     await this.emitProgress(runDir, "shell_start", "running", "Starting bounded shell effect", action);
     const commandOutput = await shellCommandOutputFingerprint(runDir, action);
-    let progressQueue = Promise.resolve();
+    let progressInFlight: Promise<void> | undefined;
+    let pendingProgress: ShellExecutionProgress | undefined;
+    const startProgressDrain = (): void => {
+      if (progressInFlight) return;
+      const running = Promise.resolve().then(async () => {
+        while (pendingProgress) {
+          const next = pendingProgress;
+          pendingProgress = undefined;
+          await this.emitProgress(
+            runDir,
+            "shell_progress",
+            "running",
+            shellProgressMessage(next),
+            action,
+            next,
+          );
+        }
+      });
+      const settled = running.finally(() => {
+        if (progressInFlight !== settled) return;
+        progressInFlight = undefined;
+        if (pendingProgress) startProgressDrain();
+      });
+      progressInFlight = settled;
+    };
     let shellResult: ShellExecutionResult;
     try {
       shellResult = await this.executeShell(action, this.workspaceCwd, signal, {
         now: () => this.now().getTime(),
         onProgress: (progress) => {
-          progressQueue = progressQueue.then(() => this.emitProgress(
-            runDir,
-            "shell_progress",
-            "running",
-            shellProgressMessage(progress),
-            action,
-            progress,
-          ));
+          pendingProgress = progress;
+          startProgressDrain();
         },
       });
     } finally {
-      await progressQueue;
+      while (progressInFlight) await progressInFlight;
     }
     const stdoutPath = effectArtifactPath(runDir, action.effectId, "stdout.log");
     const stderrPath = effectArtifactPath(runDir, action.effectId, "stderr.log");
@@ -1201,33 +1246,46 @@ export class OmpDeterministicDriver {
   ): Promise<void> {
     const runId = path.basename(runDir);
     const key = `${runId}:${identity?.effectId ?? "$run"}`;
-    const operationId = this.progressOperation.getStore();
+    const scope = this.progressOperation.getStore();
+    const operationId = scope?.operationId;
     const safeMessage = sanitizeProgressText(message);
-    const stdoutTail = shellProgress?.stdoutTail ? boundedProgressContext(shellProgress.stdoutTail) : undefined;
-    const stderrTail = shellProgress?.stderrTail ? boundedProgressContext(shellProgress.stderrTail) : undefined;
-    const signature = `${stage}\u0000${state}\u0000${safeMessage}\u0000${stdoutTail ?? ""}\u0000${stderrTail ?? ""}\u0000${identity?.invocationKey ?? ""}`;
-    const signatureKey = `${operationId ?? "$unowned"}:${key}`;
-    if (this.progressSignatures.get(signatureKey) === signature) return;
-    this.progressSignatures.set(signatureKey, signature);
+    const signature = [
+      stage,
+      state,
+      safeMessage,
+      shellProgress?.elapsedMs ?? "",
+      shellProgress?.stdoutBytes ?? "",
+      shellProgress?.stderrBytes ?? "",
+      shellProgress?.stdoutTruncated ?? "",
+      shellProgress?.stderrTruncated ?? "",
+      identity?.invocationKey ?? "",
+    ].join("\u0000");
+    const stateKey = `${operationId ?? "$unowned"}:${key}`;
+    if (this.progressSignatures.get(stateKey) === signature) return;
+    this.progressSignatures.set(stateKey, signature);
+    scope?.signatureKeys.add(stateKey);
     const progress: DriverProgress = {
       schemaVersion: DRIVER_SCHEMA_VERSION,
       key,
-      sequence: (this.progressSequences.get(key) ?? 0) + 1,
+      sequence: (this.progressSequences.get(stateKey) ?? 0) + 1,
       runId,
       runDir,
       ...(identity?.effectId ? { effectId: identity.effectId } : {}),
       ...(operationId ? { operationId } : {}),
-      ...(identity?.invocationKey ? { invocationKey: identity.invocationKey } : {}),
-      ...(identity?.kind ? { kind: identity.kind } : {}),
       stage,
       state,
       message: safeMessage,
-      ...(shellProgress ? { elapsedMs: shellProgress.elapsedMs } : {}),
-      ...(stdoutTail ? { stdoutTail } : {}),
-      ...(stderrTail ? { stderrTail } : {}),
+      ...(shellProgress ? {
+        elapsedMs: shellProgress.elapsedMs,
+        stdoutBytes: shellProgress.stdoutBytes,
+        stderrBytes: shellProgress.stderrBytes,
+        stdoutTruncated: shellProgress.stdoutTruncated,
+        stderrTruncated: shellProgress.stderrTruncated,
+      } : {}),
       observedAt: this.now().toISOString(),
     };
-    this.progressSequences.set(key, progress.sequence);
+    this.progressSequences.set(stateKey, progress.sequence);
+    scope?.sequenceKeys.add(stateKey);
     await this.notifyProgressListener(this.dependencies.onProgress, progress);
     for (const listener of this.progressListeners) {
       await this.notifyProgressListener(listener, progress);
@@ -1413,8 +1471,6 @@ export async function executeBoundedShell(
     });
     const stdout = new BoundedCapture(MAX_CAPTURE_BYTES);
     const stderr = new BoundedCapture(MAX_CAPTURE_BYTES);
-    const stdoutTail = new BoundedTextTail(MAX_SHELL_PROGRESS_CONTEXT_CHARS);
-    const stderrTail = new BoundedTextTail(MAX_SHELL_PROGRESS_CONTEXT_CHARS);
     let outputChanged = false;
     let lastProgressAt = startedAtMs;
     const notifyProgress = (reason: ShellExecutionProgress["reason"]): void => {
@@ -1423,8 +1479,10 @@ export async function executeBoundedShell(
         state: "running",
         reason,
         elapsedMs: Math.max(0, observedAt - startedAtMs),
-        ...(stdoutTail.text ? { stdoutTail: stdoutTail.text } : {}),
-        ...(stderrTail.text ? { stderrTail: stderrTail.text } : {}),
+        stdoutBytes: stdout.totalBytes,
+        stderrBytes: stderr.totalBytes,
+        stdoutTruncated: stdout.truncated,
+        stderrTruncated: stderr.truncated,
       };
       lastProgressAt = observedAt;
       try {
@@ -1458,12 +1516,10 @@ export async function executeBoundedShell(
     };
     const onStdoutData = (chunk: Buffer): void => {
       stdout.add(chunk);
-      stdoutTail.add(chunk);
       markOutput();
     };
     const onStderrData = (chunk: Buffer): void => {
       stderr.add(chunk);
-      stderrTail.add(chunk);
       markOutput();
     };
     child.stdout?.on("data", onStdoutData);
@@ -1552,34 +1608,27 @@ export async function executeBoundedShell(
 
 class BoundedCapture {
   private readonly chunks: Buffer[] = [];
-  private bytes = 0;
+  private capturedBytes = 0;
+  totalBytes = 0;
   truncated = false;
 
   constructor(private readonly limit: number) {}
 
   add(chunk: Buffer): void {
-    if (this.bytes >= this.limit) {
+    this.totalBytes = Math.min(Number.MAX_SAFE_INTEGER, this.totalBytes + chunk.length);
+    if (this.capturedBytes >= this.limit) {
       this.truncated = true;
       return;
     }
-    const remaining = this.limit - this.bytes;
+    const remaining = this.limit - this.capturedBytes;
     const accepted = chunk.length > remaining ? chunk.subarray(0, remaining) : chunk;
     this.chunks.push(Buffer.from(accepted));
-    this.bytes += accepted.length;
+    this.capturedBytes += accepted.length;
     if (accepted.length !== chunk.length) this.truncated = true;
   }
 
   text(): string {
     return Buffer.concat(this.chunks).toString("utf8");
-  }
-}
-class BoundedTextTail {
-  text = "";
-
-  constructor(private readonly limit: number) {}
-
-  add(chunk: Buffer): void {
-    this.text = `${this.text}${chunk.toString("utf8")}`.slice(-this.limit);
   }
 }
 
@@ -1936,14 +1985,22 @@ async function shellResultValue(
 
   if (failed) return { value: failedValue, outputAlreadyDurable: false };
   if (typeof readObject(action.taskDef?.io)?.outputJsonPath === "string") {
+    let value: unknown;
     try {
-      return { value: JSON.parse(result.stdout), outputAlreadyDurable: false };
+      value = JSON.parse(result.stdout);
     } catch (error) {
       throw new DriverError(
         `Shell stdout for effect ${action.effectId} must be valid JSON when io.outputJsonPath is declared: ${boundedDiagnostic(error instanceof Error ? error.message : String(error))}`,
         action.effectId,
       );
     }
+    if (!readObject(value) && !Array.isArray(value)) {
+      throw new DriverError(
+        `Shell stdout for effect ${action.effectId} must be a JSON object or array when io.outputJsonPath is declared`,
+        action.effectId,
+      );
+    }
+    return { value, outputAlreadyDurable: false };
   }
   return { value: result.stdout, outputAlreadyDurable: false };
 }
@@ -2297,17 +2354,12 @@ function sanitizeProgressText(value: string): string {
   const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
   return normalized.length > 240 ? `${normalized.slice(0, 240)}…` : normalized;
 }
-function boundedProgressContext(value: string): string {
-  const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
-  if (normalized.length <= MAX_SHELL_PROGRESS_CONTEXT_CHARS) return normalized;
-  return `…${normalized.slice(-(MAX_SHELL_PROGRESS_CONTEXT_CHARS - 1))}`;
-}
-
 function shellProgressMessage(progress: ShellExecutionProgress): string {
   if (progress.reason === "start") return "Shell command is running";
   if (progress.reason === "heartbeat") return `Shell command is still running after ${progress.elapsedMs} ms`;
   return `Shell command produced output after ${progress.elapsedMs} ms`;
 }
+
 
 export function sanitizeDiagnosticText(value: string): string {
   const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
