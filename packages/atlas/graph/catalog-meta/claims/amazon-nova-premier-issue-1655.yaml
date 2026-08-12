@@ -1,0 +1,93 @@
+nodeKind: Claim
+id: claim:model-amazon-nova-premier-bedrock-availability-issue-1655
+attributes:
+  subjectId: model:amazon-nova-premier@current
+  attribute: served_by
+  value: provider:aws-bedrock
+  subjectKind: ModelVersion
+  statement: "Amazon Nova Premier is available through Amazon Bedrock with provider model IDs amazon.nova-premier-v1:0 and us.amazon.nova-premier-v1:0."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-premier-model-card
+  claimedAt: '2026-08-06T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-premier-model-card
+  about_subject:
+    - model:amazon-nova-premier@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-premier-context-window-issue-1655
+attributes:
+  subjectId: model:amazon-nova-premier@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: "Amazon Nova Premier provides a one-million-token context window."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-premier-model-card
+  claimedAt: '2026-08-06T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-premier-model-card
+  about_subject:
+    - model:amazon-nova-premier@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-premier-lifecycle-issue-1655
+attributes:
+  subjectId: model:amazon-nova-premier@current
+  attribute: lifecycleStatus
+  value: legacy; EOL 2026-09-14
+  subjectKind: ModelVersion
+  statement: "Amazon Nova Premier is listed as a legacy Bedrock model with an end-of-life date of September 14, 2026."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-premier-model-card
+  claimedAt: '2026-08-06T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-premier-model-card
+  about_subject:
+    - model:amazon-nova-premier@current
+---
+nodeKind: Claim
+id: claim:model-amazon-nova-premier-capabilities-issue-1655
+attributes:
+  subjectId: model:amazon-nova-premier@current
+  attribute: capabilities
+  value: multimodal input, text output, tool use, structured outputs, prompt caching, complex reasoning, model distillation teacher
+  subjectKind: ModelVersion
+  statement: "Amazon Nova Premier supports text, image, and video input; text output; tool use; structured outputs; prompt caching; complex reasoning; and teacher-model usage for distillation."
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:amazon-nova-premier-model-card
+    - evidence:amazon-nova-premier-launch-blog
+  claimedAt: '2026-08-06T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:amazon-nova-premier-model-card
+    - evidence:amazon-nova-premier-launch-blog
+  about_subject:
+    - model:amazon-nova-premier@current
