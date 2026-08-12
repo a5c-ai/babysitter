@@ -1,12 +1,14 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { initI18n, t } from "./i18n.js";
 import {
   type DriverProgress,
   type DriverResult,
   type ProjectionTodoPhase,
+  MAX_CAPTURE_BYTES,
   OmpDeterministicDriver,
   reconstructBabysitterProjection,
   sanitizeDiagnosticText,
@@ -109,70 +111,210 @@ function toSkillPrompt(name: string, args: string): string {
 
 
 
-function createDeferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((complete) => {
-    resolve = complete;
-  });
-  return { promise, resolve };
+export interface StdinExecutionResult {
+  code: number;
+  stdout: string;
+  stderr: string;
+  killed: boolean;
 }
 
-async function execBabysitterWithStdin(
+export interface BabysitterSpawnSpec {
+  command: string;
+  args: string[];
+}
+
+export async function resolveBabysitterSpawn(
+  args: string[],
+  platform = process.platform,
+  env: NodeJS.ProcessEnv = process.env,
+  nodeExecutable = process.execPath,
+): Promise<BabysitterSpawnSpec> {
+  if (platform !== "win32") return { command: "babysitter", args };
+
+  const pathValue = env.Path || env.PATH || "";
+  const pathDirs = pathValue
+    .split(path.delimiter)
+    .map((entry) => entry.replace(/^"(.*)"$/, "$1"))
+    .filter(Boolean);
+  const exists = async (candidate: string): Promise<boolean> => {
+    try {
+      await fs.access(candidate);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  for (const pathDir of pathDirs) {
+    for (const extension of [".exe", ".com"]) {
+      const candidate = path.join(pathDir, `babysitter${extension}`);
+      if (await exists(candidate)) return { command: candidate, args };
+    }
+    const hasNpmShim = await exists(path.join(pathDir, "babysitter.cmd"))
+      || await exists(path.join(pathDir, "babysitter.bat"));
+    if (!hasNpmShim) continue;
+    const cliCandidates = [
+      path.resolve(pathDir, "..", "@a5c-ai", "babysitter", "bin", "babysitter.js"),
+      path.join(pathDir, "node_modules", "@a5c-ai", "babysitter", "bin", "babysitter.js"),
+    ];
+    for (const cliPath of cliCandidates) {
+      if (await exists(cliPath)) return { command: nodeExecutable, args: [cliPath, ...args] };
+    }
+  }
+  throw new Error("Unable to resolve an argument-safe Babysitter executable from PATH");
+}
+
+function terminateStdinProcessTree(child: ChildProcessWithoutNullStreams): void {
+  if (!child.pid) return;
+  if (process.platform === "win32") {
+    const fallback = (): void => {
+      try { child.kill("SIGKILL"); } catch { /* Process already exited. */ }
+    };
+    try {
+      const killer = spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+        stdio: "ignore",
+        windowsHide: true,
+      });
+      killer.once("error", fallback);
+      killer.once("close", (code) => {
+        if (code !== 0) fallback();
+      });
+      killer.unref();
+    } catch {
+      fallback();
+    }
+    return;
+  }
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    try { child.kill("SIGKILL"); } catch { /* Process already exited. */ }
+  }
+}
+
+export async function execBabysitterWithStdin(
   args: string[],
   cwd: string,
   stdin: Buffer,
   timeoutMs: number,
   signal?: AbortSignal,
-): Promise<{ code: number; stdout: string; stderr: string; killed: boolean }> {
-  const { promise, resolve } = createDeferred<{
-    code: number;
-    stdout: string;
-    stderr: string;
-    killed: boolean;
-  }>();
-  const child = spawn("babysitter", args, {
-    cwd,
-    env: process.env,
-    stdio: ["pipe", "pipe", "pipe"],
-    windowsHide: true,
+): Promise<StdinExecutionResult> {
+  if (signal?.aborted) {
+    return { code: 1, stdout: "", stderr: "Babysitter stdin execution aborted", killed: true };
+  }
+  let spec: BabysitterSpawnSpec;
+  try {
+    spec = await resolveBabysitterSpawn(args);
+  } catch (error) {
+    return {
+      code: 1,
+      stdout: "",
+      stderr: `Babysitter stdin spawn failed: ${error instanceof Error ? error.message : String(error)}`,
+      killed: false,
+    };
+  }
+  let child: ChildProcessWithoutNullStreams;
+  try {
+    child = spawn(spec.command, spec.args, {
+      cwd,
+      env: process.env,
+      stdio: ["pipe", "pipe", "pipe"],
+      windowsHide: true,
+      detached: process.platform !== "win32",
+    });
+  } catch (error) {
+    return {
+      code: 1,
+      stdout: "",
+      stderr: `Babysitter stdin spawn failed: ${error instanceof Error ? error.message : String(error)}`,
+      killed: false,
+    };
+  }
+
+  return await new Promise<StdinExecutionResult>((resolve) => {
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+    let stdoutBytes = 0;
+    let stderrBytes = 0;
+    let settled = false;
+    let closedCode: number | null | undefined;
+    let stdinSettled = false;
+    let timeout: NodeJS.Timeout;
+
+    const finish = (code: number, killed: boolean, diagnostic?: string): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      signal?.removeEventListener("abort", onAbort);
+      child.stdout.off("data", onStdout);
+      child.stderr.off("data", onStderr);
+      child.stdin.off("error", onStdinError);
+      child.off("error", onSpawnError);
+      child.off("close", onClose);
+      const stdout = Buffer.concat(stdoutChunks).toString("utf8");
+      const capturedStderr = Buffer.concat(stderrChunks).toString("utf8");
+      let stderr = capturedStderr;
+      if (diagnostic) {
+        const separator = capturedStderr.length > 0 ? "\n" : "";
+        const diagnosticBytes = Buffer.from(`${separator}${diagnostic}`, "utf8");
+        const retained = Buffer.concat([
+          Buffer.from(capturedStderr, "utf8").subarray(0, Math.max(0, MAX_CAPTURE_BYTES - diagnosticBytes.length)),
+          diagnosticBytes.subarray(0, MAX_CAPTURE_BYTES),
+        ]);
+        stderr = retained.subarray(0, MAX_CAPTURE_BYTES).toString("utf8");
+      }
+      resolve({ code, stdout, stderr, killed });
+    };
+    const failClosed = (diagnostic: string): void => {
+      if (settled) return;
+      terminateStdinProcessTree(child);
+      child.stdin.destroy();
+      child.stdout.destroy();
+      child.stderr.destroy();
+      finish(1, true, diagnostic);
+    };
+    const capture = (target: "stdout" | "stderr", chunk: Buffer): void => {
+      if (settled) return;
+      const chunks = target === "stdout" ? stdoutChunks : stderrChunks;
+      const used = target === "stdout" ? stdoutBytes : stderrBytes;
+      const remaining = MAX_CAPTURE_BYTES - used;
+      if (remaining > 0) chunks.push(chunk.subarray(0, remaining));
+      if (target === "stdout") stdoutBytes += Math.min(chunk.length, remaining);
+      else stderrBytes += Math.min(chunk.length, remaining);
+      if (chunk.length > remaining) {
+        failClosed(`Babysitter stdin ${target} exceeded the ${MAX_CAPTURE_BYTES}-byte capture limit`);
+      }
+    };
+    const onStdout = (chunk: Buffer): void => capture("stdout", chunk);
+    const onStderr = (chunk: Buffer): void => capture("stderr", chunk);
+    const onAbort = (): void => failClosed("Babysitter stdin execution aborted");
+    const onStdinError = (error: Error): void => {
+      failClosed(`Babysitter stdin write failed: ${error.message}`);
+    };
+    const onSpawnError = (error: Error): void => {
+      finish(1, false, `Babysitter stdin spawn failed: ${error.message}`);
+    };
+    const onClose = (code: number | null): void => {
+      closedCode = code;
+      if (stdinSettled) finish(code ?? 1, false);
+    };
+
+    child.stdout.on("data", onStdout);
+    child.stderr.on("data", onStderr);
+    child.stdin.on("error", onStdinError);
+    child.once("error", onSpawnError);
+    child.once("close", onClose);
+    signal?.addEventListener("abort", onAbort, { once: true });
+    timeout = setTimeout(
+      () => failClosed(`Babysitter stdin execution timed out after ${timeoutMs}ms`),
+      timeoutMs,
+    );
+    timeout.unref();
+    child.stdin.end(stdin, () => {
+      stdinSettled = true;
+      if (closedCode !== undefined) finish(closedCode ?? 1, false);
+    });
+    if (signal?.aborted) onAbort();
   });
-  let stdout = "";
-  let stderr = "";
-  let killed = false;
-  let settled = false;
-  const finish = (code: number): void => {
-    if (settled) return;
-    settled = true;
-    clearTimeout(timeout);
-    signal?.removeEventListener("abort", abort);
-    resolve({ code, stdout, stderr, killed });
-  };
-  const abort = (): void => {
-    killed = true;
-    child.kill("SIGKILL");
-  };
-  const timeout = setTimeout(abort, timeoutMs);
-  timeout.unref();
-  child.stdout.setEncoding("utf8");
-  child.stderr.setEncoding("utf8");
-  child.stdout.on("data", (chunk: string) => {
-    stdout += chunk;
-  });
-  child.stderr.on("data", (chunk: string) => {
-    stderr += chunk;
-  });
-  child.once("error", (error) => {
-    stderr += error instanceof Error ? error.message : String(error);
-    finish(1);
-  });
-  child.once("close", (code) => finish(code ?? 1));
-  signal?.addEventListener("abort", abort, { once: true });
-  if (signal?.aborted) abort();
-  child.stdin.on("error", () => {
-    // The exit status remains authoritative when the child closes stdin early.
-  });
-  child.stdin.end(stdin);
-  return await promise;
 }
 
 export default function activate(

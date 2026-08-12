@@ -80,6 +80,11 @@ interface ShellCommandOutput {
   kind: "canonical_output" | "canonical_result" | "external";
 }
 
+interface ShellOutputClassification {
+  kind: ShellCommandOutput["kind"];
+  canonicalRealPath?: string;
+}
+
 interface ResolvedShellValue {
   value: unknown;
   outputAlreadyDurable: boolean;
@@ -1876,16 +1881,22 @@ async function shellCommandOutputFingerprint(
 
   const outputPath = await resolveRunRelativeReal(runDir, selectedRef);
   const beforeSnapshot = await shellOutputSnapshot(runDir, selectedRef, action.effectId);
-  const kind = await classifyShellOutputTarget(runDir, action.effectId, beforeSnapshot?.realPath ?? outputPath);
-  if (
-    beforeSnapshot &&
-    kind !== "external" &&
-    beforeSnapshot.realPath !== await expectedRealPathWithoutInRunAliases(runDir, outputPath)
-  ) {
-    throw new DriverError(
-      `Shell output JSON for effect ${action.effectId} is a symlink alias to canonical engine-owned ${kind === "canonical_output" ? "output.json" : "result.json"}`,
-      action.effectId,
-    );
+  const classification = await classifyShellOutputTarget(runDir, action.effectId, beforeSnapshot ?? { realPath: outputPath });
+  const { kind } = classification;
+  if (beforeSnapshot && kind !== "external") {
+    const expectedRealPath = await expectedRealPathWithoutInRunAliases(runDir, outputPath);
+    if (beforeSnapshot.realPath !== expectedRealPath) {
+      throw new DriverError(
+        `Shell output JSON for effect ${action.effectId} is a symlink alias to canonical engine-owned ${kind === "canonical_output" ? "output.json" : "result.json"}`,
+        action.effectId,
+      );
+    }
+    if (beforeSnapshot.realPath !== classification.canonicalRealPath) {
+      throw new DriverError(
+        `Shell output JSON for effect ${action.effectId} is a hard-link alias to canonical engine-owned ${kind === "canonical_output" ? "output.json" : "result.json"}`,
+        action.effectId,
+      );
+    }
   }
   return {
     ref: selectedRef,
@@ -1900,7 +1911,7 @@ async function shellOutputSnapshot(
   runDir: string,
   ref: string,
   effectId: string,
-): Promise<{ fingerprint: string; bytes: Buffer; realPath: string } | null> {
+): Promise<{ fingerprint: string; bytes: Buffer; realPath: string; dev: number; ino: number } | null> {
   const filePath = await resolveRunRelativeReal(runDir, ref);
   let handle;
   try {
@@ -1938,6 +1949,8 @@ async function shellOutputSnapshot(
       fingerprint: `${after.dev}:${after.ino}:${after.size}:${after.mtimeMs}:${after.ctimeMs}:${sha256(bytes)}`,
       bytes,
       realPath,
+      dev: after.dev,
+      ino: after.ino,
     };
   } finally {
     await handle.close();
@@ -1970,18 +1983,24 @@ async function shellResultValue(
   if (commandOutput) {
     const afterSnapshot = await shellOutputSnapshot(runDir, commandOutput.ref, action.effectId);
     const changed = afterSnapshot !== null && afterSnapshot.fingerprint !== commandOutput.before;
-    const authenticatedKind = afterSnapshot
-      ? await classifyShellOutputTarget(runDir, action.effectId, afterSnapshot.realPath)
-      : commandOutput.kind;
-    if (
-      afterSnapshot &&
-      authenticatedKind !== "external" &&
-      afterSnapshot.realPath !== await expectedRealPathWithoutInRunAliases(runDir, commandOutput.path)
-    ) {
-      throw new DriverError(
-        `Shell output JSON for effect ${action.effectId} is a symlink alias to canonical engine-owned ${authenticatedKind === "canonical_output" ? "output.json" : "result.json"}`,
-        action.effectId,
-      );
+    const classification = afterSnapshot
+      ? await classifyShellOutputTarget(runDir, action.effectId, afterSnapshot)
+      : { kind: commandOutput.kind };
+    const authenticatedKind = classification.kind;
+    if (afterSnapshot && authenticatedKind !== "external") {
+      const expectedRealPath = await expectedRealPathWithoutInRunAliases(runDir, commandOutput.path);
+      if (afterSnapshot.realPath !== expectedRealPath) {
+        throw new DriverError(
+          `Shell output JSON for effect ${action.effectId} is a symlink alias to canonical engine-owned ${authenticatedKind === "canonical_output" ? "output.json" : "result.json"}`,
+          action.effectId,
+        );
+      }
+      if (afterSnapshot.realPath !== classification.canonicalRealPath) {
+        throw new DriverError(
+          `Shell output JSON for effect ${action.effectId} is a hard-link alias to canonical engine-owned ${authenticatedKind === "canonical_output" ? "output.json" : "result.json"}`,
+          action.effectId,
+        );
+      }
     }
     if (authenticatedKind !== "external") {
       if (changed) await restoreTransientShellResult(commandOutput);
@@ -2037,23 +2056,52 @@ async function restoreTransientShellResult(commandOutput: ShellCommandOutput): P
 async function classifyShellOutputTarget(
   runDir: string,
   effectId: string,
-  authenticatedRealPath: string,
-): Promise<ShellCommandOutput["kind"]> {
-  const canonicalOutput = effectArtifactPath(runDir, effectId, "output.json");
-  const canonicalResult = effectArtifactPath(runDir, effectId, "result.json");
-  const canonicalOutputIdentity = await fs.realpath(canonicalOutput).catch((error: unknown) => {
-    if (isNotFound(error)) return canonicalOutput;
+  authenticated: { realPath: string; dev?: number; ino?: number },
+): Promise<ShellOutputClassification> {
+  if (authenticated.dev === undefined || authenticated.ino === undefined) {
+    for (const artifact of [
+      { name: "output.json", kind: "canonical_output" },
+      { name: "result.json", kind: "canonical_result" },
+    ] as const) {
+      const canonicalPath = effectArtifactPath(runDir, effectId, artifact.name);
+      if (authenticated.realPath === canonicalPath) {
+        return { kind: artifact.kind };
+      }
+    }
+    return { kind: "external" };
+  }
+  const tasksDir = path.join(runDir, "tasks");
+  const entries = await fs.readdir(tasksDir, { withFileTypes: true }).catch((error: unknown) => {
+    if (isNotFound(error)) return [];
     throw error;
   });
-  const canonicalResultIdentity = await fs.realpath(canonicalResult).catch((error: unknown) => {
-    if (isNotFound(error)) return canonicalResult;
-    throw error;
-  });
-  return authenticatedRealPath === canonicalOutputIdentity
-    ? "canonical_output"
-    : authenticatedRealPath === canonicalResultIdentity
-      ? "canonical_result"
-      : "external";
+  const effectDirs = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  for (const candidateEffectId of effectDirs) {
+    for (const artifact of [
+      { name: "output.json", kind: "canonical_output" },
+      { name: "result.json", kind: "canonical_result" },
+    ] as const) {
+      const candidatePath = effectArtifactPath(runDir, candidateEffectId, artifact.name);
+      const candidate = await fs.stat(candidatePath).catch((error: unknown) => {
+        if (isNotFound(error)) return null;
+        throw error;
+      });
+      if (
+        candidate &&
+        candidate.dev === authenticated.dev &&
+        candidate.ino === authenticated.ino
+      ) {
+        return {
+          kind: artifact.kind,
+          canonicalRealPath: await fs.realpath(candidatePath),
+        };
+      }
+    }
+  }
+  return { kind: "external" };
 }
 
 

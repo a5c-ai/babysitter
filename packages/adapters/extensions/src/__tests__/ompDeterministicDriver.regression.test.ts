@@ -116,6 +116,115 @@ afterEach(async () => {
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
 
+interface StdinExecutionResult {
+  code: number;
+  stdout: string;
+  stderr: string;
+  killed: boolean;
+}
+
+type StdinExecutor = (
+  args: string[],
+  cwd: string,
+  stdin: Buffer,
+  timeoutMs: number,
+  signal?: AbortSignal,
+) => Promise<StdinExecutionResult>;
+
+interface GeneratedStdinModule {
+  execBabysitterWithStdin: StdinExecutor;
+  resolveBabysitterSpawn(
+    args: string[],
+    platform?: NodeJS.Platform,
+    env?: NodeJS.ProcessEnv,
+    nodeExecutable?: string,
+  ): Promise<{ command: string; args: string[] }>;
+}
+
+let generatedStdinModule: GeneratedStdinModule | undefined;
+
+async function loadGeneratedStdinModule(): Promise<GeneratedStdinModule> {
+  if (!generatedStdinModule) {
+    const output = await tempRun('omp-stdin-extension-');
+    const result = compile({ source: UNIFIED_PLUGIN_DIR, target: 'oh-my-pi', output });
+    expect(result.status, result.diagnostics.map((diagnostic) => diagnostic.message).join('\n')).not.toBe('error');
+    const moduleUrl = pathToFileURL(path.join(result.outputDir, 'extensions', 'index.ts')).href;
+    // The compiler selects this generated plugin path at runtime; a static import cannot exercise it.
+    generatedStdinModule = await import(/* @vite-ignore */ moduleUrl) as unknown as GeneratedStdinModule;
+  }
+  return generatedStdinModule;
+}
+
+async function execBabysitterWithStdin(
+  args: string[],
+  cwd: string,
+  stdin: Buffer,
+  timeoutMs: number,
+  signal?: AbortSignal,
+): Promise<StdinExecutionResult> {
+  const extensionModule = await loadGeneratedStdinModule();
+  return await extensionModule.execBabysitterWithStdin(args, cwd, stdin, timeoutMs, signal);
+}
+
+async function withBabysitterExecutable<T>(run: (cwd: string) => Promise<T>): Promise<T> {
+  const cwd = await tempRun('omp-stdin-exec-');
+  const binDir = path.join(cwd, 'bin');
+  await fs.mkdir(binDir);
+  const executable = path.join(binDir, process.platform === 'win32' ? 'babysitter.cmd' : 'babysitter');
+  if (process.platform === 'win32') {
+    await fs.writeFile(executable, `@echo off\r\n"${process.execPath}" %*\r\n`);
+  } else {
+    await fs.writeFile(executable, `#!/bin/sh\nexec "${process.execPath}" "$@"\n`);
+    await fs.chmod(executable, 0o755);
+  }
+  const originalPath = process.env.PATH;
+  process.env.PATH = `${binDir}${path.delimiter}${originalPath ?? ''}`;
+  try {
+    return await run(cwd);
+  } finally {
+    if (originalPath === undefined) delete process.env.PATH;
+    else process.env.PATH = originalPath;
+  }
+}
+
+async function recordedPids(cwd: string): Promise<number[]> {
+  const entries = await Promise.all(
+    ['parent.pid', 'descendant.pid'].map(async (name) => {
+      try {
+        return Number(await fs.readFile(path.join(cwd, name), 'utf8'));
+      } catch {
+        return 0;
+      }
+    }),
+  );
+  return entries.filter((pid) => Number.isSafeInteger(pid) && pid > 0);
+}
+
+
+async function killRecordedProcesses(cwd: string): Promise<void> {
+  for (const pid of await recordedPids(cwd)) {
+    try {
+      process.kill(pid, 'SIGKILL');
+    } catch {
+      // Already exited.
+    }
+  }
+}
+
+async function expectRecordedProcessesGone(cwd: string): Promise<void> {
+  const pids = await recordedPids(cwd);
+  await vi.waitFor(() => {
+    expect(pids.filter((pid) => {
+      try {
+        process.kill(pid, 0);
+        return true;
+      } catch {
+        return false;
+      }
+    })).toEqual([]);
+  }, { timeout: 1_000, interval: 10 });
+}
+
 describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   it('ships corrected generated instructions with the driver and blocking bridge agent', async () => {
     const output = await tempRun('omp-driver-package-');
@@ -146,6 +255,195 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(manifest.files).toContain('agents/');
     expect(manifest.peerDependencies).toEqual({ '@oh-my-pi/pi-coding-agent': '>=16.5.2 <17' });
     expect(manifest.dependencies).toEqual({ zod: '^4.4.3' });
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'terminates a spawned process tree and settles when a descendant retains stdout',
+    async () => {
+      await withBabysitterExecutable(async (cwd) => {
+        const script = [
+          "const { spawn } = require('node:child_process');",
+          "const fs = require('node:fs');",
+          "fs.writeFileSync('parent.pid', String(process.pid));",
+          "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { stdio: ['ignore', 1, 2] });",
+          "fs.writeFileSync('descendant.pid', String(child.pid));",
+          "require('node:http').createServer().listen(0);",
+        ].join('');
+        try {
+          const result = await within(
+            execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 80),
+            'descendant-held stdout timeout',
+          );
+          expect(result).toMatchObject({ code: 1, killed: true });
+          expect(result.stderr).toMatch(/timed out/i);
+          await expectRecordedProcessesGone(cwd);
+        } finally {
+          await killRecordedProcesses(cwd);
+        }
+      });
+    },
+  );
+
+  it.each([
+    { stream: 'stdout', target: 'stdout' },
+    { stream: 'stderr', target: 'stderr' },
+  ] as const)('fails closed when spawned $stream exceeds the capture bound', async ({ target }) => {
+    await withBabysitterExecutable(async (cwd) => {
+      const script = [
+        "const fs = require('node:fs');",
+        "fs.writeFileSync('parent.pid', String(process.pid));",
+        `process.${target}.write(Buffer.alloc(1024 * 1024 + 64, 97));`,
+        "require('node:http').createServer().listen(0);",
+      ].join('');
+      try {
+        const result = await within(
+          execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 5_000),
+          `${target} overflow`,
+        );
+        expect(result).toMatchObject({ code: 1, killed: true });
+        expect(result.stderr).toMatch(new RegExp(`${target}.*limit|limit.*${target}`, 'i'));
+        expect(Buffer.byteLength(result[target], 'utf8')).toBeLessThanOrEqual(1024 * 1024);
+        await expectRecordedProcessesGone(cwd);
+      } finally {
+        await killRecordedProcesses(cwd);
+      }
+    });
+  });
+
+  it.skipIf(process.platform === 'win32')('kills the spawned process tree and settles promptly on AbortSignal', async () => {
+    await withBabysitterExecutable(async (cwd) => {
+      const script = [
+        "const { spawn } = require('node:child_process');",
+        "const fs = require('node:fs');",
+        "fs.writeFileSync('parent.pid', String(process.pid));",
+        "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { stdio: ['ignore', 1, 2] });",
+        "fs.writeFileSync('descendant.pid', String(child.pid));",
+        "require('node:http').createServer().listen(0);",
+      ].join('');
+      const controller = new AbortController();
+      const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
+      try {
+        const execution = execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 5_000, controller.signal);
+        await vi.waitFor(async () => {
+          await expect(fs.access(path.join(cwd, 'descendant.pid'))).resolves.toBeUndefined();
+        });
+        controller.abort();
+        const result = await within(
+          execution,
+          'AbortSignal tree termination',
+        );
+        expect(result).toMatchObject({ code: 1, killed: true });
+        expect(result.stderr).toMatch(/aborted/i);
+        expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
+        await expectRecordedProcessesGone(cwd);
+      } finally {
+        controller.abort();
+        removeListener.mockRestore();
+        await killRecordedProcesses(cwd);
+      }
+    });
+  });
+
+  it('surfaces stdin EPIPE instead of reporting child success', async () => {
+    await withBabysitterExecutable(async (cwd) => {
+      const script = [
+        "const fs = require('node:fs');",
+        "fs.writeFileSync('parent.pid', String(process.pid));",
+        "fs.closeSync(0);",
+        "require('node:http').createServer().listen(0);",
+      ].join('');
+      try {
+        const result = await within(
+          execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(8 * 1024 * 1024, 97), 5_000),
+          'stdin EPIPE',
+        );
+        expect(result.code).toBe(1);
+        expect(result.stderr).toMatch(/stdin|EPIPE|write/i);
+        await expectRecordedProcessesGone(cwd);
+      } finally {
+        await killRecordedProcesses(cwd);
+      }
+    });
+  });
+
+  it('preserves exact stdin bytes and normal nonzero exit output', async () => {
+    await withBabysitterExecutable(async (cwd) => {
+      const stdin = Buffer.from([0, 1, 2, 127, 128, 255]);
+      const script = [
+        "const { createHash } = require('node:crypto');",
+        "const chunks = [];",
+        "process.stdin.on('data', (chunk) => chunks.push(chunk));",
+        "process.stdin.on('end', () => {",
+        "process.stdout.write(createHash('sha256').update(Buffer.concat(chunks)).digest('hex'));",
+        "process.stderr.write('expected-error');",
+        "process.exit(7);",
+        "});",
+      ].join('');
+      const result = await within(
+        execBabysitterWithStdin(['-e', script], cwd, stdin, 5_000),
+        'normal exact stdin execution',
+      );
+      expect(result).toEqual({
+        code: 7,
+        stdout: createHash('sha256').update(stdin).digest('hex'),
+        stderr: 'expected-error',
+        killed: false,
+      });
+    });
+  });
+
+  it('resolves the current-platform executable without shell-concatenating arguments', async () => {
+    await withBabysitterExecutable(async (cwd) => {
+      const script = "process.stdin.resume(); process.stdin.on('end', () => process.stdout.write(JSON.stringify(process.argv.slice(1))));";
+      const args = ['a&b', 'two words', 'quote"arg'];
+      const result = await within(
+        execBabysitterWithStdin(['-e', script, ...args], cwd, Buffer.from('exact-input'), 5_000),
+        'platform executable resolution',
+      );
+      expect(result).toEqual({ code: 0, stdout: JSON.stringify(args), stderr: '', killed: false });
+    });
+  });
+
+  it('resolves a Windows npm cmd shim to Node without parsing metacharacter arguments', async () => {
+    const root = await tempRun('omp-stdin-windows-shim-');
+    const binDir = path.join(root, 'node_modules', '.bin');
+    const cliPath = path.join(root, 'node_modules', '@a5c-ai', 'babysitter', 'bin', 'babysitter.js');
+    await fs.mkdir(binDir, { recursive: true });
+    await fs.mkdir(path.dirname(cliPath), { recursive: true });
+    await fs.writeFile(path.join(binDir, 'babysitter.cmd'), '@echo off\r\n');
+    await fs.writeFile(cliPath, '');
+    const args = ['a&b', 'two words', 'quote"arg', '%PATH%'];
+    const extensionModule = await loadGeneratedStdinModule();
+
+    await expect(
+      extensionModule.resolveBabysitterSpawn(args, 'win32', { Path: binDir }, 'C:\\node.exe'),
+    ).resolves.toEqual({
+      command: 'C:\\node.exe',
+      args: [cliPath, ...args],
+    });
+  });
+
+  it.skipIf(process.platform === 'win32')('reports spawn errors and removes AbortSignal listeners', async () => {
+    const cwd = await tempRun('omp-stdin-spawn-error-');
+    const emptyPath = await tempRun('omp-stdin-empty-path-');
+    const originalPath = process.env.PATH;
+    const controller = new AbortController();
+    const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
+    process.env.PATH = emptyPath;
+    try {
+      await expect(
+        within(execBabysitterWithStdin([], cwd, Buffer.from('unwritten'), 5_000, controller.signal), 'spawn error'),
+      ).resolves.toMatchObject({
+        code: 1,
+        stderr: expect.stringMatching(/spawn failed|ENOENT/i),
+        killed: false,
+      });
+      expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
+    } finally {
+      if (originalPath === undefined) delete process.env.PATH;
+      else process.env.PATH = originalPath;
+      removeListener.mockRestore();
+    }
   });
 
   it('packs and imports the generated driver from a strict isolated install', async () => {
@@ -1260,6 +1558,156 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(
       fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
     ).resolves.toEqual(stdoutValue);
+  });
+
+  it.each([
+    'tasks/effect-shell/output.json',
+    'tasks/effect-shell/result.json',
+  ])('rejects a noncanonical io.outputJsonPath hard-linked to canonical %s', async (canonicalRef) => {
+    const runDir = await tempRun('omp-shell-canonical-hard-link-');
+    const outputRef = 'artifacts/command-output.json';
+    const canonicalPath = path.join(runDir, canonicalRef);
+    const outputPath = path.join(runDir, outputRef);
+    const effect = action('shell', {
+      shell: { command: 'hard-link-canonical-json' },
+      io: { outputJsonPath: outputRef },
+    });
+    let iterations = 0;
+    let posts = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        await fs.mkdir(path.dirname(canonicalPath), { recursive: true });
+        await fs.mkdir(path.dirname(outputPath), { recursive: true });
+        await writeJson(canonicalPath, { source: 'canonical hard link' });
+        await fs.link(canonicalPath, outputPath);
+        return {
+          exitCode: 0,
+          stdout: '{"mustNotWin":"stdout"}',
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-11T00:00:00.000Z',
+          finishedAt: '2026-08-11T00:00:01.000Z',
+        };
+      },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:post') posts += 1;
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      new RegExp(`hard-link alias to canonical engine-owned ${path.basename(canonicalRef).replace('.', '\\.')}`, 'i'),
+    );
+    expect(posts).toBe(0);
+  });
+
+  it.each(['output.json', 'result.json'])(
+    'rejects a noncanonical io.outputJsonPath hard-linked to another effect canonical %s',
+    async (artifactName) => {
+      const runDir = await tempRun('omp-shell-cross-effect-hard-link-');
+      const outputRef = 'artifacts/command-output.json';
+      const canonicalPath = path.join(runDir, 'tasks', 'other-effect', artifactName);
+      const outputPath = path.join(runDir, outputRef);
+      await writeJson(canonicalPath, { source: 'other effect canonical artifact' });
+      const effect = action('shell', {
+        shell: { command: 'hard-link-other-effect-canonical-json' },
+        io: { outputJsonPath: outputRef },
+      });
+      let iterations = 0;
+      let posts = 0;
+      const driver = new OmpDeterministicDriver({
+        cwd: runDir,
+        executeShell: async () => {
+          await fs.mkdir(path.dirname(outputPath), { recursive: true });
+          await fs.link(canonicalPath, outputPath);
+          return {
+            exitCode: 0,
+            stdout: '{"mustNotWin":"stdout"}',
+            stderr: '',
+            timedOut: false,
+            stdoutTruncated: false,
+            stderrTruncated: false,
+            startedAt: '2026-08-11T00:00:00.000Z',
+            finishedAt: '2026-08-11T00:00:01.000Z',
+          };
+        },
+        runCli: async (args) => {
+          if (args[0] === 'run:iterate') {
+            iterations += 1;
+            return {
+              code: 0,
+              stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+              stderr: '',
+            };
+          }
+          if (args[0] === 'task:post') posts += 1;
+          return { code: 0, stdout: '{}', stderr: '' };
+        },
+      });
+
+      await expect(driver.drive(runDir)).rejects.toThrow(
+        new RegExp(`hard-link alias to canonical engine-owned ${artifactName.replace('.', '\\.')}`, 'i'),
+      );
+      expect(posts).toBe(0);
+    },
+  );
+
+  it('consumes a genuinely noncanonical io.outputJsonPath hard link', async () => {
+    const runDir = await tempRun('omp-shell-noncanonical-hard-link-');
+    const sourceRef = 'artifacts/source.json';
+    const outputRef = 'artifacts/command-output.json';
+    const value = { source: 'noncanonical hard link' };
+    const effect = action('shell', {
+      shell: { command: 'hard-link-noncanonical-json' },
+      io: { outputJsonPath: outputRef },
+    });
+    let iterations = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        await writeJson(path.join(runDir, sourceRef), value);
+        await fs.link(path.join(runDir, sourceRef), path.join(runDir, outputRef));
+        return {
+          exitCode: 0,
+          stdout: '{"mustNotWin":"stdout"}',
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-11T00:00:00.000Z',
+          finishedAt: '2026-08-11T00:00:01.000Z',
+        };
+      },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') return await taskShowResult(runDir, effect);
+        await recordCommittedResult(runDir, effect, value);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toEqual(value);
   });
 
   it('consumes newly created JSON from a noncanonical io.outputJsonPath', async () => {
