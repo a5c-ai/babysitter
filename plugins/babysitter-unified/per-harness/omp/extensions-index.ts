@@ -163,32 +163,255 @@ export async function resolveBabysitterSpawn(
   throw new Error("Unable to resolve an argument-safe Babysitter executable from PATH");
 }
 
-function terminateStdinProcessTree(child: ChildProcessWithoutNullStreams): void {
-  if (!child.pid) return;
-  if (process.platform === "win32") {
-    const fallback = (): void => {
-      try { child.kill("SIGKILL"); } catch { /* Process already exited. */ }
+interface ProcessTerminationResult {
+  killed: boolean;
+  diagnostic?: string;
+}
+
+const PROCESS_TREE_ROUNDS = 3;
+const PROCESS_TREE_SETTLE_MS = 10;
+const PROCESS_TABLE_TIMEOUT_MS = 150;
+const PROCESS_TABLE_MAX_BYTES = 4 * 1024 * 1024;
+const PROCESS_TREE_MAX_NODES = 32_768;
+
+function signalProcess(pid: number, signal: NodeJS.Signals): string | undefined {
+  try {
+    process.kill(pid, signal);
+    return undefined;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ESRCH") return undefined;
+    return error instanceof Error ? error.message : String(error);
+  }
+}
+
+async function readPosixProcessTable(): Promise<Map<number, number>> {
+  return await new Promise<Map<number, number>>((resolve, reject) => {
+    const ps = spawn("ps", ["-axo", "pid=,ppid="], {
+      stdio: ["ignore", "pipe", "ignore"],
+      windowsHide: true,
+    });
+    const chunks: Buffer[] = [];
+    let bytes = 0;
+    let settled = false;
+    const finish = (error?: Error): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      ps.stdout.removeAllListeners();
+      ps.removeAllListeners();
+      if (error) {
+        try { ps.kill("SIGKILL"); } catch { /* Process already exited. */ }
+        reject(error);
+        return;
+      }
+      try {
+        const table = new Map<number, number>();
+        for (const line of Buffer.concat(chunks).toString("utf8").split(/\r?\n/)) {
+          if (line.trim().length === 0) continue;
+          const match = /^\s*([1-9]\d*)\s+(\d+)\s*$/.exec(line);
+          if (!match) throw new Error("ps returned malformed process metadata");
+          const pid = Number(match[1]);
+          const ppid = Number(match[2]);
+          if (!Number.isSafeInteger(pid) || !Number.isSafeInteger(ppid) || table.has(pid)) {
+            throw new Error("ps returned invalid or duplicate process metadata");
+          }
+          table.set(pid, ppid);
+          if (table.size > PROCESS_TREE_MAX_NODES) {
+            throw new Error("process table exceeded the bounded node limit");
+          }
+        }
+        resolve(table);
+      } catch (parseError) {
+        reject(parseError);
+      }
     };
-    try {
-      const killer = spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+    const timeout = setTimeout(
+      () => finish(new Error(`ps process discovery exceeded ${PROCESS_TABLE_TIMEOUT_MS}ms`)),
+      PROCESS_TABLE_TIMEOUT_MS,
+    );
+    timeout.unref();
+    ps.stdout.on("data", (chunk: Buffer) => {
+      bytes += chunk.length;
+      if (bytes > PROCESS_TABLE_MAX_BYTES) {
+        finish(new Error("ps process metadata exceeded the bounded capture limit"));
+        return;
+      }
+      chunks.push(chunk);
+    });
+    ps.once("error", (error) => finish(error));
+    ps.once("close", (code) => {
+      if (code !== 0) finish(new Error(`ps process discovery exited with code ${code ?? "unknown"}`));
+      else finish();
+    });
+  });
+}
+
+function rootedDescendants(table: Map<number, number>, rootPid: number): Array<{ pid: number; depth: number }> {
+  if (!table.has(rootPid)) return [];
+  const children = new Map<number, number[]>();
+  for (const [pid, ppid] of table) {
+    const siblings = children.get(ppid);
+    if (siblings) siblings.push(pid);
+    else children.set(ppid, [pid]);
+  }
+  const descendants: Array<{ pid: number; depth: number }> = [];
+  const queue = [{ pid: rootPid, depth: 0 }];
+  for (let index = 0; index < queue.length; index += 1) {
+    if (queue.length > PROCESS_TREE_MAX_NODES) throw new Error("process tree exceeded the bounded node limit");
+    const current = queue[index];
+    for (const pid of children.get(current.pid) ?? []) {
+      const descendant = { pid, depth: current.depth + 1 };
+      descendants.push(descendant);
+      queue.push(descendant);
+    }
+  }
+  return descendants;
+}
+
+async function terminateWindowsProcessTree(child: ChildProcessWithoutNullStreams): Promise<ProcessTerminationResult> {
+  const pid = child.pid;
+  if (!pid) return { killed: false, diagnostic: "spawned process has no PID" };
+  const fallback = (): ProcessTerminationResult => {
+    try { child.kill("SIGKILL"); } catch { /* Process already exited. */ }
+    return { killed: true };
+  };
+  try {
+    return await new Promise<ProcessTerminationResult>((resolve) => {
+      const killer = spawn("taskkill", ["/pid", String(pid), "/T", "/F"], {
         stdio: "ignore",
         windowsHide: true,
       });
-      killer.once("error", fallback);
-      killer.once("close", (code) => {
-        if (code !== 0) fallback();
-      });
-      killer.unref();
-    } catch {
-      fallback();
-    }
-    return;
-  }
-  try {
-    process.kill(-child.pid, "SIGKILL");
+      let settled = false;
+      const finish = (result: ProcessTerminationResult): void => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        killer.removeAllListeners();
+        killer.unref();
+        resolve(result);
+      };
+      const timeout = setTimeout(() => {
+        try { killer.kill("SIGKILL"); } catch { /* Killer already exited. */ }
+        finish(fallback());
+      }, PROCESS_TABLE_TIMEOUT_MS);
+      timeout.unref();
+      killer.once("error", () => finish(fallback()));
+      killer.once("close", (code) => finish(code === 0 ? { killed: true } : fallback()));
+    });
   } catch {
-    try { child.kill("SIGKILL"); } catch { /* Process already exited. */ }
+    return fallback();
   }
+}
+
+async function terminatePosixProcessTree(child: ChildProcessWithoutNullStreams): Promise<ProcessTerminationResult> {
+  const rootPid = child.pid;
+  if (!rootPid) return { killed: false, diagnostic: "spawned process has no PID" };
+  const rootParentPid = process.pid;
+  const failures: string[] = [];
+  const knownPids = new Set<number>([rootPid]);
+  let rootIdentityConfirmed = false;
+  let groupStopAttempted = false;
+  let discoveryEstablished = false;
+
+  try {
+    rootIdentityConfirmed = (await readPosixProcessTable()).get(rootPid) === rootParentPid;
+    if (!rootIdentityConfirmed) {
+      failures.push("direct-child identity could not be revalidated before termination");
+    }
+  } catch (error) {
+    failures.push(`initial process discovery failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (rootIdentityConfirmed) {
+    groupStopAttempted = true;
+    const groupStopFailure = signalProcess(-rootPid, "SIGSTOP");
+    if (groupStopFailure) failures.push(`process-group stop failed: ${groupStopFailure}`);
+  }
+
+  for (let round = 0; round < PROCESS_TREE_ROUNDS; round += 1) {
+    try {
+      const table = await readPosixProcessTable();
+      if (table.get(rootPid) !== rootParentPid) {
+        failures.push("direct-child identity could not be revalidated after process-group stop");
+        break;
+      }
+      rootIdentityConfirmed = true;
+      if (!groupStopAttempted) {
+        groupStopAttempted = true;
+        const groupStopFailure = signalProcess(-rootPid, "SIGSTOP");
+        if (groupStopFailure) failures.push(`process-group stop failed: ${groupStopFailure}`);
+        continue;
+      }
+      discoveryEstablished = true;
+      const descendants = rootedDescendants(table, rootPid);
+      for (const { pid } of descendants) knownPids.add(pid);
+      for (const { pid } of descendants.sort((left, right) => left.depth - right.depth)) {
+        const error = signalProcess(pid, "SIGSTOP");
+        if (error) failures.push(`failed to stop descendant ${pid}: ${error}`);
+      }
+      await new Promise<void>((resolve) => setTimeout(resolve, PROCESS_TREE_SETTLE_MS));
+      const revalidatedTable = await readPosixProcessTable();
+      if (revalidatedTable.get(rootPid) !== rootParentPid) {
+        failures.push("direct-child identity could not be revalidated before descendant kill");
+        break;
+      }
+      const killableDescendants = rootedDescendants(revalidatedTable, rootPid);
+      for (const { pid } of killableDescendants) knownPids.add(pid);
+      for (const { pid } of killableDescendants.sort((left, right) => left.depth - right.depth)) {
+        const error = signalProcess(pid, "SIGSTOP");
+        if (error) failures.push(`failed to re-stop descendant ${pid}: ${error}`);
+      }
+      for (const { pid } of killableDescendants.sort((left, right) => right.depth - left.depth)) {
+        const error = signalProcess(pid, "SIGKILL");
+        if (error) failures.push(`failed to kill descendant ${pid}: ${error}`);
+      }
+    } catch (error) {
+      failures.push(`process discovery failed: ${error instanceof Error ? error.message : String(error)}`);
+      break;
+    }
+  }
+
+  try {
+    const finalTable = await readPosixProcessTable();
+    const finalRootParent = finalTable.get(rootPid);
+    if (finalRootParent === rootParentPid) {
+      const groupKillFailure = signalProcess(-rootPid, "SIGKILL");
+      if (groupKillFailure) failures.push(`process-group kill failed: ${groupKillFailure}`);
+      const rootKillFailure = signalProcess(rootPid, "SIGKILL");
+      if (rootKillFailure) failures.push(`direct-child kill failed: ${rootKillFailure}`);
+    } else if (finalRootParent !== undefined) {
+      failures.push("direct-child identity could not be revalidated before final kill");
+    } else if (!rootIdentityConfirmed) {
+      failures.push("direct-child identity could not be revalidated before final kill");
+    }
+  } catch (error) {
+    failures.push(`final process discovery failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  for (let round = 0; round < PROCESS_TREE_ROUNDS; round += 1) {
+    await new Promise<void>((resolve) => setTimeout(resolve, PROCESS_TREE_SETTLE_MS));
+    try {
+      const table = await readPosixProcessTable();
+      const remaining = [...knownPids].filter((pid) => table.has(pid));
+      if (remaining.length === 0) {
+        return discoveryEstablished && failures.length === 0
+          ? { killed: true }
+          : { killed: false, diagnostic: failures.join("; ") || "process-tree discovery could not be established" };
+      }
+      if (round === PROCESS_TREE_ROUNDS - 1) {
+        failures.push(`termination could not confirm exit of PIDs ${remaining.join(", ")}`);
+      }
+    } catch (error) {
+      failures.push(`termination confirmation failed: ${error instanceof Error ? error.message : String(error)}`);
+      break;
+    }
+  }
+  return { killed: false, diagnostic: failures.join("; ") || "process-tree termination could not be confirmed" };
+}
+
+async function terminateStdinProcessTree(child: ChildProcessWithoutNullStreams): Promise<ProcessTerminationResult> {
+  return process.platform === "win32"
+    ? await terminateWindowsProcessTree(child)
+    : await terminatePosixProcessTree(child);
 }
 
 export async function execBabysitterWithStdin(
@@ -199,7 +422,7 @@ export async function execBabysitterWithStdin(
   signal?: AbortSignal,
 ): Promise<StdinExecutionResult> {
   if (signal?.aborted) {
-    return { code: 1, stdout: "", stderr: "Babysitter stdin execution aborted", killed: true };
+    return { code: 1, stdout: "", stderr: "Babysitter stdin execution aborted", killed: false };
   }
   let spec: BabysitterSpawnSpec;
   try {
@@ -236,6 +459,7 @@ export async function execBabysitterWithStdin(
     let stdoutBytes = 0;
     let stderrBytes = 0;
     let settled = false;
+    let terminating = false;
     let closedCode: number | null | undefined;
     let stdinSettled = false;
     let timeout: NodeJS.Timeout;
@@ -265,15 +489,25 @@ export async function execBabysitterWithStdin(
       resolve({ code, stdout, stderr, killed });
     };
     const failClosed = (diagnostic: string): void => {
-      if (settled) return;
-      terminateStdinProcessTree(child);
-      child.stdin.destroy();
-      child.stdout.destroy();
-      child.stderr.destroy();
-      finish(1, true, diagnostic);
+      if (settled || terminating) return;
+      terminating = true;
+      void terminateStdinProcessTree(child)
+        .catch((error): ProcessTerminationResult => ({
+          killed: false,
+          diagnostic: error instanceof Error ? error.message : String(error),
+        }))
+        .then((termination) => {
+          child.stdin.destroy();
+          child.stdout.destroy();
+          child.stderr.destroy();
+          const terminationDiagnostic = termination.diagnostic
+            ? `${diagnostic}; process-tree termination could not be confirmed: ${termination.diagnostic}`
+            : diagnostic;
+          finish(1, termination.killed, terminationDiagnostic);
+        });
     };
     const capture = (target: "stdout" | "stderr", chunk: Buffer): void => {
-      if (settled) return;
+      if (settled || terminating) return;
       const chunks = target === "stdout" ? stdoutChunks : stderrChunks;
       const used = target === "stdout" ? stdoutBytes : stderrBytes;
       const remaining = MAX_CAPTURE_BYTES - used;
@@ -291,11 +525,11 @@ export async function execBabysitterWithStdin(
       failClosed(`Babysitter stdin write failed: ${error.message}`);
     };
     const onSpawnError = (error: Error): void => {
-      finish(1, false, `Babysitter stdin spawn failed: ${error.message}`);
+      if (!terminating) finish(1, false, `Babysitter stdin spawn failed: ${error.message}`);
     };
     const onClose = (code: number | null): void => {
       closedCode = code;
-      if (stdinSettled) finish(code ?? 1, false);
+      if (!terminating && stdinSettled) finish(code ?? 1, false);
     };
 
     child.stdout.on("data", onStdout);
@@ -311,7 +545,7 @@ export async function execBabysitterWithStdin(
     timeout.unref();
     child.stdin.end(stdin, () => {
       stdinSettled = true;
-      if (closedCode !== undefined) finish(closedCode ?? 1, false);
+      if (!terminating && closedCode !== undefined) finish(closedCode ?? 1, false);
     });
     if (signal?.aborted) onAbort();
   });

@@ -258,14 +258,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   });
 
   it.skipIf(process.platform === 'win32')(
-    'terminates a spawned process tree and settles when a descendant retains stdout',
+    'terminates a detached descendant and settles on timeout',
     async () => {
       await withBabysitterExecutable(async (cwd) => {
         const script = [
           "const { spawn } = require('node:child_process');",
           "const fs = require('node:fs');",
           "fs.writeFileSync('parent.pid', String(process.pid));",
-          "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { stdio: ['ignore', 1, 2] });",
+          "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { detached: true, stdio: ['ignore', 1, 2] });",
           "fs.writeFileSync('descendant.pid', String(child.pid));",
           "require('node:http').createServer().listen(0);",
         ].join('');
@@ -290,8 +290,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   ] as const)('fails closed when spawned $stream exceeds the capture bound', async ({ target }) => {
     await withBabysitterExecutable(async (cwd) => {
       const script = [
+        "const { spawn } = require('node:child_process');",
         "const fs = require('node:fs');",
         "fs.writeFileSync('parent.pid', String(process.pid));",
+        "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { detached: true, stdio: ['ignore', 1, 2] });",
+        "fs.writeFileSync('descendant.pid', String(child.pid));",
         `process.${target}.write(Buffer.alloc(1024 * 1024 + 64, 97));`,
         "require('node:http').createServer().listen(0);",
       ].join('');
@@ -310,13 +313,13 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     });
   });
 
-  it.skipIf(process.platform === 'win32')('kills the spawned process tree and settles promptly on AbortSignal', async () => {
+  it.skipIf(process.platform === 'win32')('terminates a detached descendant and settles promptly on AbortSignal', async () => {
     await withBabysitterExecutable(async (cwd) => {
       const script = [
         "const { spawn } = require('node:child_process');",
         "const fs = require('node:fs');",
         "fs.writeFileSync('parent.pid', String(process.pid));",
-        "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { stdio: ['ignore', 1, 2] });",
+        "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { detached: true, stdio: ['ignore', 1, 2] });",
         "fs.writeFileSync('descendant.pid', String(child.pid));",
         "require('node:http').createServer().listen(0);",
       ].join('');
