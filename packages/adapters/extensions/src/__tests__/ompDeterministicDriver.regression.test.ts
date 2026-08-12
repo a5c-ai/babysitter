@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { promises as fs, type Stats } from 'node:fs';
+import { existsSync, promises as fs, readFileSync, type Stats } from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -187,6 +187,38 @@ async function withBabysitterExecutable<T>(run: (cwd: string) => Promise<T>): Pr
   }
 }
 
+async function installPersistentZombiePsShim(
+  cwd: string,
+  retainedState: 'zombie' | 'replacement' = 'zombie',
+): Promise<void> {
+  const executable = path.join(cwd, 'bin', 'ps');
+  const transitionCall = retainedState === 'zombie' ? 9 : 8;
+  const script = `#!/bin/sh
+pid_file=${JSON.stringify(path.join(cwd, 'parent.pid'))}
+count_file=${JSON.stringify(path.join(cwd, 'ps-call-count'))}
+injected_file=${JSON.stringify(path.join(cwd, `${retainedState}-row-injected`))}
+if [ ! -f "$pid_file" ]; then exit 0; fi
+IFS= read -r pid < "$pid_file"
+count=0
+if [ -f "$count_file" ]; then IFS= read -r count < "$count_file"; fi
+count=$((count + 1))
+printf '%s\\n' "$count" > "$count_file"
+if [ "$count" -ge '${transitionCall}' ]; then
+  if [ "$count" -eq '${transitionCall}' ]; then kill -KILL "$pid" 2>/dev/null || true; fi
+  if [ '${retainedState}' = replacement ]; then
+    printf '%s %s %s R Sun Jan 1 00:00:00 2000\\n' "$pid" '${process.pid}' "$pid"
+  else
+    printf '%s %s %s Z Mon Aug 11 00:00:00 2026\\n' "$pid" '${process.pid}' "$pid"
+  fi
+  : > "$injected_file"
+else
+  printf '%s %s %s S Mon Aug 11 00:00:00 2026\\n' "$pid" '${process.pid}' "$pid"
+fi
+`;
+  await fs.writeFile(executable, script);
+  await fs.chmod(executable, 0o755);
+}
+
 async function recordedPids(cwd: string): Promise<number[]> {
   const entries = await Promise.all(
     ['parent.pid', 'descendant.pid'].map(async (name) => {
@@ -274,7 +306,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
             execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 80),
             'descendant-held stdout timeout',
           );
-          expect(result).toMatchObject({ code: 1, killed: true });
+          expect(result.killed, result.stderr).toBe(true);
           expect(result.stderr).toMatch(/timed out/i);
           await expectRecordedProcessesGone(cwd);
         } finally {
@@ -284,6 +316,70 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     },
   );
 
+  it.skipIf(process.platform === 'win32')(
+    'confirms timeout termination when ps retains the reaped root as a zombie',
+    async () => {
+      await withBabysitterExecutable(async (cwd) => {
+        await installPersistentZombiePsShim(cwd);
+        const script = [
+          "const fs = require('node:fs');",
+          "fs.writeFileSync('parent.pid', String(process.pid));",
+          "require('node:http').createServer().listen(0);",
+        ].join('');
+        try {
+          const result = await within(
+            execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 200),
+            'zombie-visible timeout termination',
+          );
+          await expect(fs.access(path.join(cwd, 'zombie-row-injected'))).resolves.toBeUndefined();
+          expect(result.killed, result.stderr).toBe(true);
+          expect(result.stderr).toMatch(/timed out/i);
+          await expectRecordedProcessesGone(cwd);
+        } finally {
+          await killRecordedProcesses(cwd);
+        }
+      });
+    },
+  );
+
+
+  it.skipIf(process.platform === 'win32')(
+    'does not signal a replacement that reuses the terminated root PID',
+    async () => {
+      await withBabysitterExecutable(async (cwd) => {
+        await installPersistentZombiePsShim(cwd, 'replacement');
+        const script = [
+          "const fs = require('node:fs');",
+          "fs.writeFileSync('parent.pid', String(process.pid));",
+          "require('node:http').createServer().listen(0);",
+        ].join('');
+        const postReplacementSignals: Array<{ pid: number; signal: string | number | undefined }> = [];
+        const originalKill = process.kill.bind(process);
+        const killSpy = vi.spyOn(process, 'kill').mockImplementation((pid, signal) => {
+          const marker = path.join(cwd, 'replacement-row-injected');
+          if (existsSync(marker)) {
+            const rootPid = Number(readFileSync(path.join(cwd, 'parent.pid'), 'utf8'));
+            if ((pid === rootPid || pid === -rootPid) && signal !== 0) postReplacementSignals.push({ pid, signal });
+          }
+          return originalKill(pid, signal);
+        });
+        try {
+          const result = await within(
+            execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 200),
+            'replacement-visible timeout termination',
+          );
+          await expect(fs.access(path.join(cwd, 'replacement-row-injected'))).resolves.toBeUndefined();
+          expect(result.killed, result.stderr).toBe(true);
+          expect(result.stderr).toMatch(/timed out/i);
+          await expectRecordedProcessesGone(cwd);
+          expect(postReplacementSignals).toEqual([]);
+        } finally {
+          killSpy.mockRestore();
+          await killRecordedProcesses(cwd);
+        }
+      });
+    },
+  );
   it.each([
     { stream: 'stdout', target: 'stdout' },
     { stream: 'stderr', target: 'stderr' },

@@ -168,11 +168,31 @@ interface ProcessTerminationResult {
   diagnostic?: string;
 }
 
+interface PosixProcessMetadata {
+  parentPid: number;
+  processGroupId: number;
+  state: string;
+  startedAt: string;
+}
+
 const PROCESS_TREE_ROUNDS = 3;
 const PROCESS_TREE_SETTLE_MS = 10;
-const PROCESS_TABLE_TIMEOUT_MS = 150;
+const PROCESS_TABLE_TIMEOUT_MS = 300;
 const PROCESS_TABLE_MAX_BYTES = 4 * 1024 * 1024;
 const PROCESS_TREE_MAX_NODES = 32_768;
+
+function isSamePosixProcess(
+  current: PosixProcessMetadata | undefined,
+  expected: PosixProcessMetadata,
+): boolean {
+  return current?.parentPid === expected.parentPid
+    && current.processGroupId === expected.processGroupId
+    && current.startedAt === expected.startedAt;
+}
+
+function isZombieProcess(metadata: PosixProcessMetadata): boolean {
+  return metadata.state.startsWith("Z");
+}
 
 function signalProcess(pid: number, signal: NodeJS.Signals): string | undefined {
   try {
@@ -184,9 +204,9 @@ function signalProcess(pid: number, signal: NodeJS.Signals): string | undefined 
   }
 }
 
-async function readPosixProcessTable(): Promise<Map<number, number>> {
-  return await new Promise<Map<number, number>>((resolve, reject) => {
-    const ps = spawn("ps", ["-axo", "pid=,ppid="], {
+async function readPosixProcessTable(): Promise<Map<number, PosixProcessMetadata>> {
+  return await new Promise<Map<number, PosixProcessMetadata>>((resolve, reject) => {
+    const ps = spawn("ps", ["-axo", "pid=,ppid=,pgid=,state=,lstart="], {
       stdio: ["ignore", "pipe", "ignore"],
       windowsHide: true,
     });
@@ -205,17 +225,25 @@ async function readPosixProcessTable(): Promise<Map<number, number>> {
         return;
       }
       try {
-        const table = new Map<number, number>();
+        const table = new Map<number, PosixProcessMetadata>();
         for (const line of Buffer.concat(chunks).toString("utf8").split(/\r?\n/)) {
           if (line.trim().length === 0) continue;
-          const match = /^\s*([1-9]\d*)\s+(\d+)\s*$/.exec(line);
+          const match = /^\s*([1-9]\d*)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.+?)\s*$/.exec(line);
           if (!match) throw new Error("ps returned malformed process metadata");
           const pid = Number(match[1]);
-          const ppid = Number(match[2]);
-          if (!Number.isSafeInteger(pid) || !Number.isSafeInteger(ppid) || table.has(pid)) {
+          const parentPid = Number(match[2]);
+          const processGroupId = Number(match[3]);
+          const state = match[4];
+          const startedAt = match[5];
+          if (
+            !Number.isSafeInteger(pid)
+            || !Number.isSafeInteger(parentPid)
+            || !Number.isSafeInteger(processGroupId)
+            || table.has(pid)
+          ) {
             throw new Error("ps returned invalid or duplicate process metadata");
           }
-          table.set(pid, ppid);
+          table.set(pid, { parentPid, processGroupId, state, startedAt });
           if (table.size > PROCESS_TREE_MAX_NODES) {
             throw new Error("process table exceeded the bounded node limit");
           }
@@ -246,13 +274,16 @@ async function readPosixProcessTable(): Promise<Map<number, number>> {
   });
 }
 
-function rootedDescendants(table: Map<number, number>, rootPid: number): Array<{ pid: number; depth: number }> {
+function rootedDescendants(
+  table: Map<number, PosixProcessMetadata>,
+  rootPid: number,
+): Array<{ pid: number; depth: number }> {
   if (!table.has(rootPid)) return [];
   const children = new Map<number, number[]>();
-  for (const [pid, ppid] of table) {
-    const siblings = children.get(ppid);
+  for (const [pid, metadata] of table) {
+    const siblings = children.get(metadata.parentPid);
     if (siblings) siblings.push(pid);
-    else children.set(ppid, [pid]);
+    else children.set(metadata.parentPid, [pid]);
   }
   const descendants: Array<{ pid: number; depth: number }> = [];
   const queue = [{ pid: rootPid, depth: 0 }];
@@ -308,20 +339,29 @@ async function terminatePosixProcessTree(child: ChildProcessWithoutNullStreams):
   if (!rootPid) return { killed: false, diagnostic: "spawned process has no PID" };
   const rootParentPid = process.pid;
   const failures: string[] = [];
-  const knownPids = new Set<number>([rootPid]);
-  let rootIdentityConfirmed = false;
+  const knownProcesses = new Map<number, PosixProcessMetadata>();
+  let rootIdentity: PosixProcessMetadata | undefined;
+  let initialDiscoveryDiagnostic: string | undefined;
   let groupStopAttempted = false;
   let discoveryEstablished = false;
 
   try {
-    rootIdentityConfirmed = (await readPosixProcessTable()).get(rootPid) === rootParentPid;
-    if (!rootIdentityConfirmed) {
-      failures.push("direct-child identity could not be revalidated before termination");
+    const metadata = (await readPosixProcessTable()).get(rootPid);
+    if (
+      metadata?.parentPid === rootParentPid
+      && metadata.processGroupId === rootPid
+      && !isZombieProcess(metadata)
+    ) {
+      rootIdentity = metadata;
+      knownProcesses.set(rootPid, metadata);
+    } else {
+      initialDiscoveryDiagnostic = "direct-child identity could not be revalidated before termination";
     }
   } catch (error) {
-    failures.push(`initial process discovery failed: ${error instanceof Error ? error.message : String(error)}`);
+    initialDiscoveryDiagnostic =
+      `initial process discovery failed: ${error instanceof Error ? error.message : String(error)}`;
   }
-  if (rootIdentityConfirmed) {
+  if (rootIdentity) {
     groupStopAttempted = true;
     const groupStopFailure = signalProcess(-rootPid, "SIGSTOP");
     if (groupStopFailure) failures.push(`process-group stop failed: ${groupStopFailure}`);
@@ -330,11 +370,22 @@ async function terminatePosixProcessTree(child: ChildProcessWithoutNullStreams):
   for (let round = 0; round < PROCESS_TREE_ROUNDS; round += 1) {
     try {
       const table = await readPosixProcessTable();
-      if (table.get(rootPid) !== rootParentPid) {
+      const currentRoot = table.get(rootPid);
+      if (!rootIdentity) {
+        if (
+          currentRoot?.parentPid !== rootParentPid
+          || currentRoot.processGroupId !== rootPid
+          || isZombieProcess(currentRoot)
+        ) {
+          failures.push(initialDiscoveryDiagnostic ?? "direct-child identity could not be revalidated before termination");
+          break;
+        }
+        rootIdentity = currentRoot;
+        knownProcesses.set(rootPid, currentRoot);
+      } else if (!isSamePosixProcess(currentRoot, rootIdentity) || !currentRoot || isZombieProcess(currentRoot)) {
         failures.push("direct-child identity could not be revalidated after process-group stop");
         break;
       }
-      rootIdentityConfirmed = true;
       if (!groupStopAttempted) {
         groupStopAttempted = true;
         const groupStopFailure = signalProcess(-rootPid, "SIGSTOP");
@@ -343,24 +394,37 @@ async function terminatePosixProcessTree(child: ChildProcessWithoutNullStreams):
       }
       discoveryEstablished = true;
       const descendants = rootedDescendants(table, rootPid);
-      for (const { pid } of descendants) knownPids.add(pid);
+      for (const { pid } of descendants) {
+        const metadata = table.get(pid);
+        if (metadata) knownProcesses.set(pid, metadata);
+      }
       for (const { pid } of descendants.sort((left, right) => left.depth - right.depth)) {
+        const metadata = table.get(pid);
+        if (!metadata || isZombieProcess(metadata)) continue;
         const error = signalProcess(pid, "SIGSTOP");
         if (error) failures.push(`failed to stop descendant ${pid}: ${error}`);
       }
       await new Promise<void>((resolve) => setTimeout(resolve, PROCESS_TREE_SETTLE_MS));
       const revalidatedTable = await readPosixProcessTable();
-      if (revalidatedTable.get(rootPid) !== rootParentPid) {
+      const revalidatedRoot = revalidatedTable.get(rootPid);
+      if (!isSamePosixProcess(revalidatedRoot, rootIdentity) || !revalidatedRoot || isZombieProcess(revalidatedRoot)) {
         failures.push("direct-child identity could not be revalidated before descendant kill");
         break;
       }
       const killableDescendants = rootedDescendants(revalidatedTable, rootPid);
-      for (const { pid } of killableDescendants) knownPids.add(pid);
+      for (const { pid } of killableDescendants) {
+        const metadata = revalidatedTable.get(pid);
+        if (metadata) knownProcesses.set(pid, metadata);
+      }
       for (const { pid } of killableDescendants.sort((left, right) => left.depth - right.depth)) {
+        const metadata = revalidatedTable.get(pid);
+        if (!metadata || isZombieProcess(metadata)) continue;
         const error = signalProcess(pid, "SIGSTOP");
         if (error) failures.push(`failed to re-stop descendant ${pid}: ${error}`);
       }
       for (const { pid } of killableDescendants.sort((left, right) => right.depth - left.depth)) {
+        const metadata = revalidatedTable.get(pid);
+        if (!metadata || isZombieProcess(metadata)) continue;
         const error = signalProcess(pid, "SIGKILL");
         if (error) failures.push(`failed to kill descendant ${pid}: ${error}`);
       }
@@ -371,17 +435,14 @@ async function terminatePosixProcessTree(child: ChildProcessWithoutNullStreams):
   }
 
   try {
-    const finalTable = await readPosixProcessTable();
-    const finalRootParent = finalTable.get(rootPid);
-    if (finalRootParent === rootParentPid) {
+    const finalRoot = (await readPosixProcessTable()).get(rootPid);
+    if (rootIdentity && isSamePosixProcess(finalRoot, rootIdentity) && finalRoot && !isZombieProcess(finalRoot)) {
       const groupKillFailure = signalProcess(-rootPid, "SIGKILL");
       if (groupKillFailure) failures.push(`process-group kill failed: ${groupKillFailure}`);
       const rootKillFailure = signalProcess(rootPid, "SIGKILL");
       if (rootKillFailure) failures.push(`direct-child kill failed: ${rootKillFailure}`);
-    } else if (finalRootParent !== undefined) {
-      failures.push("direct-child identity could not be revalidated before final kill");
-    } else if (!rootIdentityConfirmed) {
-      failures.push("direct-child identity could not be revalidated before final kill");
+    } else if (!rootIdentity) {
+      failures.push(initialDiscoveryDiagnostic ?? "direct-child identity could not be revalidated before final kill");
     }
   } catch (error) {
     failures.push(`final process discovery failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -391,7 +452,10 @@ async function terminatePosixProcessTree(child: ChildProcessWithoutNullStreams):
     await new Promise<void>((resolve) => setTimeout(resolve, PROCESS_TREE_SETTLE_MS));
     try {
       const table = await readPosixProcessTable();
-      const remaining = [...knownPids].filter((pid) => table.has(pid));
+      const remaining = [...knownProcesses].filter(([pid, expected]) => {
+        const metadata = table.get(pid);
+        return isSamePosixProcess(metadata, expected) && metadata !== undefined && !isZombieProcess(metadata);
+      }).map(([pid]) => pid);
       if (remaining.length === 0) {
         return discoveryEstablished && failures.length === 0
           ? { killed: true }
