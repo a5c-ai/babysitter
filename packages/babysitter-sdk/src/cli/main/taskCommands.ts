@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { createHash } from "node:crypto";
 import * as path from "node:path";
 import { commitEffectCancellation, commitEffectResult } from "../../runtime/commitEffectResult";
 import { readTaskDefinition } from "../../storage/tasks";
@@ -33,6 +34,43 @@ function resolveMaybeRunRelative(runDir: string, candidate?: string) {
   return collapseDoubledA5cRuns(path.join(runDir, candidate));
 }
 
+function validateSha256(value: string | undefined, flag: string): boolean {
+  if (value === undefined) return true;
+  if (/^[a-f0-9]{64}$/.test(value)) return true;
+  console.error(`[task:post] ${flag} must be exactly 64 lowercase hexadecimal characters`);
+  return false;
+}
+
+async function readChecksumBoundFile(
+  runDir: string,
+  filename: string,
+  expectedSha256: string,
+  flag: "--value-sha256" | "--error-sha256",
+): Promise<Buffer> {
+  if (filename === "-") {
+    throw new Error(`[task:post] ${flag} requires a file path, not stdin`);
+  }
+  const bytes = await fs.readFile(resolveMaybeRunRelative(runDir, filename)!);
+  const actualSha256 = createHash("sha256").update(bytes).digest("hex");
+  if (actualSha256 !== expectedSha256) {
+    throw new Error(`[task:post] ${flag} checksum mismatch`);
+  }
+  return bytes;
+}
+
+
+function parseErrorBytes(bytes: Buffer, requireJson: boolean): unknown {
+  const trimmed = bytes.toString("utf8").trim();
+  if (!trimmed.length) return undefined;
+  try {
+    return JSON.parse(trimmed) as unknown;
+  } catch (error) {
+    if (requireJson) throw error;
+    const message = trimmed.replace(/^Error:\s*/, "");
+    return { name: "Error", message };
+  }
+}
+
 async function readJsonFile(runDir: string, filename?: string): Promise<unknown> {
   if (!filename) return undefined;
   if (filename === "-") {
@@ -64,17 +102,7 @@ async function readErrorFile(runDir: string, filename?: string): Promise<unknown
   const raw = filename === "-"
     ? await readStdinUtf8()
     : await fs.readFile(resolveMaybeRunRelative(runDir, filename)!, "utf8");
-  const trimmed = raw.trim();
-  if (!trimmed.length) return undefined;
-  try {
-    return JSON.parse(trimmed) as unknown;
-  } catch {
-    // Not JSON — treat the file contents as the error message itself. Strip a
-    // leading "Error: " prefix (the result of String(new Error(message))) so
-    // the surfaced message is the underlying failure, not doubled.
-    const message = trimmed.replace(/^Error:\s*/, "");
-    return { name: "Error", message };
-  }
+  return parseErrorBytes(Buffer.from(raw), false);
 }
 
 function readInlineJson(raw?: string): unknown {
@@ -116,6 +144,24 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     console.error("[task:post] --value-inline is only supported with --status ok");
     return 1;
   }
+  if (!validateSha256(parsed.valueSha256, "--value-sha256")) return 1;
+  if (!validateSha256(parsed.errorSha256, "--error-sha256")) return 1;
+  if (parsed.valueSha256 && !parsed.valuePath) {
+    console.error("[task:post] --value-sha256 requires --value <file>");
+    return 1;
+  }
+  if (parsed.errorSha256 && !parsed.errorPath) {
+    console.error("[task:post] --error-sha256 requires --error <file>");
+    return 1;
+  }
+  if (parsed.taskStatus === "ok" && (parsed.errorPath || parsed.errorSha256)) {
+    console.error("[task:post] --error and --error-sha256 require --status error");
+    return 1;
+  }
+  if (parsed.taskStatus === "error" && (parsed.valuePath || parsed.valueInline || parsed.valueSha256)) {
+    console.error("[task:post] --value, --value-inline, and --value-sha256 require --status ok");
+    return 1;
+  }
   if (parsed.taskStatus === "ok" && !parsed.valuePath && !parsed.valueInline) {
     console.error("[task:post] ok results require --value or --value-inline");
     return 1;
@@ -148,16 +194,38 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   const metadata = isJsonRecord(metadataRaw) ? metadataRaw : undefined;
   const stdout = parsed.stdoutFile ? await readTextFile(runDir, parsed.stdoutFile) : undefined;
   const stderr = parsed.stderrFile ? await readTextFile(runDir, parsed.stderrFile) : undefined;
-  const errorPayload =
-    parsed.taskStatus === "error"
-      ? (await readErrorFile(runDir, parsed.errorPath)) ?? { name: "Error", message: "Task reported failure" }
-      : undefined;
-  const value =
-    parsed.taskStatus === "ok"
-      ? parsed.valueInline
-        ? readInlineJson(parsed.valueInline)
-        : await readJsonFile(runDir, parsed.valuePath)
-      : undefined;
+  let errorPayload: unknown;
+  if (parsed.taskStatus === "error") {
+    if (parsed.errorPath && parsed.errorSha256) {
+      const bytes = await readChecksumBoundFile(
+        runDir,
+        parsed.errorPath,
+        parsed.errorSha256,
+        "--error-sha256",
+      );
+      errorPayload = parseErrorBytes(bytes, true);
+    } else {
+      errorPayload = await readErrorFile(runDir, parsed.errorPath);
+    }
+    errorPayload ??= { name: "Error", message: "Task reported failure" };
+  }
+  let value: unknown;
+  if (parsed.taskStatus === "ok") {
+    if (parsed.valueInline) {
+      value = readInlineJson(parsed.valueInline);
+    } else if (parsed.valuePath && parsed.valueSha256) {
+      const bytes = await readChecksumBoundFile(
+        runDir,
+        parsed.valuePath,
+        parsed.valueSha256,
+        "--value-sha256",
+      );
+      const trimmed = bytes.toString("utf8").trim();
+      value = trimmed.length ? (JSON.parse(trimmed) as unknown) : undefined;
+    } else {
+      value = await readJsonFile(runDir, parsed.valuePath);
+    }
+  }
   const committedStatus = parsed.taskStatus;
 
   const plan = {

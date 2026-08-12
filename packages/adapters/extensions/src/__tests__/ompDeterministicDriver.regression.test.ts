@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, promises as fs, readFileSync, type Stats } from 'node:fs';
+import { promises as fs, type Stats } from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -116,146 +116,6 @@ afterEach(async () => {
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
 
-interface StdinExecutionResult {
-  code: number;
-  stdout: string;
-  stderr: string;
-  killed: boolean;
-}
-
-type StdinExecutor = (
-  args: string[],
-  cwd: string,
-  stdin: Buffer,
-  timeoutMs: number,
-  signal?: AbortSignal,
-) => Promise<StdinExecutionResult>;
-
-interface GeneratedStdinModule {
-  execBabysitterWithStdin: StdinExecutor;
-  resolveBabysitterSpawn(
-    args: string[],
-    platform?: NodeJS.Platform,
-    env?: NodeJS.ProcessEnv,
-    nodeExecutable?: string,
-  ): Promise<{ command: string; args: string[] }>;
-}
-
-let generatedStdinModule: GeneratedStdinModule | undefined;
-
-async function loadGeneratedStdinModule(): Promise<GeneratedStdinModule> {
-  if (!generatedStdinModule) {
-    const output = await tempRun('omp-stdin-extension-');
-    const result = compile({ source: UNIFIED_PLUGIN_DIR, target: 'oh-my-pi', output });
-    expect(result.status, result.diagnostics.map((diagnostic) => diagnostic.message).join('\n')).not.toBe('error');
-    const moduleUrl = pathToFileURL(path.join(result.outputDir, 'extensions', 'index.ts')).href;
-    // The compiler selects this generated plugin path at runtime; a static import cannot exercise it.
-    generatedStdinModule = await import(/* @vite-ignore */ moduleUrl) as unknown as GeneratedStdinModule;
-  }
-  return generatedStdinModule;
-}
-
-async function execBabysitterWithStdin(
-  args: string[],
-  cwd: string,
-  stdin: Buffer,
-  timeoutMs: number,
-  signal?: AbortSignal,
-): Promise<StdinExecutionResult> {
-  const extensionModule = await loadGeneratedStdinModule();
-  return await extensionModule.execBabysitterWithStdin(args, cwd, stdin, timeoutMs, signal);
-}
-
-async function withBabysitterExecutable<T>(run: (cwd: string) => Promise<T>): Promise<T> {
-  const cwd = await tempRun('omp-stdin-exec-');
-  const binDir = path.join(cwd, 'bin');
-  await fs.mkdir(binDir);
-  const executable = path.join(binDir, process.platform === 'win32' ? 'babysitter.cmd' : 'babysitter');
-  if (process.platform === 'win32') {
-    await fs.writeFile(executable, `@echo off\r\n"${process.execPath}" %*\r\n`);
-  } else {
-    await fs.writeFile(executable, `#!/bin/sh\nexec "${process.execPath}" "$@"\n`);
-    await fs.chmod(executable, 0o755);
-  }
-  const originalPath = process.env.PATH;
-  process.env.PATH = `${binDir}${path.delimiter}${originalPath ?? ''}`;
-  try {
-    return await run(cwd);
-  } finally {
-    if (originalPath === undefined) delete process.env.PATH;
-    else process.env.PATH = originalPath;
-  }
-}
-
-async function installPersistentZombiePsShim(
-  cwd: string,
-  retainedState: 'zombie' | 'replacement' = 'zombie',
-): Promise<void> {
-  const executable = path.join(cwd, 'bin', 'ps');
-  const transitionCall = retainedState === 'zombie' ? 9 : 8;
-  const script = `#!/bin/sh
-pid_file=${JSON.stringify(path.join(cwd, 'parent.pid'))}
-count_file=${JSON.stringify(path.join(cwd, 'ps-call-count'))}
-injected_file=${JSON.stringify(path.join(cwd, `${retainedState}-row-injected`))}
-if [ ! -f "$pid_file" ]; then exit 0; fi
-IFS= read -r pid < "$pid_file"
-count=0
-if [ -f "$count_file" ]; then IFS= read -r count < "$count_file"; fi
-count=$((count + 1))
-printf '%s\\n' "$count" > "$count_file"
-if [ "$count" -ge '${transitionCall}' ]; then
-  if [ "$count" -eq '${transitionCall}' ]; then kill -KILL "$pid" 2>/dev/null || true; fi
-  if [ '${retainedState}' = replacement ]; then
-    printf '%s %s %s R Sun Jan 1 00:00:00 2000\\n' "$pid" '${process.pid}' "$pid"
-  else
-    printf '%s %s %s Z Mon Aug 11 00:00:00 2026\\n' "$pid" '${process.pid}' "$pid"
-  fi
-  : > "$injected_file"
-else
-  printf '%s %s %s S Mon Aug 11 00:00:00 2026\\n' "$pid" '${process.pid}' "$pid"
-fi
-`;
-  await fs.writeFile(executable, script);
-  await fs.chmod(executable, 0o755);
-}
-
-async function recordedPids(cwd: string): Promise<number[]> {
-  const entries = await Promise.all(
-    ['parent.pid', 'descendant.pid'].map(async (name) => {
-      try {
-        return Number(await fs.readFile(path.join(cwd, name), 'utf8'));
-      } catch {
-        return 0;
-      }
-    }),
-  );
-  return entries.filter((pid) => Number.isSafeInteger(pid) && pid > 0);
-}
-
-
-async function killRecordedProcesses(cwd: string): Promise<void> {
-  for (const pid of await recordedPids(cwd)) {
-    try {
-      process.kill(pid, 'SIGKILL');
-    } catch {
-      // Already exited.
-    }
-  }
-}
-
-async function expectRecordedProcessesGone(cwd: string): Promise<void> {
-  const pids = await recordedPids(cwd);
-  await vi.waitFor(() => {
-    expect(pids.filter((pid) => {
-      try {
-        process.kill(pid, 0);
-        return true;
-      } catch {
-        return false;
-      }
-    })).toEqual([]);
-  }, { timeout: 1_000, interval: 10 });
-}
 
 describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   it('ships corrected generated instructions with the driver and blocking bridge agent', async () => {
@@ -269,6 +129,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const generatedIndex = await fs.readFile(path.join(result.outputDir, 'extensions', 'index.ts'), 'utf8');
     expect(generatedIndex).not.toContain('babysitter-proxied-session-start');
     expect(generatedIndex).not.toContain('babysitter_agent_complete');
+    expect(generatedIndex).not.toContain('execBabysitterWithStdin');
+    expect(generatedIndex).not.toContain('resolveBabysitterSpawn');
+    expect(generatedIndex).not.toContain('node:child_process');
+    expect(generatedIndex).not.toContain('taskkill');
+    expect(generatedIndex).not.toContain('rootedDescendants');
     const agentPrompt = await fs.readFile(path.join(result.outputDir, 'agents', 'babysitter-task.md'), 'utf8');
     expect(agentPrompt).toContain('blocking: true');
     expect(agentPrompt).toContain('Yield your final effect value normally');
@@ -289,261 +154,6 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(manifest.dependencies).toEqual({ zod: '^4.4.3' });
   });
 
-  it.skipIf(process.platform === 'win32')(
-    'terminates a detached descendant and settles on timeout',
-    async () => {
-      await withBabysitterExecutable(async (cwd) => {
-        const script = [
-          "const { spawn } = require('node:child_process');",
-          "const fs = require('node:fs');",
-          "fs.writeFileSync('parent.pid', String(process.pid));",
-          "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { detached: true, stdio: ['ignore', 1, 2] });",
-          "fs.writeFileSync('descendant.pid', String(child.pid));",
-          "require('node:http').createServer().listen(0);",
-        ].join('');
-        try {
-          const result = await within(
-            execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 80),
-            'descendant-held stdout timeout',
-          );
-          expect(result.killed, result.stderr).toBe(true);
-          expect(result.stderr).toMatch(/timed out/i);
-          await expectRecordedProcessesGone(cwd);
-        } finally {
-          await killRecordedProcesses(cwd);
-        }
-      });
-    },
-  );
-
-  it.skipIf(process.platform === 'win32')(
-    'confirms timeout termination when ps retains the reaped root as a zombie',
-    async () => {
-      await withBabysitterExecutable(async (cwd) => {
-        await installPersistentZombiePsShim(cwd);
-        const script = [
-          "const fs = require('node:fs');",
-          "fs.writeFileSync('parent.pid', String(process.pid));",
-          "require('node:http').createServer().listen(0);",
-        ].join('');
-        try {
-          const result = await within(
-            execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 200),
-            'zombie-visible timeout termination',
-          );
-          await expect(fs.access(path.join(cwd, 'zombie-row-injected'))).resolves.toBeUndefined();
-          expect(result.killed, result.stderr).toBe(true);
-          expect(result.stderr).toMatch(/timed out/i);
-          await expectRecordedProcessesGone(cwd);
-        } finally {
-          await killRecordedProcesses(cwd);
-        }
-      });
-    },
-  );
-
-
-  it.skipIf(process.platform === 'win32')(
-    'does not signal a replacement that reuses the terminated root PID',
-    async () => {
-      await withBabysitterExecutable(async (cwd) => {
-        await installPersistentZombiePsShim(cwd, 'replacement');
-        const script = [
-          "const fs = require('node:fs');",
-          "fs.writeFileSync('parent.pid', String(process.pid));",
-          "require('node:http').createServer().listen(0);",
-        ].join('');
-        const postReplacementSignals: Array<{ pid: number; signal: string | number | undefined }> = [];
-        const originalKill = process.kill.bind(process);
-        const killSpy = vi.spyOn(process, 'kill').mockImplementation((pid, signal) => {
-          const marker = path.join(cwd, 'replacement-row-injected');
-          if (existsSync(marker)) {
-            const rootPid = Number(readFileSync(path.join(cwd, 'parent.pid'), 'utf8'));
-            if ((pid === rootPid || pid === -rootPid) && signal !== 0) postReplacementSignals.push({ pid, signal });
-          }
-          return originalKill(pid, signal);
-        });
-        try {
-          const result = await within(
-            execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 200),
-            'replacement-visible timeout termination',
-          );
-          await expect(fs.access(path.join(cwd, 'replacement-row-injected'))).resolves.toBeUndefined();
-          expect(result.killed, result.stderr).toBe(true);
-          expect(result.stderr).toMatch(/timed out/i);
-          await expectRecordedProcessesGone(cwd);
-          expect(postReplacementSignals).toEqual([]);
-        } finally {
-          killSpy.mockRestore();
-          await killRecordedProcesses(cwd);
-        }
-      });
-    },
-  );
-  it.each([
-    { stream: 'stdout', target: 'stdout' },
-    { stream: 'stderr', target: 'stderr' },
-  ] as const)('fails closed when spawned $stream exceeds the capture bound', async ({ target }) => {
-    await withBabysitterExecutable(async (cwd) => {
-      const script = [
-        "const { spawn } = require('node:child_process');",
-        "const fs = require('node:fs');",
-        "fs.writeFileSync('parent.pid', String(process.pid));",
-        "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { detached: true, stdio: ['ignore', 1, 2] });",
-        "fs.writeFileSync('descendant.pid', String(child.pid));",
-        `process.${target}.write(Buffer.alloc(1024 * 1024 + 64, 97));`,
-        "require('node:http').createServer().listen(0);",
-      ].join('');
-      try {
-        const result = await within(
-          execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 5_000),
-          `${target} overflow`,
-        );
-        expect(result).toMatchObject({ code: 1, killed: true });
-        expect(result.stderr).toMatch(new RegExp(`${target}.*limit|limit.*${target}`, 'i'));
-        expect(Buffer.byteLength(result[target], 'utf8')).toBeLessThanOrEqual(1024 * 1024);
-        await expectRecordedProcessesGone(cwd);
-      } finally {
-        await killRecordedProcesses(cwd);
-      }
-    });
-  });
-
-  it.skipIf(process.platform === 'win32')('terminates a detached descendant and settles promptly on AbortSignal', async () => {
-    await withBabysitterExecutable(async (cwd) => {
-      const script = [
-        "const { spawn } = require('node:child_process');",
-        "const fs = require('node:fs');",
-        "fs.writeFileSync('parent.pid', String(process.pid));",
-        "const child = spawn(process.execPath, ['-e', \"require('node:http').createServer().listen(0)\"], { detached: true, stdio: ['ignore', 1, 2] });",
-        "fs.writeFileSync('descendant.pid', String(child.pid));",
-        "require('node:http').createServer().listen(0);",
-      ].join('');
-      const controller = new AbortController();
-      const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
-      try {
-        const execution = execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(0), 5_000, controller.signal);
-        await vi.waitFor(async () => {
-          await expect(fs.access(path.join(cwd, 'descendant.pid'))).resolves.toBeUndefined();
-        });
-        controller.abort();
-        const result = await within(
-          execution,
-          'AbortSignal tree termination',
-        );
-        expect(result).toMatchObject({ code: 1, killed: true });
-        expect(result.stderr).toMatch(/aborted/i);
-        expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
-        await expectRecordedProcessesGone(cwd);
-      } finally {
-        controller.abort();
-        removeListener.mockRestore();
-        await killRecordedProcesses(cwd);
-      }
-    });
-  });
-
-  it('surfaces stdin EPIPE instead of reporting child success', async () => {
-    await withBabysitterExecutable(async (cwd) => {
-      const script = [
-        "const fs = require('node:fs');",
-        "fs.writeFileSync('parent.pid', String(process.pid));",
-        "fs.closeSync(0);",
-        "require('node:http').createServer().listen(0);",
-      ].join('');
-      try {
-        const result = await within(
-          execBabysitterWithStdin(['-e', script], cwd, Buffer.alloc(8 * 1024 * 1024, 97), 5_000),
-          'stdin EPIPE',
-        );
-        expect(result.code).toBe(1);
-        expect(result.stderr).toMatch(/stdin|EPIPE|write/i);
-        await expectRecordedProcessesGone(cwd);
-      } finally {
-        await killRecordedProcesses(cwd);
-      }
-    });
-  });
-
-  it('preserves exact stdin bytes and normal nonzero exit output', async () => {
-    await withBabysitterExecutable(async (cwd) => {
-      const stdin = Buffer.from([0, 1, 2, 127, 128, 255]);
-      const script = [
-        "const { createHash } = require('node:crypto');",
-        "const chunks = [];",
-        "process.stdin.on('data', (chunk) => chunks.push(chunk));",
-        "process.stdin.on('end', () => {",
-        "process.stdout.write(createHash('sha256').update(Buffer.concat(chunks)).digest('hex'));",
-        "process.stderr.write('expected-error');",
-        "process.exit(7);",
-        "});",
-      ].join('');
-      const result = await within(
-        execBabysitterWithStdin(['-e', script], cwd, stdin, 5_000),
-        'normal exact stdin execution',
-      );
-      expect(result).toEqual({
-        code: 7,
-        stdout: createHash('sha256').update(stdin).digest('hex'),
-        stderr: 'expected-error',
-        killed: false,
-      });
-    });
-  });
-
-  it('resolves the current-platform executable without shell-concatenating arguments', async () => {
-    await withBabysitterExecutable(async (cwd) => {
-      const script = "process.stdin.resume(); process.stdin.on('end', () => process.stdout.write(JSON.stringify(process.argv.slice(1))));";
-      const args = ['a&b', 'two words', 'quote"arg'];
-      const result = await within(
-        execBabysitterWithStdin(['-e', script, ...args], cwd, Buffer.from('exact-input'), 5_000),
-        'platform executable resolution',
-      );
-      expect(result).toEqual({ code: 0, stdout: JSON.stringify(args), stderr: '', killed: false });
-    });
-  });
-
-  it('resolves a Windows npm cmd shim to Node without parsing metacharacter arguments', async () => {
-    const root = await tempRun('omp-stdin-windows-shim-');
-    const binDir = path.join(root, 'node_modules', '.bin');
-    const cliPath = path.join(root, 'node_modules', '@a5c-ai', 'babysitter', 'bin', 'babysitter.js');
-    await fs.mkdir(binDir, { recursive: true });
-    await fs.mkdir(path.dirname(cliPath), { recursive: true });
-    await fs.writeFile(path.join(binDir, 'babysitter.cmd'), '@echo off\r\n');
-    await fs.writeFile(cliPath, '');
-    const args = ['a&b', 'two words', 'quote"arg', '%PATH%'];
-    const extensionModule = await loadGeneratedStdinModule();
-
-    await expect(
-      extensionModule.resolveBabysitterSpawn(args, 'win32', { Path: binDir }, 'C:\\node.exe'),
-    ).resolves.toEqual({
-      command: 'C:\\node.exe',
-      args: [cliPath, ...args],
-    });
-  });
-
-  it.skipIf(process.platform === 'win32')('reports spawn errors and removes AbortSignal listeners', async () => {
-    const cwd = await tempRun('omp-stdin-spawn-error-');
-    const emptyPath = await tempRun('omp-stdin-empty-path-');
-    const originalPath = process.env.PATH;
-    const controller = new AbortController();
-    const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
-    process.env.PATH = emptyPath;
-    try {
-      await expect(
-        within(execBabysitterWithStdin([], cwd, Buffer.from('unwritten'), 5_000, controller.signal), 'spawn error'),
-      ).resolves.toMatchObject({
-        code: 1,
-        stderr: expect.stringMatching(/spawn failed|ENOENT/i),
-        killed: false,
-      });
-      expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
-    } finally {
-      if (originalPath === undefined) delete process.env.PATH;
-      else process.env.PATH = originalPath;
-      removeListener.mockRestore();
-    }
-  });
 
   it('packs and imports the generated driver from a strict isolated install', async () => {
     const output = await tempRun('omp-strict-package-');
@@ -1208,16 +818,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const moduleUrl = pathToFileURL(path.join(result.outputDir, 'extensions', 'index.ts')).href;
     // The compiler chooses this generated module path at runtime, so a static import cannot exercise it.
     const extensionModule = await import(/* @vite-ignore */ moduleUrl) as unknown as {
-      default: (
-        pi: Record<string, unknown>,
-        executeWithStdin?: (
-          args: string[],
-          cwd: string,
-          stdin: Buffer,
-          timeoutMs: number,
-          signal?: AbortSignal,
-        ) => Promise<{ code: number; stdout: string; stderr: string; killed: boolean }>,
-      ) => void;
+      default: (pi: Record<string, unknown>) => void;
     };
 
     const runDir = await tempRun('omp-modeled-recovery-run-');
@@ -1298,13 +899,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         handlers.set(event, handler);
       },
     };
-    extensionModule.default(pi, async (args) => {
-      const result = await (pi.exec as (
-        command: string,
-        args: string[],
-      ) => Promise<{ code: number; stdout: string; stderr: string }>)("babysitter", args);
-      return { ...result, killed: false };
-    });
+    extensionModule.default(pi);
 
     const driveTool = tools.get('babysitter_drive');
     const cancelTool = tools.get('babysitter_agent_cancel');
@@ -1937,20 +1532,19 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   });
 
   it.each([
-    { status: 'ok', exitCode: 0 },
-    { status: 'error', exitCode: 9 },
+    { status: 'ok', exitCode: 0, fileFlag: '--value', checksumFlag: '--value-sha256' },
+    { status: 'error', exitCode: 9, fileFlag: '--error', checksumFlag: '--error-sha256' },
   ] as const)(
-    'binds $status checkpoint bytes across post-boundary canonical output replacement',
-    async ({ status, exitCode }) => {
+    'hands checkpoint-bound $status files and checksums to ordinary runCli',
+    async ({ status, exitCode, fileFlag, checksumFlag }) => {
       const runDir = await tempRun(`omp-shell-post-boundary-${status}-`);
       const effect = action('shell', { shell: { command: 'post-boundary-replacement' } });
       const outputPath = path.join(runDir, 'tasks', effect.effectId, 'output.json');
       const replacementValue = { attacker: `replacement-${status}` };
       let iterations = 0;
-      let resolved = false;
-      let authenticatedValue: unknown;
-      let postedInput: unknown;
-      let postSelector: string | undefined;
+      let postArgs: string[] | undefined;
+      let postCalled = false;
+      let committed = false;
       const driver = new OmpDeterministicDriver({
         cwd: runDir,
         executeShell: async () => ({
@@ -1963,12 +1557,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           startedAt: '2026-08-11T00:00:00.000Z',
           finishedAt: '2026-08-11T00:00:01.000Z',
         }),
-        runCli: async (
-          args,
-          _timeoutMs?: number,
-          _signal?: AbortSignal,
-          stdin?: Buffer,
-        ) => {
+        runCli: async (args) => {
           if (args[0] === 'run:iterate') {
             iterations += 1;
             return {
@@ -1977,50 +1566,30 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
               stderr: '',
             };
           }
-          if (args[0] === 'task:show') {
-            return {
-              code: 0,
-              stdout: JSON.stringify({
-                effect: resolved
-                  ? {
-                      effectId: effect.effectId,
-                      invocationKey: effect.invocationKey,
-                      status: status === 'error' ? 'resolved_error' : 'resolved_ok',
-                      resultRef: `tasks/${effect.effectId}/result.json`,
-                    }
-                  : { status: 'requested' },
-              }),
-              stderr: '',
-            };
-          }
-          authenticatedValue = JSON.parse(await fs.readFile(outputPath, 'utf8'));
+          if (args[0] === 'task:show') return await taskShowResult(runDir, effect);
+          postArgs = args;
+          postCalled = true;
+          const expectedHash = args[args.indexOf(checksumFlag) + 1];
+          const selectedPath = args[args.indexOf(fileFlag) + 1];
           await writeJson(outputPath, replacementValue);
-          const flag = status === 'error' ? '--error' : '--value';
-          postSelector = args[args.indexOf(flag) + 1];
-          if (postSelector === '-') {
-            if (!stdin) throw new Error('task:post stdin selector requires bound bytes');
-            postedInput = JSON.parse(stdin.toString('utf8'));
-          } else {
-            postedInput = JSON.parse(await fs.readFile(postSelector, 'utf8'));
+          const actualHash = createHash('sha256').update(await fs.readFile(selectedPath)).digest('hex');
+          if (actualHash !== expectedHash) {
+            return { code: 1, stdout: '', stderr: 'checksum mismatch' };
           }
-          if (status === 'error') {
-            await writeJson(path.join(runDir, 'tasks', effect.effectId, 'result.json'), {
-              effectId: effect.effectId,
-              invocationKey: effect.invocationKey,
-              status: 'error',
-              error: toSerializedEffectError(postedInput),
-            });
-          } else {
-            await recordCommittedResult(runDir, effect, postedInput);
-          }
-          resolved = true;
+          committed = true;
           return { code: 0, stdout: '{}', stderr: '' };
         },
       });
 
-      await expect(driver.drive(runDir)).rejects.toThrow(/checkpoint|hash|immutable durable output|conflicts/i);
-      expect(postSelector).toBe('-');
-      expect(postedInput).toEqual(authenticatedValue);
+      await expect(driver.drive(runDir)).rejects.toThrow(/task:post failed|checksum mismatch/i);
+      expect(postCalled).toBe(true);
+      if (!postArgs) throw new Error('missing task:post arguments');
+      const checkpoint = JSON.parse(
+        await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
+      ) as { outputSha256: string };
+      expect(postArgs[postArgs.indexOf(fileFlag) + 1]).toBe(outputPath);
+      expect(postArgs[postArgs.indexOf(checksumFlag) + 1]).toBe(checkpoint.outputSha256);
+      expect(committed).toBe(false);
     },
   );
 
@@ -2153,7 +1722,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           finishedAt: '2026-08-11T00:00:01.000Z',
         };
       },
-      runCli: async (args, _timeoutMs, _signal, stdin) => {
+      runCli: async (args) => {
         if (args[0] === 'run:iterate') {
           iterations += 1;
           return {
@@ -2166,8 +1735,13 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           return await taskShowResult(runDir, effect);
         }
         posts += 1;
-        expect(args[args.indexOf('--value') + 1]).toBe('-');
-        expect(JSON.parse(stdin?.toString('utf8') ?? '')).toEqual(value);
+        const valuePath = args[args.indexOf('--value') + 1];
+        expect(valuePath).toBe(path.join(runDir, 'tasks', effect.effectId, 'output.json'));
+        const valueBytes = await fs.readFile(valuePath);
+        expect(JSON.parse(valueBytes.toString('utf8'))).toEqual(value);
+        expect(args[args.indexOf('--value-sha256') + 1]).toBe(
+          createHash('sha256').update(valueBytes).digest('hex'),
+        );
         const checkpoint = JSON.parse(
           await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
         ) as Record<string, unknown>;

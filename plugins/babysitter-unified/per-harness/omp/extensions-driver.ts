@@ -141,7 +141,7 @@ export type DriverProgressListener = (progress: DriverProgress) => void | Promis
 
 interface DriverDependencies {
   cwd: string;
-  runCli(args: string[], timeoutMs?: number, signal?: AbortSignal, stdin?: Buffer): Promise<CliResult>;
+  runCli(args: string[], timeoutMs?: number, signal?: AbortSignal): Promise<CliResult>;
   executeShell?: (
     action: EffectAction,
     cwd: string,
@@ -1194,16 +1194,21 @@ export class OmpDeterministicDriver {
       return false;
     }
 
-    const outputBytes = await readCheckpointOutputBytes(runDir, checkpoint);
+    await readCheckpointOutputBytes(runDir, checkpoint);
     const resultStatus = checkpoint.resultStatus ?? "ok";
+    const outputPath = await resolveRunRelativeReal(runDir, checkpoint.outputRef);
+    const fileFlag = resultStatus === "error" ? "--error" : "--value";
+    const checksumFlag = resultStatus === "error" ? "--error-sha256" : "--value-sha256";
     const args = [
       "task:post",
       runDir,
       checkpoint.effectId,
       "--status",
       resultStatus,
-      resultStatus === "error" ? "--error" : "--value",
-      "-",
+      fileFlag,
+      outputPath,
+      checksumFlag,
+      checkpoint.outputSha256!,
       "--invocation-key",
       checkpoint.invocationKey,
       "--started-at",
@@ -1219,7 +1224,7 @@ export class OmpDeterministicDriver {
       args.push("--stderr-file", await resolveRunRelativeReal(runDir, checkpoint.stderrRef));
     }
 
-    const result = await this.dependencies.runCli(args, undefined, signal, outputBytes);
+    const result = await this.dependencies.runCli(args, undefined, signal);
     if (result.code !== 0) {
       if (await this.hasCommittedResult(runDir, checkpoint, signal)) {
         await this.emitProgress(runDir, "post", "completed", "Recovered a concurrently committed effect result", checkpoint);
