@@ -3,6 +3,7 @@ import type { MockInstance } from "vitest";
 import path from "path";
 import os from "os";
 import { promises as fs } from "fs";
+import { Readable } from "node:stream";
 import { createBabysitterCli } from "../main";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
@@ -26,9 +27,28 @@ const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
 
+async function withStdin<T>(payload: string, run: () => Promise<T>): Promise<T> {
+  const originalStdin = process.stdin;
+  const stdin = Readable.from([payload], { encoding: "utf8" });
+  Object.defineProperty(process, "stdin", {
+    value: stdin,
+    writable: true,
+    configurable: true,
+  });
+  try {
+    return await run();
+  } finally {
+    Object.defineProperty(process, "stdin", {
+      value: originalStdin,
+      writable: true,
+      configurable: true,
+    });
+  }
+}
+
 describe("CLI main entry", () => {
-  let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
-  let errorSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
+  let logSpy: MockInstance<typeof console.log>;
+  let errorSpy: MockInstance<typeof console.error>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -327,6 +347,55 @@ describe("CLI main entry", () => {
           },
         }),
       })
+    );
+  });
+
+  it.each([
+    {
+      status: "ok",
+      flag: "--value",
+      payload: '{"approved":true}',
+      exitCode: 0,
+      expected: { status: "ok", value: { approved: true } },
+    },
+    {
+      status: "error",
+      flag: "--error",
+      payload: '{"name":"Error","message":"bound failure","data":{"code":"BOUND"}}',
+      exitCode: 1,
+      expected: {
+        status: "error",
+        error: { name: "Error", message: "bound failure", data: { code: "BOUND" } },
+      },
+    },
+  ])("reads authoritative task:post $status JSON from stdin when the selector is '-'", async ({
+    status,
+    flag,
+    payload,
+    expected,
+    exitCode: expectedExitCode,
+  }) => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(`ef-stdin-${status}`)]));
+    const cli = createBabysitterCli();
+
+    const exitCode = await withStdin(payload, () => cli.run([
+      "task:post",
+      "runs/demo",
+      `ef-stdin-${status}`,
+      "--status",
+      status,
+      flag,
+      "-",
+      "--runs-dir",
+      ".",
+    ]));
+
+    expect(exitCode).toBe(expectedExitCode);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effectId: `ef-stdin-${status}`,
+        result: expect.objectContaining(expected),
+      }),
     );
   });
 

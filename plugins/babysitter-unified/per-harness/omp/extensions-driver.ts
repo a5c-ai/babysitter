@@ -136,7 +136,7 @@ export type DriverProgressListener = (progress: DriverProgress) => void | Promis
 
 interface DriverDependencies {
   cwd: string;
-  runCli(args: string[], timeoutMs?: number, signal?: AbortSignal): Promise<CliResult>;
+  runCli(args: string[], timeoutMs?: number, signal?: AbortSignal, stdin?: Buffer): Promise<CliResult>;
   executeShell?: (
     action: EffectAction,
     cwd: string,
@@ -1189,6 +1189,7 @@ export class OmpDeterministicDriver {
       return false;
     }
 
+    const outputBytes = await readCheckpointOutputBytes(runDir, checkpoint);
     const resultStatus = checkpoint.resultStatus ?? "ok";
     const args = [
       "task:post",
@@ -1197,7 +1198,7 @@ export class OmpDeterministicDriver {
       "--status",
       resultStatus,
       resultStatus === "error" ? "--error" : "--value",
-      await resolveRunRelativeReal(runDir, checkpoint.outputRef),
+      "-",
       "--invocation-key",
       checkpoint.invocationKey,
       "--started-at",
@@ -1213,13 +1214,19 @@ export class OmpDeterministicDriver {
       args.push("--stderr-file", await resolveRunRelativeReal(runDir, checkpoint.stderrRef));
     }
 
-    const result = await this.dependencies.runCli(args, undefined, signal);
+    const result = await this.dependencies.runCli(args, undefined, signal, outputBytes);
     if (result.code !== 0) {
       if (await this.hasCommittedResult(runDir, checkpoint, signal)) {
         await this.emitProgress(runDir, "post", "completed", "Recovered a concurrently committed effect result", checkpoint);
         return false;
       }
       throw new DriverError(`task:post failed for effect ${checkpoint.effectId}: ${boundedDiagnostic(result.stderr || result.stdout)}`, checkpoint.effectId);
+    }
+    if (!await this.hasCommittedResult(runDir, checkpoint, signal)) {
+      throw new DriverError(
+        `task:post exited successfully without a checkpoint-matching committed result for effect ${checkpoint.effectId}`,
+        checkpoint.effectId,
+      );
     }
     const posted = { ...checkpoint, postedAt: this.now().toISOString() };
     await writeJsonAtomic(executionPath(runDir, checkpoint.effectId), posted);
@@ -1868,14 +1875,18 @@ async function shellCommandOutputFingerprint(
   if (!selectedRef) return null;
 
   const outputPath = await resolveRunRelativeReal(runDir, selectedRef);
-  const canonicalOutput = effectArtifactPath(runDir, action.effectId, "output.json");
-  const canonicalResult = effectArtifactPath(runDir, action.effectId, "result.json");
-  const kind = outputPath === canonicalOutput
-    ? "canonical_output"
-    : outputPath === canonicalResult
-      ? "canonical_result"
-      : "external";
   const beforeSnapshot = await shellOutputSnapshot(runDir, selectedRef, action.effectId);
+  const kind = await classifyShellOutputTarget(runDir, action.effectId, beforeSnapshot?.realPath ?? outputPath);
+  if (
+    beforeSnapshot &&
+    kind !== "external" &&
+    beforeSnapshot.realPath !== await expectedRealPathWithoutInRunAliases(runDir, outputPath)
+  ) {
+    throw new DriverError(
+      `Shell output JSON for effect ${action.effectId} is a symlink alias to canonical engine-owned ${kind === "canonical_output" ? "output.json" : "result.json"}`,
+      action.effectId,
+    );
+  }
   return {
     ref: selectedRef,
     path: outputPath,
@@ -1889,13 +1900,16 @@ async function shellOutputSnapshot(
   runDir: string,
   ref: string,
   effectId: string,
-): Promise<{ fingerprint: string; bytes: Buffer } | null> {
+): Promise<{ fingerprint: string; bytes: Buffer; realPath: string } | null> {
   const filePath = await resolveRunRelativeReal(runDir, ref);
   let handle;
   try {
     handle = await fs.open(filePath, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
   } catch (error) {
     if (isNotFound(error)) return null;
+    if ((error as NodeJS.ErrnoException)?.code === "ELOOP") {
+      throw new DriverError(`Shell output JSON for effect ${effectId} is a forbidden final-component symlink alias`, effectId);
+    }
     throw error;
   }
   try {
@@ -1903,6 +1917,8 @@ async function shellOutputSnapshot(
     const bytes = await fs.readFile(handle);
     const after = await handle.stat();
     await resolveRunRelativeReal(runDir, ref);
+    const realPath = await fs.realpath(filePath);
+    await assertRealPathWithinRun(runDir, realPath, ref);
     const current = await fs.stat(filePath);
     if (
       before.dev !== after.dev ||
@@ -1921,6 +1937,7 @@ async function shellOutputSnapshot(
     return {
       fingerprint: `${after.dev}:${after.ino}:${after.size}:${after.mtimeMs}:${after.ctimeMs}:${sha256(bytes)}`,
       bytes,
+      realPath,
     };
   } finally {
     await handle.close();
@@ -1953,7 +1970,20 @@ async function shellResultValue(
   if (commandOutput) {
     const afterSnapshot = await shellOutputSnapshot(runDir, commandOutput.ref, action.effectId);
     const changed = afterSnapshot !== null && afterSnapshot.fingerprint !== commandOutput.before;
-    if (commandOutput.kind !== "external") {
+    const authenticatedKind = afterSnapshot
+      ? await classifyShellOutputTarget(runDir, action.effectId, afterSnapshot.realPath)
+      : commandOutput.kind;
+    if (
+      afterSnapshot &&
+      authenticatedKind !== "external" &&
+      afterSnapshot.realPath !== await expectedRealPathWithoutInRunAliases(runDir, commandOutput.path)
+    ) {
+      throw new DriverError(
+        `Shell output JSON for effect ${action.effectId} is a symlink alias to canonical engine-owned ${authenticatedKind === "canonical_output" ? "output.json" : "result.json"}`,
+        action.effectId,
+      );
+    }
+    if (authenticatedKind !== "external") {
       if (changed) await restoreTransientShellResult(commandOutput);
       if (failed) return { value: failedValue, outputAlreadyDurable: false };
     } else if (failed) {
@@ -1970,7 +2000,7 @@ async function shellResultValue(
       }
       return { value, outputAlreadyDurable: false, outputBytes: afterSnapshot.bytes };
     }
-    if (commandOutput.kind === "external") {
+    if (authenticatedKind === "external") {
       throw new DriverError(
         `Shell output JSON for effect ${action.effectId} was not created or updated by the command`,
         action.effectId,
@@ -2004,6 +2034,29 @@ async function restoreTransientShellResult(commandOutput: ShellCommandOutput): P
   });
 }
 
+async function classifyShellOutputTarget(
+  runDir: string,
+  effectId: string,
+  authenticatedRealPath: string,
+): Promise<ShellCommandOutput["kind"]> {
+  const canonicalOutput = effectArtifactPath(runDir, effectId, "output.json");
+  const canonicalResult = effectArtifactPath(runDir, effectId, "result.json");
+  const canonicalOutputIdentity = await fs.realpath(canonicalOutput).catch((error: unknown) => {
+    if (isNotFound(error)) return canonicalOutput;
+    throw error;
+  });
+  const canonicalResultIdentity = await fs.realpath(canonicalResult).catch((error: unknown) => {
+    if (isNotFound(error)) return canonicalResult;
+    throw error;
+  });
+  return authenticatedRealPath === canonicalOutputIdentity
+    ? "canonical_output"
+    : authenticatedRealPath === canonicalResultIdentity
+      ? "canonical_result"
+      : "external";
+}
+
+
 async function hasMatchingCommittedArtifact(runDir: string, checkpoint: ExecutionCheckpoint): Promise<boolean> {
   const canonicalOutputRef = taskRelativeRef(checkpoint.effectId, "output.json");
   if (checkpoint.outputRef && checkpoint.outputRef !== canonicalOutputRef) {
@@ -2030,8 +2083,8 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
     );
   }
 
-  const outputPath = await resolveRunRelativeReal(runDir, canonicalOutputRef);
-  const durableOutput = await readJson<unknown>(outputPath);
+  const outputBytes = await readCheckpointOutputBytes(runDir, checkpoint);
+  const durableOutput = JSON.parse(outputBytes.toString("utf8")) as unknown;
   let committedValue: unknown;
   if (expectedStatus === "error") {
     committedValue = result.error;
@@ -2068,6 +2121,30 @@ async function hasMatchingCommittedArtifact(runDir: string, checkpoint: Executio
     );
   }
   return true;
+}
+
+async function readCheckpointOutputBytes(runDir: string, checkpoint: ExecutionCheckpoint): Promise<Buffer> {
+  const canonicalOutputRef = taskRelativeRef(checkpoint.effectId, "output.json");
+  if (checkpoint.outputRef !== canonicalOutputRef || !checkpoint.outputSha256) {
+    throw new DriverError(
+      `Execution checkpoint lacks canonical output identity for effect ${checkpoint.effectId}`,
+      checkpoint.effectId,
+    );
+  }
+  const snapshot = await shellOutputSnapshot(runDir, canonicalOutputRef, checkpoint.effectId);
+  if (!snapshot) {
+    throw new DriverError(
+      `Execution checkpoint output is missing for effect ${checkpoint.effectId}`,
+      checkpoint.effectId,
+    );
+  }
+  if (sha256(snapshot.bytes) !== checkpoint.outputSha256) {
+    throw new DriverError(
+      `Immutable durable output hash conflicts with execution checkpoint for effect ${checkpoint.effectId}`,
+      checkpoint.effectId,
+    );
+  }
+  return snapshot.bytes;
 }
 
 function serializeCommittedEffectError(error: unknown): JsonObject {
@@ -2197,6 +2274,11 @@ async function ensureEffectTaskDir(runDir: string, effectId: string): Promise<vo
   await resolveRunRelativeReal(runDir, taskRef);
 }
 
+async function expectedRealPathWithoutInRunAliases(runDir: string, lexicalPath: string): Promise<string> {
+  const relative = path.relative(path.resolve(runDir), lexicalPath);
+  return path.join(await fs.realpath(runDir), relative);
+}
+
 async function resolveRunRelativeReal(runDir: string, candidate: string): Promise<string> {
   const resolved = resolveRunRelative(runDir, candidate);
   const realRun = await fs.realpath(runDir);
@@ -2217,6 +2299,14 @@ async function resolveRunRelativeReal(runDir: string, candidate: string): Promis
     }
   }
 }
+
+async function assertRealPathWithinRun(runDir: string, realPath: string, candidate: string): Promise<void> {
+  const relative = path.relative(await fs.realpath(runDir), realPath);
+  if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new DriverError(`Artifact ref real path escapes the run directory: ${JSON.stringify(candidate)}`);
+  }
+}
+
 
 async function readCheckpoint(runDir: string, effectId: string): Promise<ExecutionCheckpoint | null> {
   const checkpointPath = await resolveRunRelativeReal(runDir, taskRelativeRef(effectId, "execution.json"));

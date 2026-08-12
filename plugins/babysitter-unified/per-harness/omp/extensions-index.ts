@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import { spawn } from "node:child_process";
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 import * as path from "node:path";
 import { initI18n, t } from "./i18n.js";
@@ -108,7 +109,76 @@ function toSkillPrompt(name: string, args: string): string {
 
 
 
-export default function activate(pi: ExtensionAPI): void {
+function createDeferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((complete) => {
+    resolve = complete;
+  });
+  return { promise, resolve };
+}
+
+async function execBabysitterWithStdin(
+  args: string[],
+  cwd: string,
+  stdin: Buffer,
+  timeoutMs: number,
+  signal?: AbortSignal,
+): Promise<{ code: number; stdout: string; stderr: string; killed: boolean }> {
+  const { promise, resolve } = createDeferred<{
+    code: number;
+    stdout: string;
+    stderr: string;
+    killed: boolean;
+  }>();
+  const child = spawn("babysitter", args, {
+    cwd,
+    env: process.env,
+    stdio: ["pipe", "pipe", "pipe"],
+    windowsHide: true,
+  });
+  let stdout = "";
+  let stderr = "";
+  let killed = false;
+  let settled = false;
+  const finish = (code: number): void => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", abort);
+    resolve({ code, stdout, stderr, killed });
+  };
+  const abort = (): void => {
+    killed = true;
+    child.kill("SIGKILL");
+  };
+  const timeout = setTimeout(abort, timeoutMs);
+  timeout.unref();
+  child.stdout.setEncoding("utf8");
+  child.stderr.setEncoding("utf8");
+  child.stdout.on("data", (chunk: string) => {
+    stdout += chunk;
+  });
+  child.stderr.on("data", (chunk: string) => {
+    stderr += chunk;
+  });
+  child.once("error", (error) => {
+    stderr += error instanceof Error ? error.message : String(error);
+    finish(1);
+  });
+  child.once("close", (code) => finish(code ?? 1));
+  signal?.addEventListener("abort", abort, { once: true });
+  if (signal?.aborted) abort();
+  child.stdin.on("error", () => {
+    // The exit status remains authoritative when the child closes stdin early.
+  });
+  child.stdin.end(stdin);
+  return await promise;
+}
+
+export default function activate(
+  pi: ExtensionAPI,
+  executeWithStdin: typeof execBabysitterWithStdin = execBabysitterWithStdin,
+): void {
   initI18n(pi);
   const projectionApi = pi as ProjectionExtensionAPI;
   let activeContext: ExtensionContext | undefined;
@@ -294,12 +364,15 @@ export default function activate(pi: ExtensionAPI): void {
 
   const driver = new OmpDeterministicDriver({
     cwd: process.cwd(),
-    runCli: async (args, timeoutMs, signal) => {
-      const result = await pi.exec("babysitter", args, {
-        cwd: driveContext.getStore()?.cwd ?? activeContext?.cwd ?? process.cwd(),
-        timeout: timeoutMs ?? 120_000,
-        signal,
-      });
+    runCli: async (args, timeoutMs, signal, stdin) => {
+      const cwd = driveContext.getStore()?.cwd ?? activeContext?.cwd ?? process.cwd();
+      const result = stdin
+        ? await executeWithStdin(args, cwd, stdin, timeoutMs ?? 120_000, signal)
+        : await pi.exec("babysitter", args, {
+            cwd,
+            timeout: timeoutMs ?? 120_000,
+            signal,
+          });
       return {
         code: result.code,
         stdout: result.stdout,

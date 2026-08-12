@@ -83,6 +83,35 @@ async function recordCommittedResult(runDir: string, effect: Action, value: unkn
   });
 }
 
+async function taskShowResult(runDir: string, effect: Action): Promise<{
+  code: number;
+  stdout: string;
+  stderr: string;
+}> {
+  let result: Record<string, unknown> | undefined;
+  try {
+    result = JSON.parse(
+      await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'result.json'), 'utf8'),
+    ) as Record<string, unknown>;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  return {
+    code: 0,
+    stdout: JSON.stringify({
+      effect: result
+        ? {
+            effectId: effect.effectId,
+            invocationKey: effect.invocationKey,
+            status: result.status === 'error' ? 'resolved_error' : 'resolved_ok',
+            resultRef: `tasks/${effect.effectId}/result.json`,
+          }
+        : { status: 'requested' },
+    }),
+    stderr: '',
+  };
+}
+
 afterEach(async () => {
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
@@ -782,7 +811,16 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const moduleUrl = pathToFileURL(path.join(result.outputDir, 'extensions', 'index.ts')).href;
     // The compiler chooses this generated module path at runtime, so a static import cannot exercise it.
     const extensionModule = await import(/* @vite-ignore */ moduleUrl) as unknown as {
-      default: (pi: Record<string, unknown>) => void;
+      default: (
+        pi: Record<string, unknown>,
+        executeWithStdin?: (
+          args: string[],
+          cwd: string,
+          stdin: Buffer,
+          timeoutMs: number,
+          signal?: AbortSignal,
+        ) => Promise<{ code: number; stdout: string; stderr: string; killed: boolean }>,
+      ) => void;
     };
 
     const runDir = await tempRun('omp-modeled-recovery-run-');
@@ -839,7 +877,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return args[1] === activeRunDir
+            ? await taskShowResult(activeRunDir, activeEffect)
+            : await taskShowResult(runDir, effect);
         }
         if (args[0] === 'task:post' && args[1] === activeRunDir) {
           const value = JSON.parse(await fs.readFile(path.join(activeRunDir, 'tasks', activeEffect.effectId, 'output.json'), 'utf8'));
@@ -861,7 +901,13 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         handlers.set(event, handler);
       },
     };
-    extensionModule.default(pi);
+    extensionModule.default(pi, async (args) => {
+      const result = await (pi.exec as (
+        command: string,
+        args: string[],
+      ) => Promise<{ code: number; stdout: string; stderr: string }>)("babysitter", args);
+      return { ...result, killed: false };
+    });
 
     const driveTool = tools.get('babysitter_drive');
     const cancelTool = tools.get('babysitter_agent_cancel');
@@ -1150,7 +1196,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         posts += 1;
         await recordCommittedResult(runDir, effect, value);
@@ -1203,7 +1249,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, stdoutValue);
         return { code: 0, stdout: '{}', stderr: '' };
@@ -1250,7 +1296,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, value);
         return { code: 0, stdout: '{}', stderr: '' };
@@ -1329,7 +1375,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, replacementValue);
         return { code: 0, stdout: '{}', stderr: '' };
@@ -1341,6 +1387,147 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     } finally {
       statSpy.mockRestore();
     }
+  });
+
+  it.each([
+    { status: 'ok', exitCode: 0 },
+    { status: 'error', exitCode: 9 },
+  ] as const)(
+    'binds $status checkpoint bytes across post-boundary canonical output replacement',
+    async ({ status, exitCode }) => {
+      const runDir = await tempRun(`omp-shell-post-boundary-${status}-`);
+      const effect = action('shell', { shell: { command: 'post-boundary-replacement' } });
+      const outputPath = path.join(runDir, 'tasks', effect.effectId, 'output.json');
+      const replacementValue = { attacker: `replacement-${status}` };
+      let iterations = 0;
+      let resolved = false;
+      let authenticatedValue: unknown;
+      let postedInput: unknown;
+      let postSelector: string | undefined;
+      const driver = new OmpDeterministicDriver({
+        cwd: runDir,
+        executeShell: async () => ({
+          exitCode,
+          stdout: status === 'ok' ? JSON.stringify({ bound: 'authenticated-success' }) : 'partial stdout',
+          stderr: status === 'error' ? 'command failed' : '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-11T00:00:00.000Z',
+          finishedAt: '2026-08-11T00:00:01.000Z',
+        }),
+        runCli: async (
+          args,
+          _timeoutMs?: number,
+          _signal?: AbortSignal,
+          stdin?: Buffer,
+        ) => {
+          if (args[0] === 'run:iterate') {
+            iterations += 1;
+            return {
+              code: 0,
+              stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+              stderr: '',
+            };
+          }
+          if (args[0] === 'task:show') {
+            return {
+              code: 0,
+              stdout: JSON.stringify({
+                effect: resolved
+                  ? {
+                      effectId: effect.effectId,
+                      invocationKey: effect.invocationKey,
+                      status: status === 'error' ? 'resolved_error' : 'resolved_ok',
+                      resultRef: `tasks/${effect.effectId}/result.json`,
+                    }
+                  : { status: 'requested' },
+              }),
+              stderr: '',
+            };
+          }
+          authenticatedValue = JSON.parse(await fs.readFile(outputPath, 'utf8'));
+          await writeJson(outputPath, replacementValue);
+          const flag = status === 'error' ? '--error' : '--value';
+          postSelector = args[args.indexOf(flag) + 1];
+          if (postSelector === '-') {
+            if (!stdin) throw new Error('task:post stdin selector requires bound bytes');
+            postedInput = JSON.parse(stdin.toString('utf8'));
+          } else {
+            postedInput = JSON.parse(await fs.readFile(postSelector, 'utf8'));
+          }
+          if (status === 'error') {
+            await writeJson(path.join(runDir, 'tasks', effect.effectId, 'result.json'), {
+              effectId: effect.effectId,
+              invocationKey: effect.invocationKey,
+              status: 'error',
+              error: toSerializedEffectError(postedInput),
+            });
+          } else {
+            await recordCommittedResult(runDir, effect, postedInput);
+          }
+          resolved = true;
+          return { code: 0, stdout: '{}', stderr: '' };
+        },
+      });
+
+      await expect(driver.drive(runDir)).rejects.toThrow(/checkpoint|hash|immutable durable output|conflicts/i);
+      expect(postSelector).toBe('-');
+      expect(postedInput).toEqual(authenticatedValue);
+    },
+  );
+
+  it('fails closed when task:post exits zero but the committed value mismatches the checkpoint', async () => {
+    const runDir = await tempRun('omp-shell-post-mismatch-');
+    const effect = action('shell', { shell: { command: 'mismatched-post' } });
+    const authenticatedValue = { bound: 'checkpoint' };
+    const mismatchedValue = { bound: 'different-value' };
+    let iterations = 0;
+    let resolved = false;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode: 0,
+        stdout: JSON.stringify(authenticatedValue),
+        stderr: '',
+        timedOut: false,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-11T00:00:00.000Z',
+        finishedAt: '2026-08-11T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({
+              effect: resolved
+                ? {
+                    effectId: effect.effectId,
+                    invocationKey: effect.invocationKey,
+                    status: 'resolved_ok',
+                    resultRef: `tasks/${effect.effectId}/result.json`,
+                  }
+                : { status: 'requested' },
+            }),
+            stderr: '',
+          };
+        }
+        await recordCommittedResult(runDir, effect, mismatchedValue);
+        resolved = true;
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(/committed result|checkpoint|conflicts/i);
   });
 
   it.each([
@@ -1380,7 +1567,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, expected);
         return { code: 0, stdout: '{}', stderr: '' };
@@ -1419,7 +1606,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           finishedAt: '2026-08-11T00:00:01.000Z',
         };
       },
-      runCli: async (args) => {
+      runCli: async (args, _timeoutMs, _signal, stdin) => {
         if (args[0] === 'run:iterate') {
           iterations += 1;
           return {
@@ -1429,11 +1616,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         posts += 1;
-        const valuePath = args[args.indexOf('--value') + 1];
-        expect(JSON.parse(await fs.readFile(valuePath, 'utf8'))).toEqual(value);
+        expect(args[args.indexOf('--value') + 1]).toBe('-');
+        expect(JSON.parse(stdin?.toString('utf8') ?? '')).toEqual(value);
         const checkpoint = JSON.parse(
           await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'execution.json'), 'utf8'),
         ) as Record<string, unknown>;
@@ -1963,7 +2150,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           return { code: 0, stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }), stderr: '' };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return posts === 0
+            ? { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' }
+            : await taskShowResult(runDir, effect);
         }
         posts += 1;
         return { code: 0, stdout: '{}', stderr: '' };
@@ -2086,7 +2275,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(completedRunDir, completedEffect);
         }
         posts += 1;
         await recordCommittedResult(completedRunDir, completedEffect, value);
@@ -2596,7 +2785,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         posts += 1;
         await recordCommittedResult(runDir, effect, value);
@@ -2704,6 +2893,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
             stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
             stderr: '',
           };
+        }
+        if (args[0] === 'task:show') {
+          return await taskShowResult(runDir, effect);
         }
         posts += 1;
         await recordCommittedResult(runDir, effect, { approved: true });
@@ -2833,7 +3025,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           return { code: 0, stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }), stderr: '' };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, '');
         return { code: 0, stdout: 'token=top-secret command="rm -rf /"', stderr: '' };
@@ -2892,9 +3084,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
-        await recordCommittedResult(runDir, effect, { ok: true });
+        await recordCommittedResult(runDir, effect, '{"ok":true}');
         return { code: 0, stdout: '{}', stderr: '' };
       },
     });
@@ -2978,7 +3170,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, stdout);
         return { code: 0, stdout: '{}', stderr: '' };
@@ -3058,7 +3250,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, '');
         return { code: 0, stdout: '{}', stderr: '' };
@@ -3682,6 +3874,148 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
   });
 
   it.each([
+    { aliasKind: 'ancestor', artifact: 'output.json' },
+    { aliasKind: 'ancestor', artifact: 'result.json' },
+    { aliasKind: 'final component', artifact: 'output.json' },
+    { aliasKind: 'final component', artifact: 'result.json' },
+  ])(
+    'rejects a post-execution $aliasKind symlink alias to canonical $artifact',
+    async ({ aliasKind, artifact }) => {
+      const runDir = await tempRun(`omp-shell-canonical-${aliasKind.replace(' ', '-')}-${artifact}-`);
+      const outputRef = aliasKind === 'ancestor' ? `alias/${artifact}` : `aliases/${artifact}`;
+      const effect = action('shell', {
+        shell: { command: 'seize-canonical-artifact-through-alias' },
+        io: { outputJsonPath: outputRef },
+      });
+      const taskDir = path.join(runDir, 'tasks', effect.effectId);
+      const canonicalPath = path.join(taskDir, artifact);
+      const aliasPath = path.join(runDir, outputRef);
+      let posts = 0;
+      let resolved = false;
+      const driver = new OmpDeterministicDriver({
+        cwd: runDir,
+        executeShell: async () => {
+          if (aliasKind === 'ancestor') {
+            await fs.symlink(taskDir, path.join(runDir, 'alias'));
+          } else {
+            await fs.mkdir(path.dirname(aliasPath), { recursive: true });
+            await fs.symlink(canonicalPath, aliasPath);
+          }
+          await writeJson(aliasPath, { seized: artifact });
+          return {
+            exitCode: 0,
+            stdout: '{"trusted":"stdout"}',
+            stderr: '',
+            timedOut: false,
+            stdoutTruncated: false,
+            stderrTruncated: false,
+            startedAt: '2026-08-11T00:00:00.000Z',
+            finishedAt: '2026-08-11T00:00:01.000Z',
+          };
+        },
+        runCli: async (args) => {
+          if (args[0] === 'run:iterate') {
+            return {
+              code: 0,
+              stdout: resolved ? JSON.stringify({ status: 'completed' }) : waiting(effect),
+              stderr: '',
+            };
+          }
+          if (args[0] === 'task:show') {
+            return {
+              code: 0,
+              stdout: JSON.stringify({
+                effect: resolved
+                  ? {
+                      effectId: effect.effectId,
+                      invocationKey: effect.invocationKey,
+                      status: 'resolved_ok',
+                      resultRef: `tasks/${effect.effectId}/result.json`,
+                    }
+                  : { status: 'requested' },
+              }),
+              stderr: '',
+            };
+          }
+          posts += 1;
+          await recordCommittedResult(runDir, effect, { seized: artifact });
+          resolved = true;
+          return { code: 0, stdout: '{}', stderr: '' };
+        },
+      });
+
+      await expect(driver.drive(runDir)).rejects.toThrow(/canonical|symlink|alias|engine-owned/i);
+      expect(posts).toBe(0);
+      await expect(fs.readFile(canonicalPath, 'utf8').then(JSON.parse)).resolves.toEqual({ seized: artifact });
+    },
+  );
+
+  it('consumes a post-execution ancestor alias only when its authenticated target is noncanonical and in-run', async () => {
+    const runDir = await tempRun('omp-shell-noncanonical-ancestor-alias-');
+    const outputRef = 'alias/command-output.json';
+    const effect = action('shell', {
+      shell: { command: 'write-noncanonical-through-alias' },
+      io: { outputJsonPath: outputRef },
+    });
+    const value = { authenticated: 'noncanonical in-run target' };
+    let iterations = 0;
+    let resolved = false;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        const targetDir = path.join(runDir, 'artifacts');
+        await fs.mkdir(targetDir, { recursive: true });
+        await fs.symlink(targetDir, path.join(runDir, 'alias'));
+        await writeJson(path.join(runDir, outputRef), value);
+        return {
+          exitCode: 0,
+          stdout: '{"mustNotWin":true}',
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-11T00:00:00.000Z',
+          finishedAt: '2026-08-11T00:00:01.000Z',
+        };
+      },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({
+              effect: resolved
+                ? {
+                    effectId: effect.effectId,
+                    invocationKey: effect.invocationKey,
+                    status: 'resolved_ok',
+                    resultRef: `tasks/${effect.effectId}/result.json`,
+                  }
+                : { status: 'requested' },
+            }),
+            stderr: '',
+          };
+        }
+        await recordCommittedResult(runDir, effect, value);
+        resolved = true;
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toMatchObject({ state: 'completed' });
+    await expect(
+      fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8').then(JSON.parse),
+    ).resolves.toEqual(value);
+  });
+
+  it.each([
     { label: 'JSON string scalar', stdout: JSON.stringify('plain text'), value: 'plain text' },
     { label: 'JSON number scalar', stdout: '42', value: 42 },
     { label: 'JSON boolean scalar', stdout: 'true', value: true },
@@ -3715,7 +4049,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           };
         }
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         await recordCommittedResult(runDir, effect, value);
         return { code: 0, stdout: '{}', stderr: '' };
@@ -3859,10 +4193,19 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       },
       runCli: async (args) => {
         if (args[0] === 'task:show') {
-          return { code: 0, stdout: JSON.stringify({ effect: { status: 'requested' } }), stderr: '' };
+          return await taskShowResult(runDir, effect);
         }
         if (args[0] === 'task:post') {
           await expect(fs.access(resultPath)).rejects.toMatchObject({ code: 'ENOENT' });
+          const error = JSON.parse(
+            await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8'),
+          ) as unknown;
+          await writeJson(resultPath, {
+            effectId: effect.effectId,
+            invocationKey: effect.invocationKey,
+            status: 'error',
+            error: toSerializedEffectError(error),
+          });
           return { code: 0, stdout: '{}', stderr: '' };
         }
         return { code: 0, stdout: waiting(effect), stderr: '' };
@@ -3870,6 +4213,10 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     });
 
     await expect(driver.drive(runDir)).rejects.toThrow('failed; refusing deterministic continuation');
-    await expect(fs.access(resultPath)).rejects.toMatchObject({ code: 'ENOENT' });
+    await expect(fs.readFile(resultPath, 'utf8').then(JSON.parse)).resolves.toMatchObject({
+      effectId: effect.effectId,
+      status: 'error',
+      error: expect.objectContaining({ message: expect.stringContaining('command') }),
+    });
   });
 });
