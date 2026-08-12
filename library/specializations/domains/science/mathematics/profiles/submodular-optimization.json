@@ -1,0 +1,64 @@
+{
+  "id": "submodular-optimization",
+  "version": "1.0.0",
+  "contractVersion": "1.0.0",
+  "moduleSelection": {
+    "mode": "deterministic-by-input-kind",
+    "requiredInputField": "applicableModules",
+    "modules": ["multilinear-extension", "matroid-maximization", "density-reduction", "graphical-specialization"],
+    "rule": "Every module is explicitly selected or excluded with a nonempty rationale; excluded module templates and edge rows must be not-applicable with the same rationale."
+  },
+  "requiredLedgers": [
+    {"moduleId":"common","ledgers":["theoremReferences"]},
+    {"moduleId":"multilinear-extension","ledgers":["hypotheses","useSites","boundaries","randomDistributions","convergenceChecks"]},
+    {"moduleId":"matroid-maximization","ledgers":["hypotheses","useSites","boundaries"]},
+    {"moduleId":"density-reduction","ledgers":["hypotheses","boundaries","exactArithmetic"]},
+    {"moduleId":"graphical-specialization","ledgers":["hypotheses","boundaries"]}
+  ],
+  "requiredObligationKinds": ["definition", "lemma", "use-site", "boundary", "complexity", "document"],
+  "edgeRows": [
+    {"id":"EDGE-CUBE-ORIGIN","moduleId":"multilinear-extension","domain":"proof-object","expected":"F(0) and every origin limit are explicit"},
+    {"id":"EDGE-CUBE-FACES","moduleId":"matroid-maximization","domain":"proof-object","expected":"paths remain in the cube, including zero/one faces"},
+    {"id":"EDGE-ZERO-INCREMENT","moduleId":"multilinear-extension","domain":"proof-object","expected":"zero affine increments preserve direction without division"},
+    {"id":"EDGE-IMPROPER-ENDPOINT","moduleId":"multilinear-extension","domain":"proof-object","expected":"truncate, bound, and justify the limit at zero"},
+    {"id":"EDGE-EMPTY-GROUND","moduleId":"density-reduction","domain":"reduction","expected":"state behavior when V is empty"},
+    {"id":"EDGE-SINGLETON-WITNESS","moduleId":"density-reduction","domain":"reduction","expected":"contraction permits empty remainder for singleton witness"},
+    {"id":"EDGE-NONEMPTY-DOMAIN","moduleId":"density-reduction","domain":"reduction","expected":"empty-set false positives are excluded soundly and completely"},
+    {"id":"EDGE-RATIONAL-ENCODING","moduleId":"density-reduction","domain":"reduction","expected":"binary numerator/denominator and exact scaling are bounded"},
+    {"id":"EDGE-THEOREM-TARGET","moduleId":"common","domain":"document","expected":"numeric references target numbered compatible declarations"},
+    {"id":"EDGE-ALL-ZERO-OBJECTIVE","moduleId":"density-reduction","domain":"reduction","expected":"state the decision and optimization result when the objective is identically zero"},
+    {"id":"EDGE-ZERO-NEGATIVE-THRESHOLD","moduleId":"density-reduction","domain":"reduction","expected":"state zero and negative rational threshold behavior wherever the predicate permits it"},
+    {"id":"EDGE-GRAPH-LOOP-PARALLEL","moduleId":"graphical-specialization","domain":"graphical-specialization","expected":"state loop and parallel-element conventions when a graphical specialization is used, otherwise give a reasoned not-applicable disposition"}
+  ],
+  "obligationTemplates": [
+    {"id":"OB-PRODUCT-DISTRIBUTION","moduleId":"multilinear-extension","kind":"definition","statement":"Define product random sets, exclusions, and marginals."},
+    {"id":"OB-FIRST-PARTIAL","moduleId":"multilinear-extension","kind":"lemma","statement":"Derive first derivative by conditioning."},
+    {"id":"OB-MIXED-PARTIAL","moduleId":"multilinear-extension","kind":"lemma","statement":"Express mixed derivative as expected second difference and prove sign."},
+    {"id":"OB-DR-ANTITONE","moduleId":"multilinear-extension","kind":"lemma","statement":"Prove coordinate derivative antitonicity on the cube."},
+    {"id":"OB-PATH-TUPLE","moduleId":"multilinear-extension","kind":"use-site","statement":"Record domain, formula, endpoints, membership, derivative, and FTC bounds."},
+    {"id":"OB-POSITIVE-PART","moduleId":"multilinear-extension","kind":"lemma","statement":"Prove the positive-part inequality with sign checks."},
+    {"id":"OB-RADIAL","moduleId":"multilinear-extension","kind":"lemma","statement":"Prove the radial gradient inequality with endpoint checks."},
+    {"id":"OB-NORMALIZATION","moduleId":"multilinear-extension","kind":"lemma","statement":"Source or derive normalization at the origin."},
+    {"id":"OB-IMPROPER-CONVERGENCE","moduleId":"multilinear-extension","kind":"lemma","statement":"Prove truncated integral convergence and interchange hypotheses."},
+    {"id":"OB-MATROID-COMPARATOR","moduleId":"matroid-maximization","kind":"use-site","statement":"Prove comparator feasibility before local-optimum substitution."},
+    {"id":"OB-DERIVATIVE-TELESCOPE","moduleId":"matroid-maximization","kind":"lemma","statement":"Audit weighting, product derivative, factors, and endpoints."},
+    {"id":"OB-MODULAR-CLOSURE","moduleId":"density-reduction","kind":"lemma","statement":"Prove modular addition preserves submodularity."},
+    {"id":"OB-CONTRACTION-CLOSURE","moduleId":"density-reduction","kind":"lemma","statement":"Prove contraction preserves submodularity."},
+    {"id":"OB-REDUCTION-SOUNDNESS","moduleId":"density-reduction","kind":"lemma","statement":"Prove every returned witness is valid."},
+    {"id":"OB-REDUCTION-COMPLETENESS","moduleId":"density-reduction","kind":"lemma","statement":"Prove every valid witness is represented."},
+    {"id":"OB-NONEMPTY-ENFORCEMENT","moduleId":"density-reduction","kind":"boundary","statement":"Handle empty set, singleton witnesses, and V empty."},
+    {"id":"OB-EXACT-BIT-COMPLEXITY","moduleId":"density-reduction","kind":"complexity","statement":"Record encoding, scaling, calls, magnitude, bit length, and comparisons."},
+    {"id":"OB-CANDIDATE-COMPLETENESS","moduleId":"density-reduction","kind":"complexity","statement":"Prove candidate set count, size, and completeness."},
+    {"id":"OB-THEOREM-REFERENCES","moduleId":"common","kind":"document","statement":"Resolve references to numbered compatible targets."}
+  ],
+  "rubric": {
+    "categoryMaxima": {
+      "coreMathematicalValidity": 35,
+      "lemmaUseSiteClosure": 15,
+      "domainEdgeCompleteness": 20,
+      "exactReductionComplexity": 15,
+      "expositionAmbiguity": 5,
+      "deterministicArtifactSemantics": 10
+    }
+  }
+}
