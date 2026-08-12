@@ -4,6 +4,7 @@ import * as path from "node:path";
 import { initI18n, t } from "./i18n.js";
 import {
   type DriverProgress,
+  executeHostShell,
   type DriverResult,
   type ProjectionTodoPhase,
   OmpDeterministicDriver,
@@ -309,6 +310,16 @@ export default function activate(pi: ExtensionAPI): void {
         killed: result.killed,
       };
     },
+    executeShell: async (action, cwd, signal, progress) =>
+      await executeHostShell(action, cwd, signal, async (command, args, options) => {
+        const result = await pi.exec(command, args, options);
+        return {
+          code: result.code,
+          stdout: result.stdout,
+          stderr: result.stderr,
+          killed: result.killed,
+        };
+      }, progress),
     onProgress: (progress) => {
       const owner = projectionOwner;
       if (

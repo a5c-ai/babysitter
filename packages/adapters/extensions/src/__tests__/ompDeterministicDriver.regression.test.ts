@@ -10,7 +10,8 @@ import { compile } from '../compiler.js';
 import {
   type AgentRetryInput,
   type DriverProgress,
-  executeBoundedShell,
+  executeHostShell,
+  MAX_CAPTURE_BYTES,
   OmpDeterministicDriver,
   reconstructBabysitterProjection,
 } from '../../../../../plugins/babysitter-unified/per-harness/omp/extensions-driver.js';
@@ -123,17 +124,20 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const result = compile({ source: UNIFIED_PLUGIN_DIR, target: 'oh-my-pi', output });
 
     expect(result.status, result.diagnostics.map((diagnostic) => diagnostic.message).join('\n')).not.toBe('error');
-    await expect(fs.readFile(path.join(result.outputDir, 'extensions', 'driver.ts'), 'utf8')).resolves.toContain(
-      'class OmpDeterministicDriver',
-    );
+    const generatedDriver = await fs.readFile(path.join(result.outputDir, 'extensions', 'driver.ts'), 'utf8');
+    expect(generatedDriver).toContain('class OmpDeterministicDriver');
     const generatedIndex = await fs.readFile(path.join(result.outputDir, 'extensions', 'index.ts'), 'utf8');
-    expect(generatedIndex).not.toContain('babysitter-proxied-session-start');
-    expect(generatedIndex).not.toContain('babysitter_agent_complete');
-    expect(generatedIndex).not.toContain('execBabysitterWithStdin');
-    expect(generatedIndex).not.toContain('resolveBabysitterSpawn');
-    expect(generatedIndex).not.toContain('node:child_process');
-    expect(generatedIndex).not.toContain('taskkill');
-    expect(generatedIndex).not.toContain('rootedDescendants');
+    for (const generatedSource of [generatedDriver, generatedIndex]) {
+      expect(generatedSource).not.toContain('babysitter-proxied-session-start');
+      expect(generatedSource).not.toContain('babysitter_agent_complete');
+      expect(generatedSource).not.toContain('execBabysitterWithStdin');
+      expect(generatedSource).not.toContain('resolveBabysitterSpawn');
+      expect(generatedSource).not.toContain('node:child_process');
+      expect(generatedSource).not.toContain('taskkill');
+      expect(generatedSource).not.toContain('rootedDescendants');
+      expect(generatedSource).not.toContain('terminateProcessTree');
+      expect(generatedSource).not.toContain('process.kill');
+    }
     const agentPrompt = await fs.readFile(path.join(result.outputDir, 'agents', 'babysitter-task.md'), 'utf8');
     expect(agentPrompt).toContain('blocking: true');
     expect(agentPrompt).toContain('Yield your final effect value normally');
@@ -319,7 +323,25 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         command: { handler: (args: unknown, ctx: Record<string, unknown>) => unknown },
       ) => { commands.set(name, command.handler); },
       sendUserMessage: (message: string) => { sentMessages.push(message); },
-      exec: async (_command: string, args: string[], options?: { cwd?: string; signal?: AbortSignal }) => {
+      exec: async (command: string, args: string[], options?: { cwd?: string; signal?: AbortSignal }) => {
+        if (command !== 'babysitter') {
+          if (command !== pendingShellEffect.taskDef.shell.command) {
+            throw new Error(`unexpected shell command ${command}`);
+          }
+          const pending = Promise.withResolvers<{ code: number; stdout: string; stderr: string; killed: boolean }>();
+          const abort = () => pending.resolve({
+            code: 143,
+            stdout: JSON.stringify({
+              token: progressSecrets[0],
+              quoted: progressSecrets[1],
+              opaque: progressSecrets[2],
+            }) + `\n${progressSecrets[3]}`,
+            stderr: `${progressSecrets[4]}\n${progressSecrets[5]}`,
+            killed: true,
+          });
+          options?.signal?.addEventListener('abort', abort, { once: true });
+          return await pending.promise;
+        }
         if (args[0] === 'run:iterate') {
           runIterateSignal = options?.signal;
           runIterateCwd = options?.cwd;
@@ -428,7 +450,6 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     shellProgressRunDir = pendingShellRun;
     const pendingShellAbort = new AbortController();
     const shellProgressObserved = Promise.withResolvers<void>();
-    const shellOutputProgressObserved = Promise.withResolvers<void>();
     const pendingShellUpdates: Array<Record<string, unknown>> = [];
     const pendingShellProjectionBoundary = projectionWrites.length;
     const pendingShellStatusBoundary = uiStatusWrites.length;
@@ -442,15 +463,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       pendingShellAbort.signal,
       (update: Record<string, unknown>) => {
         pendingShellUpdates.push(update);
-        const details = update.details as {
-          progress?: { stage?: string; stdoutBytes?: number; stderrBytes?: number };
-        } | undefined;
+        const details = update.details as { progress?: { stage?: string } } | undefined;
         if (details?.progress?.stage === 'shell_progress') shellProgressObserved.resolve();
-        if (
-          details?.progress?.stage === 'shell_progress' &&
-          (details.progress.stdoutBytes ?? 0) > 0 &&
-          (details.progress.stderrBytes ?? 0) > 0
-        ) shellOutputProgressObserved.resolve();
       },
       {
         cwd: output,
@@ -460,7 +474,6 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         },
       },
     ).finally(() => { pendingShellSettled = true; });
-    await within(shellOutputProgressObserved.promise, 'confidential shell output progress');
     await within(shellProgressObserved.promise, 'pending shell progress');
     await within(pendingProjectionWrite.promise, 'pending projection write');
     expect(pendingShellUpdates).not.toHaveLength(0);
@@ -856,7 +869,18 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       },
       registerCommand: () => undefined,
       sendUserMessage: (message: string) => { sentMessages.push(message); },
-      exec: async (_command: string, args: string[]) => {
+      exec: async (command: string, args: string[], options?: { cwd?: string }) => {
+        if (command !== 'babysitter') {
+          if (command !== activeEffect.taskDef.shell.command) {
+            throw new Error(`unexpected shell command ${command}`);
+          }
+          return {
+            code: 0,
+            stdout: JSON.stringify({ cwd: options?.cwd }),
+            stderr: '',
+            killed: false,
+          };
+        }
         if (args[0] === 'run:iterate' && args[1] === activeRunDir) {
           activeIterations += 1;
           if (activeIterations === 1) {
@@ -978,7 +1002,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       path.join(activeRunDir, 'tasks', activeEffect.effectId, 'stdout.log'),
       'utf8',
     );
-    expect(JSON.parse(activeStdout)).toEqual({ cwd: await fs.realpath(activeWorkspace) });
+    expect(JSON.parse(activeStdout)).toEqual({ cwd: activeWorkspace });
     const retryResult = await retryPromise;
     expect(retryResult).toMatchObject({
       details: {
@@ -2560,169 +2584,157 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     });
   });
 
-  it('enforces a hard timeout for a TERM-ignoring process', async () => {
-    // Platform integration: fake timers cannot prove that a real OS process group is force-killed.
-    const effect = action('shell', {
+  it('executes exact shell argv and cwd through the injected host boundary', async () => {
+    const calls: unknown[][] = [];
+    const result = await executeHostShell(action('shell', {
       shell: {
         command: process.execPath,
-        args: [
-          '-e',
-          'process.on("SIGTERM", () => process.stderr.write("ignored-term\\n")); setInterval(() => {}, 1000)',
-        ],
-        timeoutMs: 100,
+        args: ['-e', 'process.stdout.write("ok")'],
+        cwd: 'nested',
+        timeoutMs: 4321,
       },
+    }), '/workspace', undefined, async (command, args, options) => {
+      calls.push([command, args, options]);
+      return { code: 0, stdout: 'ok', stderr: '', killed: false };
     });
-    const startedAt = Date.now();
 
-    const result = await executeBoundedShell(effect, process.cwd());
-
-    expect(result).toMatchObject({ timedOut: true, exitCode: 124 });
-    expect(Date.now() - startedAt).toBeLessThan(1_500);
+    expect(calls).toEqual([[
+      process.execPath,
+      ['-e', 'process.stdout.write("ok")'],
+      expect.objectContaining({ cwd: path.resolve('/workspace', 'nested'), timeout: 4321 }),
+    ]]);
+    expect(result).toMatchObject({ exitCode: 0, stdout: 'ok', stderr: '', timedOut: false });
   });
-  it('reports bounded incremental shell output before the command resolves and stops after abort', async () => {
-    const effect = action('shell', {
-      shell: {
-        command: process.execPath,
-        args: [
-          '-e',
-          'process.stdout.write("incremental-output"); process.on("SIGTERM", () => process.exit(0)); setInterval(() => {}, 1000)',
-        ],
-      },
+
+  it('fails closed instead of dropping shell env overrides at the host boundary', async () => {
+    let calls = 0;
+    await expect(executeHostShell(action('shell', {
+      shell: { command: 'env-sensitive', env: { REQUIRED_VALUE: 'bound' } },
+    }), '/workspace', undefined, async () => {
+      calls += 1;
+      return { code: 0, stdout: '', stderr: '', killed: false };
+    })).rejects.toThrow(/env overrides.*unsupported/i);
+    expect(calls).toBe(0);
+  });
+
+  it('passes no-args commands verbatim without shell interpretation or concatenation', async () => {
+    const calls: unknown[][] = [];
+    await executeHostShell(action('shell', {
+      shell: { command: 'printf "one two" | wc -w' },
+    }), '/workspace', undefined, async (command, args, options) => {
+      calls.push([command, args, options]);
+      return { code: 0, stdout: '', stderr: '', killed: false };
     });
-    const outputObserved = Promise.withResolvers<void>();
-    const controller = new AbortController();
+
+    expect(calls).toEqual([[
+      'printf "one two" | wc -w',
+      [],
+      expect.objectContaining({ cwd: '/workspace' }),
+    ]]);
+  });
+
+  it.each([
+    { label: 'nonzero', host: { code: 7, stdout: 'partial', stderr: 'failed', killed: false }, timedOut: false },
+    { label: 'timeout', host: { code: 143, stdout: 'partial', stderr: 'timed out', killed: true }, timedOut: true },
+  ])('maps host $label results without a model repair loop', async ({ host, timedOut }) => {
+    let calls = 0;
+    const result = await executeHostShell(
+      action('shell', { shell: { command: 'gate' } }),
+      '/workspace',
+      undefined,
+      async () => {
+        calls += 1;
+        return host;
+      },
+    );
+    expect(calls).toBe(1);
+    expect(result).toMatchObject({
+      exitCode: timedOut ? 124 : host.code,
+      timedOut,
+      stdout: 'partial',
+      stderr: host.stderr,
+    });
+  });
+
+  it('forwards abort and removes heartbeat scheduling after host rejection', async () => {
     const callbacks = new Set<() => void>();
     const progress: Array<Record<string, unknown>> = [];
-    let nowMs = 0;
-    const execution = executeBoundedShell(effect, process.cwd(), controller.signal, {
-      onProgress: (update) => {
-        progress.push(update as unknown as Record<string, unknown>);
-        if (update.reason === 'output') outputObserved.resolve();
-      },
-      now: () => nowMs,
-      scheduler: {
-        setInterval: (callback) => {
-          callbacks.add(callback);
-          return callback;
-        },
-        clearInterval: (callback) => { callbacks.delete(callback as () => void); },
-      },
-    });
-    let executionSettled = false;
-    void execution.then(
-      () => { executionSettled = true; },
-      () => { executionSettled = true; },
-    );
-    nowMs = 250;
-    await within(outputObserved.promise, 'incremental shell output');
-
-    expect(progress[0]).toMatchObject({
-      state: 'running',
-      reason: 'start',
-      elapsedMs: 0,
-      stdoutBytes: 0,
-      stderrBytes: 0,
-      stdoutTruncated: false,
-      stderrTruncated: false,
-    });
-    expect(progress).toContainEqual(expect.objectContaining({
-      state: 'running',
-      reason: 'output',
-      stdoutBytes: Buffer.byteLength('incremental-output'),
-      stderrBytes: 0,
-      stdoutTruncated: false,
-      stderrTruncated: false,
-    }));
-    expect(JSON.stringify(progress)).not.toContain('incremental-output');
-    expect(callbacks.size).toBe(1);
-    expect(executionSettled).toBe(false);
-
-    controller.abort(new DOMException('test abort', 'AbortError'));
-    await expect(execution).rejects.toMatchObject({ name: 'AbortError' });
-    expect(callbacks.size).toBe(0);
-    const updateCount = progress.length;
-    for (const callback of callbacks) callback();
-    expect(progress).toHaveLength(updateCount);
-  });
-
-  it('reports a silent shell heartbeat and removes the progress timer after completion', async () => {
-    const callbacks = new Set<() => void>();
-    const scheduledIntervals: number[] = [];
-    const scheduler = {
-      setInterval: (callback: () => void, intervalMs: number) => {
-        callbacks.add(callback);
-        scheduledIntervals.push(intervalMs);
-        return callback;
-      },
-      clearInterval: (callback: unknown) => { callbacks.delete(callback as () => void); },
-    };
-    let nowMs = 0;
     const controller = new AbortController();
-    const heartbeatProgress: Array<Record<string, unknown>> = [];
-    const silentEffect = action('shell', {
-      shell: {
-        command: process.execPath,
-        args: [
-          '-e',
-          'process.on("SIGTERM", () => process.exit(0)); setInterval(() => {}, 1000)',
-        ],
+    let receivedSignal: AbortSignal | undefined;
+    let nowMs = 0;
+    const execution = executeHostShell(
+      action('shell', { shell: { command: 'wait' } }),
+      '/workspace',
+      controller.signal,
+      async (_command, _args, options) => {
+        receivedSignal = options.signal;
+        const pending = Promise.withResolvers<{ code: number; stdout: string; stderr: string; killed: boolean }>();
+        options.signal?.addEventListener("abort", () => {
+          pending.resolve({ code: 143, stdout: "partial", stderr: "aborted", killed: true });
+        }, { once: true });
+        return await pending.promise;
       },
-    });
-    const silentExecution = executeBoundedShell(silentEffect, process.cwd(), controller.signal, {
-      onProgress: (update) => { heartbeatProgress.push(update as unknown as Record<string, unknown>); },
-      now: () => nowMs,
-      scheduler,
-    });
+      {
+        onProgress: (update) => progress.push(update as unknown as Record<string, unknown>),
+        now: () => nowMs,
+        scheduler: {
+          setInterval: (callback) => {
+            callbacks.add(callback);
+            return callback;
+          },
+          clearInterval: (callback) => callbacks.delete(callback as () => void),
+        },
+      },
+    );
     nowMs = 5_000;
     for (const callback of callbacks) callback();
-    expect(heartbeatProgress).toContainEqual(expect.objectContaining({
-      state: 'running',
-      reason: 'heartbeat',
-      elapsedMs: 5_000,
-    }));
+    expect(progress).toContainEqual(expect.objectContaining({ reason: 'heartbeat', elapsedMs: 5_000 }));
+    expect(JSON.stringify(progress)).not.toContain('wait');
     controller.abort(new DOMException('test abort', 'AbortError'));
-    await expect(silentExecution).rejects.toMatchObject({ name: 'AbortError' });
-
-    const completionProgress: Array<Record<string, unknown>> = [];
-    const completed = await executeBoundedShell(action('shell', {
-      shell: { command: process.execPath, args: ['-e', 'process.stdout.write("done")'] },
-    }), process.cwd(), undefined, {
-      onProgress: (update) => { completionProgress.push(update as unknown as Record<string, unknown>); },
-      now: () => nowMs,
-      scheduler,
-    });
-    expect(completed.exitCode).toBe(0);
-    expect(scheduledIntervals.every((intervalMs) => intervalMs >= 250)).toBe(true);
+    await expect(execution).rejects.toMatchObject({ name: 'AbortError' });
+    expect(receivedSignal).toBe(controller.signal);
     expect(callbacks.size).toBe(0);
-    const updateCount = completionProgress.length;
-    for (const callback of callbacks) callback();
-    expect(completionProgress).toHaveLength(updateCount);
   });
 
-  it('cleans progress scheduling and listeners after spawn errors', async () => {
-    const callbacks = new Set<() => void>();
+  it('bounds returned host output before durable shell handling and reports only byte summaries', async () => {
+    const stdout = 'o'.repeat(MAX_CAPTURE_BYTES + 17);
+    const stderr = 'e'.repeat(MAX_CAPTURE_BYTES + 29);
     const progress: Array<Record<string, unknown>> = [];
-    const execution = executeBoundedShell(action('shell', {
-      shell: {
-        command: path.join(os.tmpdir(), 'missing-omp-shell-command'),
-        args: ['force-direct-spawn'],
-      },
-    }), process.cwd(), undefined, {
-      onProgress: (update) => { progress.push(update as unknown as Record<string, unknown>); },
-      scheduler: {
-        setInterval: (callback) => {
-          callbacks.add(callback);
-          return callback;
-        },
-        clearInterval: (callback) => { callbacks.delete(callback as () => void); },
-      },
-    });
+    const result = await executeHostShell(
+      action('shell', { shell: { command: 'bounded' } }),
+      '/workspace',
+      undefined,
+      async () => ({ code: 0, stdout, stderr, killed: false }),
+      { onProgress: (update) => progress.push(update as unknown as Record<string, unknown>) },
+    );
 
-    await expect(execution).rejects.toMatchObject({ code: 'ENOENT' });
-    expect(callbacks.size).toBe(0);
-    const updateCount = progress.length;
-    for (const callback of callbacks) callback();
-    expect(progress).toHaveLength(updateCount);
+    expect(Buffer.byteLength(result.stdout)).toBe(MAX_CAPTURE_BYTES);
+    expect(Buffer.byteLength(result.stderr)).toBe(MAX_CAPTURE_BYTES);
+    expect(result).toMatchObject({ stdoutTruncated: true, stderrTruncated: true });
+    expect(progress.at(-1)).toMatchObject({
+      reason: 'output',
+      stdoutBytes: MAX_CAPTURE_BYTES + 17,
+      stderrBytes: MAX_CAPTURE_BYTES + 29,
+      stdoutTruncated: true,
+      stderrTruncated: true,
+    });
+    expect(JSON.stringify(progress)).not.toContain('ooo');
+    expect(JSON.stringify(progress)).not.toContain('eee');
+  });
+
+  it('truncates host text at a valid UTF-8 boundary', async () => {
+    const prefix = 'a'.repeat(MAX_CAPTURE_BYTES - 1);
+    const result = await executeHostShell(
+      action('shell', { shell: { command: 'utf8-boundary' } }),
+      '/workspace',
+      undefined,
+      async () => ({ code: 0, stdout: `${prefix}€tail`, stderr: '', killed: false }),
+    );
+
+    expect(result.stdout).toBe(prefix);
+    expect(Buffer.byteLength(result.stdout, 'utf8')).toBe(MAX_CAPTURE_BYTES - 1);
+    expect(result.stdout).not.toContain('\uFFFD');
+    expect(result.stdoutTruncated).toBe(true);
   });
 
   it('retains the interrupted blocking agent owner and refuses a duplicate dispatch or writer', async () => {

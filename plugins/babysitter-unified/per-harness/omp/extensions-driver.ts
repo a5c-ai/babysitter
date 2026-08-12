@@ -1,6 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
-import { spawn } from "node:child_process";
 import { constants as fsConstants, promises as fs } from "node:fs";
 import * as path from "node:path";
 import { isDeepStrictEqual } from "node:util";
@@ -9,9 +8,7 @@ import { fromJSONSchema } from "zod";
 export const DRIVER_SCHEMA_VERSION = "2026.07.omp-driver-v1";
 export const DEFAULT_SHELL_TIMEOUT_MS = 120_000;
 export const MAX_CAPTURE_BYTES = 1024 * 1024;
-export const SHELL_TERMINATION_GRACE_MS = 250;
 export const MAX_DRIVER_STEPS = 100;
-export const SHELL_PROGRESS_INTERVAL_MS = 250;
 export const SHELL_HEARTBEAT_INTERVAL_MS = 5_000;
 
 interface JsonObject {
@@ -40,6 +37,22 @@ interface CliResult {
   stderr: string;
   killed?: boolean;
 }
+
+interface ShellHostExecOptions {
+  cwd: string;
+  timeout: number;
+  signal?: AbortSignal;
+}
+
+interface ShellHostExecResult extends CliResult {
+  killed: boolean;
+}
+
+export type ShellHostExecutor = (
+  command: string,
+  args: string[],
+  options: ShellHostExecOptions,
+) => Promise<ShellHostExecResult>;
 
 interface ShellExecutionResult {
   exitCode: number;
@@ -307,7 +320,7 @@ export class OmpDeterministicDriver {
 
   constructor(private readonly dependencies: DriverDependencies) {
     this.workspaceCwd = path.resolve(dependencies.cwd);
-    this.executeShell = dependencies.executeShell ?? executeBoundedShell;
+    this.executeShell = dependencies.executeShell ?? missingHostShellExecutor;
     this.now = dependencies.now ?? (() => new Date());
     this.randomId = dependencies.randomId ?? randomUUID;
   }
@@ -1454,199 +1467,107 @@ export async function reconstructBabysitterProjection(runDirInput: string): Prom
   }];
 }
 
-export async function executeBoundedShell(
+export async function executeHostShell(
   action: EffectAction,
   defaultCwd: string,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  execute: ShellHostExecutor,
   progressOptions: ShellExecutionProgressOptions = {},
 ): Promise<ShellExecutionResult> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const command = typeof shell.command === "string" && shell.command.trim() ? shell.command : "echo";
   const args = Array.isArray(shell.args) ? shell.args.filter((value): value is string => typeof value === "string") : [];
   const cwd = typeof shell.cwd === "string" ? path.resolve(defaultCwd, shell.cwd) : defaultCwd;
+  if (shell.env !== undefined) {
+    throw new Error("Deterministic shell task env overrides are unsupported by the host-owned OMP executor");
+  }
   const timeoutMs = positiveInteger(shell.timeoutMs ?? shell.timeout, DEFAULT_SHELL_TIMEOUT_MS);
-  const env = readStringRecord(shell.env);
   const now = progressOptions.now ?? Date.now;
   const scheduler = progressOptions.scheduler ?? {
-    setInterval: (callback: () => void, intervalMs: number) => setInterval(callback, intervalMs),
+    setInterval: (callback: () => void, intervalMs: number) => {
+      const timer = setInterval(callback, intervalMs);
+      timer.unref();
+      return timer;
+    },
     clearInterval: (handle: unknown) => clearInterval(handle as NodeJS.Timeout),
   };
   const startedAtMs = now();
   const startedAt = new Date(startedAtMs).toISOString();
-
-  return await new Promise<ShellExecutionResult>((resolve, reject) => {
-    signal?.throwIfAborted();
-    const useShell = args.length === 0;
-    const child = spawn(command, args, {
-      cwd,
-      env: env ? { ...process.env, ...env } : process.env,
-      shell: useShell,
-      detached: process.platform !== "win32",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    const stdout = new BoundedCapture(MAX_CAPTURE_BYTES);
-    const stderr = new BoundedCapture(MAX_CAPTURE_BYTES);
-    let outputChanged = false;
-    let lastProgressAt = startedAtMs;
-    const notifyProgress = (reason: ShellExecutionProgress["reason"]): void => {
-      const observedAt = now();
-      const progress: ShellExecutionProgress = {
+  const notifyProgress = (
+    reason: ShellExecutionProgress["reason"],
+    stdoutBytes = 0,
+    stderrBytes = 0,
+    stdoutTruncated = false,
+    stderrTruncated = false,
+  ): void => {
+    try {
+      progressOptions.onProgress?.({
         state: "running",
         reason,
-        elapsedMs: Math.max(0, observedAt - startedAtMs),
-        stdoutBytes: stdout.totalBytes,
-        stderrBytes: stderr.totalBytes,
-        stdoutTruncated: stdout.truncated,
-        stderrTruncated: stderr.truncated,
-      };
-      lastProgressAt = observedAt;
-      try {
-        progressOptions.onProgress?.(progress);
-      } catch {
-        // Observability is best-effort and must not alter shell execution.
-      }
-    };
-    const progressTimer = progressOptions.onProgress
-      ? scheduler.setInterval(() => {
-        const observedAt = now();
-        if (outputChanged) {
-          outputChanged = false;
-          notifyProgress("output");
-        } else if (observedAt - lastProgressAt >= SHELL_HEARTBEAT_INTERVAL_MS) {
-          notifyProgress("heartbeat");
-        }
-      }, SHELL_PROGRESS_INTERVAL_MS)
-      : undefined;
-    let progressStopped = false;
-    const stopProgress = (): void => {
-      if (progressStopped) return;
-      progressStopped = true;
-      if (progressTimer !== undefined) scheduler.clearInterval(progressTimer);
-    };
-    const markOutput = (): void => {
-      outputChanged = true;
-      if (now() - lastProgressAt < SHELL_PROGRESS_INTERVAL_MS) return;
-      outputChanged = false;
-      notifyProgress("output");
-    };
-    const onStdoutData = (chunk: Buffer): void => {
-      stdout.add(chunk);
-      markOutput();
-    };
-    const onStderrData = (chunk: Buffer): void => {
-      stderr.add(chunk);
-      markOutput();
-    };
-    child.stdout?.on("data", onStdoutData);
-    child.stderr?.on("data", onStderrData);
-    notifyProgress("start");
-
-    let timedOut = false;
-    let settled = false;
-    let closedCode: number | null = null;
-    let escalationTimer: NodeJS.Timeout | undefined;
-    let settleTimer: NodeJS.Timeout | undefined;
-    const finish = (code: number | null): void => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeoutTimer);
-      clearTimeout(escalationTimer);
-      clearTimeout(settleTimer);
-      outputChanged = false;
-      cleanupObservers();
-      resolve({
-        exitCode: timedOut ? 124 : (code ?? 1),
-        stdout: stdout.text(),
-        stderr: stderr.text(),
-        timedOut,
-        stdoutTruncated: stdout.truncated,
-        stderrTruncated: stderr.truncated,
-        startedAt,
-        finishedAt: new Date(now()).toISOString(),
+        elapsedMs: Math.max(0, now() - startedAtMs),
+        stdoutBytes,
+        stderrBytes,
+        stdoutTruncated,
+        stderrTruncated,
       });
-    };
-    const abort = (): void => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeoutTimer);
-      cleanupObservers();
-      terminateProcessTree(child.pid, false, child.kill.bind(child));
-      escalationTimer = setTimeout(
-        () => terminateProcessTree(child.pid, true, child.kill.bind(child)),
-        SHELL_TERMINATION_GRACE_MS,
-      );
-      escalationTimer.unref();
-      reject(signal?.reason ?? new DOMException("The operation was aborted", "AbortError"));
-    };
-    signal?.addEventListener("abort", abort, { once: true });
-    const timeoutTimer = setTimeout(() => {
-      timedOut = true;
-      terminateProcessTree(child.pid, false, child.kill.bind(child));
-      escalationTimer = setTimeout(() => {
-        terminateProcessTree(child.pid, true, child.kill.bind(child));
-        settleTimer = setTimeout(() => finish(closedCode), SHELL_TERMINATION_GRACE_MS);
-        settleTimer.unref();
-      }, SHELL_TERMINATION_GRACE_MS);
-      escalationTimer.unref();
-    }, timeoutMs);
-    timeoutTimer.unref();
-
-    const onError = (error: Error): void => {
-      if (timedOut || settled) return;
-      settled = true;
-      clearTimeout(timeoutTimer);
-      clearTimeout(escalationTimer);
-      clearTimeout(settleTimer);
-      cleanupObservers();
-      reject(error);
-    };
-    const onClose = (code: number | null): void => {
-      closedCode = code;
-      if (!timedOut) {
-        finish(code);
-        return;
-      }
-      if (settleTimer) finish(code);
-    };
-    const cleanupObservers = (): void => {
-      stopProgress();
-      child.stdout?.removeListener("data", onStdoutData);
-      child.stderr?.removeListener("data", onStderrData);
-      child.removeListener("error", onError);
-      child.removeListener("close", onClose);
-      signal?.removeEventListener("abort", abort);
-    };
-    child.once("error", onError);
-    child.once("close", onClose);
-  });
-}
-
-class BoundedCapture {
-  private readonly chunks: Buffer[] = [];
-  private capturedBytes = 0;
-  totalBytes = 0;
-  truncated = false;
-
-  constructor(private readonly limit: number) {}
-
-  add(chunk: Buffer): void {
-    this.totalBytes = Math.min(Number.MAX_SAFE_INTEGER, this.totalBytes + chunk.length);
-    if (this.capturedBytes >= this.limit) {
-      this.truncated = true;
-      return;
+    } catch {
+      // Observability is best-effort and must not alter shell execution.
     }
-    const remaining = this.limit - this.capturedBytes;
-    const accepted = chunk.length > remaining ? chunk.subarray(0, remaining) : chunk;
-    this.chunks.push(Buffer.from(accepted));
-    this.capturedBytes += accepted.length;
-    if (accepted.length !== chunk.length) this.truncated = true;
-  }
-
-  text(): string {
-    return Buffer.concat(this.chunks).toString("utf8");
+  };
+  signal?.throwIfAborted();
+  notifyProgress("start");
+  const progressTimer = progressOptions.onProgress
+    ? scheduler.setInterval(() => notifyProgress("heartbeat"), SHELL_HEARTBEAT_INTERVAL_MS)
+    : undefined;
+  try {
+    const result = await execute(command, args, { cwd, timeout: timeoutMs, signal });
+    if (signal?.aborted) throw signal.reason ?? new DOMException("The operation was aborted", "AbortError");
+    const boundedStdout = boundCapturedText(result.stdout, MAX_CAPTURE_BYTES);
+    const boundedStderr = boundCapturedText(result.stderr, MAX_CAPTURE_BYTES);
+    notifyProgress(
+      "output",
+      boundedStdout.totalBytes,
+      boundedStderr.totalBytes,
+      boundedStdout.truncated,
+      boundedStderr.truncated,
+    );
+    return {
+      exitCode: result.killed ? 124 : result.code,
+      stdout: boundedStdout.text,
+      stderr: boundedStderr.text,
+      timedOut: result.killed,
+      stdoutTruncated: boundedStdout.truncated,
+      stderrTruncated: boundedStderr.truncated,
+      startedAt,
+      finishedAt: new Date(now()).toISOString(),
+    };
+  } finally {
+    if (progressTimer !== undefined) scheduler.clearInterval(progressTimer);
   }
 }
 
+function missingHostShellExecutor(): Promise<ShellExecutionResult> {
+  throw new Error("Deterministic shell execution requires an injected host executor");
+}
+
+function boundCapturedText(value: string, limit: number): {
+  text: string;
+  totalBytes: number;
+  truncated: boolean;
+} {
+  const totalBytes = Buffer.byteLength(value, "utf8");
+  if (totalBytes <= limit) return { text: value, totalBytes, truncated: false };
+  let capturedBytes = 0;
+  let end = 0;
+  while (end < value.length) {
+    const codePoint = value.codePointAt(end)!;
+    const codePointBytes = codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
+    if (capturedBytes + codePointBytes > limit) break;
+    capturedBytes += codePointBytes;
+    end += codePoint > 0xffff ? 2 : 1;
+  }
+  return { text: value.slice(0, end), totalBytes, truncated: true };
+}
 function buildAgentPrompt(action: EffectAction, descriptor: AgentBridgeDescriptor): string {
   const taskDef = action.taskDef ?? {};
   const agent = readObject(taskDef.agent) ?? {};
@@ -1828,28 +1749,6 @@ function extractSingleAgentResult(details: unknown): { ok: true; value: unknown 
   }
 }
 
-function terminateProcessTree(
-  pid: number | undefined,
-  force: boolean,
-  killChild: (signal?: NodeJS.Signals | number) => boolean,
-): void {
-  if (!pid) return;
-  if (process.platform === "win32") {
-    const taskkill = spawn("taskkill", ["/pid", String(pid), "/T", ...(force ? ["/F"] : [])], {
-      stdio: "ignore",
-      windowsHide: true,
-    });
-    taskkill.once("error", () => {
-      try { killChild(force ? "SIGKILL" : "SIGTERM"); } catch { /* process already exited */ }
-    });
-    return;
-  }
-  try {
-    process.kill(-pid, force ? "SIGKILL" : "SIGTERM");
-  } catch {
-    try { killChild(force ? "SIGKILL" : "SIGTERM"); } catch { /* process already exited */ }
-  }
-}
 
 function stableJsonStringify(value: unknown): string {
   const normalize = (candidate: unknown): unknown => {
@@ -2481,12 +2380,6 @@ function readObject(value: unknown): JsonObject | null {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
 }
 
-function readStringRecord(value: unknown): Record<string, string> | undefined {
-  const object = readObject(value);
-  if (!object) return undefined;
-  const entries = Object.entries(object).filter((entry): entry is [string, string] => typeof entry[1] === "string");
-  return Object.fromEntries(entries);
-}
 
 function positiveInteger(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : fallback;

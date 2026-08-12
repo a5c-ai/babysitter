@@ -1,4 +1,4 @@
-import { promises as fs } from "node:fs";
+import { constants as fsConstants, promises as fs, type Stats } from "node:fs";
 import { createHash } from "node:crypto";
 import * as path from "node:path";
 import { commitEffectCancellation, commitEffectResult } from "../../runtime/commitEffectResult";
@@ -20,6 +20,7 @@ import {
   loadTaskResultPreview,
   toTaskListEntry,
 } from "./runState";
+export const MAX_CHECKSUM_BOUND_FILE_BYTES = 1024 * 1024;
 
 
 function resolveMaybeRunRelative(runDir: string, candidate?: string) {
@@ -50,12 +51,114 @@ async function readChecksumBoundFile(
   if (filename === "-") {
     throw new Error(`[task:post] ${flag} requires a file path, not stdin`);
   }
-  const bytes = await fs.readFile(resolveMaybeRunRelative(runDir, filename)!);
-  const actualSha256 = createHash("sha256").update(bytes).digest("hex");
-  if (actualSha256 !== expectedSha256) {
-    throw new Error(`[task:post] ${flag} checksum mismatch`);
+  const requestedPath = await resolveTrustedRootAlias(
+    path.resolve(resolveMaybeRunRelative(runDir, filename)!),
+  );
+  const beforeAncestors = await readLexicalAncestorStats(requestedPath, flag);
+  const beforePath = await fs.lstat(requestedPath);
+  if (beforePath.isSymbolicLink()) {
+    throw new Error(`[task:post] ${flag} path must not be a symbolic link`);
   }
-  return bytes;
+  const openFlags = fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0);
+  const handle = await fs.open(requestedPath, openFlags);
+  try {
+    const before = await handle.stat();
+    assertChecksumFileStat(before, flag);
+    if (before.size > MAX_CHECKSUM_BOUND_FILE_BYTES) {
+      throw new Error(
+        `[task:post] ${flag} file is too large; maximum is ${MAX_CHECKSUM_BOUND_FILE_BYTES} bytes`,
+      );
+    }
+    const allocation = Buffer.allocUnsafe(MAX_CHECKSUM_BOUND_FILE_BYTES + 1);
+    let length = 0;
+    while (length < allocation.length) {
+      const { bytesRead } = await handle.read(allocation, length, allocation.length - length, length);
+      if (bytesRead === 0) break;
+      length += bytesRead;
+    }
+    if (length > MAX_CHECKSUM_BOUND_FILE_BYTES) {
+      throw new Error(
+        `[task:post] ${flag} file is too large; maximum is ${MAX_CHECKSUM_BOUND_FILE_BYTES} bytes`,
+      );
+    }
+    const after = await handle.stat();
+    if (!sameChecksumFileStat(before, after) || after.size !== length) {
+      throw new Error(`[task:post] ${flag} file changed while it was being authenticated`);
+    }
+    const bytes = Buffer.from(allocation.subarray(0, length));
+    const [afterPath, afterAncestors] = await Promise.all([
+      fs.lstat(requestedPath),
+      readLexicalAncestorStats(requestedPath, flag),
+    ]);
+    if (
+      afterPath.isSymbolicLink()
+      || !sameChecksumFileIdentity(beforePath, afterPath)
+      || !sameChecksumFileIdentity(after, afterPath)
+      || beforeAncestors.length !== afterAncestors.length
+      || beforeAncestors.some((entry, index) =>
+        !sameChecksumFileIdentity(entry.stat, afterAncestors[index].stat)
+      )
+    ) {
+      throw new Error(`[task:post] ${flag} path changed while it was being authenticated`);
+    }
+    const actualSha256 = createHash("sha256").update(bytes).digest("hex");
+    if (actualSha256 !== expectedSha256) {
+      throw new Error(`[task:post] ${flag} checksum mismatch`);
+    }
+    return bytes;
+  } finally {
+    await handle.close();
+  }
+}
+
+function assertChecksumFileStat(stat: Stats, flag: string): void {
+  if (!stat.isFile()) throw new Error(`[task:post] ${flag} requires a regular file`);
+}
+
+function sameChecksumFileIdentity(left: Stats, right: Stats): boolean {
+  return left.dev === right.dev && left.ino === right.ino;
+}
+
+function sameChecksumFileStat(left: Stats, right: Stats): boolean {
+  return sameChecksumFileIdentity(left, right)
+    && left.size === right.size
+    && left.mtimeMs === right.mtimeMs
+    && left.ctimeMs === right.ctimeMs;
+}
+
+async function resolveTrustedRootAlias(filePath: string): Promise<string> {
+  if (process.platform !== "darwin" || (filePath !== "/var" && !filePath.startsWith("/var/"))) {
+    return filePath;
+  }
+  const varStat = await fs.lstat("/var");
+  if (!varStat.isSymbolicLink()) return filePath;
+  const canonicalVar = await fs.realpath("/var");
+  if (canonicalVar !== "/private/var") {
+    throw new Error("[task:post] refusing an unexpected macOS /var root alias");
+  }
+  return path.join(canonicalVar, path.relative("/var", filePath));
+}
+
+async function readLexicalAncestorStats(
+  filePath: string,
+  flag: string,
+): Promise<Array<{ path: string; stat: Stats }>> {
+  const parsed = path.parse(filePath);
+  const relativeParts = filePath.slice(parsed.root.length).split(path.sep).filter(Boolean);
+  const ancestors: Array<{ path: string; stat: Stats }> = [];
+  let current = parsed.root;
+  for (const part of relativeParts.slice(0, -1)) {
+    current = path.join(current, part);
+    const stat = await fs.lstat(current);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`[task:post] ${flag} path ancestors must not contain symbolic links`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`[task:post] ${flag} path ancestor is not a directory`);
+    }
+    ancestors.push({ path: current, stat });
+  }
+  return ancestors;
 }
 
 

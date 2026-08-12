@@ -26,6 +26,7 @@ vi.mock("../../runtime/commitEffectResult", () => ({
 
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
+const MAX_CHECKSUM_BOUND_FILE_BYTES = 1024 * 1024;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
 
 async function withStdin<T>(payload: string, run: () => Promise<T>): Promise<T> {
@@ -457,6 +458,179 @@ describe("CLI main entry", () => {
       );
     } finally {
       await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { status: "ok", fileFlag: "--value", checksumFlag: "--value-sha256", size: MAX_CHECKSUM_BOUND_FILE_BYTES - 1 },
+    { status: "error", fileFlag: "--error", checksumFlag: "--error-sha256", size: MAX_CHECKSUM_BOUND_FILE_BYTES },
+  ])("accepts checksum-bound $status files at $size bytes", async ({
+    status,
+    fileFlag,
+    checksumFlag,
+    size,
+  }) => {
+    const effectId = `ef-checksum-limit-${status}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-limit-${status}-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    const prefix = status === "ok" ? '{"padding":"' : '{"name":"Error","message":"';
+    const suffix = '"}\n';
+    const bytes = Buffer.from(prefix + "x".repeat(size - prefix.length - suffix.length) + suffix);
+    await fs.writeFile(inputPath, bytes);
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        status,
+        fileFlag,
+        inputPath,
+        checksumFlag,
+        createHash("sha256").update(bytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(status === "ok" ? 0 : 1);
+      expect(commitEffectResultMock).toHaveBeenCalledOnce();
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { label: "limit plus one", size: MAX_CHECKSUM_BOUND_FILE_BYTES + 1 },
+    { label: "huge sparse file", size: MAX_CHECKSUM_BOUND_FILE_BYTES * 1024 },
+  ])("rejects an oversized checksum-bound $label before commit", async ({ size }) => {
+    const effectId = `ef-checksum-oversize-${size}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-task-post-oversize-"));
+    const inputPath = path.join(tmpDir, "input.json");
+    const handle = await fs.open(inputPath, "w");
+    await handle.truncate(size);
+    await handle.close();
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        "ok",
+        "--value",
+        inputPath,
+        "--value-sha256",
+        "0".repeat(64),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/too large|maximum|bytes/i));
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { label: "final", ancestor: false },
+    { label: "ancestor", ancestor: true },
+  ])("rejects a checksum-bound $label symlink before commit", async ({ label, ancestor }) => {
+    const effectId = `ef-checksum-symlink-${label}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-${label}-symlink-`));
+    const realDir = path.join(tmpDir, "real");
+    const selectedDir = ancestor ? path.join(tmpDir, "selected") : realDir;
+    await fs.mkdir(realDir);
+    const realPath = path.join(realDir, "input.json");
+    const bytes = Buffer.from('{"safe":true}\n');
+    await fs.writeFile(realPath, bytes);
+    if (ancestor) await fs.symlink(realDir, selectedDir, "dir");
+    const inputPath = ancestor ? path.join(selectedDir, "input.json") : path.join(tmpDir, "input.json");
+    if (!ancestor) await fs.symlink(realPath, inputPath, "file");
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        "ok",
+        "--value",
+        inputPath,
+        "--value-sha256",
+        createHash("sha256").update(bytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/symbolic link/i));
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { label: "growth", mutation: "growth" },
+    { label: "replacement", mutation: "replacement" },
+    { label: "ancestor replacement", mutation: "ancestor" },
+  ])("rejects checksum-bound file $label during authenticated read", async ({ label, mutation }) => {
+    const effectId = `ef-checksum-race-${label}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-${label}-race-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    const initialBytes = Buffer.from('{"bound":"initial"}\n');
+    await fs.writeFile(inputPath, initialBytes);
+    const selectedPath = await fs.realpath(inputPath);
+    const originalOpen = fs.open.bind(fs);
+    const openSpy = vi.spyOn(fs, "open").mockImplementation(async (...args) => {
+      const handle = await originalOpen(...args);
+      if (path.resolve(String(args[0])) !== selectedPath) return handle;
+      const originalRead = handle.read.bind(handle);
+      let mutated = false;
+      handle.read = (async (...readArgs: Parameters<typeof handle.read>) => {
+        const result = await originalRead(...readArgs);
+        if (!mutated) {
+          mutated = true;
+          if (mutation === "replacement") {
+            const replacement = `${inputPath}.replacement`;
+            await fs.writeFile(replacement, initialBytes);
+            await fs.rename(replacement, inputPath);
+          } else if (mutation === "ancestor") {
+            const replacementDir = `${tmpDir}.replacement`;
+            await fs.mkdir(replacementDir);
+            await fs.writeFile(path.join(replacementDir, "input.json"), initialBytes);
+            await fs.rename(tmpDir, `${tmpDir}.original`);
+            await fs.rename(replacementDir, tmpDir);
+          } else {
+            await fs.appendFile(inputPath, " ");
+          }
+        }
+        return result;
+      }) as typeof handle.read;
+      return handle;
+    });
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        "ok",
+        "--value",
+        inputPath,
+        "--value-sha256",
+        createHash("sha256").update(initialBytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/changed/i));
+    } finally {
+      openSpy.mockRestore();
+      await fs.rm(tmpDir, { recursive: true, force: true });
+      await fs.rm(`${tmpDir}.original`, { recursive: true, force: true });
     }
   });
 
