@@ -1781,6 +1781,127 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(fs.access(path.join(runDir, outputRef))).resolves.toBeUndefined();
   });
 
+  it('reconciles task:show invocation identity and continues through consecutive shell effects', async () => {
+    const runDir = await tempRun('omp-shell-task-show-identity-');
+    const effects: Action[] = [
+      {
+        effectId: 'effect-shell-first',
+        invocationKey: 'invocation-shell-first',
+        kind: 'shell',
+        taskDef: { shell: { command: 'first-shell' } },
+      },
+      {
+        effectId: 'effect-shell-second',
+        invocationKey: 'invocation-shell-second',
+        kind: 'shell',
+        taskDef: { shell: { command: 'second-shell' } },
+      },
+    ];
+    const values = [{ sequence: 1 }, { sequence: 2 }];
+    let iterations = 0;
+    let executions = 0;
+    let posts = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => {
+        const value = values[executions];
+        executions += 1;
+        return {
+          exitCode: 0,
+          stdout: JSON.stringify(value),
+          stderr: '',
+          timedOut: false,
+          stdoutTruncated: false,
+          stderrTruncated: false,
+          startedAt: '2026-08-12T00:00:00.000Z',
+          finishedAt: '2026-08-12T00:00:01.000Z',
+        };
+      },
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          const next = iterations < effects.length
+            ? waiting(effects[iterations])
+            : JSON.stringify({ status: 'completed' });
+          iterations += 1;
+          return { code: 0, stdout: next, stderr: '' };
+        }
+        const effect = effects.find((candidate) => candidate.effectId === args[2]);
+        if (!effect) throw new Error(`unexpected effect arguments: ${args.join(' ')}`);
+        if (args[0] === 'task:show') {
+          return await taskShowResult(runDir, effect);
+        }
+        posts += 1;
+        const committedValue = JSON.parse(
+          await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8'),
+        ) as unknown;
+        await recordCommittedResult(runDir, effect, committedValue);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).resolves.toEqual({ state: 'completed', completionProof: undefined });
+    expect({ executions, posts, iterations }).toEqual({ executions: 2, posts: 2, iterations: 3 });
+  });
+
+  it.each([
+    { label: 'missing', invocationKey: undefined },
+    { label: 'mismatched', invocationKey: 'invocation-shell-other' },
+  ])('fails closed on $label task:show invocation identity after post', async ({ invocationKey }) => {
+    const runDir = await tempRun('omp-shell-task-show-wrong-identity-');
+    const effect = action('shell', { shell: { command: 'identity-gate' } });
+    let iterations = 0;
+    let posted = false;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      executeShell: async () => ({
+        exitCode: 0,
+        stdout: '{"identity":"bound"}',
+        stderr: '',
+        timedOut: false,
+        stdoutTruncated: false,
+        stderrTruncated: false,
+        startedAt: '2026-08-12T00:00:00.000Z',
+        finishedAt: '2026-08-12T00:00:01.000Z',
+      }),
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          iterations += 1;
+          return {
+            code: 0,
+            stdout: iterations === 1 ? waiting(effect) : JSON.stringify({ status: 'completed' }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:show') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({
+              effect: {
+                effectId: effect.effectId,
+                ...(invocationKey === undefined ? {} : { invocationKey }),
+                status: 'resolved_ok',
+                resultRef: `tasks/${effect.effectId}/result.json`,
+              },
+            }),
+            stderr: '',
+          };
+        }
+        posted = true;
+        const committedValue = JSON.parse(
+          await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8'),
+        ) as unknown;
+        await recordCommittedResult(runDir, effect, committedValue);
+        return { code: 0, stdout: '{}', stderr: '' };
+      },
+    });
+
+    await expect(driver.drive(runDir)).rejects.toThrow(
+      `task:show identity conflicts with committed result for effect ${effect.effectId}`,
+    );
+    expect(posted).toBe(true);
+    expect(iterations).toBe(1);
+  });
+
   it('fails closed when an explicit command-owned output artifact is absent', async () => {
     const runDir = await tempRun('omp-shell-missing-command-output-');
     const effect = action('shell', {
