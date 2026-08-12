@@ -1,7 +1,9 @@
 ### 2. Create run and bind session:
 
 If an existing bare run is reported in the **Existing Run State** section above,
-use `run:assign-process` (see below) instead of creating a new run.
+`run:create` will adopt it automatically when the active session, project, and
+runs directory match. If the command cannot safely adopt it, use
+`run:assign-process` (see below) instead of creating a new run.
 
 **For new runs:**
 
@@ -38,10 +40,11 @@ $CLI session:resume \
   --run-id <runId> --json
 ```
 
-**For assigning a process to an existing bare run:**
+**For manually assigning a process to an existing bare run:**
 
-When the session-start hook has already created a bare run (no `--entry`), use
-`run:assign-process` to attach the process definition, then bind the session:
+When automatic adoption is unavailable or you intentionally need to use a
+specific existing run, use `run:assign-process` to attach the process
+definition, then bind the session:
 
 ```bash
 # 1. Assign the process to the bare run
@@ -76,5 +79,5 @@ event to the run.
 
 **Common mistakes to avoid:**
 - wrong: Always creating a new run when a bare run already exists from session-start
-- correct: Check `.a5c/runs/` for existing bare runs and use `run:assign-process`
+- correct: Let `run:create` adopt the active bare run, or use `run:assign-process` for a manual fallback
 - wrong: Skipping `run:assign-process` and calling `run:iterate` on a bare run (will fail)

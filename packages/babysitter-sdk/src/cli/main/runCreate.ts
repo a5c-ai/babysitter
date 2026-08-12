@@ -5,7 +5,7 @@ import { createRun } from "../../runtime/createRun";
 import { appendEvent, loadJournal } from "../../storage/journal";
 import { writeFileAtomic } from "../../storage/atomic";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
-import type { IterationMetadata } from "../../runtime/types";
+import type { CreateRunResult, IterationMetadata } from "../../runtime/types";
 import type { JournalEvent, JsonRecord } from "../../storage/types";
 import { nextUlid } from "../../storage/ulids";
 import {
@@ -18,6 +18,8 @@ import {
 import { discoverFromProcessFile, discoverSkillsInternal } from "../commands/skill";
 import { runIterate, type RunIterateResult } from "../commands/runIterate";
 import { getActiveProcessLibraryPath } from "../../processLibrary/active";
+import { callRuntimeHook } from "../../runtime/hooks/runtime";
+import { resolveProjectRootForRun } from "../../config";
 import { collapseDoubledA5cRuns, resolveRunDir } from "./args";
 import {
   formatEntrypointSpecifier,
@@ -31,6 +33,8 @@ import {
 import { formatIterationMetadata, readRunMetadataSafe } from "./runState";
 import type { ParsedArgs } from "./types";
 import { USAGE } from "./usage";
+import { assignProcessToRun } from "./assignProcess";
+import { findAdoptableSessionRun, resolveAdoptionStateDir } from "./adoptSessionRun";
 
 export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   // --entry is optional for bare runs (no process attached)
@@ -111,24 +115,6 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   }
 
   const requestedHarness = parsed.harness ?? (parsed.sessionId ? getAdapter().name : undefined);
-  const result = await createRun({
-    runsDir,
-    runId: parsed.runIdOverride,
-    request: parsed.requestId,
-    prompt: parsed.prompt,
-    harness: requestedHarness,
-    processRevision: parsed.processRevision,
-    ...(!isBareRun && absoluteImportPath && parsed.processId ? {
-      process: {
-        processId: parsed.processId,
-        importPath: absoluteImportPath,
-        exportName: entrypoint?.exportName,
-      },
-    } : {}),
-    inputs,
-    ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
-  });
-
   const detectedAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
   const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined || (detectedAdapter && detectedAdapter.name !== "custom");
   const adapter = shouldBindSession ? detectedAdapter : undefined;
@@ -142,9 +128,92 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     return 1;
   }
 
+  const sessionId = adapter?.resolveSessionId(parsed);
+  const adoptionHarness = parsed.harness ?? adapter?.name;
+  const stateDir = adapter
+    ? resolveAdoptionStateDir({
+        adapter,
+        stateDir: parsed.stateDir,
+        pluginRoot: parsed.pluginRoot,
+      })
+    : undefined;
+  const adoptableRun = !isBareRun
+    ? await findAdoptableSessionRun({
+        runsDir,
+        stateDir,
+        sessionId,
+        runIdOverride: parsed.runIdOverride,
+        harness: adoptionHarness,
+      })
+    : undefined;
+
+  let adoptedRun = false;
+  let result: CreateRunResult | undefined;
+  if (adoptableRun && absoluteImportPath && parsed.processId) {
+    const adopted = await assignProcessToRun({
+      runDir: adoptableRun.runDir,
+      processId: parsed.processId,
+      importPath: absoluteImportPath,
+      exportName: entrypoint?.exportName,
+      processRevision: parsed.processRevision,
+      request: parsed.requestId ?? parsed.processId,
+      prompt: parsed.prompt,
+      inputs,
+      additionalMetadata: parsed.interactive === false ? { nonInteractive: true } : undefined,
+      owner: "run:create:adopt",
+      requireBare: true,
+    });
+    if (!adopted) {
+      const message = `Session run ${adoptableRun.runId} changed while it was being adopted. Retry run:create.`;
+      if (parsed.json) {
+        console.log(JSON.stringify({ error: "SESSION_RUN_CHANGED", message, runId: adoptableRun.runId }));
+      } else {
+        console.error(`[run:create] ${message}`);
+      }
+      return 1;
+    }
+    adoptedRun = true;
+    result = {
+      runId: adoptableRun.runId,
+      runDir: adoptableRun.runDir,
+      metadata: adopted.metadata,
+    };
+    await callRuntimeHook(
+      "on-run-start",
+      {
+        runId: result.runId,
+        processId: parsed.processId,
+        entry: formatEntrypointSpecifier(result.metadata.entrypoint),
+        inputs,
+      },
+      {
+        cwd: resolveProjectRootForRun(result.runDir, result.metadata.entrypoint.importPath),
+      },
+    );
+  }
+
+  if (!result) {
+    result = await createRun({
+      runsDir,
+      runId: parsed.runIdOverride,
+      request: parsed.requestId,
+      prompt: parsed.prompt,
+      harness: requestedHarness,
+      processRevision: parsed.processRevision,
+      ...(!isBareRun && absoluteImportPath && parsed.processId ? {
+        process: {
+          processId: parsed.processId,
+          importPath: absoluteImportPath,
+          exportName: entrypoint?.exportName,
+        },
+      } : {}),
+      inputs,
+      ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
+    });
+  }
+
   let sessionBound;
   if (adapter) {
-    const sessionId = adapter.resolveSessionId(parsed);
     sessionBound = sessionId
       ? await adapter.bindSession({
           sessionId,
@@ -173,6 +242,7 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     adapter,
     sessionBound,
     runDir: result.runDir,
+    adopted: adoptedRun,
   })) {
     initialIteration = await runIterate({
       runDir: result.runDir,
@@ -257,6 +327,7 @@ async function shouldSeedInitialIterationAfterRunCreate(args: {
   adapter?: HarnessAdapter | null;
   sessionBound?: { sessionId?: string; error?: string; fatal?: boolean };
   runDir: string;
+  adopted?: boolean;
 }): Promise<boolean> {
   if (args.isBareRun) return false;
   if (args.adapter?.name !== "claude-code") return false;
@@ -264,7 +335,11 @@ async function shouldSeedInitialIterationAfterRunCreate(args: {
   if (!args.sessionBound?.sessionId || args.sessionBound.error || args.sessionBound.fatal) return false;
 
   const journal = await loadJournal(args.runDir);
-  return journal.length === 1 && journal[0]?.type === "RUN_CREATED";
+  if (journal.length === 1 && journal[0]?.type === "RUN_CREATED") return true;
+  return args.adopted === true
+    && journal.length === 2
+    && journal[0]?.type === "RUN_CREATED"
+    && journal[1]?.type === "PROCESS_ASSIGNED";
 }
 
 function summarizeDiscovery(
