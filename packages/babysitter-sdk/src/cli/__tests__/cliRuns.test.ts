@@ -8,6 +8,8 @@ import { readRunMetadata } from "../../storage/runFiles";
 import { DEFAULT_LAYOUT_VERSION, getStateFile } from "../../storage/paths";
 import { appendEvent, loadJournal } from "../../storage/journal";
 import { createRunDir } from "../../storage/createRunDir";
+import { createUnifiedAdapter } from "../../harness";
+import { getSessionFilePath, readSessionFile } from "../../session/parse";
 import { createStateCacheSnapshot, writeStateCache } from "../../runtime/replay/stateCache";
 import * as orchestrateIterationModule from "../../runtime/orchestrateIteration";
 import * as runFilesModule from "../../storage/runFiles";
@@ -31,6 +33,7 @@ describe("babysitter run:create CLI", () => {
     "AGENT_ENABLE_SESSION_PID_MARKERS",
     "BABYSITTER_ENABLE_SESSION_PID_MARKERS",
     "BABYSITTER_GLOBAL_STATE_DIR",
+    "BABYSITTER_STATE_DIR",
     "AGENT_TRUST_ENV_SESSION",
     "BABYSITTER_TRUST_ENV_SESSION",
     "CLAUDE_ENV_FILE",
@@ -49,6 +52,7 @@ describe("babysitter run:create CLI", () => {
       AGENT_TRUST_ENV_SESSION: process.env.AGENT_TRUST_ENV_SESSION,
       BABYSITTER_ENABLE_SESSION_PID_MARKERS: process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS,
       BABYSITTER_GLOBAL_STATE_DIR: process.env.BABYSITTER_GLOBAL_STATE_DIR,
+      BABYSITTER_STATE_DIR: process.env.BABYSITTER_STATE_DIR,
       BABYSITTER_TRUST_ENV_SESSION: process.env.BABYSITTER_TRUST_ENV_SESSION,
       CLAUDE_ENV_FILE: process.env.CLAUDE_ENV_FILE,
       CODEX_THREAD_ID: process.env.CODEX_THREAD_ID,
@@ -120,6 +124,121 @@ describe("babysitter run:create CLI", () => {
       inputsRef: "inputs.json",
       processRevision: "rev-42",
     });
+  });
+
+  it("adopts the session-start bare run for process-backed run:create", async () => {
+    const entryFile = await writeEntrypoint(
+      "processes/adopt-session.mjs",
+      `export async function process() { return "ok"; }\n`,
+    );
+    const stateDir = path.join(runsRoot, "state");
+    const sessionId = "unified-adoption-session";
+    const inputsPath = path.join(runsRoot, "adoption-inputs.json");
+    await fs.writeFile(inputsPath, JSON.stringify({ source: "regression" }), "utf8");
+
+    process.env.AGENT_SESSION_ID = sessionId;
+    process.env.BABYSITTER_STATE_DIR = stateDir;
+
+    await createUnifiedAdapter().handleSessionStartHook({
+      stateDir,
+      runsDir: runsRoot,
+      json: false,
+    });
+
+    const sessionBefore = await readSessionFile(getSessionFilePath(stateDir, sessionId));
+    expect(sessionBefore.state.runId).toBeTruthy();
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "adoption/process",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "unified",
+      "--request",
+      "adoption/request",
+      "--prompt",
+      "adopt this run",
+      "--inputs",
+      inputsPath,
+      "--process-revision",
+      "rev-adopt",
+      "--non-interactive",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    const runDirs = await listRunDirs();
+    expect(runDirs).toHaveLength(1);
+    expect(payload.runId).toBe(sessionBefore.state.runId);
+
+    const runDir = runDirs[0];
+    const metadata = await readRunMetadata(runDir);
+    expect(metadata.processId).toBe("adoption/process");
+    expect(metadata.request).toBe("adoption/request");
+    expect(metadata.prompt).toBe("adopt this run");
+    expect(metadata.processRevision).toBe("rev-adopt");
+    expect(metadata.nonInteractive).toBe(true);
+    expect(JSON.parse(await fs.readFile(path.join(runDir, "inputs.json"), "utf8"))).toEqual({
+      source: "regression",
+    });
+
+    const journal = await loadJournal(runDir);
+    expect(journal.map((event) => event.type)).toEqual(["RUN_CREATED", "PROCESS_ASSIGNED"]);
+    expect(journal[1].data).toMatchObject({
+      processId: "adoption/process",
+      prompt: "adopt this run",
+      previousEntrypoint: { importPath: "bare-run" },
+      inputsRef: "inputs.json",
+    });
+
+    const sessionAfter = await readSessionFile(getSessionFilePath(stateDir, sessionId));
+    expect(sessionAfter.state.runId).toBe(sessionBefore.state.runId);
+  });
+
+  it("keeps creating a new run when the session has an explicit run ID", async () => {
+    const entryFile = await writeEntrypoint(
+      "processes/explicit-run.mjs",
+      `export async function process() { return "ok"; }\n`,
+    );
+    const stateDir = path.join(runsRoot, "state");
+    const sessionId = "explicit-run-session";
+
+    process.env.AGENT_SESSION_ID = sessionId;
+    process.env.BABYSITTER_STATE_DIR = stateDir;
+    await createUnifiedAdapter().handleSessionStartHook({
+      stateDir,
+      runsDir: runsRoot,
+      json: false,
+    });
+    const session = await readSessionFile(getSessionFilePath(stateDir, sessionId));
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--run-id",
+      "01ZZZZZZZZZZZZZZZZZZZZZZZZ",
+      "--process-id",
+      "explicit/process",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "unified",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect((await listRunDirs()).sort()).toEqual([
+      path.join(runsRoot, "01ZZZZZZZZZZZZZZZZZZZZZZZZ"),
+      path.join(runsRoot, session.state.runId),
+    ].sort());
   });
 
   it("supports machine-readable --json output", async () => {

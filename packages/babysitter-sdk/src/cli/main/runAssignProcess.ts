@@ -1,7 +1,5 @@
 import * as path from "node:path";
-import { readRunMetadata, writeRunMetadata } from "../../storage/runFiles";
-import { appendEvent } from "../../storage/journal";
-import { withRunLock } from "../../storage/lock";
+import { readRunMetadata } from "../../storage/runFiles";
 import type { ParsedArgs } from "./types";
 import { collapseDoubledA5cRuns, resolveRunDir } from "./args";
 import {
@@ -11,7 +9,7 @@ import {
   validateProcessEntrypoint,
 } from "./runSupport";
 import { USAGE } from "./usage";
-import { hashProcessCodeFile } from "../../runtime/processCodeHash";
+import { assignProcessToRun } from "./assignProcess";
 
 export async function handleRunAssignProcess(parsed: ParsedArgs): Promise<number> {
   if (!parsed.runDirArg) {
@@ -103,34 +101,14 @@ export async function handleRunAssignProcess(parsed: ParsedArgs): Promise<number
     return 0;
   }
 
-  await withRunLock(runDir, "run:assign-process", async () => {
-    const current = await readRunMetadata(runDir);
-    const previousEntrypoint = { ...current.entrypoint };
-
-    current.entrypoint = {
-      importPath: absoluteImportPath,
-      exportName: entrypoint.exportName,
-    };
-    current.processPath = absoluteImportPath;
-    current.processId = processId;
-    current.processCodeHash = await hashProcessCodeFile(absoluteImportPath);
-    if (parsed.processRevision) {
-      current.processRevision = parsed.processRevision;
-    }
-
-    await writeRunMetadata(runDir, current);
-
-    await appendEvent({
-      runDir,
-      eventType: "PROCESS_ASSIGNED",
-      event: {
-        processId,
-        entrypoint: current.entrypoint,
-        previousEntrypoint,
-        force: parsed.sessionForce ?? false,
-        ...(current.processCodeHash ? { processCodeHash: current.processCodeHash } : {}),
-      },
-    });
+  await assignProcessToRun({
+    runDir,
+    processId,
+    importPath: absoluteImportPath,
+    exportName: entrypoint.exportName,
+    processRevision: parsed.processRevision,
+    force: parsed.sessionForce,
+    owner: "run:assign-process",
   });
 
   const updatedMetadata = await readRunMetadata(runDir);
