@@ -127,6 +127,23 @@ export interface RunOptions {
    */
   interactive?: boolean;
 
+  /**
+   * How an `interactive` run treats the PTY backend (`node-pty`, an optional
+   * peer dependency the consumer installs).
+   *
+   * - `'required'` — the run fails with `PTY_NOT_AVAILABLE` when no usable PTY
+   *   is present. It NEVER silently continues on ordinary pipes.
+   * - `'preferred'` — the run may continue on ordinary pipes, but only when
+   *   `node-pty` is not installed at all, and only after an observable
+   *   `debug`/`warn` event naming `PTY_NOT_AVAILABLE`. An installed-but-broken
+   *   node-pty (e.g. a native binding built for another Node.js ABI) still
+   *   fails loudly.
+   *
+   * Default: `'required'` when the adapter declares `capabilities.requiresPty`,
+   * otherwise `'preferred'`.
+   */
+  ptyMode?: 'required' | 'preferred';
+
   // --- Environment ---
 
   /** Working directory for the agent process. Must be an absolute path. */

@@ -2,12 +2,6 @@
   "description": "Tracked known package defects tolerated by the fast PR gate (guard:packages / verify:metadata) so the FIX-011 guardrails could land while the underlying fixes are still in flight. Every entry MUST reference the remediation-program FIX id that will remove it. The enforced end-state of every list in this file is EMPTY: when a fix lands, the corresponding entries stop reproducing and the gate fails with a 'stale allowlist entry' error until they are deleted. Removing an entry is a one-line deletion. See issues_to_Fix.md and docs/release-incident-2026-08-13.md.",
   "dependencyOwnership": [
     {
-      "fixId": "FIX-009",
-      "package": "@a5c-ai/comm-adapter",
-      "dependency": "node-pty",
-      "note": "spawn-runner.ts requires node-pty at runtime; FIX-009 chooses the intentional ownership model (documented optional peer + peerDependenciesMeta.optional)."
-    },
-    {
       "fixId": "FIX-013",
       "package": "@a5c-ai/adapters-cli",
       "dependency": "react",

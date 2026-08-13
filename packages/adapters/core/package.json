@@ -97,6 +97,14 @@
     "@sinclair/typebox": "^0.34.48",
     "@a5c-ai/trust-core": "6.0.0"
   },
+  "peerDependencies": {
+    "node-pty": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "node-pty": {
+      "optional": true
+    }
+  },
   "atlas": {
     "layers": [
       "L4",
