@@ -68,6 +68,9 @@ bug.task.md
 .claude/sound-hooks/sounds/user-prompt.mp3
 .claude/settings.local.json
 e2e-artifacts/test-results.json
+# FIX-001: the release plan (one authoritative release version) is produced by
+# the release workflow inside the publication workspace; it is never committed.
+release-version.json
 .tmp-agentsh/
 .tmp/
 e2e-artifacts/ci-run-*/

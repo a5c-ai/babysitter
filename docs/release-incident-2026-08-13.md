@@ -89,6 +89,27 @@ Recovery is Wave 5 of the remediation program and must not begin until FIX-001 (
 5. Only then move `latest` to the tested exact version via explicit, approved `npm dist-tag` corrections, and assert every public package's channel tag equals that version.
 6. Consider `npm deprecate` notices for the known-broken `@a5c-ai/tasks-adapter@6.0.0` and `@a5c-ai/extensions-adapter@6.0.0` artifacts (separate approval; never unpublish as ordinary remediation).
 
+## FIX-001 remediation status (landed on `fix/remediation-program`)
+
+The version/dist-tag path described above is now closed in code:
+
+- `scripts/lib/release-version.cjs` + `scripts/release-version.cjs` are the single resolver,
+  validator and channel-assertion surface; `scripts/__tests__/release-version.test.mjs` reproduces
+  this incident as a fixture (root 6.0.3 with 6.0.0 workspace manifests) and proves it now fails.
+- `scripts/publish-package-from-tag.mjs` refuses to publish or dist-tag when the workspace manifest
+  version, the passed release version and the tag version disagree — the exact step that promoted
+  `latest` back to 6.0.0.
+- `.github/workflows/publish.yml` resolves the release version once, verifies the synchronized
+  workspace, refuses backward channel movement before publishing, and asserts every public
+  package's channel tag after publishing.
+- `.github/workflows/release-tags.yml` accepts and validates that version instead of re-reading
+  divergent manifests, and records provenance in the annotated tag.
+- `.github/workflows/publish-packages-from-tag.yml` is recovery-only: it derives the version from
+  the tag, synchronizes every manifest on every channel, skips tags the publish workflow already
+  published from, and publishes in dependency-graph order.
+
+Registry recovery itself (Wave 5) is unchanged and still requires release-owner approval.
+
 ## Containment exit criteria status
 
 - [x] Production promotion pause is documented and in force (this record). Operational enforcement in CI/GitHub settings (e.g. environment protection on the publish workflows) is a release-owner action tracked for FIX-001.

@@ -32,14 +32,7 @@
       "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/harness/agenticTools/shared/process.ts requires @vscode/ripgrep without declaring it (guarded, but the optional contract is undeclared)."
     }
   ],
-  "releaseMatrixCoverage": [
-    {
-      "fixId": "FIX-016",
-      "package": "@a5c-ai/kradle",
-      "surface": ".github/workflows/publish-packages-from-tag.yml",
-      "note": "NEW finding discovered by the FIX-011 release-matrix audit (2026-08-13): @a5c-ai/kradle is missing from the tag publication workflow (it is present in publish.yml)."
-    }
-  ],
+  "releaseMatrixCoverage": [],
   "packedArtifact": [],
   "installScripts": []
 }

@@ -6,6 +6,32 @@ last_updated: 2026-05-01
 
 # Continuous Release Pipeline
 
+## Single authoritative release version (FIX-001)
+
+The branch release workflow (`.github/workflows/publish.yml`) is the **sole owner** of npm
+publication and channel promotion. One immutable release version flows through the whole
+pipeline; nothing downstream re-derives it.
+
+| Stage | Where the version comes from |
+| --- | --- |
+| Resolution | `node scripts/release-version.cjs resolve --branch <b> --sha <short-sha>` in `prepare_staging_publish`, exactly once. `main` releases `X.Y.Z` from the root manifest; `staging`/`develop` release `X.Y.(Z+1)-<branch>.<short-sha>`. Any other branch is a hard error. |
+| Publication workspace | The resolved plan is written to `release-version.json` and bundled into the publish-source tarball, so every publish job publishes the same version. |
+| Manifest synchronization | `scripts/sync-workspace-versions.mjs --version <releaseVersion>`, immediately verified by `release-version.cjs verify-manifests`. |
+| Publication | `scripts/publish-package-from-tag.mjs` fails unless the workspace manifest version, the release plan / `RELEASE_VERSION` / `--release-version`, and the tag version all agree. |
+| Publication order | Derived from the package dependency graph: `scripts/release-matrix.cjs --group all-publishable --format waves`. |
+| Channel assertion | `release-version.cjs assert-channel-tags` runs `preflight` before publishing (no backward channel movement) and `final` after (every one of the public packages resolves the release version). |
+| Tagging | `.github/workflows/release-tags.yml` **accepts** the version as an input and validates it against the resolver. The tag is `babysitter/<branch>/v<releaseVersion>` — the name contains the exact published version and nothing else — annotated with `babysitter-release-*` provenance. |
+| External sync | `sync-external-plugins.yml` / `sync-atlas-plugins.yml` take `release_version` as a required input. |
+
+`.github/workflows/publish-packages-from-tag.yml` is a **manual/recovery path only**. It derives
+the exact version from the tag, refuses to run for a tag the publish workflow already published
+from (no second dist-tag mutation), synchronizes every manifest to that version on every channel,
+publishes in dependency order, and asserts the channel tags at the end.
+
+Re-running a completed release is idempotent: nothing is re-published, the tag is not moved, and
+the channel assertion passes unchanged. See `docs/release-incident-2026-08-13.md` for the incident
+this model prevents.
+
 ## Workflow Overview
 - `.github/workflows/release.yml` owns production npm releases from `main`, guarded by the `release-main` concurrency group so only one run executes at a time.
 - `.github/workflows/staging-publish.yml` owns prerelease npm publishing from `staging`, guarded by the `staging-publish` concurrency group.

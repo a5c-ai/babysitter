@@ -63,6 +63,8 @@ function createFixtureRepo(t) {
 
   fs.mkdirSync(path.join(root, 'scripts'), { recursive: true });
   fs.copyFileSync(HELPER, path.join(root, 'scripts', 'publish-package-from-tag.mjs'));
+  // The helper reconciles the release version through scripts/lib/release-version.cjs.
+  fs.cpSync(path.join(repoRoot, 'scripts', 'lib'), path.join(root, 'scripts', 'lib'), { recursive: true });
 
   // Fake npm: records every invocation and answers `npm view` from the
   // NPM_FAKE_PUBLISHED allowlist. Nothing here touches the network.
@@ -89,20 +91,27 @@ function createFixtureRepo(t) {
   return { root, binDir, logPath: path.join(root, 'npm-invocations.log') };
 }
 
-function runHelper(fixture, workspace, { published = [] } = {}) {
+function runHelper(
+  fixture,
+  workspace,
+  { published = [], refName = 'develop', releaseVersion = '1.0.0', args = [] } = {},
+) {
   fs.writeFileSync(fixture.logPath, '');
-  const result = spawnSync(process.execPath, ['scripts/publish-package-from-tag.mjs', `--workspace=${workspace}`, '--skip-build'], {
-    cwd: fixture.root,
-    encoding: 'utf8',
-    env: {
-      ...process.env,
-      PATH: `${fixture.binDir}${path.delimiter}${process.env.PATH}`,
-      NODE_AUTH_TOKEN: 'fixture-token',
-      GITHUB_REF_NAME: 'babysitter/develop/v1.0.0',
-      NPM_FAKE_LOG: fixture.logPath,
-      NPM_FAKE_PUBLISHED: published.join(':'),
-    },
-  });
+  const env = {
+    ...process.env,
+    PATH: `${fixture.binDir}${path.delimiter}${process.env.PATH}`,
+    NODE_AUTH_TOKEN: 'fixture-token',
+    GITHUB_REF_NAME: refName,
+    NPM_FAKE_LOG: fixture.logPath,
+    NPM_FAKE_PUBLISHED: published.join(':'),
+  };
+  delete env.RELEASE_VERSION;
+  if (releaseVersion !== null) env.RELEASE_VERSION = releaseVersion;
+  const result = spawnSync(
+    process.execPath,
+    ['scripts/publish-package-from-tag.mjs', `--workspace=${workspace}`, '--skip-build', ...args],
+    { cwd: fixture.root, encoding: 'utf8', env },
+  );
   const invocations = fs.readFileSync(fixture.logPath, 'utf8').split('\n').filter(Boolean);
   return { ...result, invocations };
 }
@@ -155,4 +164,135 @@ test('an already-published package is not re-published, only dist-tagged', (t) =
     'an existing version must never be re-published',
   );
   assert.ok(result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@1.0.0 develop')));
+});
+
+// ---------------------------------------------------------------------------
+// FIX-001: one exact release version through publication and tagging.
+//
+// Reproduction of the 2026-08-13 incident (docs/release-incident-2026-08-13.md):
+// publish.yml synchronized a TEMPORARY workspace to 6.0.3 and published it,
+// then created a release tag from the ORIGINAL commit, whose checked-in
+// workspace manifests were still 6.0.0. The tag-triggered run checked that
+// commit out, this helper read `@pkg@6.0.0` from the stale manifest, found it
+// already on the registry, and ran `npm dist-tag add @pkg@6.0.0 latest` —
+// moving the production channel BACK to the stale artifacts.
+// ---------------------------------------------------------------------------
+
+/** Rewrites fixture manifest versions, emulating a checkout at a given state. */
+function setFixtureVersions(fixture, { root, packages = {} }) {
+  const rootManifestPath = path.join(fixture.root, 'package.json');
+  const rootManifest = JSON.parse(fs.readFileSync(rootManifestPath, 'utf8'));
+  rootManifest.version = root;
+  writeJson(rootManifestPath, rootManifest);
+  for (const [dir, version] of Object.entries(packages)) {
+    const manifestPath = path.join(fixture.root, 'packages', dir, 'package.json');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    manifest.version = version;
+    if (manifest.dependencies?.['@fixture/leaf']) manifest.dependencies['@fixture/leaf'] = version;
+    writeJson(manifestPath, manifest);
+  }
+}
+
+test('FIX-001: a main release tag cannot reassign the channel tag to the stale version in a divergent checkout', (t) => {
+  const fixture = createFixtureRepo(t);
+  // Exactly the incident state: root released 6.0.3, workspace manifests 6.0.0.
+  setFixtureVersions(fixture, { root: '6.0.3', packages: { leaf: '6.0.0' } });
+
+  const result = runHelper(fixture, '@fixture/leaf', {
+    // Both versions exist on the registry: 6.0.0 from the previous release,
+    // 6.0.3 published minutes earlier from the synchronized temp workspace.
+    published: ['@fixture/leaf@6.0.0', '@fixture/leaf@6.0.3'],
+    refName: 'babysitter/main/v6.0.3',
+    releaseVersion: null,
+  });
+
+  assert.ok(
+    !result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@6.0.0')),
+    `the stale version must never be promoted to a channel tag; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.equal(
+    result.status,
+    1,
+    `a divergent workspace must fail the publication helper, got ${result.status}\n${result.stdout}${result.stderr}`,
+  );
+  assert.match(result.stderr, /6\.0\.0/);
+  assert.match(result.stderr, /6\.0\.3/);
+});
+
+test('FIX-001: the same tag promotes the release version once the workspace is synchronized to it', (t) => {
+  const fixture = createFixtureRepo(t);
+  setFixtureVersions(fixture, { root: '6.0.3', packages: { leaf: '6.0.3' } });
+
+  const result = runHelper(fixture, '@fixture/leaf', {
+    published: ['@fixture/leaf@6.0.0', '@fixture/leaf@6.0.3'],
+    refName: 'babysitter/main/v6.0.3',
+    releaseVersion: null,
+  });
+
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  assert.ok(
+    result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@6.0.3 latest')),
+    `the release version must be promoted; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.ok(
+    !result.invocations.some((line) => line.startsWith('publish')),
+    're-running a completed release must be idempotent, never a re-publish',
+  );
+});
+
+test('FIX-001: an explicit release version that disagrees with the tag version is a hard failure', (t) => {
+  const fixture = createFixtureRepo(t);
+  setFixtureVersions(fixture, { root: '6.0.4', packages: { leaf: '6.0.4' } });
+
+  const result = runHelper(fixture, '@fixture/leaf', {
+    published: [],
+    refName: 'babysitter/main/v6.0.3',
+    releaseVersion: '6.0.4',
+  });
+
+  assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
+  assert.match(result.stderr, /Conflicting release versions/);
+  assert.ok(!result.invocations.some((line) => line.startsWith('publish')));
+});
+
+test('FIX-001: publication without any explicit release version is refused', (t) => {
+  const fixture = createFixtureRepo(t);
+
+  const result = runHelper(fixture, '@fixture/leaf', {
+    published: [],
+    refName: 'main',
+    releaseVersion: null,
+  });
+
+  assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
+  assert.match(result.stderr, /No release version was supplied/);
+  assert.ok(!result.invocations.some((line) => line.startsWith('publish')));
+});
+
+test('FIX-001: the release version may be carried by the publication workspace release plan', (t) => {
+  const fixture = createFixtureRepo(t);
+  setFixtureVersions(fixture, { root: '6.0.4', packages: { leaf: '6.0.4' } });
+  writeJson(path.join(fixture.root, 'release-version.json'), {
+    branch: 'main',
+    releaseVersion: '6.0.4',
+    distTag: 'latest',
+    releaseTag: 'babysitter/main/v6.0.4',
+    shortSha: 'abcdef123456',
+  });
+
+  const result = runHelper(fixture, '@fixture/leaf', {
+    published: [],
+    refName: 'main',
+    releaseVersion: null,
+  });
+
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  assert.ok(
+    result.invocations.some((line) => line.startsWith('publish --workspace @fixture/leaf')),
+    `expected a publish invocation; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.ok(
+    result.invocations.some((line) => line.includes('--tag latest')),
+    `the release plan owns the channel tag; saw: ${result.invocations.join(' | ')}`,
+  );
 });

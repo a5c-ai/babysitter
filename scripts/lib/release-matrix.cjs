@@ -31,6 +31,13 @@ const { listPublishablePackages } = require('./publishable-packages.cjs');
  * metadata gate credits every member of a group to a workflow that invokes it.
  */
 const GROUPS = {
+  'all-publishable': {
+    description:
+      'Every package this repository publishes. Consumed as dependency-ordered ' +
+      'publication waves (--format waves) so a package is never published before ' +
+      'the internal dependencies it pins (FIX-001).',
+    selects: () => true,
+  },
   'hooks-leaves': {
     description:
       'Public hooks harness adapter leaves (packages/adapters/hooks/adapter-*). ' +
@@ -105,6 +112,61 @@ function hooksBuildOrder(repoRoot) {
 }
 
 /**
+ * Dependency-ordered publication waves for the WHOLE publishable inventory
+ * (FIX-001).
+ *
+ * `scripts/publish-package-from-tag.mjs` hard-fails a package whose exactly
+ * pinned internal dependency is not on the registry yet, so publication order
+ * is a correctness requirement, not an optimization. Deriving it from the
+ * authoritative dependency graph — instead of a hand-curated sequence of
+ * `publish_many` groups — is what keeps a new package from being published
+ * before its dependencies (or forgotten entirely, as
+ * `@a5c-ai/hooks-adapter-genty` was).
+ *
+ * Every package in wave N depends only on packages in waves < N, so a wave may
+ * be published in parallel.
+ *
+ * @param {string} repoRoot absolute path to the repository root
+ * @returns {Array<Array<{name: string, dir: string, version: string}>>}
+ */
+function publicationOrder(repoRoot) {
+  const inventory = listPublishablePackages(repoRoot);
+  const names = new Set(inventory.map((entry) => entry.name));
+  const internalDependencies = new Map(
+    inventory.map((entry) => [
+      entry.name,
+      [
+        ...new Set(
+          ['dependencies', 'optionalDependencies', 'peerDependencies']
+            .flatMap((field) => Object.keys(entry.manifest[field] || {}))
+            .filter((dependency) => names.has(dependency) && dependency !== entry.name),
+        ),
+      ],
+    ]),
+  );
+
+  const published = new Set();
+  const waves = [];
+  while (published.size < inventory.length) {
+    const wave = inventory.filter(
+      (entry) =>
+        !published.has(entry.name) &&
+        internalDependencies.get(entry.name).every((dependency) => published.has(dependency)),
+    );
+    if (wave.length === 0) {
+      const blocked = inventory.filter((entry) => !published.has(entry.name)).map((entry) => entry.name);
+      throw new Error(
+        'The publishable-package dependency graph contains a cycle; no publication order exists for: ' +
+          `${blocked.join(', ')}`,
+      );
+    }
+    waves.push(wave.map((entry) => ({ name: entry.name, dir: entry.dir, version: entry.version })));
+    for (const entry of wave) published.add(entry.name);
+  }
+  return waves;
+}
+
+/**
  * Packages whose clean-consumer verification MUST use a non-hoisted install
  * layout (`npm install --install-strategy=nested`) — FIX-006.
  *
@@ -161,6 +223,7 @@ module.exports = {
   listGroupIds,
   listGroup,
   hooksBuildOrder,
+  publicationOrder,
   nonHoistedVerificationPackages,
   derivedWorkflowCoverage,
 };

@@ -10,6 +10,7 @@
  *   node scripts/release-matrix.cjs --group hooks-leaves               # matrix
  *   node scripts/release-matrix.cjs --group hooks-leaves --format workspaces
  *   node scripts/release-matrix.cjs --group hooks-leaves --format json
+ *   node scripts/release-matrix.cjs --group all-publishable --format waves
  *   node scripts/release-matrix.cjs --list-groups
  *
  * Formats:
@@ -17,16 +18,21 @@
  *               ready for `strategy.matrix.include: ${{ fromJson(...) }}`
  *   workspaces  one package name per line, for shell loops
  *   json        the full group entries, pretty printed
+ *   waves       dependency-ordered publication waves (FIX-001): one wave per
+ *               line, space-separated package names. Wave N depends only on
+ *               waves < N, so a wave may be published in parallel. Only valid
+ *               for the all-publishable group, whose graph is complete.
  *
  * Read-only: never builds, publishes, or contacts the registry.
  */
 'use strict';
 
 const path = require('path');
-const { listGroup, listGroupIds, GROUPS } = require('./lib/release-matrix.cjs');
+const { listGroup, listGroupIds, publicationOrder, GROUPS } = require('./lib/release-matrix.cjs');
 
 const repoRoot = path.resolve(__dirname, '..');
-const FORMATS = new Set(['matrix', 'workspaces', 'json']);
+const FORMATS = new Set(['matrix', 'workspaces', 'json', 'waves']);
+const WAVES_GROUP = 'all-publishable';
 
 function parseArgs(argv) {
   const options = { group: null, format: 'matrix', listGroups: false };
@@ -68,6 +74,18 @@ function main() {
   }
   if (!FORMATS.has(options.format)) {
     throw new Error(`Unknown --format ${JSON.stringify(options.format)}; known formats: ${[...FORMATS].join(', ')}`);
+  }
+  if (options.format === 'waves') {
+    if (options.group !== WAVES_GROUP) {
+      throw new Error(
+        `--format waves requires --group ${WAVES_GROUP}: a publication order is only correct when it is ` +
+          'derived from the complete dependency graph.',
+      );
+    }
+    for (const wave of publicationOrder(repoRoot)) {
+      process.stdout.write(`${wave.map((entry) => entry.name).join(' ')}\n`);
+    }
+    return;
   }
   const members = listGroup(repoRoot, options.group);
   if (options.format === 'workspaces') {

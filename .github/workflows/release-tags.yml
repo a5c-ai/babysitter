@@ -1,9 +1,39 @@
+# Immutable release tag creation (FIX-001).
+#
+# This workflow no longer re-derives the released version. It ACCEPTS the one
+# release version the branch release workflow resolved, validates it against
+# the resolver for this branch/commit, and records it in the tag name and in
+# the annotated tag object.
+#
+# Before FIX-001 this job re-read the root manifest of the ORIGINAL checkout
+# and appended the commit sha to main tags. The resulting tag named a version
+# that was never published, and the tag-triggered workflow then published /
+# promoted from the stale checked-out manifests — moving `latest` back to
+# 6.0.0 (docs/release-incident-2026-08-13.md).
 name: Create Release Tags
 
 on:
   # Called by Publish after all validation and publish jobs succeed
   workflow_call:
+    inputs:
+      release_version:
+        description: The exact version that was published. Never re-derived here.
+        required: true
+        type: string
+      branch:
+        description: Release branch that produced the version (main, staging, develop).
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: The exact version that was published. Never re-derived here.
+        required: true
+        type: string
+      branch:
+        description: Release branch that produced the version (main, staging, develop).
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -33,21 +63,41 @@ jobs:
         with:
           node-version: 22
 
-      - name: Create immutable release tag
+      # Validation, not derivation: the passed version must be exactly what the
+      # resolver produces for this branch and commit.
+      - name: Validate the released version
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          RELEASE_BRANCH: ${{ inputs.branch }}
         run: |
           set -euo pipefail
           SHORT_SHA=$(git rev-parse --short=12 HEAD)
-          VERSION=$(node -p "require('./package.json').version")
-          BRANCH="${GITHUB_REF_NAME}"
-          if [ "${BRANCH}" = "staging" ]; then
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-            NEXT_PATCH=$((PATCH + 1))
-            VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
-            TAG="babysitter/${BRANCH}/v${VERSION}"
-          else
-            TAG="babysitter/${BRANCH}/v${VERSION}-${SHORT_SHA}"
-          fi
+          node scripts/release-version.cjs verify \
+            --branch "$RELEASE_BRANCH" \
+            --sha "$SHORT_SHA" \
+            --version "$RELEASE_VERSION" \
+            --github-output
+
+      # Idempotent: re-running the same release must not move or duplicate the
+      # tag, and must never point an existing release tag at another commit.
+      - name: Create immutable release tag
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          RELEASE_BRANCH: ${{ inputs.branch }}
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "$TAG"
-          git push origin "$TAG"
+          # Idempotent and immutable: creates the annotated tag only if it is
+          # absent, and hard-fails rather than re-pointing an existing release
+          # tag at another commit or version.
+          node scripts/release-version.cjs ensure-tag \
+            --version "$RELEASE_VERSION" \
+            --branch "$RELEASE_BRANCH" \
+            --commit "$(git rev-parse HEAD)" \
+            --source publish-workflow \
+            --run-url "$RUN_URL"
+          git push origin "refs/tags/${RELEASE_TAG}"

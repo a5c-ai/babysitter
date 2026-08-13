@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const { listGroup, listGroupIds, hooksBuildOrder, derivedWorkflowCoverage } = require('../lib/release-matrix.cjs');
+const { listGroup, listGroupIds, hooksBuildOrder, publicationOrder, derivedWorkflowCoverage } = require('../lib/release-matrix.cjs');
 const { listPublishablePackages } = require('../lib/publishable-packages.cjs');
 
 const BRANCH_WORKFLOW = '.github/workflows/publish.yml';
@@ -233,23 +233,79 @@ test('publication order publishes the Genty leaf before the hooks CLI', () => {
     'the hooks CLI job must wait for every derived hooks leaf (including Genty) to publish',
   );
 
+  // FIX-001: the tag workflow no longer carries a hand-curated publication
+  // sequence; it consumes the dependency-ordered waves derived below.
   const tag = readRepoFile(TAG_WORKFLOW);
-  const publishStep = tag.indexOf('Publish packages from tag');
-  const leafPublish = tag.indexOf('publish_many "Publish leaf adapter packages"', publishStep);
-  const cliPublish = tag.indexOf('publish_many "Publish aggregate packages"', publishStep);
-  assert.ok(leafPublish !== -1, `${TAG_WORKFLOW} must publish the derived hooks leaves`);
-  assert.ok(cliPublish !== -1, `${TAG_WORKFLOW} must publish the aggregate group`);
-  const leafBlock = tag.slice(leafPublish, cliPublish);
-  const cliBlock = tag.slice(cliPublish, cliPublish + 400);
   assert.match(
-    leafBlock,
-    /"\$\{HOOKS_LEAVES\[@\]\}"/,
-    `${TAG_WORKFLOW} must publish the derived hooks leaves in the leaf group`,
+    tag,
+    /scripts\/release-matrix\.cjs --group all-publishable --format waves/,
+    `${TAG_WORKFLOW} must derive its publication order from the dependency graph`,
   );
-  assert.match(cliBlock, new RegExp(escapeForRegExp(HOOKS_CLI)), `${TAG_WORKFLOW} must publish ${HOOKS_CLI}`);
-  assert.ok(
-    leafPublish < cliPublish,
-    `${TAG_WORKFLOW} must publish every hooks leaf before ${HOOKS_CLI} (exact dependency order)`,
+
+  const waves = publicationOrder(repoRoot);
+  const waveOf = (name) => waves.findIndex((wave) => wave.some((entry) => entry.name === name));
+  for (const leaf of leafNames()) {
+    assert.ok(
+      waveOf(leaf) < waveOf(HOOKS_CLI),
+      `${leaf} must be published before ${HOOKS_CLI} (the CLI pins it exactly)`,
+    );
+  }
+});
+
+// ---------------------------------------------------------------------------
+// FIX-001: dependency-ordered publication waves.
+// ---------------------------------------------------------------------------
+
+test('publication waves cover the authoritative inventory exactly once', () => {
+  const waves = publicationOrder(repoRoot);
+  const ordered = waves.flat().map((entry) => entry.name);
+  const inventory = listPublishablePackages(repoRoot).map((entry) => entry.name);
+  assert.deepEqual([...ordered].sort(), [...inventory].sort());
+  assert.equal(new Set(ordered).size, ordered.length, 'no package may be published twice');
+});
+
+test('no package is published before an internal dependency it declares', () => {
+  const waves = publicationOrder(repoRoot);
+  const inventory = listPublishablePackages(repoRoot);
+  const names = new Set(inventory.map((entry) => entry.name));
+  const waveOf = new Map();
+  waves.forEach((wave, index) => wave.forEach((entry) => waveOf.set(entry.name, index)));
+
+  for (const entry of inventory) {
+    const dependencies = ['dependencies', 'optionalDependencies', 'peerDependencies']
+      .flatMap((field) => Object.keys(entry.manifest[field] || {}))
+      .filter((dependency) => names.has(dependency) && dependency !== entry.name);
+    for (const dependency of dependencies) {
+      assert.ok(
+        waveOf.get(dependency) < waveOf.get(entry.name),
+        `${dependency} (wave ${waveOf.get(dependency)}) must publish before ${entry.name} (wave ${waveOf.get(entry.name)})`,
+      );
+    }
+  }
+});
+
+test('the release-matrix CLI emits the same waves it derives', () => {
+  const stdout = execFileSync(
+    process.execPath,
+    [path.join(repoRoot, 'scripts', 'release-matrix.cjs'), '--group', 'all-publishable', '--format', 'waves'],
+    { cwd: repoRoot, encoding: 'utf8' },
+  );
+  const emitted = stdout.trim().split('\n').map((line) => line.split(' '));
+  assert.deepEqual(
+    emitted,
+    publicationOrder(repoRoot).map((wave) => wave.map((entry) => entry.name)),
+  );
+});
+
+test('a publication order may only be derived from the complete dependency graph', () => {
+  assert.throws(
+    () =>
+      execFileSync(
+        process.execPath,
+        [path.join(repoRoot, 'scripts', 'release-matrix.cjs'), '--group', 'hooks-leaves', '--format', 'waves'],
+        { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' },
+      ),
+    /requires --group all-publishable/,
   );
 });
 

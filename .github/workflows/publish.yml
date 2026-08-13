@@ -692,7 +692,12 @@ jobs:
     permissions:
       contents: write
     outputs:
-      staging_version_sdk: ${{ steps.version.outputs.staging_version_sdk }}
+      # FIX-001: THE release version, resolved exactly once here and passed
+      # explicitly to every downstream job, reusable workflow and helper. It is
+      # never re-derived from a manifest, a branch name or a tag downstream.
+      release_version: ${{ steps.version.outputs.release_version }}
+      dist_tag: ${{ steps.version.outputs.dist_tag }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
       hooks_leaves: ${{ steps.release_matrix.outputs.hooks_leaves }}
     steps:
       - name: Checkout repository
@@ -733,47 +738,39 @@ jobs:
           npm ci --force
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Set publish version
+      # FIX-001: the ONE authoritative release version. Everything downstream —
+      # manifest synchronization, publication, tag creation, external plugin
+      # sync and the final channel-tag assertion — consumes this value.
+      # release-version.json travels inside the publication workspace tarball,
+      # so every publish job publishes the same immutable version.
+      - name: Resolve the authoritative release version
         id: version
         run: |
           set -euo pipefail
-          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
           SHORT_SHA=$(git rev-parse --short=12 HEAD)
-          case "${GITHUB_REF_NAME}" in
-            main)
-              PUBLISH_VERSION="$BASE_VERSION"
-              ;;
-            staging|develop)
-              IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-              NEXT_PATCH=$((PATCH + 1))
-              PUBLISH_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-${GITHUB_REF_NAME}.${SHORT_SHA}"
-              ;;
-            *)
-              echo "Unsupported publish branch: ${GITHUB_REF_NAME}" >&2
-              exit 1
-              ;;
-          esac
-          echo "publish_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_unified=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_sdk=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_agent_mux=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_codex=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_github=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_cursor=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_gemini=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_pi=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_omp=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_opencode=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_openclaw=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Setting ${GITHUB_REF_NAME} publish version: $PUBLISH_VERSION"
-          node scripts/sync-workspace-versions.mjs --version "$PUBLISH_VERSION"
+          node scripts/release-version.cjs resolve \
+            --branch "${GITHUB_REF_NAME}" \
+            --sha "$SHORT_SHA" \
+            --commit "$(git rev-parse HEAD)" \
+            --write release-version.json \
+            --github-output
 
       - name: Prepare workspace manifests for publish
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
+          RELEASE_DIST_TAG: ${{ steps.version.outputs.dist_tag }}
         run: |
           set -euo pipefail
-          node scripts/sync-workspace-versions.mjs --version "$STAGING_VERSION"
-        env:
-          STAGING_VERSION: ${{ steps.version.outputs.staging_version_sdk }}
+          node scripts/sync-workspace-versions.mjs --version "$RELEASE_VERSION"
+          # Proves the workspace this release publishes from is actually AT the
+          # release version. The 2026-08-13 incident published from a workspace
+          # whose manifests still said 6.0.0.
+          node scripts/release-version.cjs verify-manifests --version "$RELEASE_VERSION"
+          # Refuses a release that would move any channel tag backward.
+          node scripts/release-version.cjs assert-channel-tags \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --mode preflight
 
       - name: Refresh publish lockfile
         run: |
@@ -2730,7 +2727,7 @@ jobs:
         if: ${{ github.ref_name == 'staging' && vars.A5C_CLOUD_STAGING_DEPLOY_ENABLED == 'true' }}
         env:
           A5C_CLOUD_ENVIRONMENT: staging
-          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.staging_version_sdk }}
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.release_version }}
           A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_STAGING_TARGET_TYPE }}
           A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_STAGING_KUBE_CONTEXT }}
           A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_STAGING_NAMESPACE }}
@@ -2749,7 +2746,7 @@ jobs:
         if: ${{ github.ref_name == 'main' && vars.A5C_CLOUD_PROD_DEPLOY_ENABLED == 'true' }}
         env:
           A5C_CLOUD_ENVIRONMENT: prod
-          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.staging_version_sdk }}
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.release_version }}
           A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_PROD_TARGET_TYPE }}
           A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_PROD_KUBE_CONTEXT }}
           A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_PROD_NAMESPACE }}
@@ -2812,29 +2809,75 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
 
+  # FIX-001: the release is not complete until the channel tag of EVERY public
+  # package — the full authoritative inventory, never a sample — resolves to
+  # exactly the release version. On 2026-08-13, 37 of 43 packages were left on
+  # a stale `latest` while the release was reported as successful. This gate is
+  # also the idempotency check: re-running the same release passes it and moves
+  # nothing.
+  assert_release_channel_tags:
+    name: Assert Release Channel Tags
+    needs:
+      - prepare_staging_publish
+      - publish_staging_metapackage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Assert every public package resolves the release version
+        env:
+          RELEASE_VERSION: ${{ needs.prepare_staging_publish.outputs.release_version }}
+          RELEASE_DIST_TAG: ${{ needs.prepare_staging_publish.outputs.dist_tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-version.cjs assert-channel-tags \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG"
+
   create_release_tag:
     name: Create Release Tag
     needs:
+      - prepare_staging_publish
       - publish_staging_metapackage
+      - assert_release_channel_tags
     uses: ./.github/workflows/release-tags.yml
+    with:
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
+      branch: ${{ github.ref_name }}
     secrets: inherit
 
   sync_external_plugins:
     name: Sync External Plugins
     needs:
+      - prepare_staging_publish
       - create_release_tag
     uses: ./.github/workflows/sync-external-plugins.yml
     with:
       branch: ${{ github.ref_name }}
       ref: ${{ github.sha }}
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
     secrets: inherit
 
   sync_atlas_plugins:
     name: Sync Atlas Plugins
     needs:
+      - prepare_staging_publish
       - create_release_tag
     uses: ./.github/workflows/sync-atlas-plugins.yml
     with:
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
       branch: ${{ github.ref_name }}
       ref: ${{ github.sha }}
     secrets: inherit

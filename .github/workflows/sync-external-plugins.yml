@@ -11,6 +11,14 @@ on:
         description: Commit, tag, or branch ref to checkout before generating plugins.
         required: false
         type: string
+      release_version:
+        description: >-
+          FIX-001: the exact version the release published. Passed in by the
+          branch release workflow; never re-derived here, because a locally
+          inferred version would point the marketplace manifests at something
+          that was never published.
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -51,16 +59,12 @@ jobs:
         env:
           SYNC_BRANCH: ${{ inputs.branch || github.ref_name }}
           GITHUB_REF_NAME: ${{ inputs.branch || github.ref_name }}
+          TARGET_VERSION: ${{ inputs.release_version }}
         run: |
           set -euo pipefail
-          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
-          TARGET_VERSION="$BASE_VERSION"
-          if [ "${SYNC_BRANCH}" = "staging" ]; then
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-            NEXT_PATCH=$((PATCH + 1))
-            SHORT_SHA=$(git rev-parse --short=12 HEAD)
-            TARGET_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
-          fi
+          # FIX-001: the released version is an input. It used to be re-derived
+          # here from the root manifest, which produced a DIFFERENT version from
+          # the one publish.yml actually published on every channel but main.
           # sync-workspace-versions.mjs now also points each marketplace manifest's
           # external-repo `source.ref`/`source.branch` at this channel branch
           # (via GITHUB_REF_NAME) so the documented install resolves the
