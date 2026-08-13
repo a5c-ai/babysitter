@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // CLI for extensions-adapter compiler
 
+import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
 import { fileURLToPath } from 'url';
@@ -337,7 +338,12 @@ function isExecutedDirectly(): boolean {
     return false;
   }
 
-  return path.resolve(entryPoint) === fileURLToPath(import.meta.url);
+  // npm installs bins as symlinks in node_modules/.bin, so when the CLI is
+  // invoked as `adapters-extensions` process.argv[1] is the shim path while
+  // import.meta.url is the real module path. Comparing the resolved symlink
+  // targets keeps the installed bin working (FIX-004: the published CLI
+  // silently exited 0 without running any command).
+  return fs.realpathSync(path.resolve(entryPoint)) === fs.realpathSync(fileURLToPath(import.meta.url));
 }
 
 function main() {

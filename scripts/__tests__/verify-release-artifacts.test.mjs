@@ -106,6 +106,29 @@ test('the FIX-004 extensions replica (package.json + README only tarball) fails 
   );
 });
 
+test('the package-specific verify:release gate is invoked by the generic verifier (FIX-004 wiring)', { timeout: VERIFY_TIMEOUT_MS }, async () => {
+  const reportDir = makeReportDir('verify-release');
+  const result = await runVerifier('failing-verify-release', reportDir);
+  assert.notEqual(result.code, 0, 'verifier must fail a package whose verify:release gate rejects the artifact');
+  const report = readReport(reportDir, 'fix011-failing-verify-release');
+  assert.equal(report.status, 'failed');
+  assert.equal(report.steps.surfaces.status, 'passed', 'the packed surfaces themselves are healthy');
+  assert.equal(report.steps.verifyRelease.status, 'failed');
+  assert.ok(
+    report.failures.some((failure) => failure.includes('package-specific release gate rejected this artifact')),
+    `failures must surface the package-specific gate output: ${JSON.stringify(report.failures)}`,
+  );
+});
+
+test('a package without a verify:release gate records the step as skipped', { timeout: VERIFY_TIMEOUT_MS }, async () => {
+  const reportDir = makeReportDir('no-verify-release');
+  const result = await runVerifier('good-package', reportDir);
+  assert.equal(result.code, 0, `expected exit 0, got ${result.code}\n${result.stdout}\n${result.stderr}`);
+  const report = readReport(reportDir, 'fix011-good-package');
+  assert.equal(report.steps.verifyRelease.status, 'skipped');
+  assert.match(report.steps.verifyRelease.reason, /no verify:release script/);
+});
+
 test('a package that only works via the repository root node_modules fails in the temporary consumer', { timeout: VERIFY_TIMEOUT_MS }, async () => {
   const fixtureDir = path.join(fixturesRoot, 'hoist-only');
   // Prove the masking effect first: inside the repository the undeclared

@@ -148,12 +148,6 @@
       "note": "NEW finding discovered by the FIX-011 release-matrix audit (2026-08-13): @a5c-ai/kradle is missing from the tag publication workflow (it is present in publish.yml)."
     }
   ],
-  "packedArtifact": [
-    {
-      "fixId": "FIX-004",
-      "package": "@a5c-ai/extensions-adapter",
-      "note": "dist/extensions-adapter.js (compatibility bin) is never emitted by the build, so the declared bin target is absent from the tarball."
-    }
-  ],
+  "packedArtifact": [],
   "installScripts": []
 }

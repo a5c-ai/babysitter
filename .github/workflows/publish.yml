@@ -917,6 +917,9 @@ jobs:
           - name: agent-comm-adapter
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-observability && npm run build --workspace=@a5c-ai/comm-adapter
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/comm-adapter --skip-build
+          # FIX-004: the publish helper runs with lifecycle scripts disabled, so
+          # dist/ must be built here; the package's verify:release gate (run by
+          # publish-package-from-tag.mjs) refuses to publish without it.
           - name: adapters-extensions
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/extensions-adapter
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/extensions-adapter --skip-build

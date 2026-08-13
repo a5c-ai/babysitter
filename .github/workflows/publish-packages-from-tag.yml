@@ -109,6 +109,10 @@ jobs:
           run_many "Build policy layer" \
             @a5c-ai/policy-adapter
 
+          # FIX-004: @a5c-ai/extensions-adapter is published below with
+          # PUBLISH_PACKAGE_FROM_TAG_SKIP_BUILD=1 (lifecycle scripts disabled),
+          # so its dist/ must exist from this build step; its verify:release
+          # gate refuses to publish a package without build output.
           run_many "Build core packages" \
             @a5c-ai/hooks-adapter-core \
             @a5c-ai/comm-adapter \

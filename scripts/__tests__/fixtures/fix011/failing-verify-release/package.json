@@ -1,0 +1,16 @@
+{
+  "name": "fix011-failing-verify-release",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: every packed surface is healthy, but the package-specific verify:release gate fails. The verifier must run verify:release and fail the package.",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "verify:release": "node ./verify-release.mjs"
+  },
+  "files": [
+    "index.js",
+    "verify-release.mjs",
+    "README.md"
+  ]
+}
