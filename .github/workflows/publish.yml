@@ -189,6 +189,23 @@ jobs:
           path: /tmp/build-all-dist.tar.gz
           if-no-files-found: error
 
+  # FIX-011: full packed-artifact release gate. Runs the complete
+  # build/pack/install matrix for all 43 public packages and uploads the
+  # per-package reports and tarball inventories as CI artifacts. Known,
+  # tracked artifact defects (scripts/known-package-defects.json,
+  # packedArtifact section) are tolerated until their fixes land; any other
+  # failure marks the release run failed. Promotion-blocking ordering is
+  # wired by FIX-001/FIX-010.
+  verify_release_artifacts:
+    needs: [build_all, lint]
+    name: Verify Release Artifacts
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-artifact-verifier.yml
+    with:
+      packages: ''
+      allow_known_failures: 'true'
+
   validate_core:
     needs: [build_all, lint]
     name: Validate Core Runtime

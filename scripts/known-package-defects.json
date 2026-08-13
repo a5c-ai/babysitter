@@ -1,0 +1,170 @@
+{
+  "description": "Tracked known package defects tolerated by the fast PR gate (guard:packages / verify:metadata) so the FIX-011 guardrails could land while the underlying fixes are still in flight. Every entry MUST reference the remediation-program FIX id that will remove it. The enforced end-state of every list in this file is EMPTY: when a fix lands, the corresponding entries stop reproducing and the gate fails with a 'stale allowlist entry' error until they are deleted. Removing an entry is a one-line deletion. See issues_to_Fix.md and docs/release-incident-2026-08-13.md.",
+  "dependencyOwnership": [
+    {
+      "fixId": "FIX-002",
+      "package": "@a5c-ai/tasks-adapter",
+      "dependency": "@modelcontextprotocol/sdk",
+      "note": "Tasks adapter imports the MCP SDK at runtime (src/mcp/server.ts, src/mcp/http-transport.ts) without declaring it; the published 6.0.0 artifact is broken for clean consumers."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-antigravity",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-claude",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-codex",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-copilot",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-cursor",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-gemini",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-genty",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-hermes",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-oh-my-pi",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-openclaw",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-opencode",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-pi",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks leaf imports @a5c-ai/atlas/catalog directly but only declares @a5c-ai/hooks-adapter-core; Atlas arrives transitively."
+    },
+    {
+      "fixId": "FIX-006",
+      "package": "@a5c-ai/hooks-adapter-cli",
+      "dependency": "@a5c-ai/atlas",
+      "note": "Hooks CLI resolves the Atlas catalog directly (src/cli/adapter-loader.ts) without declaring @a5c-ai/atlas."
+    },
+    {
+      "fixId": "FIX-009",
+      "package": "@a5c-ai/comm-adapter",
+      "dependency": "node-pty",
+      "note": "spawn-runner.ts requires node-pty at runtime; FIX-009 chooses the intentional ownership model (documented optional peer + peerDependenciesMeta.optional)."
+    },
+    {
+      "fixId": "FIX-013",
+      "package": "@a5c-ai/adapters-cli",
+      "dependency": "react",
+      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/commands/tui.ts dynamically imports react without declaring it in any dependency field."
+    },
+    {
+      "fixId": "FIX-013",
+      "package": "@a5c-ai/adapters-cli",
+      "dependency": "ink",
+      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/commands/tui.ts dynamically imports ink without declaring it in any dependency field."
+    },
+    {
+      "fixId": "FIX-014",
+      "package": "@a5c-ai/comm-adapter",
+      "dependency": "@opentelemetry/api",
+      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/run-handle-impl.ts imports @opentelemetry/api at runtime (context, trace) without declaring it; it currently arrives transitively via @a5c-ai/adapters-observability."
+    },
+    {
+      "fixId": "FIX-015",
+      "package": "@a5c-ai/genty-core",
+      "dependency": "@vscode/ripgrep",
+      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/agenticTools/shared/process.ts requires @vscode/ripgrep without declaring it (guarded, but the optional contract is undeclared)."
+    },
+    {
+      "fixId": "FIX-015",
+      "package": "@a5c-ai/genty-platform",
+      "dependency": "@vscode/ripgrep",
+      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/harness/agenticTools/shared/process.ts requires @vscode/ripgrep without declaring it (guarded, but the optional contract is undeclared)."
+    }
+  ],
+  "releaseMatrixCoverage": [
+    {
+      "fixId": "FIX-005",
+      "package": "@a5c-ai/hooks-adapter-genty",
+      "surface": ".github/workflows/publish.yml",
+      "note": "Public Genty hooks adapter is absent from the branch publication workflow."
+    },
+    {
+      "fixId": "FIX-005",
+      "package": "@a5c-ai/hooks-adapter-genty",
+      "surface": ".github/workflows/publish-packages-from-tag.yml",
+      "note": "Public Genty hooks adapter is absent from the tag publication workflow."
+    },
+    {
+      "fixId": "FIX-005",
+      "package": "@a5c-ai/hooks-adapter-antigravity",
+      "surface": ".github/workflows/publish-packages-from-tag.yml",
+      "note": "Same hand-maintained-list omission class as FIX-005: the hooks leaf is missing from the tag publication workflow (it is present in publish.yml). FIX-005's acceptance derives both release workflows from the authoritative inventory."
+    },
+    {
+      "fixId": "FIX-005",
+      "package": "@a5c-ai/hooks-adapter-hermes",
+      "surface": ".github/workflows/publish-packages-from-tag.yml",
+      "note": "Same hand-maintained-list omission class as FIX-005: the hooks leaf is missing from the tag publication workflow (it is present in publish.yml)."
+    },
+    {
+      "fixId": "FIX-016",
+      "package": "@a5c-ai/kradle",
+      "surface": ".github/workflows/publish-packages-from-tag.yml",
+      "note": "NEW finding discovered by the FIX-011 release-matrix audit (2026-08-13): @a5c-ai/kradle is missing from the tag publication workflow (it is present in publish.yml)."
+    }
+  ],
+  "packedArtifact": [
+    {
+      "fixId": "FIX-002",
+      "package": "@a5c-ai/tasks-adapter",
+      "note": "Clean-consumer import of the root and ./mcp subpaths fails until @modelcontextprotocol/sdk is a declared direct dependency."
+    },
+    {
+      "fixId": "FIX-004",
+      "package": "@a5c-ai/extensions-adapter",
+      "note": "dist/extensions-adapter.js (compatibility bin) is never emitted by the build, so the declared bin target is absent from the tarball."
+    }
+  ],
+  "installScripts": []
+}

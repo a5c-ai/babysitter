@@ -89,6 +89,11 @@ jobs:
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/test-logs/metadata.log
 
+      - name: Release tooling tests (inventory, dependency ownership, packed-artifact verifier)
+        run: |
+          set -euo pipefail
+          npm run test:release-tooling 2>&1 | tee artifacts/test-logs/release-tooling.log
+
       - name: Architecture boundary gate
         run: |
           set -euo pipefail

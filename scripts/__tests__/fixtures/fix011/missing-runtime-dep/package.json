@@ -1,0 +1,12 @@
+{
+  "name": "fix011-missing-runtime-dep",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: the entrypoint requires a package that is not declared in dependencies (the FIX-002 class of defect). The packed tarball installs cleanly but fails to import in a fresh consumer.",
+  "license": "MIT",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ]
+}

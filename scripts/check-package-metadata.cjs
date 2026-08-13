@@ -537,4 +537,165 @@ for (const packageJsonPath of listManagedPackageJsons()) {
   }
 }
 
-console.log('Metadata verification passed.');
+// ---------------------------------------------------------------------------
+// FIX-011: authoritative publishable-package inventory checks.
+//
+// One inventory — tracked workspace manifests with private !== true and
+// publishConfig.access === "public" — is the source of truth for publication.
+// Documentation coverage, both release workflows, and direct runtime
+// dependency ownership are compared against it here. Known, tracked defects
+// are tolerated ONLY through scripts/known-package-defects.json; every entry
+// names its FIX id and must be deleted once its fix lands (stale entries fail
+// this check). The enforced end-state of that allowlist is empty.
+// ---------------------------------------------------------------------------
+const { listPublishablePackages } = require('./lib/publishable-packages.cjs');
+const {
+  collectDependencyOwnershipViolations,
+  matchKnownDefects,
+} = require('./lib/dependency-ownership.cjs');
+
+const KNOWN_PACKAGE_DEFECTS_PATH = 'scripts/known-package-defects.json';
+const RELEASE_MATRIX_SURFACES = [
+  '.github/workflows/publish.yml',
+  '.github/workflows/publish-packages-from-tag.yml',
+];
+
+const knownPackageDefects = readJson(KNOWN_PACKAGE_DEFECTS_PATH);
+let publishableInventory;
+try {
+  publishableInventory = listPublishablePackages(repoRoot);
+} catch (error) {
+  fail(`publishable-package inventory generation failed: ${error.message}`);
+}
+
+function verifyKnownDefectEntriesNameFixIds() {
+  for (const section of ['dependencyOwnership', 'releaseMatrixCoverage', 'packedArtifact']) {
+    for (const entry of knownPackageDefects[section] || []) {
+      if (typeof entry.fixId !== 'string' || !/^FIX-\d+$/.test(entry.fixId)) {
+        fail(
+          `${KNOWN_PACKAGE_DEFECTS_PATH} ${section} entry for ${JSON.stringify(entry.package)} ` +
+            'must reference its FIX id (e.g. "FIX-002")',
+        );
+      }
+    }
+  }
+}
+
+function verifyInventoryDocsCoverage() {
+  const inventoryDirs = new Set(publishableInventory.map((entry) => entry.dir));
+  const missingFromDocs = [...inventoryDirs].filter((dir) => !publicSurfacePaths.has(dir)).sort();
+  if (missingFromDocs.length) {
+    fail(
+      `publishable packages missing from ${DOCS_SURFACE_PATH} public surfaces: ${missingFromDocs.join(', ')}`,
+    );
+  }
+  const missingFromInventory = [...publicSurfacePaths].filter((dir) => !inventoryDirs.has(dir)).sort();
+  if (missingFromInventory.length) {
+    fail(
+      `${DOCS_SURFACE_PATH} lists public surfaces that are not tracked publishable packages ` +
+        `(private !== true, publishConfig.access === "public"): ${missingFromInventory.join(', ')}`,
+    );
+  }
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function verifyReleaseMatrixCoverage() {
+  const violations = [];
+  for (const surface of RELEASE_MATRIX_SURFACES) {
+    const fullPath = path.join(repoRoot, surface);
+    if (!fs.existsSync(fullPath)) {
+      fail(`release matrix surface ${surface} is missing`);
+    }
+    const contents = fs.readFileSync(fullPath, 'utf8');
+    for (const entry of publishableInventory) {
+      const pattern = new RegExp(`${escapeRegExp(entry.name)}(?![\\w.-])`);
+      if (!pattern.test(contents)) {
+        violations.push({ package: entry.name, surface });
+      }
+    }
+  }
+  const known = knownPackageDefects.releaseMatrixCoverage || [];
+  const keyOf = (item) => `${item.package} ${item.surface}`;
+  const knownKeys = new Set(known.map(keyOf));
+  const violationKeys = new Set(violations.map(keyOf));
+  const unexpected = violations.filter((violation) => !knownKeys.has(keyOf(violation)));
+  const stale = known.filter((entry) => !violationKeys.has(keyOf(entry)));
+  if (stale.length) {
+    fail(
+      `stale releaseMatrixCoverage entries in ${KNOWN_PACKAGE_DEFECTS_PATH} — these no longer reproduce, delete them:\n` +
+        stale.map((entry) => `  - ${entry.fixId}: ${entry.package} in ${entry.surface}`).join('\n'),
+    );
+  }
+  if (unexpected.length) {
+    fail(
+      'publishable packages missing from release publication workflows (a public workspace must join the publish matrix):\n' +
+        unexpected.map((violation) => `  - ${violation.package} missing from ${violation.surface}`).join('\n'),
+    );
+  }
+  const tolerated = violations.filter((violation) => knownKeys.has(keyOf(violation)));
+  if (tolerated.length) {
+    console.warn(
+      `Tolerating ${tolerated.length} known release-matrix gap(s) tracked in ${KNOWN_PACKAGE_DEFECTS_PATH}: ` +
+        known
+          .filter((entry) => violationKeys.has(keyOf(entry)))
+          .map((entry) => `${entry.fixId} (${entry.package})`)
+          .join(', '),
+    );
+  }
+}
+
+function verifyDependencyOwnership() {
+  const violations = collectDependencyOwnershipViolations({
+    repoRoot,
+    packages: publishableInventory,
+  });
+  const { unexpected, tolerated, stale } = matchKnownDefects(
+    violations,
+    knownPackageDefects.dependencyOwnership,
+  );
+  if (stale.length) {
+    fail(
+      `stale dependencyOwnership entries in ${KNOWN_PACKAGE_DEFECTS_PATH} — these no longer reproduce, delete them:\n` +
+        stale.map((entry) => `  - ${entry.fixId}: ${entry.package} -> ${entry.dependency}`).join('\n'),
+    );
+  }
+  if (unexpected.length) {
+    fail(
+      'undeclared direct runtime dependencies (non-type runtime imports must be owned by the package\'s own ' +
+        'dependencies, optionalDependencies, or peer contract):\n' +
+        unexpected
+          .map(
+            (violation) =>
+              `  - ${violation.package} imports ${violation.dependency}` +
+              `${violation.declaredAsDevDependency ? ' (declared only as devDependency)' : ''} in ${violation.files.join(', ')}`,
+          )
+          .join('\n'),
+    );
+  }
+  if (tolerated.length) {
+    const byFix = new Map();
+    for (const violation of tolerated) {
+      const entry = (knownPackageDefects.dependencyOwnership || []).find(
+        (candidate) => candidate.package === violation.package && candidate.dependency === violation.dependency,
+      );
+      const fixId = entry ? entry.fixId : 'UNKNOWN';
+      byFix.set(fixId, (byFix.get(fixId) || 0) + 1);
+    }
+    console.warn(
+      `Tolerating ${tolerated.length} known dependency-ownership defect(s) tracked in ${KNOWN_PACKAGE_DEFECTS_PATH}: ` +
+        [...byFix.entries()].map(([fixId, count]) => `${fixId} (${count})`).join(', '),
+    );
+  }
+}
+
+verifyKnownDefectEntriesNameFixIds();
+verifyInventoryDocsCoverage();
+verifyReleaseMatrixCoverage();
+verifyDependencyOwnership();
+
+console.log(
+  `Metadata verification passed. Publishable inventory: ${publishableInventory.length} public packages.`,
+);
