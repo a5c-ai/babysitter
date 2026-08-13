@@ -40,6 +40,38 @@ async function discoverExternalAgentsViaProvider(opts: { cwd?: string; timeout?:
 
 let discoverExternalAgentsForValidation: DiscoverExternalAgentsFn = discoverExternalAgentsViaProvider;
 
+const SDK_SHIM_PACKAGE_JSON = JSON.stringify({
+  name: "@a5c-ai/babysitter-sdk",
+  type: "commonjs",
+  main: "index.js",
+}, null, 2);
+const SDK_SHIM_INDEX = [
+  '"use strict";',
+  "function staticTaskFromSpec(spec) {",
+  "  const taskDef = { ...spec };",
+  "  delete taskDef.id;",
+  "  delete taskDef.name;",
+  "  delete taskDef.run;",
+  "  delete taskDef.inputs;",
+  "  delete taskDef.outputs;",
+  "  return taskDef;",
+  "}",
+  "exports.defineTask = function defineTask(idOrSpec, maybeImpl) {",
+  "  const objectSpec = idOrSpec && typeof idOrSpec === 'object';",
+  "  const id = objectSpec ? (idOrSpec.id || idOrSpec.name) : idOrSpec;",
+  "  if (typeof id !== 'string' || !id.trim()) throw new Error('defineTask requires a non-empty id');",
+  "  const impl = objectSpec ? (typeof idOrSpec.run === 'function' ? idOrSpec.run : function () { return staticTaskFromSpec(idOrSpec); }) : maybeImpl;",
+  "  if (typeof impl !== 'function') throw new Error('defineTask requires an implementation function');",
+  "  return Object.freeze({",
+  "    id: id.trim(),",
+  "    async build(args, ctx) {",
+  "      return await Promise.resolve(impl(args, ctx));",
+  "    },",
+  "  });",
+  "};",
+  "",
+].join("\n");
+
 const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown>> = (() => {
   if (process.env.VITEST) {
     return (specifier: string) => import(specifier);
@@ -48,11 +80,21 @@ const dynamicImportModule: (specifier: string) => Promise<Record<string, unknown
   return new Function("specifier", "return import(specifier);") as (specifier: string) => Promise<Record<string, unknown>>;
 })();
 
+function targetPackageDir(targetNodeModules: string, packageName: string): string {
+  return path.join(targetNodeModules, ...packageName.split("/"));
+}
+
+async function writeProcessSdkShim(targetSdkDir: string): Promise<void> {
+  await fs.mkdir(targetSdkDir, { recursive: true });
+  await Promise.all([
+    fs.writeFile(path.join(targetSdkDir, "package.json"), `${SDK_SHIM_PACKAGE_JSON}\n`, "utf8"),
+    fs.writeFile(path.join(targetSdkDir, "index.js"), SDK_SHIM_INDEX, "utf8"),
+  ]);
+}
+
 async function ensureSdkResolvable(workspaceDir: string): Promise<void> {
-  // SDK-owned: resolve SDK package location to symlink into workspace for process validation
-  const sdkPkg = path.dirname(require.resolve("@a5c-ai/babysitter-sdk/package.json"));
   const targetNodeModules = path.join(workspaceDir, "node_modules");
-  const targetSdkDir = path.join(targetNodeModules, "@a5c-ai", "babysitter-sdk");
+  const targetSdkDir = targetPackageDir(targetNodeModules, "@a5c-ai/babysitter-sdk");
 
   try {
     await fs.access(targetSdkDir);
@@ -62,9 +104,7 @@ async function ensureSdkResolvable(workspaceDir: string): Promise<void> {
   }
 
   try {
-    await fs.mkdir(path.join(targetNodeModules, "@a5c-ai"), { recursive: true });
-    const linkType = process.platform === "win32" ? "junction" : "dir";
-    await fs.symlink(sdkPkg, targetSdkDir, linkType);
+    await writeProcessSdkShim(targetSdkDir);
   } catch {
     // best effort
   }

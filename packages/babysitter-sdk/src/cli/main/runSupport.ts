@@ -1,4 +1,4 @@
-import { promises as fs, readFileSync } from "node:fs";
+import { promises as fs } from "node:fs";
 import { createRequire } from "node:module";
 import * as path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -19,11 +19,41 @@ type ModuleExports = Record<string, unknown>;
 type ArtifactCandidate = { absolute: string; relative: string; outsideRun: boolean };
 type LocalSdkDependencyOptions = {
   createRequireFn?: typeof createRequire;
-  resolveSdkPackageDir?: () => string;
-  fsImpl?: Pick<typeof fs, "access" | "mkdir" | "symlink">;
+  fsImpl?: Pick<typeof fs, "access" | "mkdir" | "writeFile">;
 };
 
 const SDK_PACKAGE_SPECIFIER = "@a5c-ai/babysitter-sdk/package.json";
+const SDK_SHIM_PACKAGE_JSON = JSON.stringify({
+  name: "@a5c-ai/babysitter-sdk",
+  type: "commonjs",
+  main: "index.js",
+}, null, 2);
+const SDK_SHIM_INDEX = [
+  '"use strict";',
+  "function staticTaskFromSpec(spec) {",
+  "  const taskDef = { ...spec };",
+  "  delete taskDef.id;",
+  "  delete taskDef.name;",
+  "  delete taskDef.run;",
+  "  delete taskDef.inputs;",
+  "  delete taskDef.outputs;",
+  "  return taskDef;",
+  "}",
+  "exports.defineTask = function defineTask(idOrSpec, maybeImpl, maybeOptions) {",
+  "  const objectSpec = idOrSpec && typeof idOrSpec === 'object';",
+  "  const id = objectSpec ? (idOrSpec.id || idOrSpec.name) : idOrSpec;",
+  "  if (typeof id !== 'string' || !id.trim()) throw new Error('defineTask requires a non-empty id');",
+  "  const impl = objectSpec ? (typeof idOrSpec.run === 'function' ? idOrSpec.run : function () { return staticTaskFromSpec(idOrSpec); }) : maybeImpl;",
+  "  if (typeof impl !== 'function') throw new Error('defineTask requires an implementation function');",
+  "  return Object.freeze({",
+  "    id: id.trim(),",
+  "    async build(args, ctx) {",
+  "      return await Promise.resolve(impl(args, ctx));",
+  "    },",
+  "  });",
+  "};",
+  "",
+].join("\n");
 
 const dynamicImportModule: (specifier: string) => Promise<ModuleExports> = (() => {
   if (process.env.VITEST) {
@@ -218,34 +248,19 @@ function listModuleExports(mod: ModuleExports): string {
   return keys.length > 0 ? keys.join(", ") : "(none)";
 }
 
-function resolveSelfSdkPackageDir(): string {
-  let currentDir = __dirname;
-  let reachedRoot = false;
-  while (!reachedRoot) {
-    const packageJsonPath = path.join(currentDir, "package.json");
-    try {
-      const pkg = JSON.parse(readFileSync(packageJsonPath, "utf8")) as { name?: string };
-      if (pkg.name === "@a5c-ai/babysitter-sdk") {
-        return currentDir;
-      }
-    } catch {
-      // Keep walking upward.
-    }
-    const parentDir = path.dirname(currentDir);
-    reachedRoot = parentDir === currentDir;
-    if (!reachedRoot) {
-      currentDir = parentDir;
-    }
-  }
-  throw new Error("Unable to resolve the current @a5c-ai/babysitter-sdk package root");
+function targetPackageDir(targetNodeModules: string, packageName: string): string {
+  return path.join(targetNodeModules, ...packageName.split("/"));
 }
 
-function defaultResolveSdkPackageDir(): string {
-  try {
-    return path.dirname(require.resolve(SDK_PACKAGE_SPECIFIER));
-  } catch {
-    return resolveSelfSdkPackageDir();
-  }
+async function writeProcessSdkShim(
+  targetSdkDir: string,
+  fsImpl: Pick<typeof fs, "mkdir" | "writeFile">,
+): Promise<void> {
+  await fsImpl.mkdir(targetSdkDir, { recursive: true });
+  await Promise.all([
+    fsImpl.writeFile(path.join(targetSdkDir, "package.json"), `${SDK_SHIM_PACKAGE_JSON}\n`, "utf8"),
+    fsImpl.writeFile(path.join(targetSdkDir, "index.js"), SDK_SHIM_INDEX, "utf8"),
+  ]);
 }
 
 export async function ensureProcessLocalSdkDependency(
@@ -263,7 +278,8 @@ export async function ensureProcessLocalSdkDependency(
   }
 
   const fsImpl = options.fsImpl ?? fs;
-  const targetSdkDir = path.join(processDir, "node_modules", "@a5c-ai", "babysitter-sdk");
+  const targetNodeModules = path.join(processDir, "node_modules");
+  const targetSdkDir = targetPackageDir(targetNodeModules, "@a5c-ai/babysitter-sdk");
   try {
     await fsImpl.access(targetSdkDir);
     return;
@@ -271,13 +287,8 @@ export async function ensureProcessLocalSdkDependency(
     // Create below.
   }
 
-  await fsImpl.mkdir(path.dirname(targetSdkDir), { recursive: true });
   try {
-    await fsImpl.symlink(
-      (options.resolveSdkPackageDir ?? defaultResolveSdkPackageDir)(),
-      targetSdkDir,
-      process.platform === "win32" ? "junction" : "dir",
-    );
+    await writeProcessSdkShim(targetSdkDir, fsImpl);
   } catch (error) {
     const code = (error as NodeJS.ErrnoException | undefined)?.code;
     if (code !== "EEXIST") {

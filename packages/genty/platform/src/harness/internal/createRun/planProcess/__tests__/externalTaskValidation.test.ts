@@ -52,6 +52,46 @@ describe("issue #606 external responder process validation", () => {
     );
 
     await expect(validateProcessExport(processPath)).resolves.toBeUndefined();
+    const fallbackSdkDir = path.join(tmpDir, "node_modules", "@a5c-ai", "babysitter-sdk");
+    const fallbackStats = await fs.lstat(fallbackSdkDir);
+    expect(fallbackStats.isDirectory()).toBe(true);
+    expect(fallbackStats.isSymbolicLink()).toBe(false);
+    await expect(fs.readFile(path.join(fallbackSdkDir, "package.json"), "utf8")).resolves.toContain(
+      "@a5c-ai/babysitter-sdk",
+    );
+  });
+
+  it("prepares fallback SDK dependency without workspace symlinks", async () => {
+    const processPath = path.join(tmpDir, "portable-fallback-process.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { defineTask } from "@a5c-ai/babysitter-sdk";
+
+      const portableTask = defineTask("issue-1757/portable-fallback", () => ({
+        kind: "agent",
+        title: "Portable fallback",
+        agent: {
+          responderType: "agent",
+          adapter: "codex",
+          fallbackType: "internal",
+          prompt: { task: "review" }
+        }
+      }));
+
+      export async function process(inputs, ctx) {
+        return await ctx.task(portableTask, inputs);
+      }
+      `,
+      "utf8",
+    );
+
+    await expect(validateProcessExport(processPath)).resolves.toBeUndefined();
+
+    const fallbackSdkDir = path.join(tmpDir, "node_modules", "@a5c-ai", "babysitter-sdk");
+    const fallbackStats = await fs.lstat(fallbackSdkDir);
+    expect(fallbackStats.isDirectory()).toBe(true);
+    expect(fallbackStats.isSymbolicLink()).toBe(false);
   });
 
   it("rejects agent responder tasks that omit adapter", async () => {
