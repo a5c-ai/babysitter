@@ -122,4 +122,6 @@ npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
 npm pack --json --dry-run --workspace=@a5c-ai/tasks-adapter
 ```
 
+`test:packaged-surface-parity` (`src/__tests__/packaged-surface-parity.test.ts`) builds and packs the adapter, installs the exact tarball into a clean temporary consumer, imports the package root plus every `exports` subpath, typechecks a consumer, and asserts the tarball matches the published contents listed above. In CI it runs in the `test` job of `.github/workflows/ci.yml` and, as a prepublication gate, in the `validate_mux` job of `.github/workflows/publish.yml` — both with `--allow-known-failures`, which tolerates only defects tracked in `scripts/known-package-defects.json` (currently FIX-002, the undeclared `@modelcontextprotocol/sdk` runtime dependency) and fails as stale once the tracked fix lands.
+
 Keep this README aligned with the exported CLI, MCP, and package topology surfaced by `packages/adapters/tasks/`.

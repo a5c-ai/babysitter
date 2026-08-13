@@ -58,6 +58,8 @@ npm run test --workspace=@a5c-ai/tasks-adapter
 npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
 ```
 
+`test:packaged-surface-parity` is the packaged-surface parity gate (`src/__tests__/packaged-surface-parity.test.ts`): it builds and packs the adapter, installs the exact tarball into a clean temporary consumer, imports the root plus every `exports` subpath, and typechecks a consumer. In CI it runs in the `test` job of `.github/workflows/ci.yml` and in the `validate_mux` prepublication job of `.github/workflows/publish.yml`, both with `--allow-known-failures` (tolerating only defects tracked in `scripts/known-package-defects.json`).
+
 ## CLI Setup
 
 The bin name is `adapters-tasks`.

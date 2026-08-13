@@ -354,6 +354,17 @@ jobs:
           npm run verify:release --workspace=@a5c-ai/comm-adapter 2>&1 | tee artifacts/adapter-logs/agent-comm-adapter-release.log
           npm run verify:release --workspace=@a5c-ai/genty-tui 2>&1 | tee artifacts/adapter-logs/adapters-tui-release.log
 
+      # FIX-012: tasks-adapter packaged-surface parity prepublication gate —
+      # packs the exact tarball, installs it into a clean temporary consumer,
+      # imports the root plus every exports subpath, and typechecks a consumer.
+      # --allow-known-failures tolerates ONLY the tracked FIX-002 defect
+      # (scripts/known-package-defects.json, packedArtifact) and hard-fails as
+      # stale once FIX-002 lands until that entry is deleted.
+      - name: tasks-adapter packaged-surface parity
+        run: |
+          set -euo pipefail
+          npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter -- --allow-known-failures 2>&1 | tee artifacts/adapter-logs/tasks-adapter-packaged-surface-parity.log
+
       - name: Validate transport-adapter runtime owner
         run: |
           set -euo pipefail

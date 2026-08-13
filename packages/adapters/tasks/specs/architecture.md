@@ -114,7 +114,7 @@ The package surface intentionally separates published runtime files from reposit
 
 - `package.json#files` stays limited to `dist`, `responder`, and `README.md`
 - `docs/`, `skills/`, and `specs/` exist to support source review and contributor workflows
-- the parity gate lives in `src/__tests__/packaged-surface-parity.test.ts` so the package can detect doc drift locally
+- the parity gate lives in `src/__tests__/packaged-surface-parity.test.ts` (`npm run test:packaged-surface-parity`); it packs the exact tarball, installs it into a clean temporary consumer, imports the root plus every `exports` subpath, typechecks a consumer, and asserts the tarball contains only the published surface above (it runs in ci.yml `test` and publish.yml `validate_mux`)
 
 ## Guardrail Expectations
 

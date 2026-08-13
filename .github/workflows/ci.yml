@@ -124,6 +124,17 @@ jobs:
           set -euo pipefail
           npm run test --workspace=@a5c-ai/tasks-adapter 2>&1 | tee artifacts/test-logs/adapters-tasks-tests.log
 
+      # FIX-012: packaged-surface parity gate — builds and packs the tasks
+      # adapter, installs the exact tarball into a clean temporary consumer,
+      # imports the root plus every exports subpath, and typechecks a consumer.
+      # --allow-known-failures tolerates ONLY the tracked FIX-002 defect
+      # (scripts/known-package-defects.json, packedArtifact) and hard-fails as
+      # stale once FIX-002 lands until that entry is deleted.
+      - name: adapters-tasks packaged-surface parity
+        run: |
+          set -euo pipefail
+          npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter -- --allow-known-failures 2>&1 | tee artifacts/test-logs/tasks-adapter-test-packaged-surface-parity.log
+
       - name: Build hooks-adapter
         run: |
           set -euo pipefail
