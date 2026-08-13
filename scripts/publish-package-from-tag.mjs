@@ -37,11 +37,20 @@ if (!process.env.NODE_AUTH_TOKEN) {
   process.exit(0);
 }
 
+// FIX-005: every EXACTLY pinned internal dependency must already exist in the
+// registry before we publish a package that pins it. The previous condition
+// skipped this check whenever a same-named local workspace existed — which is
+// always true inside this monorepo — so `@a5c-ai/hooks-adapter-cli` published
+// successfully while pinning `@a5c-ai/hooks-adapter-genty`, a package that had
+// never been published at all (docs/release-incident-2026-08-13.md). A local
+// workspace proves nothing about what a clean consumer can install.
 for (const dependency of collectInternalDependencies(target.manifest)) {
-  if (!packages.has(dependency.name) && !dependency.range.startsWith('^') && !dependency.range.startsWith('~')) {
-    if (!npmView(`${dependency.name}@${dependency.range}`)) {
-      fail(`Required internal dependency ${dependency.name}@${dependency.range} is not published yet.`);
-    }
+  if (!isExactVersion(dependency.range)) continue;
+  if (!npmView(`${dependency.name}@${dependency.range}`)) {
+    fail(
+      `Required internal dependency ${dependency.name}@${dependency.range} is not published yet. ` +
+        `Publish it before ${packageSpec} (dependency-ordered publication).`,
+    );
   }
 }
 
@@ -125,11 +134,31 @@ function walkPackageJson(dir) {
   return entries;
 }
 
+/**
+ * True for an exactly pinned version (`6.0.0`, `6.0.3-staging.abc`) — the only
+ * shape whose registry presence can be verified as a single exact version.
+ * Ranges (`^`, `~`, `>=`, `x`) resolve against whatever the registry offers and
+ * are intentionally not gated here.
+ */
+function isExactVersion(range) {
+  return /^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(range);
+}
+
+/**
+ * Dependencies this repository itself publishes: anything in the `@a5c-ai`
+ * scope plus any dependency that resolves to a local workspace. Both must be
+ * on the registry before a dependent is published.
+ */
 function collectInternalDependencies(manifest) {
   const fields = ['dependencies', 'peerDependencies', 'optionalDependencies'];
   return fields.flatMap((field) =>
     Object.entries(manifest[field] || {})
-      .filter(([name, range]) => name.startsWith('@a5c-ai/') && !String(range).startsWith('workspace:') && range !== '*')
+      .filter(
+        ([name, range]) =>
+          (name.startsWith('@a5c-ai/') || packages.has(name)) &&
+          !String(range).startsWith('workspace:') &&
+          range !== '*',
+      )
       .map(([name, range]) => ({ name, range: String(range) })),
   );
 }

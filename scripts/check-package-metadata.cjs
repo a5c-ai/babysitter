@@ -553,6 +553,7 @@ const {
   collectDependencyOwnershipViolations,
   matchKnownDefects,
 } = require('./lib/dependency-ownership.cjs');
+const { derivedWorkflowCoverage } = require('./lib/release-matrix.cjs');
 
 const KNOWN_PACKAGE_DEFECTS_PATH = 'scripts/known-package-defects.json';
 const RELEASE_MATRIX_SURFACES = [
@@ -610,9 +611,14 @@ function verifyReleaseMatrixCoverage() {
       fail(`release matrix surface ${surface} is missing`);
     }
     const contents = fs.readFileSync(fullPath, 'utf8');
+    // FIX-005: a package is covered either by being named in the workflow or
+    // by belonging to a release-matrix group the workflow derives from the
+    // authoritative inventory (scripts/release-matrix.cjs --group <id>).
+    // Derived coverage is what makes a hand-maintained omission impossible.
+    const derived = derivedWorkflowCoverage(repoRoot, contents);
     for (const entry of publishableInventory) {
       const pattern = new RegExp(`${escapeRegExp(entry.name)}(?![\\w.-])`);
-      if (!pattern.test(contents)) {
+      if (!pattern.test(contents) && !derived.has(entry.name)) {
         violations.push({ package: entry.name, surface });
       }
     }

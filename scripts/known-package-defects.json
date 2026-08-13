@@ -118,30 +118,6 @@
   ],
   "releaseMatrixCoverage": [
     {
-      "fixId": "FIX-005",
-      "package": "@a5c-ai/hooks-adapter-genty",
-      "surface": ".github/workflows/publish.yml",
-      "note": "Public Genty hooks adapter is absent from the branch publication workflow."
-    },
-    {
-      "fixId": "FIX-005",
-      "package": "@a5c-ai/hooks-adapter-genty",
-      "surface": ".github/workflows/publish-packages-from-tag.yml",
-      "note": "Public Genty hooks adapter is absent from the tag publication workflow."
-    },
-    {
-      "fixId": "FIX-005",
-      "package": "@a5c-ai/hooks-adapter-antigravity",
-      "surface": ".github/workflows/publish-packages-from-tag.yml",
-      "note": "Same hand-maintained-list omission class as FIX-005: the hooks leaf is missing from the tag publication workflow (it is present in publish.yml). FIX-005's acceptance derives both release workflows from the authoritative inventory."
-    },
-    {
-      "fixId": "FIX-005",
-      "package": "@a5c-ai/hooks-adapter-hermes",
-      "surface": ".github/workflows/publish-packages-from-tag.yml",
-      "note": "Same hand-maintained-list omission class as FIX-005: the hooks leaf is missing from the tag publication workflow (it is present in publish.yml)."
-    },
-    {
       "fixId": "FIX-016",
       "package": "@a5c-ai/kradle",
       "surface": ".github/workflows/publish-packages-from-tag.yml",

@@ -128,9 +128,15 @@ jobs:
           run_bg bash -lc '
             set -euo pipefail
             npm run build --workspace=@a5c-ai/hooks-adapter-core
-            # Adapters are independent (only depend on core) — build in parallel
-            for adapter in claude codex gemini copilot cursor pi oh-my-pi opencode openclaw hermes; do
-              npm run build --workspace=@a5c-ai/hooks-adapter-$adapter &
+            # FIX-005: the hooks leaves are DERIVED from the authoritative
+            # publishable-package inventory, never hand-listed here, so a new
+            # public leaf cannot be silently left unbuilt (that omission is how
+            # @a5c-ai/hooks-adapter-genty went unpublished).
+            # Leaves are independent (they depend only on core) — build in parallel.
+            HOOKS_LEAVES=()
+            while IFS= read -r leaf; do HOOKS_LEAVES+=("$leaf"); done < <(node scripts/release-matrix.cjs --group hooks-leaves --format workspaces)
+            for workspace in "${HOOKS_LEAVES[@]}"; do
+              npm run build --workspace="$workspace" &
             done
             wait
             npm run build --workspace=@a5c-ai/hooks-adapter-cli
@@ -687,6 +693,7 @@ jobs:
       contents: write
     outputs:
       staging_version_sdk: ${{ steps.version.outputs.staging_version_sdk }}
+      hooks_leaves: ${{ steps.release_matrix.outputs.hooks_leaves }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -701,6 +708,18 @@ jobs:
           cache-dependency-path: package-lock.json
           registry-url: https://registry.npmjs.org/
           token: ${{ secrets.NPM_TOKEN }}
+
+      # FIX-005: publication matrices are derived from the authoritative
+      # publishable-package inventory. This is the last job with a git
+      # checkout before the publish jobs (they consume the publish-source
+      # tarball, which excludes .git), so the matrix is resolved here.
+      - name: Resolve derived publication matrices
+        id: release_matrix
+        run: |
+          set -euo pipefail
+          HOOKS_LEAVES="$(node scripts/release-matrix.cjs --group hooks-leaves)"
+          echo "Derived hooks leaf publication matrix: $HOOKS_LEAVES"
+          echo "hooks_leaves=$HOOKS_LEAVES" >> "$GITHUB_OUTPUT"
 
       - name: Restore node_modules cache
         id: nm-cache
@@ -970,38 +989,25 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: ${{ matrix.publish }}
 
+  # FIX-005: the hooks leaf publication matrix is DERIVED from the
+  # authoritative publishable-package inventory
+  # (node scripts/release-matrix.cjs --group hooks-leaves, resolved in
+  # prepare_staging_publish). It used to be hand-maintained here, which is why
+  # the public, documented @a5c-ai/hooks-adapter-genty was never published
+  # (docs/release-incident-2026-08-13.md). Every public leaf now publishes here,
+  # before publish_staging_hooks_cli, which pins hooks leaves exactly.
   publish_staging_hooks_adapters:
     name: Publish Hooks Adapter - ${{ matrix.name }}
-    needs: publish_staging_hooks_and_core
+    needs:
+      - prepare_staging_publish
+      - publish_staging_hooks_and_core
     runs-on: ubuntu-latest-l
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: hooks-adapter-adapter-claude
-            workspace: '@a5c-ai/hooks-adapter-claude'
-          - name: hooks-adapter-adapter-codex
-            workspace: '@a5c-ai/hooks-adapter-codex'
-          - name: hooks-adapter-adapter-gemini
-            workspace: '@a5c-ai/hooks-adapter-gemini'
-          - name: hooks-adapter-adapter-copilot
-            workspace: '@a5c-ai/hooks-adapter-copilot'
-          - name: hooks-adapter-adapter-cursor
-            workspace: '@a5c-ai/hooks-adapter-cursor'
-          - name: hooks-adapter-adapter-pi
-            workspace: '@a5c-ai/hooks-adapter-pi'
-          - name: hooks-adapter-adapter-oh-my-pi
-            workspace: '@a5c-ai/hooks-adapter-oh-my-pi'
-          - name: hooks-adapter-adapter-opencode
-            workspace: '@a5c-ai/hooks-adapter-opencode'
-          - name: hooks-adapter-adapter-openclaw
-            workspace: '@a5c-ai/hooks-adapter-openclaw'
-          - name: hooks-adapter-adapter-hermes
-            workspace: '@a5c-ai/hooks-adapter-hermes'
-          - name: hooks-adapter-adapter-antigravity
-            workspace: '@a5c-ai/hooks-adapter-antigravity'
+        include: ${{ fromJson(needs.prepare_staging_publish.outputs.hooks_leaves) }}
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v4

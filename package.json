@@ -54,6 +54,7 @@
     "check:library-syntax": "node ./scripts/validate-library-js-syntax.cjs",
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
     "inventory:packages": "node ./scripts/lib/publishable-packages.cjs",
+    "release:matrix": "node ./scripts/release-matrix.cjs",
     "verify:release-artifacts": "node ./scripts/verify-release-artifacts.mjs",
     "test:release-tooling": "node --test scripts/__tests__/*.test.mjs",
     "validate:processes": "node ./scripts/validate-process.mjs",

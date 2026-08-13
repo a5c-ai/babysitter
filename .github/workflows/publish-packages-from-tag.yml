@@ -118,21 +118,23 @@ jobs:
             @a5c-ai/comm-adapter \
             @a5c-ai/extensions-adapter
 
+          # FIX-005: the hooks leaves are DERIVED from the authoritative
+          # publishable-package inventory instead of being hand-listed here.
+          # The hand-maintained list omitted @a5c-ai/hooks-adapter-genty
+          # entirely (never published) and @a5c-ai/hooks-adapter-antigravity /
+          # @a5c-ai/hooks-adapter-hermes from this workflow
+          # (docs/release-incident-2026-08-13.md).
+          HOOKS_LEAVES=()
+          while IFS= read -r leaf; do HOOKS_LEAVES+=("$leaf"); done < <(node scripts/release-matrix.cjs --group hooks-leaves --format workspaces)
+          echo "Derived hooks leaves: ${HOOKS_LEAVES[*]}"
+
           run_many "Build leaf adapter packages" \
             @a5c-ai/adapters-codecs \
             @a5c-ai/adapters-harness-mock \
             @a5c-ai/transport-adapter \
             @a5c-ai/config-adapter \
             @a5c-ai/genty-ui \
-            @a5c-ai/hooks-adapter-claude \
-            @a5c-ai/hooks-adapter-codex \
-            @a5c-ai/hooks-adapter-gemini \
-            @a5c-ai/hooks-adapter-copilot \
-            @a5c-ai/hooks-adapter-cursor \
-            @a5c-ai/hooks-adapter-pi \
-            @a5c-ai/hooks-adapter-oh-my-pi \
-            @a5c-ai/hooks-adapter-opencode \
-            @a5c-ai/hooks-adapter-openclaw
+            "${HOOKS_LEAVES[@]}"
 
           run_many "Build packages depending on leaf adapters" \
             @a5c-ai/launch-adapter \
@@ -218,6 +220,16 @@ jobs:
             @a5c-ai/comm-adapter \
             @a5c-ai/extensions-adapter
 
+          # FIX-005: hooks leaves are derived from the authoritative
+          # publishable-package inventory and published in the leaf group
+          # below, i.e. before the aggregate group that publishes the hooks
+          # CLI. The CLI pins hooks leaves at exact versions and
+          # publish-package-from-tag.mjs hard-fails it when any exactly pinned
+          # internal dependency is missing from the registry.
+          HOOKS_LEAVES=()
+          while IFS= read -r leaf; do HOOKS_LEAVES+=("$leaf"); done < <(node scripts/release-matrix.cjs --group hooks-leaves --format workspaces)
+          echo "Derived hooks leaves: ${HOOKS_LEAVES[*]}"
+
           publish_many "Publish leaf adapter packages" \
             @a5c-ai/adapters-codecs \
             @a5c-ai/adapters-harness-mock \
@@ -226,15 +238,7 @@ jobs:
             @a5c-ai/launch-adapter \
             @a5c-ai/tools-adapter \
             @a5c-ai/genty-ui \
-            @a5c-ai/hooks-adapter-claude \
-            @a5c-ai/hooks-adapter-codex \
-            @a5c-ai/hooks-adapter-gemini \
-            @a5c-ai/hooks-adapter-copilot \
-            @a5c-ai/hooks-adapter-cursor \
-            @a5c-ai/hooks-adapter-pi \
-            @a5c-ai/hooks-adapter-oh-my-pi \
-            @a5c-ai/hooks-adapter-opencode \
-            @a5c-ai/hooks-adapter-openclaw
+            "${HOOKS_LEAVES[@]}"
 
           publish_many "Publish aggregate packages" \
             @a5c-ai/adapters-gateway \
