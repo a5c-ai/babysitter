@@ -2,11 +2,18 @@
  * Git Worktree Isolation (GAP-TOOLS-017).
  *
  * Helpers for creating, listing, and removing git worktrees
- * to isolate concurrent agent work. Uses injectable command
+ * to isolate concurrent agent work. Uses an injectable command
  * executor for testability.
+ *
+ * Security (FIX-003): these helpers are published through the
+ * `@a5c-ai/genty-platform/harness` subpath and accept caller-controlled
+ * branch names and filesystem paths. No caller-controlled value is ever
+ * placed in a shell command string — git is invoked directly with a
+ * structured argument vector and `shell: false`, and `--` terminates
+ * option parsing so leading-dash values are treated as operands.
  */
 
-import { execSync as defaultExecSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -25,7 +32,40 @@ export interface WorktreeInfo {
   bare: boolean;
 }
 
-export type ExecSyncFn = (cmd: string, opts?: { cwd?: string }) => Buffer;
+/** Options forwarded to the injected executor. */
+export interface WorktreeExecOptions {
+  cwd?: string;
+}
+
+/**
+ * Injected command executor.
+ *
+ * The contract is deliberately `(file, args)` and never a single command
+ * string: every element of `args` must reach the child process as one literal
+ * argument, with no shell parsing. Implementations MUST NOT enable a shell.
+ */
+export type WorktreeExecFn = (
+  file: string,
+  args: readonly string[],
+  options?: WorktreeExecOptions,
+) => Buffer;
+
+/**
+ * @deprecated Renamed to {@link WorktreeExecFn}. The executor contract changed
+ * from a shell command string to `(file, args)` in FIX-003; a shell-string
+ * executor is no longer accepted.
+ */
+export type ExecSyncFn = WorktreeExecFn;
+
+// ---------------------------------------------------------------------------
+// Default executor
+// ---------------------------------------------------------------------------
+
+/**
+ * Default executor: runs the binary directly, never through a shell.
+ */
+const defaultExec: WorktreeExecFn = (file, args, options) =>
+  execFileSync(file, [...args], { ...options, shell: false });
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -33,26 +73,32 @@ export type ExecSyncFn = (cmd: string, opts?: { cwd?: string }) => Buffer;
 
 /**
  * Create a new git worktree.
+ *
+ * `config.worktreePath` and `config.baseBranch` are passed as literal
+ * arguments after `--`; shell metacharacters and leading dashes are inert.
  */
 export function createWorktree(
   repoDir: string,
   config: WorktreeConfig,
-  exec: ExecSyncFn = defaultExecSync,
+  exec: WorktreeExecFn = defaultExec,
 ): void {
   exec(
-    `git worktree add "${config.worktreePath}" "${config.baseBranch}"`,
+    'git',
+    ['worktree', 'add', '--', config.worktreePath, config.baseBranch],
     { cwd: repoDir },
   );
 }
 
 /**
  * Remove a git worktree.
+ *
+ * `worktreePath` is passed as a literal argument after `--`.
  */
 export function removeWorktree(
   worktreePath: string,
-  exec: ExecSyncFn = defaultExecSync,
+  exec: WorktreeExecFn = defaultExec,
 ): void {
-  exec(`git worktree remove "${worktreePath}"`);
+  exec('git', ['worktree', 'remove', '--', worktreePath]);
 }
 
 /**
@@ -60,9 +106,9 @@ export function removeWorktree(
  */
 export function listWorktrees(
   repoDir: string,
-  exec: ExecSyncFn = defaultExecSync,
+  exec: WorktreeExecFn = defaultExec,
 ): WorktreeInfo[] {
-  const output = exec('git worktree list --porcelain', { cwd: repoDir }).toString('utf8');
+  const output = exec('git', ['worktree', 'list', '--porcelain'], { cwd: repoDir }).toString('utf8');
   return parsePorcelainOutput(output);
 }
 
@@ -71,10 +117,10 @@ export function listWorktrees(
  */
 export function isInsideWorktree(
   dir: string,
-  exec: ExecSyncFn = defaultExecSync,
+  exec: WorktreeExecFn = defaultExec,
 ): boolean {
   try {
-    const gitDir = exec('git rev-parse --git-dir', { cwd: dir }).toString('utf8').trim();
+    const gitDir = exec('git', ['rev-parse', '--git-dir'], { cwd: dir }).toString('utf8').trim();
     // A worktree's .git is a file pointing to the main repo's .git/worktrees/<name>,
     // so the git-dir path will contain '/worktrees/' or '\\worktrees\\'.
     return gitDir.includes('/worktrees/') || gitDir.includes('\\worktrees\\');
