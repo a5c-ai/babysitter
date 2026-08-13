@@ -13,6 +13,7 @@
 
 import { execSync } from 'child_process';
 import * as fs from 'fs';
+import { createRequire } from 'module';
 import * as os from 'os';
 import * as path from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -94,6 +95,66 @@ describe('pi target ships agent_end wiring + proxied hook scripts (#948)', () =>
         entry.files.map((f) => f.path),
       );
       expect(packedPaths).toContain('hooks/babysitter-proxied-stop.js');
+    },
+    120_000,
+  );
+
+  it(
+    'packs Pi bin entry points that resolve the shipped install-shared.cjs (#1581)',
+    () => {
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pi-1581-'));
+      tempDirs.push(tempDir);
+
+      const result = compile({
+        source: UNIFIED_PLUGIN_DIR,
+        target: 'pi',
+        output: path.join(tempDir, 'pi'),
+      });
+
+      expect(
+        result.status,
+        result.diagnostics
+          .filter((d) => d.level === 'error')
+          .map((d) => d.message)
+          .join('\n'),
+      ).not.toBe('error');
+
+      const binPaths = [
+        'bin/cli.cjs',
+        'bin/install.cjs',
+        'bin/uninstall.cjs',
+      ];
+      const sharedPath = path.join(
+        result.outputDir,
+        'bin',
+        'install-shared.cjs',
+      );
+      const packOutput = execSync('npm pack --dry-run --json', {
+        cwd: result.outputDir,
+        encoding: 'utf-8',
+      });
+      const packed = JSON.parse(packOutput) as NpmPackEntry[];
+      const packedPaths = packed.flatMap((entry) =>
+        entry.files.map((file) => file.path),
+      );
+
+      expect(packedPaths).toEqual(
+        expect.arrayContaining([...binPaths, 'bin/install-shared.cjs']),
+      );
+
+      for (const binPath of binPaths) {
+        const entryPath = path.join(result.outputDir, binPath);
+        const entrySource = fs.readFileSync(entryPath, 'utf-8');
+
+        expect(entrySource, binPath).toMatch(
+          /require\(\s*['"]\.\/install-shared\.cjs['"]\s*\)/,
+        );
+        expect(
+          fs.realpathSync(
+            createRequire(entryPath).resolve('./install-shared.cjs'),
+          ),
+        ).toBe(fs.realpathSync(sharedPath));
+      }
     },
     120_000,
   );
