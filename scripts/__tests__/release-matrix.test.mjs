@@ -26,6 +26,7 @@ const HOOKS_BUILD_SCRIPT = 'scripts/hooks-adapter-build.cjs';
 const HOOKS_CLI = '@a5c-ai/hooks-adapter-cli';
 const HOOKS_CORE = '@a5c-ai/hooks-adapter-core';
 const GENTY_LEAF = '@a5c-ai/hooks-adapter-genty';
+const ATLAS = '@a5c-ai/atlas';
 
 // The public hooks harness leaves as of the 2026-08-13 audit baseline. Adding
 // or removing a harness adapter is an intentional act: update this list in the
@@ -169,6 +170,18 @@ test('every public hooks leaf is VERSIONED in lockstep with the rest of the hook
   for (const [dependency, range] of Object.entries(cli.manifest.dependencies)) {
     if (!dependency.startsWith('@a5c-ai/hooks-adapter-')) continue;
     assert.equal(range, version, `${HOOKS_CLI} must pin ${dependency} at the exact version ${version}`);
+  }
+
+  // FIX-006: Atlas is a directly owned dependency of every hooks package that
+  // imports it, and it publishes in the same lockstep release as the family, so
+  // it follows the same exact-pin convention hooks core already uses.
+  const atlasVersion = manifestOf(ATLAS).manifest.version;
+  for (const packageName of [...EXPECTED_HOOKS_LEAVES, HOOKS_CORE, HOOKS_CLI]) {
+    assert.equal(
+      manifestOf(packageName).manifest.dependencies[ATLAS],
+      atlasVersion,
+      `${packageName} must pin ${ATLAS} at the exact version ${atlasVersion} (FIX-006)`,
+    );
   }
 });
 

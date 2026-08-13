@@ -107,18 +107,24 @@ test('FIX-002 regression: the tasks adapter owns its MCP SDK runtime dependency'
   );
 });
 
-test('detects the FIX-006 undeclared Atlas imports in hooks leaves and CLI in the real repository', () => {
+test('FIX-006 regression: every hooks package that imports Atlas owns it directly', () => {
+  // Before FIX-006 this assertion was inverted: the check DETECTED that the
+  // twelve harness leaves and the hooks CLI import @a5c-ai/atlas/catalog while
+  // declaring only @a5c-ai/hooks-adapter-core, so Atlas arrived transitively
+  // through hooks core and any non-hoisted consumer layout broke. The chosen
+  // ownership model is "the importer declares it", so the assertion now guards
+  // the fix. The non-hoisted install proof lives in
+  // scripts/__tests__/hooks-atlas-ownership.test.mjs.
   const inventory = listPublishablePackages(repoRoot);
-  const violations = collectDependencyOwnershipViolations({ repoRoot, packages: inventory });
-  for (const pkg of ['@a5c-ai/hooks-adapter-claude', '@a5c-ai/hooks-adapter-cli']) {
-    const atlasViolations = violations.filter(
-      (violation) => violation.package === pkg && violation.dependency === '@a5c-ai/atlas',
-    );
-    assert.ok(
-      atlasViolations.length > 0,
-      `the dependency-ownership check must detect that ${pkg} imports @a5c-ai/atlas without declaring it (FIX-006)`,
-    );
-  }
+  const hooksPackages = inventory.filter((pkg) => pkg.dir.startsWith('packages/adapters/hooks/'));
+  assert.ok(hooksPackages.length >= 14, 'the hooks family must be present in the inventory');
+
+  const violations = collectDependencyOwnershipViolations({ repoRoot, packages: hooksPackages });
+  assert.deepEqual(
+    violations.map((violation) => `${violation.package}:${violation.dependency}`),
+    [],
+    'no hooks package may import an undeclared runtime dependency (FIX-006)',
+  );
 });
 
 test('reports only well-formed package names (no template-literal or path-alias noise)', () => {

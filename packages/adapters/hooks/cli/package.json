@@ -34,6 +34,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@a5c-ai/atlas": "6.0.0",
     "@a5c-ai/hooks-adapter-claude": "6.0.0",
     "@a5c-ai/hooks-adapter-antigravity": "6.0.0",
     "@a5c-ai/hooks-adapter-codex": "6.0.0",

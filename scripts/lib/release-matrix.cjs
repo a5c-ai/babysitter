@@ -104,6 +104,32 @@ function hooksBuildOrder(repoRoot) {
   ];
 }
 
+/**
+ * Packages whose clean-consumer verification MUST use a non-hoisted install
+ * layout (`npm install --install-strategy=nested`) — FIX-006.
+ *
+ * Every hooks leaf — and the hooks CLI — resolves `@a5c-ai/atlas/catalog` from
+ * its own shipped sources. A hoisted `node_modules` places Atlas at the
+ * consumer root regardless of who declared it, so a hoisted install proves
+ * nothing about ownership: it passed for months while the leaves declared only
+ * `@a5c-ai/hooks-adapter-core`. Under a nested layout each package resolves
+ * only what it declares, so the tarball import fails unless the importer owns
+ * Atlas itself.
+ *
+ * Derived from the hooks-leaves group so a new leaf joins this matrix by
+ * existing, not by being remembered.
+ *
+ * @param {string} repoRoot absolute path to the repository root
+ * @returns {string[]} package names, sorted
+ */
+function nonHoistedVerificationPackages(repoRoot) {
+  const cli = listPublishablePackages(repoRoot).find((entry) => entry.dir === HOOKS_CLI_DIR);
+  if (!cli) {
+    throw new Error(`Expected ${HOOKS_CLI_DIR} to be a public package in the authoritative inventory`);
+  }
+  return [...listGroup(repoRoot, 'hooks-leaves').map((entry) => entry.name), cli.name].sort();
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -135,5 +161,6 @@ module.exports = {
   listGroupIds,
   listGroup,
   hooksBuildOrder,
+  nonHoistedVerificationPackages,
   derivedWorkflowCoverage,
 };
