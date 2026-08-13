@@ -25,9 +25,11 @@ The current repository provides these concrete validation commands and workflow 
 | Breakpoints adapter | `npm run build --workspace=@a5c-ai/tasks-adapter`, `npm run typecheck --workspace=@a5c-ai/tasks-adapter`, `npm run test --workspace=@a5c-ai/tasks-adapter` | Build, typecheck, and test coverage for the current breakpoints workspace |
 | Architecture boundaries | `npm run test:architecture` | Enforces the `@a5c-ai/genty-platform` seam contract and repo package-family dependency rules for the current orchestration, dispatch, support, consumer, and distribution surfaces |
 | Plugin packaging checks | `npm run validate:ci --prefix plugins/<plugin>` for first-class plugins | Packaged-install and integration validation for the listed plugin packages |
-| Metadata checks | `npm run verify:metadata` | Repository/package metadata consistency checks only |
+| Metadata checks | `npm run verify:metadata` | Repository/package metadata consistency, plus (since FIX-011) the authoritative publishable-package inventory, its docs coverage, its coverage by both publication workflows, and **direct runtime dependency ownership** — an undeclared runtime import fails this gate |
+| Release tooling checks | `npm run test:release-tooling` | Inventory, release-matrix, release-version, release-promotion, publish-helper, and packed-artifact verifier regression suites |
+| Packed-artifact checks | `node scripts/verify-release-artifacts.mjs` | Every public package's tarball installs, imports its root and exported subpaths, typechecks, and exposes its declared bins from a clean temporary consumer |
 | Docs quality | `npm run docs:qa` | Markdown/style lint, command-sample validation, repo freshness reporting, evidence freshness, and Docusaurus broken-link/build validation for the staged docs corpus |
-| CI wiring | `.github/workflows/ci.yml`, `.github/workflows/release.yml`, `.github/workflows/staging-publish.yml`, `.github/workflows/docs-site.yml` | The commands above are run in automation where those workflows explicitly invoke them |
+| CI wiring | `.github/workflows/ci.yml`, `.github/workflows/publish.yml` (plus the reusable `release-artifact-verifier.yml`, `live-stack-published.yml`, `release-tags.yml`, and the recovery-only `publish-packages-from-tag.yml`) | The commands above are run in automation where those workflows explicitly invoke them. The former `release.yml` / `staging-publish.yml` pair is retired; `publish.yml` is the single branch publication workflow (see [docs/release-pipeline.md](../release-pipeline.md)) |
 
 ## What The Current Surface Does Not Prove
 
@@ -61,7 +63,7 @@ Architecture-boundary testing now exists as an explicit repository slice.
 | --- | --- | --- | --- |
 | Architecture boundary gate | SDK maintainers | `npm run test:architecture` | Implemented |
 | Interface contract gate | SDK maintainers | Add and wire `npm run test:contracts` | Deferred, not implemented today |
-| CI promotion of architecture gates | CI maintainers | Run `npm run test:architecture` in `.github/workflows/ci.yml`, `release.yml`, and `staging-publish.yml` | Implemented |
+| CI promotion of architecture gates | CI maintainers | Run `npm run test:architecture` in `.github/workflows/ci.yml` (job `test`) and `.github/workflows/publish.yml` (job `validate_core`) | Implemented |
 | Documentation claim promotion | V6 documentation owners | Cite the implemented command and workflow gates where architecture claims depend on them | Implemented for the current architecture gate slice |
 
 Today `npm run test:architecture` proves two current claims only:

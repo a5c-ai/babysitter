@@ -11,6 +11,61 @@ The intended production-current release of the babysitter monorepo is **6.0.3** 
 
 This split-brain state is the concrete manifestation of FIX-001 in the remediation plan: the release tag path can reassign `latest` to the stale version read from checked-out workspace manifests (which are still 6.0.0) instead of the synchronized release version (6.0.3).
 
+## Why `latest` moved backward
+
+`latest` did not fail to advance — it was actively moved back. Nothing in the pipeline
+published a wrong artifact; the 6.0.3 tarballs are on the registry and are fine. What
+went wrong is that **four separate places each answered "what version are we releasing?"
+independently**, and the last one to answer won the dist-tag:
+
+1. `.github/workflows/publish.yml` computed a publish version and synchronized every
+   workspace manifest to it — but only inside a **temporary** publication workspace. The
+   checked-in manifests on `main` stayed at 6.0.0.
+2. `.github/workflows/release-tags.yml` then named the release tag by re-reading the root
+   manifest of the **original** checkout. The tag therefore named a version that was not
+   what had just been published.
+3. That tag triggered `.github/workflows/publish-packages-from-tag.yml`, which
+   re-synchronized manifests only for **staging** tags. A `main` tag was published from
+   the stale checked-in 6.0.0 manifests.
+4. `scripts/publish-package-from-tag.mjs` read each stale workspace manifest, found 6.0.0
+   already on the registry, skipped the publish as a no-op — and then assigned the channel
+   dist-tag to **that** version.
+
+Step 4 is the damage. `npm dist-tag add <pkg>@6.0.0 latest` is a perfectly successful
+command; it succeeds just as readily when it moves a channel backward. Nothing compared
+the version being tagged against the version that had been validated, and nothing checked
+whether the channel was moving forward, so the pipeline reported a green release while
+`latest` silently regressed for 37 of 43 packages. Consumers running
+`npm install @a5c-ai/<pkg>` after the "successful" 6.0.3 release received 6.0.0 —
+including the two artifacts with known runtime defects (`@a5c-ai/tasks-adapter@6.0.0`,
+missing its MCP SDK dependency (FIX-002), and the unusable
+`@a5c-ai/extensions-adapter@6.0.0` tarball (FIX-004)).
+
+Three properties were missing, and all three are now enforced (see the FIX-001 and FIX-010
+status sections below):
+
+- **One version, passed explicitly.** `scripts/lib/release-version.cjs` resolves the
+  release version exactly once; every downstream surface receives and validates it instead
+  of re-deriving it. An unknown branch or unparseable tag is a hard error, never a guess.
+- **Publication cannot write a channel.** Publishing writes only the immutable
+  `candidate-<version>` dist-tag. `scripts/release-promotion.cjs promote` is the single
+  channel mutation, and it refuses to run without evidence that this exact version passed
+  clean-consumer validation.
+- **Channels cannot move backward.** `release-version.cjs assert-channel-tags` runs
+  `preflight` before anything is published and `final` over all 43 packages afterwards, so
+  a regression is caught before it can reach a consumer rather than discovered by audit.
+
+### Recovered versions
+
+Recovery does not repair 6.0.3 in place. Existing versions are immutable and are not
+unpublished or overwritten; the fix is a **new patch version** (6.0.4 or later — verify it
+is unused across all 43 packages against a freshly refreshed snapshot) that is published as
+a candidate, validated at that exact version from a clean consumer, and only then promoted
+to `latest`. That release also carries the first-ever publication of
+`@a5c-ai/hooks-adapter-genty` and the first `X.Y.Z` release of `@a5c-ai/genty-ui`, the two
+packages the snapshot below shows could not be promoted to 6.0.3 at all. The operator
+command sequence is [docs/release-recovery-runbook.md](./release-recovery-runbook.md).
+
 ## Containment decisions (in force as of 2026-08-13)
 
 1. **Production promotion is PAUSED.** No automated or manual promotion of any production channel dist-tag (`latest`) may occur until FIX-001 has a passing regression test and the release owner approves the corrected flow. This pause applies to all publish paths: `.github/workflows/publish.yml`, `.github/workflows/publish-packages-from-tag.yml`, `.github/workflows/release-tags.yml`, and any manual `npm dist-tag` invocation.

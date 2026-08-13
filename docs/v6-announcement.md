@@ -179,10 +179,10 @@ Across all web surfaces (430 files, 78K lines), v6 completes a systematic migrat
 
 ### CI/CD
 
-Thirteen workflow files (2.7K lines) implement a tag-driven release model. The two largest are `release.yml` (803 lines) and `staging-publish.yml` (891 lines).
+The release model moved from manual publishing to a single automated branch pipeline. `release.yml` and `staging-publish.yml` — the two largest workflows at the time this announcement was written — have since been retired and replaced by one branch publication workflow, `publish.yml`.
 
 - New workflows: `deploy-atlas-webui.yml`, `publish-packages-from-tag.yml`, `release-tags.yml`, `generate-plugins.yml`, `sync-external-plugins.yml`.
-- Tag-driven release model replaces manual publishing.
+- One authoritative release version flows through validation, publication, tagging, and channel promotion; `publish-packages-from-tag.yml` is a recovery-only path. See [docs/release-pipeline.md](./release-pipeline.md).
 - Plugin bundles generated in CI, not committed to the repo.
 
 ---

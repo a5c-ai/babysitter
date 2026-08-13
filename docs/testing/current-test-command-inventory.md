@@ -1,12 +1,32 @@
 ---
 title: Current Test Command Inventory
 description: Current package and workflow test command mapping for roadmap slice 0.
-last_updated: 2026-05-07
+last_updated: 2026-08-13
 ---
 
 # Current Test Command Inventory
 
 Status: Current. This inventory implements roadmap slice 0, "Inventory and naming". It maps existing CI-relevant test-like package scripts to package or surface, lane, scope, owner, artifact name, and pipeline placement. Proposed future bundles remain in [Pipeline Integration](./pipeline-integration.md#proposed-command-bundles) and are not treated as current commands here.
+
+**Pipeline placement is reconciled against actual workflow invocation data** (`.github/workflows/ci.yml` and `.github/workflows/publish.yml` read in full, plus the reusable workflows they call: `release-artifact-verifier.yml` and `live-stack-published.yml`). Where a script exists but no workflow invokes it, the placement column says so explicitly rather than naming an aspirational lane — an uninvoked gate is a gap, and the remediation program was caused by exactly that kind of paper coverage.
+
+## Root release and package-integrity gates (added by the remediation program)
+
+These root scripts are the guardrails FIX-011/FIX-012 added. Their placement is stated exactly as the workflows invoke them.
+
+| Root script | Definition | Lane | Scope | Actual pipeline placement |
+| --- | --- | --- | --- | --- |
+| `test:release-tooling` | `node --test scripts/__tests__/*.test.mjs` | No-model | contract | `ci.yml` job `test`, step "Release tooling tests (inventory, dependency ownership, packed-artifact verifier)"; and `release-artifact-verifier.yml` step "Release tooling tests", which `publish.yml` reaches through its `verify_release_artifacts` job. Currently expands to 10 suites: `dependency-ownership`, `hooks-adapter-genty-packed`, `hooks-atlas-ownership`, `publish-package-from-tag`, `publishable-packages`, `release-matrix`, `release-promotion`, `release-version`, `verify-published-release`, `verify-release-artifacts`. |
+| `test:babysitter-metapackage` | `npm test --workspace=@a5c-ai/babysitter` (→ `node --test bin/__tests__/*.test.js`) | No-model | contract | `ci.yml` job `test`, step "Metapackage shim tests (packed exit-code propagation)" (FIX-007). **Not invoked by `publish.yml`.** |
+| `verify:metadata` | `node ./scripts/check-package-metadata.cjs` | No-model | static-check | `ci.yml` job `test`, step "Verify metadata"; `publish.yml` job `lint`, step "Verify metadata". Since FIX-011 this also validates the publishable-package inventory, docs coverage, release-matrix coverage of both publication workflows, and **direct runtime dependency ownership** (FIX-002/FIX-006). |
+| `verify:release-artifacts` | `node ./scripts/verify-release-artifacts.mjs` | No-model release gate | release-gate | Not invoked by name. `publish.yml` reaches the script through `verify_release_artifacts` → `release-artifact-verifier.yml`, which runs `node scripts/verify-release-artifacts.mjs --report-dir artifacts/release-verifier --allow-known-failures` over the full inventory and uploads `release-verifier-reports`. **No publish gate depends on that job today** — it is observability, not a block. |
+| `guard:packages` | `node ./scripts/guard-package-integrity.cjs` | No-model | static-check | **Not invoked by `ci.yml` or `publish.yml`.** It is the local/fast entry point (`release-artifact-verifier.yml` names it only in a comment). Run it locally before pushing release-affecting changes. |
+| `test:binary-renames` | `node ./scripts/check-binary-renames.cjs` | No-model | contract | **Not invoked by `ci.yml` or `publish.yml`**, despite being the gate that proves the FIX-004 compatibility bin points at an emitted path. Local/manual only. |
+| `test:package-renames` | `node ./scripts/check-package-renames.cjs` | No-model | contract | **Not invoked by `ci.yml` or `publish.yml`.** Local/manual only. |
+| — (`scripts/verify-published-release.mjs`) | `node scripts/verify-published-release.mjs --version <v>` | No-model release gate | release-gate | `publish.yml` job `published_consumer_validation` → `live-stack-published.yml` job `published_consumer`, step "Install, import and bin-smoke every public package at the exact version". Artifact `published-consumer-checks`. This is the FIX-010 gate that `promote_release_channel` requires (`if: needs.published_consumer_validation.result == 'success'`). |
+| — (`scripts/release-version.cjs`) | `resolve` / `verify-manifests` / `assert-channel-tags` | No-model release gate | release-gate | `publish.yml` job `prepare_staging_publish` (resolve, verify-manifests, `assert-channel-tags --mode preflight`) and job `assert_release_channel_tags` (final assertion over every public package). Regression-tested by `test:release-tooling`. |
+| — (`scripts/release-promotion.cjs`) | `candidate-tag` / `promote` | No-model release gate | release-gate | `publish.yml` jobs `prepare_staging_publish` and `promote_release_channel`. The only channel dist-tag mutation in the pipeline; it requires `--evidence artifacts/published-consumer/validation.json`. Regression-tested by `test:release-tooling`. |
+| — (`scripts/release-matrix.cjs`) | `--group hooks-leaves [--format workspaces]` | No-model | contract | `publish.yml` job `build_all` (build fan-out) and job `prepare_staging_publish` step "Resolve derived publication matrices", whose output becomes the **dynamic** `publish_staging_hooks_adapters` matrix (12 leaves today, including `@a5c-ai/hooks-adapter-genty` — FIX-005). Regression-tested by `test:release-tooling`. |
 
 ## Naming Rules
 
@@ -21,8 +41,10 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | Metric | Count |
 | --- | ---: |
 | Package manifests scanned | 46 |
-| Current CI-relevant test-like scripts mapped | 121 |
+| Current CI-relevant test-like scripts mapped | 123 |
 | Packages or surfaces with mapped commands | 36 |
+| Root release/package-integrity gates mapped separately | 10 |
+| Public packages in the authoritative inventory (`scripts/lib/publishable-packages.cjs`) | 43 |
 
 ## Current Command Map
 
@@ -34,10 +56,10 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/adapters-codecs` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/adapters-adapters-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/adapters-cli` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/adapters-cli-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/comm-adapter` | `prepublishOnly` | No-model release gate | release-gate | Adapter maintainers | `release-logs/agent-comm-adapter-prepublishonly.log` | publish.yml validate and publish gates |
-| `@a5c-ai/comm-adapter` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/agent-comm-adapter-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/comm-adapter` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/agent-comm-adapter-test.log` | publish.yml validate_mux, via `node scripts/adapters-build.cjs test packages/adapters/core`. **ci.yml builds adapters but never runs this suite.** The `test` script is `vitest run src tests`, so it is also the only lane that executes the FIX-009 PTY suites (`tests/pty.test.ts`, `tests/pty-consumer.packaged.test.ts`); no workflow step is named for PTY. |
 | `@a5c-ai/comm-adapter` | `verify:release` | No-model release gate | release-gate | Adapter maintainers | `release-logs/agent-comm-adapter-verify-release.log` | publish.yml validate and publish gates |
-| `@a5c-ai/adapters-gateway` | `test` | No-model | e2e | Adapter maintainers | `e2e/adapters-gateway-test` | ci.yml test/workspace-coverage; ci.yml gateway-node-engine (Node 22.13.0 + 22); publish.yml validate_mux |
-| `@a5c-ai/adapters-gateway` | `test:node-engine-floor` | No-model | contract | Adapter maintainers | `e2e/adapters-gateway-node-engine-floor` | ci.yml gateway-node-engine (Node 22.13.0 + 22) |
+| `@a5c-ai/adapters-gateway` | `test` | No-model | e2e | Adapter maintainers | `e2e/adapters-gateway-test` | ci.yml `gateway-node-engine` job, matrix `node-version: ['22.13.0', '22']` (the first entry must equal `engines.node` of `packages/adapters/gateway/package.json` — Node >= 22.13.0, FIX-008); publish.yml validate_mux via `node scripts/adapters-build.cjs test packages/adapters/gateway` (Node 22 only, no engine-floor matrix) |
+| `@a5c-ai/adapters-gateway` | `test:node-engine-floor` | No-model | contract | Adapter maintainers | `e2e/adapters-gateway-node-engine-floor` | Not invoked by name. `tests/node-engine-floor.test.ts` is listed explicitly in the package `test` script, so the ci.yml `gateway-node-engine` matrix runs it on both Node versions. The suite asserts one exact floor across four surfaces — `engines.node`, the runtime constant, the package README, and the ci.yml matrix — and proves the floor is at or above every built-in reachable from the package root. Changing the floor in only one of those places fails it. |
 | `@a5c-ai/adapters-harness-mock` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/adapters-harness-mock-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/adapters-observability` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/adapters-observability-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/genty-tui` | `prepublishOnly` | No-model release gate | release-gate | Adapter maintainers | `release-logs/adapters-tui-prepublishonly.log` | publish.yml validate and publish gates |
@@ -54,8 +76,10 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/genty-web-app` | `test:e2e:install` | No-model | e2e | Adapter maintainers | `e2e/adapters-webui-test-e2e-install` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/genty-web-app` | `test:realtime` | No-model | release-gate | Adapter maintainers | `release-logs/adapters-webui-test-realtime.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/genty-web-app` | `verify:release` | No-model release gate | release-gate | Adapter maintainers | `release-logs/adapters-webui-verify-release.log` | publish.yml validate and publish gates |
-| `@a5c-ai/extensions-adapter` | `lint` | No-model | static-check | Adapter maintainers | `test-logs/extensions-adapter-lint.log` | ci.yml test or package-local validation when package is touched |
-| `@a5c-ai/extensions-adapter` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/extensions-adapter-test.log` | ci.yml test or package-local validation when package is touched |
+| `@a5c-ai/extensions-adapter` | `lint` | No-model | static-check | Adapter maintainers | `test-logs/extensions-adapter-lint.log` | Not invoked by ci.yml or publish.yml; package-local validation when package is touched |
+| `@a5c-ai/extensions-adapter` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/extensions-adapter-test.log` | ci.yml test ("adapters-extensions tests"); publish.yml validate_observer_and_compiler ("Test adapters-extensions") |
+| `@a5c-ai/extensions-adapter` | `test:packaged-surface-parity` | No-model release gate | release-gate | Adapter maintainers | `test-logs/extensions-adapter-test-packaged-surface-parity.log` | **Not invoked by ci.yml or publish.yml.** The FIX-004 tarball/compatibility-bin properties are covered in the publication path by the package's own `verify:release`, which `scripts/publish-package-from-tag.mjs` runs immediately before `npm publish`, and by the full-inventory `verify-release-artifacts.mjs` sweep in `release-artifact-verifier.yml`. |
+| `@a5c-ai/extensions-adapter` | `verify:release` | No-model release gate | release-gate | Adapter maintainers | `release-logs/extensions-adapter-verify-release.log` | `scripts/publish-package-from-tag.mjs` runs it per-package immediately before `npm publish` |
 | `@a5c-ai/atlas` | `verify:library-metadata` | No-model | contract | Catalog/Atlas maintainers | `test-logs/atlas-verify-library-metadata.log` | ci.yml packages-sdk/test; publish.yml validate_core |
 | `@a5c-ai/babysitter` | `lint` | No-model | static-check | Owning package maintainer | `test-logs/babysitter-lint.log` | ci.yml test or package-local validation when package is touched |
 | `@a5c-ai/genty-platform` | `lint` | No-model | static-check | Runtime maintainers | `test-lo../platform-lint.log` | ci.yml packages-sdk/test; publish.yml validate_core |
@@ -156,12 +180,31 @@ Current workflows already call many of these commands. Slice 0 does not change w
 
 | Workflow | Current role | Inventory naming target |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | PR/push docs, package, adapter, coverage, SDK, and observer validation | Keep current jobs, then align uploaded logs with `test-logs/`, `coverage/`, `e2e/`, and `docs-qa/` names |
-| `.github/workflows/publish.yml` | Unified branch-aware validation, live-stack preflight, publish, deploy, release-tag, and external-plugin sync ordering | Owns current no-model validation jobs plus the model-backed live-stack scenario/OS matrix before publish jobs |
-| `.github/workflows/publish.yml` docs deploy job | Docs QA and build/deploy | Use `docs-qa/` artifacts and docs check labels inside the unified publish workflow |
+| `.github/workflows/ci.yml` | PR/push docs, package, adapter, coverage, SDK, and observer validation. Jobs: `docs-quality`, `test`, `gateway-node-engine` (the only matrix job: `node-version: ['22.13.0', '22']`), `workspace-coverage`, `observer-dashboard`. It is the **only** workflow that runs `test:release-tooling` under its own name and the **only** one that runs `test:babysitter-metapackage`. | Keep current jobs, then align uploaded logs with `test-logs/`, `coverage/`, `e2e/`, and `docs-qa/` names |
+| `.github/workflows/publish.yml` | Unified branch-aware validation, live-stack preflight, publish, deploy, release-tag, and external-plugin sync ordering. Validation jobs: `lint`, `build_all`, `validate_core`, `validate_mux`, `validate_cloud`, `validate_kradle`, `validate_observer_and_compiler`, `e2e_integration`. `prepare_staging_publish` runs only when all of those report `success`. | Owns current no-model validation jobs plus the model-backed live-stack scenario/OS matrix before publish jobs |
+| `.github/workflows/publish.yml` publication and promotion chain | `prepare_staging_publish` (resolve version, sync + verify manifests, preflight channel assertion, derive the `hooks-leaves` matrix) → dependency-ordered publish jobs → `published_consumer_validation` → `promote_release_channel` (gated on that job succeeding) → `assert_release_channel_tags` → `create_release_tag` | Release-gate lane; evidence artifacts `published-consumer-checks`, `release-promotion-evidence` |
+| `.github/workflows/release-artifact-verifier.yml` (reusable) | Called by `publish.yml` job `verify_release_artifacts`. Runs `test:release-tooling` and the full-inventory `verify-release-artifacts.mjs` sweep with `--allow-known-failures`. **No publish job depends on it**, so it currently reports rather than gates. | Release-gate lane; artifact `release-verifier-reports` |
+| `.github/workflows/live-stack-published.yml` (reusable) | Called by `publish.yml` job `published_consumer_validation` with the exact release version. Runs `verify-published-release.mjs` against npm. Its `documented_install` job is gated on a `channel` input that `publish.yml` does not pass, so the documented-install lanes are skipped pre-promotion. | Release-gate lane; artifact `published-consumer-checks` |
+| `.github/workflows/publish.yml` docs deploy job | Docs QA and build/deploy (`deploy_docs_site`, skipped on `develop`) | Use `docs-qa/` artifacts and docs check labels inside the unified publish workflow |
 | `.github/workflows/generate-plugins.yml` and `.github/workflows/sync-external-plugins.yml` | Generated plugin validation and sync | Keep generated plugin artifacts separate from runtime/model-backed test artifacts |
 
 ## Gaps For Follow-Up Slices
+
+### Scripts that exist but no workflow invokes
+
+Reconciling this inventory against actual workflow invocation data surfaced gates that exist as package scripts but are not wired into `ci.yml` or `publish.yml`. Each is a real coverage gap, not a naming gap:
+
+- `guard:packages` — the composed fast package-integrity gate. Local/manual only.
+- `test:binary-renames` — the check that proves a compatibility bin points at an emitted path (the FIX-004 failure mode). Local/manual only.
+- `test:package-renames` — same class, local/manual only.
+- `test:packaged-surface-parity --workspace=@a5c-ai/extensions-adapter` — the tasks-adapter equivalent is wired into both workflows; the extensions-adapter one is not.
+- `test:babysitter-metapackage` — runs in `ci.yml` only; the publication path does not re-check FIX-007 exit-code propagation against the packed metapackage.
+- `verify_release_artifacts` runs in `publish.yml` but is in no publish job's `needs`, so a packed-artifact regression it detects does not block publication today.
+- The FIX-009 PTY suites run only as part of `@a5c-ai/comm-adapter`'s `test` script inside `publish.yml`'s `validate_mux`. No PR-time lane executes them, and no step is named for PTY, so a PTY regression is invisible until the publish workflow runs.
+
+Wiring these is follow-up work; this document records the current true state rather than the intended one.
+
+### Other gaps
 
 - Current package scripts are mostly no-model package checks; the implemented model-backed live-stack lane is selected by `.github/workflows/publish.yml` and exercised through `test:e2e:live-stack:pipeline`.
 - Artifact naming is partially enforced in `publish.yml` for validation logs and live-stack artifacts; remaining package-local logs should converge on the inventory names when touched.

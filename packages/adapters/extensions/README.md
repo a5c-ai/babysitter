@@ -8,6 +8,16 @@ Cross-harness plugin compiler for converting a unified `plugin.json` source tree
 npm install @a5c-ai/extensions-adapter
 ```
 
+> **Pin an explicit version until the recovery release lands.** As of the
+> 2026-08-13 registry snapshot, `latest` for this package still resolves to
+> `6.0.0`, whose tarball ships only `package.json` and this README — no `dist/`,
+> so neither bin works (FIX-004). The repaired artifact ships in the recovery
+> release; the unversioned command above resolves a working artifact only once
+> `latest` has been promoted to it. See
+> [docs/release-incident-2026-08-13.md](../../../docs/release-incident-2026-08-13.md)
+> and [docs/release-recovery-runbook.md](../../../docs/release-recovery-runbook.md).
+> Delete this note once the promotion has been verified against the registry.
+
 CLI usage:
 
 ```bash

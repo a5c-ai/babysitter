@@ -11,6 +11,16 @@ npm install --save-dev @a5c-ai/tasks-adapter
 npx --yes @a5c-ai/tasks-adapter --help
 ```
 
+> **Pin an explicit version until the recovery release lands.** As of the
+> 2026-08-13 registry snapshot, `latest` for this package still resolves to
+> `6.0.0`, which omits its `@modelcontextprotocol/sdk` runtime dependency and
+> fails on any MCP import (FIX-002). The fix ships in the recovery release; the
+> unversioned commands above resolve a working artifact only once `latest` has
+> been promoted to it. See
+> [docs/release-incident-2026-08-13.md](../../../docs/release-incident-2026-08-13.md)
+> and [docs/release-recovery-runbook.md](../../../docs/release-recovery-runbook.md).
+> Delete this note once the promotion has been verified against the registry.
+
 ## CLI
 
 The published executable is `adapters-tasks`. The supported consumer workflow is either:
