@@ -21,10 +21,15 @@ on:
         description: 'Space-separated package names to verify (empty = full 43-package matrix)'
         required: false
         default: ''
+      # FIX-011: strict by default on every lane. `scripts/known-package-defects.json`
+      # `packedArtifact` is empty and its enforced end-state is empty, so a
+      # permissive default was a latent tolerance that would have silently
+      # absorbed a future entry. Set this to 'true' explicitly to triage a
+      # newly-listed defect; nothing sets it to 'true' by default.
       allow_known_failures:
         description: 'Tolerate packages listed under packedArtifact in scripts/known-package-defects.json'
         required: false
-        default: 'true'
+        default: 'false'
   workflow_call:
     inputs:
       packages:
@@ -34,7 +39,16 @@ on:
       allow_known_failures:
         type: string
         required: false
-        default: 'true'
+        default: 'false'
+      # The tree to verify. Empty means the ref that triggered the caller, which
+      # is correct for the branch release. Tag recovery
+      # (publish-packages-from-tag.yml) must pass the release tag explicitly,
+      # otherwise the matrix would verify the dispatch ref instead of the tree
+      # that is about to be published.
+      ref:
+        type: string
+        required: false
+        default: ''
   pull_request:
     paths:
       - 'scripts/verify-release-artifacts.mjs'
@@ -55,6 +69,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          # Empty resolves to the caller's triggering ref (branch release);
+          # tag recovery passes the release tag.
+          ref: ${{ inputs.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -76,7 +94,7 @@ jobs:
       - name: Verify packed artifacts
         env:
           VERIFIER_PACKAGES: ${{ inputs.packages || github.event.inputs.packages || '' }}
-          VERIFIER_ALLOW_KNOWN_FAILURES: ${{ inputs.allow_known_failures || github.event.inputs.allow_known_failures || 'true' }}
+          VERIFIER_ALLOW_KNOWN_FAILURES: ${{ inputs.allow_known_failures || github.event.inputs.allow_known_failures || 'false' }}
         run: |
           set -euo pipefail
           args=(--report-dir artifacts/release-verifier)

@@ -272,3 +272,121 @@ test('the release path runs the packed-artifact gate with no tolerance left', ()
     'the release path must not tolerate known packed-artifact failures while the allowlist is empty',
   );
 });
+
+// ---------------------------------------------------------------------------
+// FIX-011: the packed-artifact matrix GATES publication on both publish lanes.
+//
+// The regression this pins: `verify_release_artifacts` existed in publish.yml
+// but no job declared it in `needs`, so a failing 43-package matrix reported a
+// red job while the publication chain published anyway; and the tag-recovery
+// workflow — the lane that caused the 2026-08-13 incident — never called the
+// verifier at all.
+// ---------------------------------------------------------------------------
+
+const VERIFIER_WORKFLOW = './.github/workflows/release-artifact-verifier.yml';
+
+function readWorkflowJobs(workflowFile) {
+  const { parse: parseYaml } = require('yaml');
+  const parsed = parseYaml(
+    fs.readFileSync(path.join(repoRoot, '.github', 'workflows', workflowFile), 'utf8'),
+  );
+  return { parsed, jobs: parsed.jobs, triggers: parsed.on ?? parsed[true] };
+}
+
+function needsOf(job) {
+  if (!job || job.needs === undefined) return [];
+  return Array.isArray(job.needs) ? job.needs : [job.needs];
+}
+
+test('FIX-011: the branch release cannot publish unless the packed-artifact matrix passes', () => {
+  const { jobs } = readWorkflowJobs('publish.yml');
+  const prepare = jobs.prepare_staging_publish;
+  assert.ok(prepare, 'publish.yml must have a prepare_staging_publish job');
+  assert.ok(
+    needsOf(prepare).includes('verify_release_artifacts'),
+    'prepare_staging_publish — the first job of the publication chain — must depend on '
+      + 'verify_release_artifacts; without it the matrix reports rather than gates',
+  );
+  assert.match(
+    String(prepare.if),
+    /needs\.verify_release_artifacts\.result == 'success'/,
+    "prepare_staging_publish uses `!cancelled()`, so its `if:` must also require the verifier's success",
+  );
+
+  // Every publication job hangs off prepare_staging_publish, directly or
+  // transitively: gating that one job gates the whole chain.
+  const publishJobs = Object.keys(jobs).filter((name) => name.startsWith('publish_staging_'));
+  assert.ok(publishJobs.length > 0, 'publish.yml must declare publication jobs');
+  const gated = new Set(['prepare_staging_publish']);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [name, job] of Object.entries(jobs)) {
+      if (gated.has(name)) continue;
+      if (needsOf(job).some((dependency) => gated.has(dependency))) {
+        gated.add(name);
+        changed = true;
+      }
+    }
+  }
+  for (const name of publishJobs) {
+    assert.ok(gated.has(name), `${name} must sit downstream of the gated prepare_staging_publish`);
+  }
+});
+
+test('FIX-011: tag recovery runs the strict matrix against the tag before it publishes', () => {
+  const { jobs } = readWorkflowJobs('publish-packages-from-tag.yml');
+  const verify = jobs.verify_release_artifacts;
+  assert.ok(
+    verify,
+    'the recovery workflow must call the release-artifact verifier; recovery is the lane that '
+      + 'published the 2026-08-13 incident',
+  );
+  assert.equal(verify.uses, VERIFIER_WORKFLOW);
+  assert.equal(
+    String(verify.with.allow_known_failures),
+    'false',
+    'recovery must carry no packed-artifact tolerance either',
+  );
+  assert.equal(String(verify.with.packages), '', 'recovery must verify the full matrix, not a subset');
+  assert.match(
+    String(verify.with.ref),
+    /needs\.release_identity\.outputs\.release_tag/,
+    'the matrix must verify the release TAG tree, not whatever ref dispatched the recovery',
+  );
+
+  const publish = jobs.publish_non_plugin_packages;
+  assert.ok(publish, 'the recovery workflow must have a publish_non_plugin_packages job');
+  assert.ok(
+    needsOf(publish).includes('verify_release_artifacts'),
+    'recovery publication must depend on the packed-artifact matrix',
+  );
+});
+
+test('FIX-011: the reusable verifier is strict by default on every lane', () => {
+  const { triggers, jobs } = readWorkflowJobs('release-artifact-verifier.yml');
+  assert.equal(
+    String(triggers.workflow_dispatch.inputs.allow_known_failures.default),
+    'false',
+    'manual dispatch must default to the strict matrix',
+  );
+  assert.equal(
+    String(triggers.workflow_call.inputs.allow_known_failures.default),
+    'false',
+    'a caller that omits the input must get the strict matrix',
+  );
+
+  const steps = jobs['verify-artifacts'].steps;
+  const verifyStep = steps.find((step) => step.name === 'Verify packed artifacts');
+  assert.ok(verifyStep, 'the verifier workflow must have a "Verify packed artifacts" step');
+  assert.doesNotMatch(
+    String(verifyStep.env.VERIFIER_ALLOW_KNOWN_FAILURES),
+    /'true'/,
+    "the pull_request lane's fallback default must be strict too",
+  );
+
+  // The tag-recovery lane needs to verify a ref other than the trigger's.
+  assert.ok(triggers.workflow_call.inputs.ref, 'callers must be able to name the tree to verify');
+  const checkout = steps.find((step) => String(step.uses || '').startsWith('actions/checkout'));
+  assert.match(String(checkout.with.ref), /inputs\.ref/, 'the checkout must honour the requested ref');
+});

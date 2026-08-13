@@ -210,6 +210,17 @@ jobs:
           set -euo pipefail
           npm run verify:release --workspace=@a5c-ai/comm-adapter 2>&1 | tee artifacts/test-logs/agent-comm-adapter-release.log
 
+      # FIX-009: the adapters-core (@a5c-ai/comm-adapter) suite is the ONLY lane
+      # that executes the PTY contract — tests/pty.test.ts and the packaged
+      # consumer test tests/pty-consumer.packaged.test.ts. It previously ran in
+      # publish.yml's validate_mux alone, so a PTY regression stayed invisible
+      # until release time. This is the PR-time copy; the step is named for PTY
+      # so the coverage is greppable from the workflow.
+      - name: adapters-core PTY contract (@a5c-ai/comm-adapter suite)
+        run: |
+          set -euo pipefail
+          node scripts/adapters-build.cjs test packages/adapters/core 2>&1 | tee artifacts/test-logs/adapters-core-pty-contract.log
+
       - name: Build realtime flow surfaces
         run: |
           set -euo pipefail

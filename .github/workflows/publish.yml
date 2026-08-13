@@ -204,8 +204,10 @@ jobs:
   # `allow_known_failures: 'false'` — the `packedArtifact` section of
   # scripts/known-package-defects.json is empty and its enforced end-state is
   # empty, so the release path carries no tolerance: any packed-artifact
-  # failure marks the release run failed. Promotion-blocking ordering is
-  # wired by FIX-001/FIX-010.
+  # failure marks the release run failed. `prepare_staging_publish` declares
+  # this job in its `needs`, so the matrix GATES publication rather than merely
+  # reporting on it: nothing is published when a packed artifact fails.
+  # Promotion-blocking ordering is wired by FIX-001/FIX-010.
   verify_release_artifacts:
     needs: [build_all, lint]
     name: Verify Release Artifacts
@@ -265,6 +267,16 @@ jobs:
         run: |
           set -euo pipefail
           npm run test:architecture 2>&1 | tee artifacts/core-logs/architecture.log
+
+      # FIX-007: the packed-metapackage exit-code gate. `@a5c-ai/babysitter` is
+      # the package end users install, and this suite packs it, installs the
+      # exact tarball into a clean consumer and asserts the shim propagates the
+      # SDK CLI's exit code. It ran in ci.yml only, so the release path — the
+      # one that actually publishes the metapackage — never proved the shim.
+      - name: Metapackage shim tests (packed exit-code propagation)
+        run: |
+          set -euo pipefail
+          npm run test:babysitter-metapackage 2>&1 | tee artifacts/core-logs/babysitter-metapackage-tests.log
 
       - name: SDK tests
         run: |
@@ -682,6 +694,7 @@ jobs:
       && needs.validate_cloud.result == 'success'
       && needs.validate_kradle.result == 'success'
       && needs.validate_observer_and_compiler.result == 'success'
+      && needs.verify_release_artifacts.result == 'success'
     name: Prepare Publish
     needs:
       - lint
@@ -692,6 +705,11 @@ jobs:
       - validate_cloud
       - validate_kradle
       - validate_observer_and_compiler
+      # FIX-011: the strict 43-package packed-artifact matrix GATES publication.
+      # `prepare_staging_publish` is the first job of the publication chain, so
+      # a failing packed artifact stops every downstream publish job before any
+      # immutable version reaches npm.
+      - verify_release_artifacts
     runs-on: ubuntu-latest-l
     permissions:
       contents: write

@@ -12,13 +12,16 @@
 #   1. derives version + channel from the tag name (one exact version);
 #   2. refuses to run for a tag the publish workflow already published from —
 #      no second, conflicting publication or dist-tag mutation;
-#   3. synchronizes EVERY manifest to that version, on every channel, and
+#   3. gates publication on the strict 43-package packed-artifact matrix
+#      (.github/workflows/release-artifact-verifier.yml, allow_known_failures
+#      'false') run against the release TAG's tree (FIX-011);
+#   4. synchronizes EVERY manifest to that version, on every channel, and
 #      verifies the synchronization before publishing;
-#   4. publishes in dependency order derived from the package graph, under the
+#   5. publishes in dependency order derived from the package graph, under the
 #      non-production candidate dist-tag (FIX-010);
-#   5. validates that exact version from npm through the published-consumer
+#   6. validates that exact version from npm through the published-consumer
 #      workflow (.github/workflows/live-stack-published.yml);
-#   6. only then moves the channel tag, and asserts the channel tag of every
+#   7. only then moves the channel tag, and asserts the channel tag of every
 #      public package equals that version.
 name: Publish Packages From Tag
 
@@ -107,9 +110,28 @@ jobs:
           echo "${RELEASE_TAG} was not created by the branch release workflow; publishing from the tag."
           echo "should_publish=true" >> "$GITHUB_OUTPUT"
 
+  # FIX-011: recovery publication runs the SAME strict packed-artifact gate as
+  # the branch release. Recovery is the lane that produced the 2026-08-13
+  # incident, so it must not be the lane that can push an unverified tarball to
+  # npm. The full 43-package matrix runs against the release tag's tree, with no
+  # tolerance for known defects, and `publish_non_plugin_packages` needs it.
+  verify_release_artifacts:
+    name: Verify Release Artifacts
+    needs: release_identity
+    if: needs.release_identity.outputs.should_publish == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-artifact-verifier.yml
+    with:
+      packages: ''
+      allow_known_failures: 'false'
+      ref: ${{ needs.release_identity.outputs.release_tag }}
+
   publish_non_plugin_packages:
     name: Publish Packages From Tag
-    needs: release_identity
+    needs:
+      - release_identity
+      - verify_release_artifacts
     if: needs.release_identity.outputs.should_publish == 'true'
     runs-on: ubuntu-latest-l
     env:
