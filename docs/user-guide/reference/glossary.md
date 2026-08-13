@@ -100,7 +100,7 @@ A unit in Babysitter's **Adapters** runtime that lets the same orchestration cor
 
 The host-side companion CLI (`adapters`, package `@a5c-ai/adapters-cli`) for running and managing AI coding harnesses directly from your shell - install, run, models, sessions, config, and auth. It runs a harness from *outside*, whereas the in-session `/babysitter:*` commands drive an orchestration run from *inside* a harness.
 
-**Binary:** `adapters` · **Requires:** Node.js >=20.9.0
+**Binary:** `adapters` · **Requires:** Node.js >=22.13.0
 
 **See Also:** [Adapters CLI Reference](./adapters-cli.md)
 

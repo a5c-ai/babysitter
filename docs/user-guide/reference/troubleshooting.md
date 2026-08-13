@@ -370,10 +370,10 @@ echo $PATH
 
 **Symptoms:**
 ```
-Error: @a5c-ai/adapters-cli requires Node.js >=20.9.0
+Error: @a5c-ai/adapters-gateway requires Node.js >=22.13.0, but this process is running Node.js v20.19.0.
 ```
 
-The `adapters` CLI pins a higher Node floor (>=20.9.0) than the rest of the toolchain (>=20.0.0), so a Node that works for `babysitter` may still be too old for `adapters`.
+The `adapters` CLI pins a higher Node floor (>=22.13.0) than the rest of the toolchain (>=20.0.0), so a Node that works for `babysitter` may still be too old for `adapters`. The floor comes from `@a5c-ai/adapters-gateway`, which the CLI root loads: it uses the built-in `node:sqlite` module, unflagged only from Node.js 22.13.0.
 
 **Diagnosis:**
 ```bash

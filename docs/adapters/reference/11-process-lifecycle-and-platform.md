@@ -970,6 +970,7 @@ Iterating over a `RunHandle` after the run has completed yields all buffered eve
 | Requirement | Minimum Version | Rationale |
 |---|---|---|
 | Node.js | 20.9.0 | Stable Web Streams API, `structuredClone()`, improved `AbortSignal` support |
+| Node.js (`@a5c-ai/adapters-cli`, `@a5c-ai/adapters`) | 22.13.0 | Their roots load `@a5c-ai/adapters-gateway`, which uses the built-in `node:sqlite` module (unflagged only from 22.13.0) |
 | npm | 10.0.0 | Workspace protocol support for monorepo package structure |
 | TypeScript (development) | 5.3 | `satisfies` operator, const type parameters |
 
@@ -980,6 +981,16 @@ The `engines` field in `package.json`:
   "engines": {
     "node": ">=20.9.0",
     "npm": ">=10.0.0"
+  }
+}
+```
+
+Packages whose root import graph reaches the gateway declare the higher floor instead:
+
+```json
+{
+  "engines": {
+    "node": ">=22.13.0"
   }
 }
 ```

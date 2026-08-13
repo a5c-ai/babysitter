@@ -12,7 +12,7 @@ npm install @a5c-ai/adapters
 
 The `adapters` CLI is available via this package (`npx adapters --help`).
 
-Requires Node.js >= 20.9.0. ESM-first.
+Requires Node.js >= 22.13.0. ESM-first. (This meta-package re-exports `@a5c-ai/adapters-cli`, whose root loads `@a5c-ai/adapters-gateway` and its built-in `node:sqlite` module — unflagged only from Node.js 22.13.0.)
 
 ## Usage
 

@@ -9,7 +9,7 @@ last_updated: 2026-06-23
 
 # Adapters CLI Reference
 
-**Package:** `@a5c-ai/adapters-cli` · **Binary:** `adapters` · **Version:** 6.0.0 · **Node:** >=20.9.0
+**Package:** `@a5c-ai/adapters-cli` · **Binary:** `adapters` · **Version:** 6.0.0 · **Node:** >=22.13.0
 
 ## On this page
 
@@ -50,7 +50,7 @@ That installs the CLI globally and runs the Claude harness with a single prompt.
 
 ## Technical Reference
 
-The `adapters` binary is published as `@a5c-ai/adapters-cli` and requires Node.js **>=20.9.0** (the rest of the Babysitter toolchain runs on Node >=20.0.0; the Adapters CLI pins a slightly higher floor). Install it globally:
+The `adapters` binary is published as `@a5c-ai/adapters-cli` and requires Node.js **>=22.13.0** (the rest of the Babysitter toolchain runs on Node >=20.0.0; the Adapters CLI pins a higher floor because its root loads `@a5c-ai/adapters-gateway`, which uses the built-in `node:sqlite` module — unflagged only from Node.js 22.13.0). Install it globally:
 
 ```bash
 npm install -g @a5c-ai/adapters-cli

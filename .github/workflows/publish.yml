@@ -200,9 +200,10 @@ jobs:
 
   # FIX-011: full packed-artifact release gate. Runs the complete
   # build/pack/install matrix for all 43 public packages and uploads the
-  # per-package reports and tarball inventories as CI artifacts. Known,
-  # tracked artifact defects (scripts/known-package-defects.json,
-  # packedArtifact section) are tolerated until their fixes land; any other
+  # per-package reports and tarball inventories as CI artifacts.
+  # `allow_known_failures: 'false'` — the `packedArtifact` section of
+  # scripts/known-package-defects.json is empty and its enforced end-state is
+  # empty, so the release path carries no tolerance: any packed-artifact
   # failure marks the release run failed. Promotion-blocking ordering is
   # wired by FIX-001/FIX-010.
   verify_release_artifacts:
@@ -213,7 +214,7 @@ jobs:
     uses: ./.github/workflows/release-artifact-verifier.yml
     with:
       packages: ''
-      allow_known_failures: 'true'
+      allow_known_failures: 'false'
 
   validate_core:
     needs: [build_all, lint]

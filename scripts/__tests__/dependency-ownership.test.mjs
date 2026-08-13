@@ -127,6 +127,48 @@ test('FIX-006 regression: every hooks package that imports Atlas owns it directl
   );
 });
 
+test('FIX-013/FIX-014/FIX-015 regression: the last tolerated ownership gaps are declared, not allowlisted', () => {
+  // These three were surfaced by the FIX-011 ownership audit itself and were
+  // the only remaining `dependencyOwnership` tolerances. Each is now declared
+  // by the importing package under the contract its code actually expresses:
+  //
+  //   FIX-013 @a5c-ai/adapters-cli    -> react, ink        (hard dependencies:
+  //           src/commands/tui.ts awaits both unguarded once the TUI loads)
+  //   FIX-014 @a5c-ai/comm-adapter    -> @opentelemetry/api (hard dependency:
+  //           src/run-handle-impl.ts imports `context`/`trace` statically; it
+  //           previously arrived only through @a5c-ai/adapters-observability's
+  //           hoisting — the exact FIX-002 defect class)
+  //   FIX-015 @a5c-ai/genty-core,
+  //           @a5c-ai/genty-platform  -> @vscode/ripgrep    (optional: the
+  //           require is guarded and falls back to `rg` on PATH)
+  const expectations = [
+    { dir: ['packages', 'adapters', 'cli'], field: 'dependencies', deps: ['react', 'ink'] },
+    { dir: ['packages', 'adapters', 'core'], field: 'dependencies', deps: ['@opentelemetry/api'] },
+    { dir: ['packages', 'genty', 'core'], field: 'optionalDependencies', deps: ['@vscode/ripgrep'] },
+    { dir: ['packages', 'genty', 'platform'], field: 'optionalDependencies', deps: ['@vscode/ripgrep'] },
+  ];
+  for (const expectation of expectations) {
+    const manifestPath = path.join(repoRoot, ...expectation.dir, 'package.json');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    for (const dependency of expectation.deps) {
+      assert.ok(
+        typeof manifest[expectation.field]?.[dependency] === 'string',
+        `${manifest.name} must declare ${dependency} in ${expectation.field}`,
+      );
+    }
+  }
+
+  const knownDefects = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, 'scripts', 'known-package-defects.json'), 'utf8'),
+  );
+  assert.deepEqual(
+    knownDefects.dependencyOwnership,
+    [],
+    'the dependencyOwnership allowlist has reached its enforced end-state (empty) and must stay there: ' +
+      'a new undeclared runtime import is a defect to fix, not an entry to add',
+  );
+});
+
 test('reports only well-formed package names (no template-literal or path-alias noise)', () => {
   const inventory = listPublishablePackages(repoRoot);
   const violations = collectDependencyOwnershipViolations({ repoRoot, packages: inventory });

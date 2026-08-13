@@ -25,7 +25,7 @@
     "sdk"
   ],
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=22.13.0"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",

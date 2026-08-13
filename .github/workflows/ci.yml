@@ -291,6 +291,13 @@ jobs:
   # suite (including tests/node-engine-floor.test.ts, which re-derives the floor
   # from the built root import graph and pins README + this matrix to it) on the
   # exact declared minimum as well as on the current 22.x line.
+  #
+  # The same floor is inherited by every package whose published entrypoints
+  # statically evaluate the gateway — today @a5c-ai/adapters-cli and
+  # @a5c-ai/adapters. That set is derived from the sources (not a hand list) by
+  # scripts/__tests__/gateway-engine-floor.test.mjs, and the CLI's runtime proof
+  # (packages/adapters/cli/tests/node-engine-floor.test.ts) runs in this matrix
+  # too so the floor is exercised on the exact declared minimum.
   gateway-node-engine:
     name: Gateway Node engine floor
     runs-on: ubuntu-latest
@@ -328,6 +335,21 @@ jobs:
         run: |
           set -euo pipefail
           npm run test --workspace=@a5c-ai/adapters-gateway
+
+      - name: Build adapters CLI
+        run: |
+          set -euo pipefail
+          npm run build:adapters:non-realtime
+
+      - name: Adapters CLI Node engine floor (on Node ${{ matrix.node-version }})
+        run: |
+          set -euo pipefail
+          npx vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/node-engine-floor.test.ts
+
+      - name: Gateway-inherited engine floors (manifests and docs)
+        run: |
+          set -euo pipefail
+          node --test scripts/__tests__/gateway-engine-floor.test.mjs
 
   workspace-coverage:
     name: Workspace Coverage

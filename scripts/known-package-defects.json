@@ -1,37 +1,6 @@
 {
   "description": "Tracked known package defects tolerated by the fast PR gate (guard:packages / verify:metadata) so the FIX-011 guardrails could land while the underlying fixes are still in flight. Every entry MUST reference the remediation-program FIX id that will remove it. The enforced end-state of every list in this file is EMPTY: when a fix lands, the corresponding entries stop reproducing and the gate fails with a 'stale allowlist entry' error until they are deleted. Removing an entry is a one-line deletion. See issues_to_Fix.md and docs/release-incident-2026-08-13.md.",
-  "dependencyOwnership": [
-    {
-      "fixId": "FIX-013",
-      "package": "@a5c-ai/adapters-cli",
-      "dependency": "react",
-      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/commands/tui.ts dynamically imports react without declaring it in any dependency field."
-    },
-    {
-      "fixId": "FIX-013",
-      "package": "@a5c-ai/adapters-cli",
-      "dependency": "ink",
-      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/commands/tui.ts dynamically imports ink without declaring it in any dependency field."
-    },
-    {
-      "fixId": "FIX-014",
-      "package": "@a5c-ai/comm-adapter",
-      "dependency": "@opentelemetry/api",
-      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/run-handle-impl.ts imports @opentelemetry/api at runtime (context, trace) without declaring it; it currently arrives transitively via @a5c-ai/adapters-observability."
-    },
-    {
-      "fixId": "FIX-015",
-      "package": "@a5c-ai/genty-core",
-      "dependency": "@vscode/ripgrep",
-      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/agenticTools/shared/process.ts requires @vscode/ripgrep without declaring it (guarded, but the optional contract is undeclared)."
-    },
-    {
-      "fixId": "FIX-015",
-      "package": "@a5c-ai/genty-platform",
-      "dependency": "@vscode/ripgrep",
-      "note": "NEW finding discovered by the FIX-011 dependency-ownership audit (2026-08-13): src/harness/agenticTools/shared/process.ts requires @vscode/ripgrep without declaring it (guarded, but the optional contract is undeclared)."
-    }
-  ],
+  "dependencyOwnership": [],
   "releaseMatrixCoverage": [],
   "packedArtifact": [],
   "installScripts": []

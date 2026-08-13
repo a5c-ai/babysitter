@@ -206,3 +206,31 @@ test('verifier --list prints the 43-package inventory without verifying anything
   assert.ok(inventory.some((entry) => entry.name === '@a5c-ai/tasks-adapter'));
   assert.ok(inventory.some((entry) => entry.name === '@a5c-ai/hooks-adapter-genty'));
 });
+
+test('the release path runs the packed-artifact gate with no tolerance left', () => {
+  // scripts/known-package-defects.json `packedArtifact` is empty and its
+  // enforced end-state is empty, so `allow_known_failures: 'true'` in the
+  // release path was a latent tolerance: it would have silently absorbed any
+  // future entry. The release call now demands a fully clean matrix.
+  const { parse: parseYaml } = require('yaml');
+  const knownDefects = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, 'scripts', 'known-package-defects.json'), 'utf8'),
+  );
+  assert.deepEqual(
+    knownDefects.packedArtifact,
+    [],
+    'the packedArtifact allowlist must stay at its enforced end-state (empty)',
+  );
+
+  const publishWorkflow = parseYaml(
+    fs.readFileSync(path.join(repoRoot, '.github', 'workflows', 'publish.yml'), 'utf8'),
+  );
+  const job = publishWorkflow.jobs.verify_release_artifacts;
+  assert.ok(job, 'publish.yml must call the release-artifact verifier');
+  assert.equal(job.uses, './.github/workflows/release-artifact-verifier.yml');
+  assert.equal(
+    String(job.with.allow_known_failures),
+    'false',
+    'the release path must not tolerate known packed-artifact failures while the allowlist is empty',
+  );
+});

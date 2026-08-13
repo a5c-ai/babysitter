@@ -19,7 +19,7 @@ The CLI and SDK are co-equal surfaces that share the same core layer and behave 
 | npm package | `@a5c-ai/adapters-cli` |
 | Binary name | `adapters` |
 | Language | TypeScript, strict mode |
-| Runtime | Node.js 20.9.0 or later |
+| Runtime | Node.js 22.13.0 or later (the CLI root loads the gateway's built-in `node:sqlite`) |
 | License | MIT |
 
 The binary is installed as part of `@a5c-ai/adapters` (the convenience meta-package) or standalone via `@a5c-ai/adapters-cli`. It depends on `@a5c-ai/comm-adapter` and `@a5c-ai/adapters-codecs`.
