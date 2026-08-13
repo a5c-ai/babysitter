@@ -26,7 +26,7 @@ const { spawnSync } = require('child_process');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 let shared;
-try { shared = require('./install-shared'); } catch {}
+try { shared = require('./install-shared${ext}'); } catch {}
 
 function printUsage() {
   console.error([
@@ -121,12 +121,14 @@ export function generateInstallScript(
   _manifest: A5cPluginManifest,
   targetProfile: TargetProfile
 ): string {
+  const ext = getExt(targetProfile);
+
   if (targetProfile.componentSupport?.agents === 'native' && targetProfile.packageMetadata?.installLifecycle === 'plugin-scripts') {
     return `#!/usr/bin/env node
 'use strict';
 
 const path = require('path');
-const shared = require('./install-shared');
+const shared = require('./install-shared${ext}');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 
@@ -168,7 +170,7 @@ main();
 'use strict';
 
 const path = require('path');
-const shared = require('./install-shared');
+const shared = require('./install-shared${ext}');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 
@@ -233,13 +235,15 @@ export function generateUninstallScript(
   _manifest: A5cPluginManifest,
   targetProfile: TargetProfile
 ): string {
+  const ext = getExt(targetProfile);
+
   if (targetProfile.componentSupport?.agents === 'native' && targetProfile.packageMetadata?.installLifecycle === 'plugin-scripts') {
     return `#!/usr/bin/env node
 'use strict';
 
 const path = require('path');
 const fs = require('fs');
-const shared = require('./install-shared');
+const shared = require('./install-shared${ext}');
 
 function main() {
   const pluginRoot = shared.getHomePluginRoot();
@@ -288,7 +292,7 @@ main();
 
 const fs = require('fs');
 const path = require('path');
-const shared = require('./install-shared');
+const shared = require('./install-shared${ext}');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 
