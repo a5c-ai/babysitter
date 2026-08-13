@@ -26,13 +26,13 @@ attributes:
   trustLevel: trust-level:vendor-doc
   sourceUrl: https://api-docs.deepseek.com/quick_start/pricing
   sourcePathOrUrl: https://api-docs.deepseek.com/quick_start/pricing
-  locator: "model details table - deepseek-v4-flash and deepseek-v4-pro"
-  capturedAt: "2026-05-26T00:00:00Z"
-  observedAt: "2026-05-26T00:00:00Z"
+  locator: "model details table - deepseek-v4-flash, deepseek-v4-pro, DeepSeek-V4-Flash-0731, and DeepSeek-V4-Pro-0813"
+  capturedAt: "2026-08-13T00:00:00Z"
+  observedAt: "2026-08-13T00:00:00Z"
   observedBy: a5c-ai-catalog
   freshnessWindowDays: 30
   reviewOwner: "@a5c-ai/catalog"
-  reviewedAt: "2026-05-26T00:00:00Z"
+  reviewedAt: "2026-08-13T00:00:00Z"
 edges:
   has_trust_level:
     - trust-level:vendor-doc
