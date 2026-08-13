@@ -27,4 +27,17 @@ try {
   throw error;
 }
 
-void createBabysitterCli().run();
+// Mirror the SDK executable (packages/babysitter-sdk/src/cli/main.ts): the CLI
+// resolves the process exit code, so it must be awaited and assigned, and a
+// rejection must surface as one handled error with exit code 1. Discarding the
+// promise (`void run()`) silently turned every nonzero CLI result into a
+// success and crashed on rejection with an unhandled-rejection dump.
+createBabysitterCli()
+  .run()
+  .then((code) => {
+    process.exitCode = code;
+  })
+  .catch((error) => {
+    console.error("The @a5c-ai/babysitter-sdk CLI failed:", error);
+    process.exitCode = 1;
+  });

@@ -94,6 +94,16 @@ jobs:
           set -euo pipefail
           npm run test:release-tooling 2>&1 | tee artifacts/test-logs/release-tooling.log
 
+      # FIX-007: packed-metapackage exit-code gate — packs @a5c-ai/babysitter,
+      # installs the exact tarball into a clean temporary consumer with a
+      # deterministic SDK CLI stub, and asserts the shim propagates the CLI's
+      # resolved exit code (0 and 7), reports a rejection as one handled error
+      # with exit 1, and still prints missing-SDK repair guidance.
+      - name: Metapackage shim tests (packed exit-code propagation)
+        run: |
+          set -euo pipefail
+          npm run test:babysitter-metapackage 2>&1 | tee artifacts/test-logs/babysitter-metapackage-tests.log
+
       - name: Architecture boundary gate
         run: |
           set -euo pipefail
