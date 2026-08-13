@@ -17,7 +17,12 @@ function buildConfig(): AdapterConfig {
     pluginRootEnvVars: ["CODEX_PLUGIN_ROOT", "AGENT_PLUGIN_ROOT"],
     sessionIdEnvVars: ["CODEX_THREAD_ID", "CODEX_SESSION_ID", "AGENT_SESSION_ID"],
     pluginRootVar: "${CODEX_PLUGIN_ROOT}",
-    interactiveToolName: "AskUserQuestion tool",
+    // Codex has no agent-callable question tool. Its only structured-input
+    // mechanism is MCP elicitation, which is invoked by an MCP server rather
+    // than by the model, so interactive asks are plain-text turn endings.
+    // Naming a tool the harness lacks made agents classify themselves
+    // non-interactive and auto-approve breakpoints. See issue #1758.
+    interactiveToolName: "",
     sessionEnvVars: "CODEX_THREAD_ID/CODEX_SESSION_ID and AGENT_SESSION_ID",
     hasIntentFidelityChecks: true,
     hasNonNegotiables: true,

@@ -451,6 +451,40 @@ describe('interactive vs non-interactive', () => {
     expect(output).toContain('AskUserQuestion');
   });
 
+  // Regression: issue #1758. Codex has no agent-callable question tool, so
+  // naming one let agents read "no AskUserQuestion tool" as "I am
+  // non-interactive" and auto-approve breakpoints.
+  it('codex context never names the Claude Code question tool', () => {
+    const ctx = createPromptContextFromCatalog('codex');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).not.toContain('AskUserQuestion');
+  });
+
+  it('codex context renders the non-interactive header without a tool clause', () => {
+    const ctx = createPromptContextFromCatalog('codex');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).toContain('Non-interactive mode (running with -p flag)');
+  });
+
+  // Regression: issue #1758, second defect. breakpoint-handling.md interpolated
+  // interactiveToolName raw, so harnesses that leave it empty rendered
+  // "if the  itself throws an error" with a doubled space and dangling article.
+  it('harnesses without a named question tool render a well-formed error clause', () => {
+    for (const harness of ['codex', 'opencode', 'genty'] as const) {
+      const output = composeBabysitSkillPrompt(createPromptContextFromCatalog(harness));
+      expect(output, `${harness} should not render an empty tool name`)
+        .not.toContain('if the  itself throws an error');
+      expect(output, `${harness} should fall back to a generic noun`)
+        .toContain('if the question tool itself throws an error');
+    }
+  });
+
+  it('claude-code error clause still names its actual tool', () => {
+    const ctx = createPromptContextFromCatalog('claude-code');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).toContain('if the AskUserQuestion tool itself throws an error');
+  });
+
   it('interactive=undefined shows both interactive and non-interactive sections', () => {
     const ctx = createPromptContextFromCatalog('claude-code', { interactive: undefined });
     const output = composeBabysitSkillPrompt(ctx);
