@@ -29,9 +29,9 @@ id: claim:model-version-model-deepseek-v4-pro-current-version-name
 attributes:
   subjectId: model:deepseek-v4-pro@current
   attribute: providerModelIds
-  value: "deepseekApi=deepseek-v4-pro;deepseekVersion=DeepSeek-V4-Pro"
+  value: "deepseekApi=deepseek-v4-pro;deepseekVersion=DeepSeek-V4-Pro-0813"
   subjectKind: ModelVersion
-  statement: model:deepseek-v4-pro@current uses DeepSeek-V4-Pro as the vendor version name for the deepseek-v4-pro API model.
+  statement: model:deepseek-v4-pro@current uses DeepSeek-V4-Pro-0813 as the vendor version name for the deepseek-v4-pro API model.
   confidence: high
   provenanceKind: observation
   evidenceStrength: strong
@@ -39,10 +39,10 @@ attributes:
   evidenceSourceIds:
     - evidence:deepseek-v4-release
     - evidence:deepseek-v4-pricing
-  claimedAt: '2026-05-26T00:00:00Z'
+  claimedAt: '2026-08-13T00:00:00Z'
   claimedBy: a5c-ai-catalog
   claimKind: assertion
-  note: Evidence binding for the issue #431 exact model ID/version pair.
+  note: Evidence binding refreshed during the 2026-08-13 provider sweep for the exact model ID/version pair.
 edges:
   backed_by_evidence:
     - evidence:deepseek-v4-release
