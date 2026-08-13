@@ -81,16 +81,29 @@ test('accepts optionalDependencies and peerDependencies as ownership', () => {
   }
 });
 
-test('detects the FIX-002 tasks adapter MCP SDK omission in the real repository', () => {
+test('FIX-002 regression: the tasks adapter owns its MCP SDK runtime dependency', () => {
+  // Before FIX-002 this assertion was inverted: the check DETECTED that
+  // @a5c-ai/tasks-adapter imports @modelcontextprotocol/sdk (src/mcp/server.ts,
+  // src/mcp/http-transport.ts, re-exported from the package root) without
+  // declaring it, so the published tarball was unusable in a clean consumer.
+  // The ownership must never regress, so the assertion now guards the fix.
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, 'packages', 'adapters', 'tasks', 'package.json'), 'utf8'),
+  );
+  assert.ok(
+    typeof manifest.dependencies?.['@modelcontextprotocol/sdk'] === 'string',
+    '@a5c-ai/tasks-adapter must declare @modelcontextprotocol/sdk in its direct dependencies (FIX-002)',
+  );
+
   const inventory = listPublishablePackages(repoRoot);
   const violations = collectDependencyOwnershipViolations({ repoRoot, packages: inventory });
   const tasksViolations = violations.filter(
-    (violation) =>
-      violation.package === '@a5c-ai/tasks-adapter' && violation.dependency === '@modelcontextprotocol/sdk',
+    (violation) => violation.package === '@a5c-ai/tasks-adapter',
   );
-  assert.ok(
-    tasksViolations.length > 0,
-    'the dependency-ownership check must detect that @a5c-ai/tasks-adapter imports @modelcontextprotocol/sdk without declaring it (FIX-002)',
+  assert.deepEqual(
+    tasksViolations.map((violation) => violation.dependency),
+    [],
+    '@a5c-ai/tasks-adapter must not import any undeclared runtime dependency (FIX-002)',
   );
 });
 

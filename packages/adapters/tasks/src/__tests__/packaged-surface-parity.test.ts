@@ -16,18 +16,19 @@
  *   - the tarball contains ONLY the documented published surface
  *     (package.json, README.md, dist/, responder/).
  *
- * While @modelcontextprotocol/sdk is missing from the manifest (FIX-002),
- * this test FAILS: the clean consumer cannot import the root or ./mcp
- * subpath (ERR_MODULE_NOT_FOUND). That failure is the point — it models the
- * broken published 6.0.0 artifact. CI runs this gate with
- * `--allow-known-failures`, which tolerates ONLY the failure tracked under
- * `packedArtifact` in scripts/known-package-defects.json (FIX-002) and, once
- * FIX-002 lands, hard-fails as stale until that allowlist entry is deleted.
+ * History: while @modelcontextprotocol/sdk was missing from the manifest
+ * (FIX-002) this test FAILED — the clean consumer could not import the root or
+ * ./mcp subpath (ERR_MODULE_NOT_FOUND), exactly modelling the broken published
+ * 6.0.0 artifact. FIX-002 declared the SDK as a direct runtime dependency and
+ * deleted the `packedArtifact` allowlist entry, so the gate now runs STRICTLY
+ * in CI: any clean-consumer packaging failure fails the build. The
+ * `--allow-known-failures` mode below is retained only for packages still
+ * tracked in scripts/known-package-defects.json; for this package it tolerates
+ * nothing and hard-fails on a reintroduced (stale) allowlist entry.
  *
- * Invocation (this exact command is wired in package.json):
+ * Invocation (this exact command is wired in package.json, and is what CI and
+ * the publish.yml prepublication gate run):
  *   npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
- * CI/prepublication invocation:
- *   npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter -- --allow-known-failures
  *
  * Never publishes and never mutates the npm registry; installing the packed
  * tarball may fetch declared dependencies read-only.

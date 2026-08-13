@@ -357,13 +357,14 @@ jobs:
       # FIX-012: tasks-adapter packaged-surface parity prepublication gate —
       # packs the exact tarball, installs it into a clean temporary consumer,
       # imports the root plus every exports subpath, and typechecks a consumer.
-      # --allow-known-failures tolerates ONLY the tracked FIX-002 defect
-      # (scripts/known-package-defects.json, packedArtifact) and hard-fails as
-      # stale once FIX-002 lands until that entry is deleted.
+      # FIX-002 landed (@modelcontextprotocol/sdk is now a declared direct
+      # runtime dependency) and its scripts/known-package-defects.json
+      # packedArtifact entry was deleted, so this gate runs strictly: any
+      # clean-consumer packaging failure blocks publication.
       - name: tasks-adapter packaged-surface parity
         run: |
           set -euo pipefail
-          npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter -- --allow-known-failures 2>&1 | tee artifacts/adapter-logs/tasks-adapter-packaged-surface-parity.log
+          npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter 2>&1 | tee artifacts/adapter-logs/tasks-adapter-packaged-surface-parity.log
 
       - name: Validate transport-adapter runtime owner
         run: |

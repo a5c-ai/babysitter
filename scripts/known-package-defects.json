@@ -2,12 +2,6 @@
   "description": "Tracked known package defects tolerated by the fast PR gate (guard:packages / verify:metadata) so the FIX-011 guardrails could land while the underlying fixes are still in flight. Every entry MUST reference the remediation-program FIX id that will remove it. The enforced end-state of every list in this file is EMPTY: when a fix lands, the corresponding entries stop reproducing and the gate fails with a 'stale allowlist entry' error until they are deleted. Removing an entry is a one-line deletion. See issues_to_Fix.md and docs/release-incident-2026-08-13.md.",
   "dependencyOwnership": [
     {
-      "fixId": "FIX-002",
-      "package": "@a5c-ai/tasks-adapter",
-      "dependency": "@modelcontextprotocol/sdk",
-      "note": "Tasks adapter imports the MCP SDK at runtime (src/mcp/server.ts, src/mcp/http-transport.ts) without declaring it; the published 6.0.0 artifact is broken for clean consumers."
-    },
-    {
       "fixId": "FIX-006",
       "package": "@a5c-ai/hooks-adapter-antigravity",
       "dependency": "@a5c-ai/atlas",
@@ -155,11 +149,6 @@
     }
   ],
   "packedArtifact": [
-    {
-      "fixId": "FIX-002",
-      "package": "@a5c-ai/tasks-adapter",
-      "note": "Clean-consumer import of the root and ./mcp subpaths fails until @modelcontextprotocol/sdk is a declared direct dependency."
-    },
     {
       "fixId": "FIX-004",
       "package": "@a5c-ai/extensions-adapter",
