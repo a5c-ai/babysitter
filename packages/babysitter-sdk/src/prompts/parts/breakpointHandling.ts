@@ -7,5 +7,14 @@ import type { PromptContext } from '../types';
  * and posting examples.
  */
 export function renderBreakpointHandling(ctx: PromptContext): string {
-  return renderTemplate(resolveTemplatePath('breakpoint-handling.md'), ctx);
+  // Harnesses without a named question tool leave interactiveToolName empty.
+  // Interpolating it raw produced "if the  itself throws an error"; fall back
+  // to a generic noun so the sentence reads correctly on every harness.
+  // Mirrors the guard in parts/interview.ts.
+  const augmentedCtx = {
+    ...ctx,
+    interactiveToolName: ctx.interactiveToolName || 'question tool',
+  };
+
+  return renderTemplate(resolveTemplatePath('breakpoint-handling.md'), augmentedCtx);
 }

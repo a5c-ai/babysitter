@@ -17,7 +17,9 @@ function buildConfig(): AdapterConfig {
     pluginRootEnvVars: ["GEMINI_EXTENSION_PATH", "BABYSITTER_EXTENSION_PATH"],
     sessionIdEnvVars: ["GEMINI_SESSION_ID", "AGENT_SESSION_ID"],
     pluginRootVar: "${GEMINI_EXTENSION_PATH}",
-    interactiveToolName: "AskUserQuestion tool",
+    // No agent-callable question tool; verified against the installed CLI.
+    // Interactive asks are plain-text turn endings. See issue #1758.
+    interactiveToolName: "",
     sessionEnvVars: "GEMINI_SESSION_ID and AGENT_SESSION_ID",
     hasIntentFidelityChecks: false,
     hasNonNegotiables: false,

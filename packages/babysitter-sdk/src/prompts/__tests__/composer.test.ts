@@ -445,10 +445,60 @@ describe('interactive vs non-interactive', () => {
     expect(output).toContain('no AskUserQuestion tool');
   });
 
-  it('PI context uses its own interactiveToolName', () => {
+  // Was 'PI context uses its own interactiveToolName', asserting it contained
+  // 'AskUserQuestion'. Pi does not expose such a tool: its only occurrence of
+  // that string is a hardcoded list commented "Claude Code 2.x tool names",
+  // used for Anthropic API mapping, and pi-coding-agent's own dist/cli.js has
+  // none. The old assertion passed while encoding the premise this fixes.
+  it('PI context does not name the Claude Code question tool', () => {
     const ctx = createPromptContextFromCatalog('pi');
     const output = composeBabysitSkillPrompt(ctx);
-    expect(output).toContain('AskUserQuestion');
+    expect(output).not.toContain('AskUserQuestion');
+  });
+
+  // Regression: issue #1758. Codex has no agent-callable question tool, so
+  // naming one let agents read "no AskUserQuestion tool" as "I am
+  // non-interactive" and auto-approve breakpoints.
+  it('codex context never names the Claude Code question tool', () => {
+    const ctx = createPromptContextFromCatalog('codex');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).not.toContain('AskUserQuestion');
+  });
+
+  it('codex context renders the non-interactive header without a tool clause', () => {
+    const ctx = createPromptContextFromCatalog('codex');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).toContain('Non-interactive mode (running with -p flag)');
+  });
+
+  // Regression: issue #1758, second defect. breakpoint-handling.md interpolated
+  // interactiveToolName raw, so harnesses that leave it empty rendered
+  // "if the  itself throws an error" with a doubled space and dangling article.
+  // Verified against each installed CLI: none exposes an agent-callable
+  // question tool. openclaw / antigravity-cli / omp are deliberately absent —
+  // not installed locally, so not verified and not changed.
+  it.each(['codex', 'cursor', 'copilot-cli', 'gemini-cli', 'pi'])(
+    '%s never names the Claude Code question tool',
+    (harness) => {
+      const output = composeBabysitSkillPrompt(createPromptContextFromCatalog(harness));
+      expect(output).not.toContain('AskUserQuestion');
+    },
+  );
+
+  it('harnesses without a named question tool render a well-formed error clause', () => {
+    for (const harness of ['codex', 'cursor', 'copilot-cli', 'gemini-cli', 'pi', 'opencode', 'genty'] as const) {
+      const output = composeBabysitSkillPrompt(createPromptContextFromCatalog(harness));
+      expect(output, `${harness} should not render an empty tool name`)
+        .not.toContain('if the  itself throws an error');
+      expect(output, `${harness} should fall back to a generic noun`)
+        .toContain('if the question tool itself throws an error');
+    }
+  });
+
+  it('claude-code error clause still names its actual tool', () => {
+    const ctx = createPromptContextFromCatalog('claude-code');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).toContain('if the AskUserQuestion tool itself throws an error');
   });
 
   it('interactive=undefined shows both interactive and non-interactive sections', () => {
