@@ -285,6 +285,50 @@ jobs:
             packages/adapters/webui/.tmp/playwright-test-results
           if-no-files-found: ignore
 
+  # FIX-008: @a5c-ai/adapters-gateway loads the built-in node:sqlite module from
+  # its package root, and node:sqlite is only importable without
+  # --experimental-sqlite from Node 22.13.0 onward. This job runs the gateway
+  # suite (including tests/node-engine-floor.test.ts, which re-derives the floor
+  # from the built root import graph and pins README + this matrix to it) on the
+  # exact declared minimum as well as on the current 22.x line.
+  gateway-node-engine:
+    name: Gateway Node engine floor
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # The first entry MUST equal the engines.node floor of
+        # packages/adapters/gateway/package.json.
+        node-version: ['22.13.0', '22']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --legacy-peer-deps
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build adapters gateway
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/adapters-gateway
+
+      - name: Gateway tests (SQLite-backed, on Node ${{ matrix.node-version }})
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/adapters-gateway
+
   workspace-coverage:
     name: Workspace Coverage
     runs-on: ubuntu-latest

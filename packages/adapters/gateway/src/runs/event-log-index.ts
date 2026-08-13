@@ -1,11 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { createRequire } from 'node:module';
 
+import { DatabaseSync } from '../runtime/node-sqlite.js';
 import type { RunEntry } from './types.js';
-
-const require = createRequire(import.meta.url);
-const { DatabaseSync } = require('node:sqlite') as { DatabaseSync: new (path: string) => any };
 
 export interface IndexedRunEvent {
   seq: number;

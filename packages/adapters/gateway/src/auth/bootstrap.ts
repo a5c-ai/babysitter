@@ -1,10 +1,6 @@
-import { createRequire } from 'node:module';
-
+import { DatabaseSync } from '../runtime/node-sqlite.js';
 import { hashSecret, verifySecretHash } from './hashing.js';
 import type { TokenIssueResult, TokenStore } from './tokens.js';
-
-const require = createRequire(import.meta.url);
-const { DatabaseSync } = require('node:sqlite') as { DatabaseSync: new (path: string) => any };
 
 export type BootstrapAuthMode = 'manual' | 'local-dev' | 'bootstrap-admin';
 

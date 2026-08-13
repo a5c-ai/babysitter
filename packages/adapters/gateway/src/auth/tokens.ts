@@ -2,12 +2,9 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
-import { createRequire } from 'node:module';
 
+import { DatabaseSync } from '../runtime/node-sqlite.js';
 import { hashToken, verifyTokenHash } from './hashing.js';
-
-const require = createRequire(import.meta.url);
-const { DatabaseSync } = require('node:sqlite') as { DatabaseSync: new (path: string) => any };
 
 export interface TokenRecord {
   id: string;

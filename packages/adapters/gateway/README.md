@@ -3,6 +3,17 @@
 `@a5c-ai/adapters-gateway` is the package scaffold for remote and browser-facing
 adapters surfaces.
 
+## Runtime requirements
+
+Requires **Node.js >= 22.13.0**. The gateway stores tokens, bootstrap auth state
+and the run event-log index in the built-in `node:sqlite` module, and the package
+root loads it eagerly. Node.js added `node:sqlite` in v22.5.0 behind
+`--experimental-sqlite` and only unflagged it in
+[v22.13.0](https://nodejs.org/docs/latest-v22.x/api/sqlite.html), so importing
+this package on anything older fails immediately. Older runtimes are rejected by
+`engines.node` at install time and by an explicit engine diagnostic on import;
+there is no SQLite-less mode.
+
 Current scope:
 
 - `GatewayConfig` and default configuration helpers

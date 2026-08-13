@@ -36,7 +36,8 @@ Status: Current. This inventory implements roadmap slice 0, "Inventory and namin
 | `@a5c-ai/comm-adapter` | `prepublishOnly` | No-model release gate | release-gate | Adapter maintainers | `release-logs/agent-comm-adapter-prepublishonly.log` | publish.yml validate and publish gates |
 | `@a5c-ai/comm-adapter` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/agent-comm-adapter-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/comm-adapter` | `verify:release` | No-model release gate | release-gate | Adapter maintainers | `release-logs/agent-comm-adapter-verify-release.log` | publish.yml validate and publish gates |
-| `@a5c-ai/adapters-gateway` | `test` | No-model | e2e | Adapter maintainers | `e2e/adapters-gateway-test` | ci.yml test/workspace-coverage; publish.yml validate_mux |
+| `@a5c-ai/adapters-gateway` | `test` | No-model | e2e | Adapter maintainers | `e2e/adapters-gateway-test` | ci.yml test/workspace-coverage; ci.yml gateway-node-engine (Node 22.13.0 + 22); publish.yml validate_mux |
+| `@a5c-ai/adapters-gateway` | `test:node-engine-floor` | No-model | contract | Adapter maintainers | `e2e/adapters-gateway-node-engine-floor` | ci.yml gateway-node-engine (Node 22.13.0 + 22) |
 | `@a5c-ai/adapters-harness-mock` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/adapters-harness-mock-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/adapters-observability` | `test` | No-model | unit-or-integration | Adapter maintainers | `test-logs/adapters-observability-test.log` | ci.yml test/workspace-coverage; publish.yml validate_mux |
 | `@a5c-ai/genty-tui` | `prepublishOnly` | No-model release gate | release-gate | Adapter maintainers | `release-logs/adapters-tui-prepublishonly.log` | publish.yml validate and publish gates |
