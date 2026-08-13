@@ -49,6 +49,11 @@ exercised.
 | Failure behaviour | No channel tag is touched. The candidate stays installable as `<pkg>@<version>` and under `candidate-<version>` for diagnosis. |
 | Recovery | `workflow_dispatch` on `live-stack-published.yml` takes the same exact-version input; `.github/workflows/publish-packages-from-tag.yml` follows the identical candidate → validate → promote sequence. |
 
+The operator-facing command sequence for a recovery release — version selection, local pre-flight
+gates, candidate publication, published-consumer validation, promotion, full-inventory channel
+assertion, and the separately approved `npm deprecate` notices — is
+[docs/release-recovery-runbook.md](./release-recovery-runbook.md).
+
 ## Workflow Overview
 - `.github/workflows/release.yml` owns production npm releases from `main`, guarded by the `release-main` concurrency group so only one run executes at a time.
 - `.github/workflows/staging-publish.yml` owns prerelease npm publishing from `staging`, guarded by the `staging-publish` concurrency group.

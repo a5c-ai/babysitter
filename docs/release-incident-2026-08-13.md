@@ -126,7 +126,12 @@ longer a manual procedure: it is the only path the workflows implement.
 - A failed validation therefore leaves the candidate versions installable by exact version and
   under their candidate tag for diagnosis, with the channel still on the previous release.
 
-Registry recovery itself (Wave 5) is unchanged and still requires release-owner approval.
+Registry recovery itself (Wave 5) is unchanged and still requires release-owner approval. The
+exact command sequence the release owner must run — candidate publication, published-consumer
+validation of the exact version, channel promotion, full-inventory channel assertion, and the
+separately approved `npm deprecate` notices for the known-broken 6.0.0 tasks/extensions artifacts —
+is documented in [docs/release-recovery-runbook.md](./release-recovery-runbook.md), together with
+the Wave 5 local candidate rehearsal evidence.
 
 ## Containment exit criteria status
 
