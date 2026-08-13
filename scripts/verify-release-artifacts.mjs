@@ -72,6 +72,7 @@ const { nonHoistedVerificationPackages } = require('./lib/release-matrix.cjs');
 const {
   binEntries,
   binSmokeArgs,
+  bundlerOnlyRuntime,
   collectSurfaceTargets,
   consumerSurfaceProblem,
   normalizeTarget,
@@ -400,6 +401,21 @@ function verifyPackage({ pkg, options, tempRoot, installScriptAllowlist, nonHois
       return {
         skipped: true,
         reason: 'package declares no importable root or exported runtime subpath',
+      };
+    }
+    const bundlerOnly = bundlerOnlyRuntime(manifest);
+    if (bundlerOnly) {
+      // The package declares a bundler runtime in its own manifest (e.g. the
+      // standard `"react-native"` resolution field). Bare Node cannot evaluate
+      // such an entrypoint no matter how the package is published, so a Node
+      // import proves nothing about it. `surfaces`, `install` and `typecheck`
+      // still run, and dependency ownership is audited separately.
+      return {
+        skipped: true,
+        reason:
+          `package declares a bundler runtime via the "${bundlerOnly.field}" manifest field ` +
+          `(-> ${bundlerOnly.target}); bare Node cannot evaluate it`,
+        declaredRuntimeField: bundlerOnly.field,
       };
     }
     const scriptLines = [

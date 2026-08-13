@@ -173,6 +173,32 @@ function runtimeImportSpecs(manifest) {
 }
 
 /**
+ * A package whose declared runtime is a bundler, not Node.
+ *
+ * React Native component libraries statically import `react-native`, whose own
+ * entrypoint is Flow source (`import typeof * as ... from './index.js.flow'`).
+ * No Node runtime can evaluate that, and no change to the *publishing* package
+ * can make it evaluable: such a package is resolved by Metro (or webpack/Vite),
+ * which is exactly what the standard top-level `"react-native"` resolution
+ * field declares. Asking "does bare Node import this?" is the same category of
+ * false positive as synthesizing a root import for a bin-only metapackage — the
+ * gate asserting something the package never promised.
+ *
+ * The declaration must be IN THE MANIFEST, per package: there is no name-keyed
+ * allowlist, and every other step (surfaces, install with the declared
+ * install-strategy, consumer typecheck, bins, verify:release) still runs. The
+ * "does this package own its direct runtime imports" question that the Node
+ * import incidentally answered is covered for all 43 packages by the
+ * dependency-ownership audit in scripts/lib/dependency-ownership.cjs.
+ *
+ * @returns {{field: string, target: string}|null}
+ */
+function bundlerOnlyRuntime(manifest) {
+  const target = normalizeTarget(manifest['react-native']);
+  return target ? { field: 'react-native', target } : null;
+}
+
+/**
  * "Nothing to check" is NOT a pass. Omitting the synthesized root import for
  * bin-only packages must not let a package with no importable root AND no bin
  * sail through both release gates having verified nothing at all. Such a
@@ -198,6 +224,7 @@ function safeReportName(packageName) {
 module.exports = {
   BIN_SMOKE_ARGS,
   binEntries,
+  bundlerOnlyRuntime,
   binSmokeArgs,
   collectExportTargets,
   collectSurfaceTargets,

@@ -184,6 +184,44 @@ test('a package with no importable root AND no bin fails loudly instead of passi
   );
 });
 
+test('a package that declares a bundler runtime skips ONLY the Node import step', { timeout: VERIFY_TIMEOUT_MS }, async () => {
+  // React Native component libraries statically import react-native, whose own
+  // entrypoint is Flow source. No publishing change makes that evaluable by
+  // bare Node, so requiring a Node root import is the same false positive class
+  // as synthesizing one for a bin-only metapackage. The escape is a per-package
+  // declaration IN THE MANIFEST (the standard "react-native" resolution field),
+  // never a name-keyed allowlist, and it must narrow exactly one step.
+  const reportDir = makeReportDir('bundler-runtime');
+  const { code } = await runVerifier('bundler-runtime', reportDir);
+  assert.equal(code, 0);
+  const report = readReport(reportDir, 'fix011-bundler-runtime');
+  assert.equal(report.status, 'passed');
+
+  const imports = report.steps.imports;
+  assert.equal(imports.status, 'skipped');
+  assert.match(imports.reason, /react-native/);
+  assert.match(imports.reason, /bare Node cannot evaluate it/);
+
+  // Everything else still had to run and pass.
+  for (const stepName of ['pack', 'surfaces', 'install', 'typecheck']) {
+    const step = report.steps[stepName];
+    assert.ok(step, `the ${stepName} step must still run for a bundler-runtime package`);
+    assert.equal(step.status, 'passed', `${stepName} must still be enforced`);
+  }
+});
+
+test('the bundler-runtime escape requires the manifest declaration', { timeout: VERIFY_TIMEOUT_MS }, async () => {
+  // Same fixture without the declaration: the verifier must fail on the Node
+  // import rather than guessing that the package is bundler-only.
+  const { bundlerOnlyRuntime } = require(path.join(repoRoot, 'scripts', 'lib', 'package-surface.cjs'));
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(fixturesRoot, 'bundler-runtime', 'package.json'), 'utf8'),
+  );
+  assert.deepEqual(bundlerOnlyRuntime(manifest), { field: 'react-native', target: 'index.js' });
+  const { ['react-native']: _declared, ...withoutDeclaration } = manifest;
+  assert.equal(bundlerOnlyRuntime(withoutDeclaration), null);
+});
+
 test('verifier writes a machine-readable summary covering every verified package', { timeout: VERIFY_TIMEOUT_MS }, async () => {
   const reportDir = makeReportDir('summary');
   await runVerifier('good-package', reportDir);

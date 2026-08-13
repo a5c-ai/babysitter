@@ -1,0 +1,21 @@
+{
+  "name": "fix011-bundler-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: a package whose declared runtime is a bundler (standard \"react-native\" resolution field). Its entrypoint is deliberately not evaluable by bare Node, so the verifier must record the imports step as skipped WITH the declaration named — and must still enforce every other step.",
+  "license": "MIT",
+  "main": "index.js",
+  "react-native": "./index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ]
+}
