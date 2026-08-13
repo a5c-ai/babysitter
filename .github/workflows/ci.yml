@@ -94,6 +94,13 @@ jobs:
           set -euo pipefail
           npm run test:release-tooling 2>&1 | tee artifacts/test-logs/release-tooling.log
 
+      # FIX-004: proves every declared bin target (including the extensions
+      # compatibility bin) resolves to a tsconfig-derived emitted path.
+      - name: Binary rename guardrail
+        run: |
+          set -euo pipefail
+          npm run test:binary-renames 2>&1 | tee artifacts/test-logs/binary-renames.log
+
       # FIX-007: packed-metapackage exit-code gate — packs @a5c-ai/babysitter,
       # installs the exact tarball into a clean temporary consumer with a
       # deterministic SDK CLI stub, and asserts the shim propagates the CLI's
