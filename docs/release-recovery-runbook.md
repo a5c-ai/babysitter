@@ -301,6 +301,40 @@ gh workflow run release-tags.yml \
 provenance in the annotated tag body
 (`node scripts/release-version.cjs tag-message ...`).
 
+### 3.8 Pin the newly published Genty hooks leaf in the hooks CLI — REQUIRED FOLLOW-UP
+
+`@a5c-ai/hooks-adapter-genty` has never existed on npm, so
+`packages/adapters/hooks/cli/package.json` deliberately does **not** pin it: an
+exact pin on a version that is not in the registry fails both clean-consumer
+verification and the exact-internal-dependency registry gate in
+`scripts/publish-package-from-tag.mjs`. The deferral is recorded in the manifest
+itself under the `//deferred-dependency` key.
+
+The moment 3.4 publishes the Genty leaf, that constraint disappears and the pin
+must be added — otherwise `@a5c-ai/hooks-adapter-cli` keeps resolving the Genty
+adapter only through workspace hoisting, which is the FIX-006 defect class:
+
+```bash
+# AFTER @a5c-ai/hooks-adapter-genty@$RELEASE_VERSION exists on the registry:
+npm view "@a5c-ai/hooks-adapter-genty@$RELEASE_VERSION" version   # must succeed
+
+# 1. Add the exact pin next to the other eleven leaves and delete the
+#    "//deferred-dependency" key from packages/adapters/hooks/cli/package.json.
+# 2. Regenerate the lockfile from the repository root (Node 22 toolchain):
+npm install --package-lock-only --ignore-scripts
+
+# 3. Re-run the gates that now cover it:
+node --test scripts/__tests__/publish-package-from-tag.test.mjs
+node --test scripts/__tests__/release-matrix.test.mjs
+node --test scripts/__tests__/dependency-ownership.test.mjs
+node scripts/verify-release-artifacts.mjs --package @a5c-ai/hooks-adapter-cli
+```
+
+Once the pin is in place, the publish helper's exact-internal-dependency
+registry check covers the Genty leaf for the CLI on every subsequent release,
+which is what FIX-005's remaining two acceptance criteria ask for. Record the
+commit that adds the pin in the release issue.
+
 ## 4. Deprecation notices — SEPARATE, EXPLICIT APPROVAL
 
 These are **not** part of the recovery release. Each requires its own

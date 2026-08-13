@@ -314,3 +314,65 @@ test('the FIX-005 release-matrix gaps are no longer tolerated by the allowlist',
   const fix005 = (known.releaseMatrixCoverage || []).filter((entry) => entry.fixId === 'FIX-005');
   assert.deepEqual(fix005, [], 'FIX-005 release-matrix allowlist entries must be deleted once the fix lands');
 });
+
+test('FIX-005: the hooks CLI Genty pin is either present or explicitly deferred and tracked', () => {
+  // `@a5c-ai/hooks-adapter-genty` has never been published, so pinning it in
+  // the hooks CLI today would fail clean-consumer verification and the
+  // exact-internal-dependency registry gate. The deferral is legitimate, but it
+  // must never become invisible: while the pin is absent, the manifest has to
+  // carry the tracked note and the runbook has to carry the step that adds the
+  // pin as part of the recovery release. Once the pin lands, both requirements
+  // fall away and this test switches to guarding the pin itself.
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, 'packages/adapters/hooks/cli/package.json'), 'utf8'),
+  );
+  const pin = manifest.dependencies?.['@a5c-ai/hooks-adapter-genty'];
+
+  if (typeof pin === 'string') {
+    assert.equal(
+      pin,
+      manifest.version,
+      'the Genty pin must be the exact lockstep version, like every other hooks leaf',
+    );
+    assert.equal(
+      manifest['//deferred-dependency'],
+      undefined,
+      'delete the //deferred-dependency note once the pin is in place',
+    );
+    return;
+  }
+
+  const note = manifest['//deferred-dependency'];
+  assert.equal(
+    typeof note,
+    'string',
+    'while @a5c-ai/hooks-adapter-genty is unpinned, the manifest must record why (FIX-005)',
+  );
+  assert.match(note, /FIX-005/, 'the deferral note must reference its FIX id');
+  assert.match(
+    note,
+    /release-recovery-runbook\.md/,
+    'the deferral note must point at the runbook step that closes it',
+  );
+
+  const runbook = readRepoFile('docs/release-recovery-runbook.md');
+  assert.match(
+    runbook,
+    /### 3\.8 Pin the newly published Genty hooks leaf in the hooks CLI/,
+    'the release-owner checklist must carry the post-first-publish pin step',
+  );
+  assert.match(
+    runbook,
+    /@a5c-ai\/hooks-adapter-genty@\$RELEASE_VERSION/,
+    'the runbook step must verify the exact published version before adding the pin',
+  );
+
+  // The loader really does exclude genty today — that is what makes the
+  // deferral correct rather than a missing dependency.
+  const loader = readRepoFile('packages/adapters/hooks/cli/src/cli/adapter-loader.ts');
+  assert.match(
+    loader,
+    /excludes\s*=\s*new Set\(\[[^\]]*'genty'/,
+    'the deferral is only valid while the CLI genuinely does not load the Genty adapter',
+  );
+});

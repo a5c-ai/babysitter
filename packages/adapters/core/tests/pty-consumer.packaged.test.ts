@@ -62,6 +62,22 @@ function repairNodePtyPermissions(nodePtyDir: string): void {
   }
 }
 
+/**
+ * Explicit, opt-in escape hatch for hosts that genuinely cannot allocate a PTY.
+ *
+ * The real-PTY scenario is the single assertion that proves the compiled ESM
+ * artifact reaches the PTY branch, so it must never skip itself: a soft skip
+ * inside the gate is exactly the silent fallback FIX-009 removed. Without
+ * `PTY_TESTS_ALLOW_SKIP=1` an unopenable PTY FAILS the suite. No CI workflow
+ * sets it — the only invocation of this suite is
+ * `.github/workflows/publish.yml` ("adapters package tests",
+ * `node scripts/adapters-build.cjs test packages/adapters/core`) on a Linux
+ * runner, where `/dev/ptmx` is available.
+ */
+function ptySkipIsExplicitlyPermitted(): boolean {
+  return process.env.PTY_TESTS_ALLOW_SKIP === '1';
+}
+
 /** Probe whether this machine can actually allocate a PTY (CI runners often cannot). */
 function canOpenRealPty(): { ok: true } | { ok: false; reason: string } {
   try {
@@ -276,6 +292,28 @@ process.exit(0);
     if (tempRoot && fs.existsSync(tempRoot)) fs.rmSync(tempRoot, { recursive: true, force: true });
   });
 
+  /**
+   * The `real` consumer symlinks node-pty out of the repository node_modules.
+   * That copy must be guaranteed by an explicit root devDependency: while it
+   * was only transitively present, a clean checkout whose transitive supplier
+   * changed would silently lose the real-PTY scenario's dependency.
+   */
+  it('sources node-pty from an explicitly declared root devDependency', () => {
+    const rootManifest = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
+    const declared = rootManifest.devDependencies?.['node-pty'];
+    expect(
+      declared,
+      'the repository root must declare node-pty in devDependencies so this suite has a guaranteed symlink source',
+    ).toBeTypeOf('string');
+
+    const installed = path.join(REPO_NODE_MODULES, 'node-pty');
+    expect(fs.existsSync(installed), `${installed} is missing; run npm install`).toBe(true);
+    const installedVersion = JSON.parse(
+      fs.readFileSync(path.join(installed, 'package.json'), 'utf8'),
+    ).version;
+    expect(installedVersion).toBeTypeOf('string');
+  });
+
   it('declares node-pty under exactly one intentional ownership model in the packed manifest', () => {
     expect(packedManifest.peerDependencies?.['node-pty']).toBeTypeOf('string');
     expect(packedManifest.peerDependenciesMeta?.['node-pty']).toEqual({ optional: true });
@@ -288,7 +326,18 @@ process.exit(0);
     'selects the PTY branch and opens a REAL pty from the compiled ESM artifact',
     () => {
       if (!ptyProbe.ok) {
-        console.warn(`skipping real-PTY assertions: ${ptyProbe.reason}`);
+        if (!ptySkipIsExplicitlyPermitted()) {
+          throw new Error(
+            'This host could not open a real PTY, so the assertion that the compiled ESM artifact ' +
+              'selects the PTY branch could not run. Fix the host (node-pty must be installed and its ' +
+              'native binding loadable) or, only on a host that genuinely has no PTY support, re-run ' +
+              'with PTY_TESTS_ALLOW_SKIP=1 to acknowledge the gap explicitly.\n' +
+              `Probe failure: ${ptyProbe.reason}`,
+          );
+        }
+        console.warn(
+          `PTY_TESTS_ALLOW_SKIP=1: skipping real-PTY assertions on this host. Reason: ${ptyProbe.reason}`,
+        );
         return;
       }
       const scenario = runScenario('real-required', 'real', {

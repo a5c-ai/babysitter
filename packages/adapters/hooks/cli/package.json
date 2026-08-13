@@ -33,6 +33,7 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "//deferred-dependency": "FIX-005 (tracked in docs/release-recovery-runbook.md \u00a7 3.8): @a5c-ai/hooks-adapter-genty is deliberately NOT pinned here yet. src/cli/adapter-loader.ts excludes 'genty' from KNOWN_ADAPTERS, so the CLI does not consume it today, and the package has never been published \u2014 adding the exact pin now would fail clean-consumer verification and the publish helper's exact-internal-dependency registry gate. Add the pin (and regenerate the lockfile) as a checklist step of the recovery release, immediately AFTER @a5c-ai/hooks-adapter-genty first publishes, at which point that gate covers it.",
   "dependencies": {
     "@a5c-ai/atlas": "6.0.0",
     "@a5c-ai/hooks-adapter-claude": "6.0.0",
