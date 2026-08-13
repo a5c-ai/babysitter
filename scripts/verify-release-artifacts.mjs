@@ -66,6 +66,17 @@ const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { listPublishablePackages } = require('./lib/publishable-packages.cjs');
 const { nonHoistedVerificationPackages } = require('./lib/release-matrix.cjs');
+// Shared with scripts/verify-published-release.mjs (FIX-010) so the
+// pre-publication tarball gate and the post-publication registry gate check
+// exactly the same consumer surface.
+const {
+  binEntries,
+  binSmokeArgs,
+  collectSurfaceTargets,
+  normalizeTarget,
+  runtimeImportSpecs,
+  safeReportName,
+} = require('./lib/package-surface.cjs');
 
 const KNOWN_DEFECTS_PATH = path.join(repoRoot, 'scripts', 'known-package-defects.json');
 const DEFAULT_REPORT_DIR = path.join('artifacts', 'release-verifier');
@@ -75,15 +86,6 @@ const BIN_TIMEOUT_MS = 2 * 60 * 1000;
 // npm's supported node_modules layouts. `nested` is the FIX-006 ownership
 // layout: nothing is hoisted, so every package resolves only what it declares.
 const INSTALL_STRATEGIES = new Set(['hoisted', 'nested', 'shallow', 'linked']);
-
-// Harmless smoke argument per bin. Default is `--help`; override per
-// "<package-name> <bin-name>" when a CLI needs a different harmless argument.
-const BIN_SMOKE_ARGS = new Map([
-  // The atlas CLI intentionally exits 1 for --help (usage()); `stats` is its
-  // harmless read-only smoke command.
-  ['@a5c-ai/atlas atlas', ['stats']],
-  ['@a5c-ai/atlas a5c-atlas', ['stats']],
-]);
 
 function log(message) {
   process.stderr.write(`${message}\n`);
@@ -170,123 +172,6 @@ function execErrorText(error) {
     .map((part) => (part == null ? '' : String(part).trim()))
     .filter(Boolean);
   return parts.join('\n').slice(0, 4000);
-}
-
-function normalizeTarget(value) {
-  if (typeof value !== 'string' || value.length === 0) return null;
-  const normalized = value.replace(/\\/g, '/').replace(/^\.\//, '');
-  return normalized.length > 0 ? normalized : null;
-}
-
-function collectExportTargets(exportsValue, sink) {
-  if (typeof exportsValue === 'string') {
-    sink.push(exportsValue);
-    return;
-  }
-  if (Array.isArray(exportsValue)) {
-    for (const entry of exportsValue) collectExportTargets(entry, sink);
-    return;
-  }
-  if (exportsValue && typeof exportsValue === 'object') {
-    for (const value of Object.values(exportsValue)) collectExportTargets(value, sink);
-  }
-}
-
-function collectSurfaceTargets(manifest) {
-  const targets = [];
-  for (const kind of ['main', 'module', 'types']) {
-    const target = normalizeTarget(manifest[kind]);
-    if (target) targets.push({ kind, target });
-  }
-  if (manifest.bin && typeof manifest.bin === 'object') {
-    for (const [binName, binTarget] of Object.entries(manifest.bin)) {
-      const target = normalizeTarget(binTarget);
-      if (target) targets.push({ kind: `bin:${binName}`, target });
-    }
-  } else if (typeof manifest.bin === 'string') {
-    const target = normalizeTarget(manifest.bin);
-    if (target) targets.push({ kind: `bin:${manifest.name}`, target });
-  }
-  const exportTargets = [];
-  collectExportTargets(manifest.exports, exportTargets);
-  for (const raw of exportTargets) {
-    const target = normalizeTarget(raw);
-    if (target && target !== 'package.json' && !target.includes('*')) {
-      targets.push({ kind: 'exports', target });
-    }
-  }
-  const seen = new Set();
-  return targets.filter(({ kind, target }) => {
-    const key = `${kind}\0${target}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-function resolveRuntimeTarget(value) {
-  if (typeof value === 'string') return value;
-  if (Array.isArray(value)) {
-    for (const entry of value) {
-      const resolved = resolveRuntimeTarget(entry);
-      if (resolved) return resolved;
-    }
-    return null;
-  }
-  if (value && typeof value === 'object') {
-    for (const [condition, conditionValue] of Object.entries(value)) {
-      if (condition === 'types') continue;
-      const resolved = resolveRuntimeTarget(conditionValue);
-      if (resolved) return resolved;
-    }
-  }
-  return null;
-}
-
-function hasTypesTarget(value) {
-  if (Array.isArray(value)) return value.some(hasTypesTarget);
-  if (value && typeof value === 'object') {
-    return Object.entries(value).some(
-      ([condition, conditionValue]) => condition === 'types' || hasTypesTarget(conditionValue),
-    );
-  }
-  return false;
-}
-
-function runtimeImportSpecs(manifest) {
-  const exportsField = manifest.exports;
-  if (!exportsField || typeof exportsField === 'string' || Array.isArray(exportsField)) {
-    return [{ id: manifest.name, json: false, types: Boolean(manifest.types) }];
-  }
-  const keys = Object.keys(exportsField);
-  const subpathKeys = keys.filter((key) => key === '.' || key.startsWith('./'));
-  if (subpathKeys.length === 0) {
-    // Top-level conditions object: the root is the only entrypoint.
-    const target = resolveRuntimeTarget(exportsField);
-    return [
-      {
-        id: manifest.name,
-        json: Boolean(target && target.endsWith('.json')),
-        types: Boolean(manifest.types) || hasTypesTarget(exportsField),
-      },
-    ];
-  }
-  const specs = [];
-  for (const key of subpathKeys) {
-    if (key === './package.json' || key.includes('*')) continue;
-    const target = resolveRuntimeTarget(exportsField[key]);
-    if (!target) continue; // types-only subpath: nothing to import at runtime
-    specs.push({
-      id: key === '.' ? manifest.name : `${manifest.name}${key.slice(1)}`,
-      json: target.endsWith('.json'),
-      types: hasTypesTarget(exportsField[key]) || (key === '.' && Boolean(manifest.types)),
-    });
-  }
-  return specs;
-}
-
-function safeReportName(packageName) {
-  return packageName.replace(/^@/, '').replace(/\//g, '__');
 }
 
 function topoSortInventory(inventory, selectedNames) {
@@ -443,19 +328,14 @@ function verifyPackage({ pkg, options, tempRoot, installScriptAllowlist, nonHois
   // --- 4. bin shebangs in the extracted tarball ---------------------------
   const extractDir = path.join(workDir, 'extracted');
   step('shebangs', () => {
-    const binEntries =
-      manifest.bin && typeof manifest.bin === 'object'
-        ? Object.entries(manifest.bin)
-        : typeof manifest.bin === 'string'
-          ? [[manifest.name, manifest.bin]]
-          : [];
-    if (binEntries.length === 0) {
+    const declaredBins = binEntries(manifest);
+    if (declaredBins.length === 0) {
       return { skipped: true, reason: 'package declares no bin' };
     }
     fs.mkdirSync(extractDir, { recursive: true });
     exec('tar', ['-xzf', tarballPath, '-C', extractDir]);
     const badBins = [];
-    for (const [binName, binTarget] of binEntries) {
+    for (const [binName, binTarget] of declaredBins) {
       const target = normalizeTarget(binTarget);
       const binPath = path.join(extractDir, 'package', target);
       if (!fs.existsSync(binPath)) {
@@ -470,7 +350,7 @@ function verifyPackage({ pkg, options, tempRoot, installScriptAllowlist, nonHois
     if (badBins.length > 0) {
       throw new StepFailure(badBins.join('; '));
     }
-    return { checkedBins: binEntries.length };
+    return { checkedBins: declaredBins.length };
   });
 
   // --- 5. fresh temporary consumer install (no workspace links) ----------
@@ -565,22 +445,17 @@ function verifyPackage({ pkg, options, tempRoot, installScriptAllowlist, nonHois
 
   // --- 8. bin smoke tests -------------------------------------------------
   step('bins', () => {
-    const binEntries =
-      manifest.bin && typeof manifest.bin === 'object'
-        ? Object.entries(manifest.bin)
-        : typeof manifest.bin === 'string'
-          ? [[manifest.name, manifest.bin]]
-          : [];
-    if (binEntries.length === 0) {
+    const declaredBins = binEntries(manifest);
+    if (declaredBins.length === 0) {
       return { skipped: true, reason: 'package declares no bin' };
     }
     const results = [];
-    for (const [binName] of binEntries) {
+    for (const [binName] of declaredBins) {
       const shimPath = path.join(consumerDir, 'node_modules', '.bin', binName);
       if (!fs.existsSync(shimPath)) {
         throw new StepFailure(`bin ${binName} was not linked into node_modules/.bin by the install`);
       }
-      const smokeArgs = BIN_SMOKE_ARGS.get(`${manifest.name} ${binName}`) ?? ['--help'];
+      const smokeArgs = binSmokeArgs(manifest.name, binName);
       try {
         exec(shimPath, smokeArgs, { cwd: consumerDir, timeout: BIN_TIMEOUT_MS });
       } catch (error) {

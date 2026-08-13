@@ -19,7 +19,10 @@ permissions:
   id-token: write
 
 env:
-  NPM_TAG: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
+  # FIX-001/FIX-010: the channel is NOT derived here. `prepare_staging_publish`
+  # resolves the one release identity (version + dist_tag + candidate_dist_tag)
+  # and every downstream job consumes it explicitly; publication writes the
+  # candidate tag and only `promote_release_channel` writes the channel.
   PUBLISH_BRANCH: ${{ github.ref_name }}
   NPM_CONFIG_AUDIT: "true"
   NPM_CONFIG_FUND: "false"
@@ -699,6 +702,11 @@ jobs:
       dist_tag: ${{ steps.version.outputs.dist_tag }}
       release_tag: ${{ steps.version.outputs.release_tag }}
       hooks_leaves: ${{ steps.release_matrix.outputs.hooks_leaves }}
+      # FIX-010: the non-production dist-tag every candidate is published under.
+      # The channel tag (dist_tag) is written later, by promote_release_channel,
+      # and only after the published-consumer workflow validated this exact
+      # version.
+      candidate_dist_tag: ${{ steps.candidate.outputs.candidate_dist_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -754,6 +762,17 @@ jobs:
             --commit "$(git rev-parse HEAD)" \
             --write release-version.json \
             --github-output
+
+      # FIX-010: candidates publish here, channels move later.
+      - name: Resolve the candidate dist-tag
+        id: candidate
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          CANDIDATE="$(node scripts/release-promotion.cjs candidate-tag --version "$RELEASE_VERSION")"
+          echo "candidate_dist_tag=$CANDIDATE" >> "$GITHUB_OUTPUT"
+          echo "Candidates publish under $CANDIDATE; $RELEASE_VERSION reaches a channel only after validation."
 
       - name: Prepare workspace manifests for publish
         env:
@@ -2804,10 +2823,80 @@ jobs:
           npm ci --force
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Publish babysitter metapackage to npm ($NPM_TAG tag)
+      - name: Publish babysitter metapackage candidate to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
+
+  # FIX-010: every exact version now exists on npm under the candidate dist-tag,
+  # and NO channel tag has moved. This is the point where the release is
+  # installed from the registry — by exact version — and exercised end to end.
+  # Its verdict (published-consumer-validation evidence) is the only thing that
+  # can unlock promotion below.
+  published_consumer_validation:
+    name: Published Consumer Validation
+    needs:
+      - prepare_staging_publish
+      - publish_staging_metapackage
+    uses: ./.github/workflows/live-stack-published.yml
+    with:
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
+      candidate_dist_tag: ${{ needs.prepare_staging_publish.outputs.candidate_dist_tag }}
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  # FIX-010: the ONLY place a release channel tag moves. It runs after — and
+  # only after — the published-consumer validation of this exact version
+  # succeeded. When validation fails this job does not run: the candidate stays
+  # installable by exact version and under its candidate tag for diagnosis, and
+  # the channel keeps pointing at the previous release.
+  promote_release_channel:
+    name: Promote Release Channel
+    needs:
+      - prepare_staging_publish
+      - publish_staging_metapackage
+      - published_consumer_validation
+    if: ${{ needs.published_consumer_validation.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Download published-consumer validation evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: published-consumer-validation
+          path: artifacts/published-consumer
+
+      - name: Move every public package's channel tag to the validated version
+        env:
+          RELEASE_VERSION: ${{ needs.prepare_staging_publish.outputs.release_version }}
+          RELEASE_DIST_TAG: ${{ needs.prepare_staging_publish.outputs.dist_tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-promotion.cjs promote \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --evidence artifacts/published-consumer/validation.json
+
+      - name: Upload promotion evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-promotion-evidence
+          path: artifacts/published-consumer
+          if-no-files-found: error
 
   # FIX-001: the release is not complete until the channel tag of EVERY public
   # package — the full authoritative inventory, never a sample — resolves to
@@ -2820,6 +2909,7 @@ jobs:
     needs:
       - prepare_staging_publish
       - publish_staging_metapackage
+      - promote_release_channel
     runs-on: ubuntu-latest
     permissions:
       contents: read

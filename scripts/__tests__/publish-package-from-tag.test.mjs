@@ -154,7 +154,7 @@ test('range-based internal dependencies are not gated on an exact registry versi
   );
 });
 
-test('an already-published package is not re-published, only dist-tagged', (t) => {
+test('an already-published package is not re-published, only candidate dist-tagged', (t) => {
   const fixture = createFixtureRepo(t);
   const result = runHelper(fixture, '@fixture/leaf', { published: ['@fixture/leaf@1.0.0'] });
 
@@ -163,7 +163,14 @@ test('an already-published package is not re-published, only dist-tagged', (t) =
     !result.invocations.some((line) => line.startsWith('publish')),
     'an existing version must never be re-published',
   );
-  assert.ok(result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@1.0.0 develop')));
+  assert.ok(
+    result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@1.0.0 candidate-1.0.0')),
+    `expected the candidate dist-tag; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.ok(
+    !result.invocations.some((line) => /dist-tag add \S+ (latest|staging|develop)$/.test(line)),
+    'FIX-010: publication must never write a release channel tag',
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -219,7 +226,7 @@ test('FIX-001: a main release tag cannot reassign the channel tag to the stale v
   assert.match(result.stderr, /6\.0\.3/);
 });
 
-test('FIX-001: the same tag promotes the release version once the workspace is synchronized to it', (t) => {
+test('FIX-001: the same tag re-tags the release version once the workspace is synchronized to it', (t) => {
   const fixture = createFixtureRepo(t);
   setFixtureVersions(fixture, { root: '6.0.3', packages: { leaf: '6.0.3' } });
 
@@ -231,8 +238,14 @@ test('FIX-001: the same tag promotes the release version once the workspace is s
 
   assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
   assert.ok(
-    result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@6.0.3 latest')),
-    `the release version must be promoted; saw: ${result.invocations.join(' | ')}`,
+    result.invocations.some((line) => line.startsWith('dist-tag add @fixture/leaf@6.0.3 candidate-6.0.3')),
+    `the release version must carry its candidate tag; saw: ${result.invocations.join(' | ')}`,
+  );
+  // FIX-010: `latest` is moved by scripts/release-promotion.cjs promote, only
+  // after the published-consumer validation of 6.0.3 succeeded.
+  assert.ok(
+    !result.invocations.some((line) => line.includes(' latest')),
+    `publication must not move the production channel; saw: ${result.invocations.join(' | ')}`,
   );
   assert.ok(
     !result.invocations.some((line) => line.startsWith('publish')),
@@ -292,7 +305,30 @@ test('FIX-001: the release version may be carried by the publication workspace r
     `expected a publish invocation; saw: ${result.invocations.join(' | ')}`,
   );
   assert.ok(
-    result.invocations.some((line) => line.includes('--tag latest')),
-    `the release plan owns the channel tag; saw: ${result.invocations.join(' | ')}`,
+    result.invocations.some((line) => line.includes('--tag candidate-6.0.4')),
+    `the candidate tag is derived from the plan's release version; saw: ${result.invocations.join(' | ')}`,
+  );
+});
+
+// ---------------------------------------------------------------------------
+// FIX-010: publication publishes a CANDIDATE; it never promotes.
+//
+// Before this, `npm publish --tag latest` made publication and promotion the
+// same event, so a release reached every consumer of the channel before
+// anything had installed it from npm.
+// ---------------------------------------------------------------------------
+
+test('FIX-010: publication targets the candidate dist-tag and never a release channel', (t) => {
+  const fixture = createFixtureRepo(t);
+  const result = runHelper(fixture, '@fixture/leaf', { published: [], refName: 'main', releaseVersion: '1.0.0' });
+
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  const publishInvocation = result.invocations.find((line) => line.startsWith('publish'));
+  assert.ok(publishInvocation, `expected a publish invocation; saw: ${result.invocations.join(' | ')}`);
+  assert.match(publishInvocation, /--tag candidate-1\.0\.0/);
+  assert.doesNotMatch(publishInvocation, /--tag (latest|staging|develop)/);
+  assert.ok(
+    !result.invocations.some((line) => /dist-tag add \S+ (latest|staging|develop)$/.test(line)),
+    'no channel dist-tag may be written by publication',
   );
 });

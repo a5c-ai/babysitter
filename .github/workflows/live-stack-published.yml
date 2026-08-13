@@ -1,11 +1,61 @@
 name: Live Stack (Published)
+
+# FIX-010: this is the published-consumer gate that must pass BEFORE a release
+# channel tag (`latest` / `staging` / `develop`) is moved. It therefore takes
+# ONE exact immutable version — never a mutable dist-tag — installs exactly
+# that version from npm, and exercises it. `publish.yml` calls it after every
+# candidate has been published and before promotion; `workflow_dispatch` keeps
+# the identical exact-version input available for manual recovery.
+#
+# There is deliberately no `push` trigger: a push cannot name the exact version
+# under test, and a run that guesses a version proves nothing about a release.
 on:
-  push:
-    branches: [staging, main, develop]
-    paths:
-      - '.github/workflows/live-stack-published.yml'
+  workflow_call:
+    inputs:
+      release_version:
+        description: 'EXACT immutable version under test (e.g. 6.0.4). Dist-tags and ranges are rejected.'
+        required: true
+        type: string
+      candidate_dist_tag:
+        description: 'Non-production dist-tag the candidate was published under (candidate-<version>).'
+        required: false
+        type: string
+        default: ''
+      ref:
+        description: 'Ref to check out for test code + matrix config only.'
+        required: false
+        type: string
+        default: ''
+      os:
+        description: 'Runner OS (ubuntu-latest-l, macos-latest, windows-latest).'
+        required: false
+        type: string
+        default: 'ubuntu-latest-l'
+      matrix:
+        description: 'JSON array of test combinations. Empty = representative default lanes.'
+        required: false
+        type: string
+        default: ''
+      channel:
+        description: 'Release channel to additionally validate through the DOCUMENTED marketplace install. Empty (the pre-promotion default) skips that lane, because the channel still resolves the PREVIOUS release until promotion.'
+        required: false
+        type: string
+        default: ''
+    outputs:
+      evidence_artifact:
+        description: 'Artifact name holding the published-consumer validation evidence.'
+        value: ${{ jobs.record_validation.outputs.evidence_artifact }}
   workflow_dispatch:
     inputs:
+      release_version:
+        description: 'EXACT immutable version under test (e.g. 6.0.4). Dist-tags and ranges are rejected.'
+        required: true
+        type: string
+      candidate_dist_tag:
+        description: 'Non-production dist-tag the candidate was published under (candidate-<version>).'
+        required: false
+        type: string
+        default: ''
       ref:
         description: 'Branch or ref to check out (for test code + matrix config only).'
         required: false
@@ -17,12 +67,12 @@ on:
         type: string
         default: 'ubuntu-latest-l'
       matrix:
-        description: 'JSON array of test combinations. Empty = use push defaults.'
+        description: 'JSON array of test combinations. Empty = representative default lanes.'
         required: false
         type: string
         default: ''
-      npm_tag:
-        description: 'npm dist-tag for published packages (staging, latest, develop). Auto-detected from branch if empty.'
+      channel:
+        description: 'Release channel whose DOCUMENTED marketplace install should also be validated (latest, staging, develop). Empty skips that lane.'
         required: false
         type: string
         default: ''
@@ -37,8 +87,10 @@ env:
   NPM_CONFIG_PREFER_OFFLINE: "true"
 
 concurrency:
-  group: live-stack-published-${{ github.event_name == 'workflow_dispatch' && format('dispatch-{0}', github.run_id) || format('push-{0}', github.ref_name) }}
-  cancel-in-progress: true
+  # Keyed on the exact version under test. A validation run is never cancelled:
+  # a cancelled run is an unproven release, and promotion depends on it.
+  group: live-stack-published-${{ inputs.release_version }}
+  cancel-in-progress: false
 
 jobs:
   setup:
@@ -49,23 +101,35 @@ jobs:
       vanilla_interactive: ${{ steps.matrix.outputs.vanilla_interactive }}
       bp_interactive: ${{ steps.matrix.outputs.bp_interactive }}
       bp_bridged: ${{ steps.matrix.outputs.bp_bridged }}
-      npm_tag: ${{ steps.resolve_tag.outputs.npm_tag }}
     steps:
-      - name: Resolve npm tag
-        id: resolve_tag
+      - name: Checkout repository (test code only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # FIX-010: refuse a mutable reference before anything is installed. A
+      # dist-tag or range would validate "whatever the registry serves right
+      # now", which is exactly what must not gate a channel promotion.
+      - name: Validate the exact version under test
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          CANDIDATE_DIST_TAG: ${{ inputs.candidate_dist_tag }}
         run: |
-          TAG="${{ inputs.npm_tag }}"
-          if [ -z "$TAG" ]; then
-            BRANCH="${{ inputs.ref || github.ref_name }}"
-            case "$BRANCH" in
-              main)    TAG="latest" ;;
-              staging) TAG="staging" ;;
-              develop) TAG="develop" ;;
-              *)       TAG="staging" ;;
-            esac
+          set -euo pipefail
+          node scripts/release-promotion.cjs assert-exact-version \
+            --version "$RELEASE_VERSION" \
+            --label "published-consumer version under test"
+          EXPECTED_CANDIDATE="$(node scripts/release-promotion.cjs candidate-tag --version "$RELEASE_VERSION")"
+          if [ -n "${CANDIDATE_DIST_TAG:-}" ] && [ "$CANDIDATE_DIST_TAG" != "$EXPECTED_CANDIDATE" ]; then
+            echo "candidate_dist_tag $CANDIDATE_DIST_TAG does not belong to $RELEASE_VERSION (expected $EXPECTED_CANDIDATE)" >&2
+            exit 1
           fi
-          echo "npm_tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Resolved npm tag: $TAG"
 
       - name: Generate matrix combinations
         id: matrix
@@ -167,9 +231,60 @@ jobs:
             "
           fi
 
+  # FIX-010: the clean-consumer half of the gate. Installs EVERY public package
+  # at the exact version from npm into a throwaway project, imports each root
+  # and every exported runtime subpath, and smokes every declared bin. This is
+  # what makes "a missing dependency, missing bin, or failed import blocks
+  # channel promotion" true.
+  published_consumer:
+    needs: [setup]
+    name: "Published Consumer (exact ${{ inputs.release_version }})"
+    runs-on: ubuntu-latest-l
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository (inventory + scripts only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install, import and bin-smoke every public package at the exact version
+        timeout-minutes: 45
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          node scripts/verify-published-release.mjs \
+            --version "$RELEASE_VERSION" \
+            --report-dir artifacts/published-consumer
+
+      - name: Upload published-consumer evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-consumer-checks
+          path: artifacts/published-consumer
+          if-no-files-found: error
+
   documented_install:
     needs: [setup]
-    name: "Documented Install (${{ inputs.os || 'ubuntu' }}, ${{ matrix.harness }}, ${{ needs.setup.outputs.npm_tag }})"
+    # FIX-010: the documented install follows a CHANNEL (marketplace + dist-tag),
+    # so before promotion it would exercise the PREVIOUS release, not the version
+    # under test. It runs only when a channel is explicitly named — i.e. for a
+    # post-promotion or manual channel verification, never as the pre-promotion
+    # exact-version gate.
+    if: ${{ inputs.channel != '' }}
+    name: "Documented Install (${{ inputs.os || 'ubuntu' }}, ${{ matrix.harness }}, ${{ inputs.channel }})"
     # Validates the PUBLISHED, user-facing documented install path (README marketplace
     # commands against the external marketplaces) — NOT the BP local-source lane.
     # Catches a broken/stale published marketplace that the local-source lanes mask
@@ -220,7 +335,7 @@ jobs:
       - name: Verify documented published install
         timeout-minutes: 15
         env:
-          NPM_TAG: ${{ needs.setup.outputs.npm_tag }}
+          NPM_TAG: ${{ inputs.channel }}
           LIVE_STACK_DOCUMENTED_INSTALL_HARNESS: ${{ matrix.harness }}
           LIVE_STACK_RUN_MODEL_TESTS: '1'
           LIVE_STACK_REQUIRE_EVIDENCE: '1'
@@ -261,33 +376,38 @@ jobs:
 
       - name: Install published packages
         env:
-          NPM_TAG: ${{ needs.setup.outputs.npm_tag }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
           set -euo pipefail
-          echo "Installing published packages with tag: @${NPM_TAG}"
+          # FIX-010: EXACT immutable version only. Installing a dist-tag would
+          # test whatever the registry happened to serve, and the channel tag
+          # this run gates has NOT been moved yet, so it still resolves the
+          # previous release.
+          node scripts/release-promotion.cjs assert-exact-version --version "$RELEASE_VERSION"
+          echo "Installing published packages at exact version @${RELEASE_VERSION}"
 
           # Install the babysitter SDK CLI first. It re-exports `adapters` and
           # `adapters-hooks` as its own bins (bd11c5b1b) so a standalone SDK install
           # still puts them on PATH, which collides with the packages that own those
           # names — `npm i -g` refuses to overwrite an existing bin (EEXIST).
-          npm install -g @a5c-ai/babysitter-sdk@${NPM_TAG}
+          npm install -g @a5c-ai/babysitter-sdk@${RELEASE_VERSION}
 
           # Install the adapters CLI (includes transport-adapter, atlas catalog, etc.).
           # --force lets the canonical owner take the `adapters` bin back from the SDK
           # shim. Order matters: the SDK's own dependency range is ^6.0.0, which does
           # NOT match a 6.0.x-<channel>.* prerelease, so leaving the shim in place would
-          # silently exercise the last RELEASED adapters instead of the channel build.
-          npm install -g --force @a5c-ai/adapters@${NPM_TAG}
+          # silently exercise the last RELEASED adapters instead of the release build.
+          npm install -g --force @a5c-ai/adapters@${RELEASE_VERSION}
 
           # Install the genty runtime CLI — required for genty (runtime-cli) scenarios;
           # the adapters launcher spawns `genty`, which must be on PATH (source-build
           # workflow builds it; the published workflow must install it). Without this
           # genty cells fail with `ENOENT: spawn genty`.
-          npm install -g @a5c-ai/genty@${NPM_TAG}
+          npm install -g @a5c-ai/genty@${RELEASE_VERSION}
 
           # Install hooks-adapter CLI — same bin collision as adapters above, on
           # `adapters-hooks`, so the canonical owner also needs --force.
-          npm install -g --force @a5c-ai/hooks-adapter-cli@${NPM_TAG}
+          npm install -g --force @a5c-ai/hooks-adapter-cli@${RELEASE_VERSION}
 
           # Install node-pty for interactive modes
           npm install -g node-pty || echo "node-pty install failed (optional)"
@@ -307,10 +427,23 @@ jobs:
             npm install --no-save --legacy-peer-deps "$RB" 2>/dev/null || true
           }
 
-          # Verify installations
-          echo "--- Installed versions ---"
-          adapters --version 2>/dev/null || echo "adapters: not found"
-          babysitter --version 2>/dev/null || echo "babysitter: not found"
+      # FIX-010: prove the globally installed CLIs ARE the exact release, and
+      # preserve the resolved map for incident review. A global install that
+      # silently resolved a cached or older artifact would otherwise make the
+      # whole lane report on the wrong version.
+      - name: Assert and record the exact installed versions
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/live-stack
+          node scripts/release-promotion.cjs assert-installed \
+            --version "$RELEASE_VERSION" \
+            --global \
+            --packages "@a5c-ai/babysitter-sdk,@a5c-ai/adapters,@a5c-ai/genty,@a5c-ai/hooks-adapter-cli" \
+            --out artifacts/live-stack/installed-versions.json
+          adapters --version
+          babysitter --version
 
       - name: Install harness agents
         run: |
@@ -432,3 +565,96 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.setup.outputs.bp_bridged) }}
     steps: *published_steps
+
+  # FIX-010: the single machine-readable verdict on this exact version. It is
+  # the only thing that can unlock a channel promotion
+  # (`scripts/release-promotion.cjs promote --evidence`), and it is preserved as
+  # a workflow artifact for incident review whether it passes or fails.
+  record_validation:
+    name: "Record Published-Consumer Validation (${{ inputs.release_version }})"
+    if: ${{ always() }}
+    needs:
+      - setup
+      - published_consumer
+      - documented_install
+      - live_stack_vanilla_ni
+      - live_stack_vanilla_interactive
+      - live_stack_bp_interactive
+      - live_stack_bp_bridged
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      evidence_artifact: published-consumer-validation
+    steps:
+      - name: Checkout repository (scripts only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # Written by the published_consumer job; its absence means the
+      # install/import/bin gate never produced a verdict, and this job fails —
+      # which is exactly what must block promotion.
+      - name: Download published-consumer checks
+        uses: actions/download-artifact@v4
+        with:
+          name: published-consumer-checks
+          path: artifacts/published-consumer
+
+      - name: Record the validation evidence
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          CANDIDATE_DIST_TAG: ${{ inputs.candidate_dist_tag }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # Representative live-stack execution: the vanilla non-interactive lane
+          # must have succeeded, and no other lane may have failed or been
+          # cancelled. Lanes whose matrix is empty are skipped by design.
+          VANILLA_NI: ${{ needs.live_stack_vanilla_ni.result }}
+          VANILLA_INTERACTIVE: ${{ needs.live_stack_vanilla_interactive.result }}
+          BP_INTERACTIVE: ${{ needs.live_stack_bp_interactive.result }}
+          BP_BRIDGED: ${{ needs.live_stack_bp_bridged.result }}
+          DOCUMENTED_INSTALL: ${{ needs.documented_install.result }}
+        run: |
+          set -euo pipefail
+          LIVE_STACK_STATUS=success
+          LIVE_STACK_DETAIL="vanilla-ni=${VANILLA_NI}"
+          if [ "$VANILLA_NI" != "success" ]; then
+            LIVE_STACK_STATUS=failure
+          fi
+          for LANE in "$VANILLA_INTERACTIVE" "$BP_INTERACTIVE" "$BP_BRIDGED" "$DOCUMENTED_INSTALL"; do
+            if [ "$LANE" = "failure" ] || [ "$LANE" = "cancelled" ]; then
+              LIVE_STACK_STATUS=failure
+            fi
+          done
+          LIVE_STACK_DETAIL="${LIVE_STACK_DETAIL} vanilla-interactive=${VANILLA_INTERACTIVE} bp-interactive=${BP_INTERACTIVE} bp-bridged=${BP_BRIDGED} documented-install=${DOCUMENTED_INSTALL}"
+
+          CANDIDATE_ARGS=()
+          if [ -n "${CANDIDATE_DIST_TAG:-}" ]; then
+            CANDIDATE_ARGS=(--candidate-tag "$CANDIDATE_DIST_TAG")
+          fi
+
+          node scripts/release-promotion.cjs record-validation \
+            --version "$RELEASE_VERSION" \
+            "${CANDIDATE_ARGS[@]}" \
+            --checks artifacts/published-consumer/checks.json \
+            --check "live-stack=${LIVE_STACK_STATUS}:${LIVE_STACK_DETAIL}" \
+            --resolved artifacts/published-consumer/resolved-versions.json \
+            --run-url "$RUN_URL" \
+            --out artifacts/published-consumer/validation.json
+
+      - name: Upload validation evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-consumer-validation
+          path: artifacts/published-consumer
+          if-no-files-found: error

@@ -14,8 +14,12 @@
 #      no second, conflicting publication or dist-tag mutation;
 #   3. synchronizes EVERY manifest to that version, on every channel, and
 #      verifies the synchronization before publishing;
-#   4. publishes in dependency order derived from the package graph;
-#   5. asserts the channel tag of every public package equals that version.
+#   4. publishes in dependency order derived from the package graph, under the
+#      non-production candidate dist-tag (FIX-010);
+#   5. validates that exact version from npm through the published-consumer
+#      workflow (.github/workflows/live-stack-published.yml);
+#   6. only then moves the channel tag, and asserts the channel tag of every
+#      public package equals that version.
 name: Publish Packages From Tag
 
 on:
@@ -45,6 +49,7 @@ jobs:
       release_tag: ${{ steps.identity.outputs.release_tag }}
       release_version: ${{ steps.identity.outputs.release_version }}
       dist_tag: ${{ steps.identity.outputs.dist_tag }}
+      candidate_dist_tag: ${{ steps.candidate.outputs.candidate_dist_tag }}
       should_publish: ${{ steps.gate.outputs.should_publish }}
     steps:
       - name: Checkout release tag
@@ -68,6 +73,17 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/release-version.cjs tag-source --tag "$RELEASE_TAG" --github-output
+
+      # FIX-010: recovery publishes candidates too; the channel moves only after
+      # the published-consumer validation of this exact version.
+      - name: Resolve the candidate dist-tag
+        id: candidate
+        env:
+          RELEASE_VERSION: ${{ steps.identity.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          CANDIDATE="$(node scripts/release-promotion.cjs candidate-tag --version "$RELEASE_VERSION")"
+          echo "candidate_dist_tag=$CANDIDATE" >> "$GITHUB_OUTPUT"
 
       - name: Decide whether this run may publish
         id: gate
@@ -323,6 +339,63 @@ jobs:
             fi
           done < "$WAVES_FILE"
 
+  # FIX-010: recovery follows the same candidate -> validate -> promote model as
+  # the branch release. Publication above wrote only the candidate dist-tag, so
+  # no channel has moved yet; this validates the exact recovered version from
+  # npm before anything is promoted.
+  published_consumer_validation:
+    name: Published Consumer Validation
+    needs:
+      - release_identity
+      - publish_non_plugin_packages
+    uses: ./.github/workflows/live-stack-published.yml
+    with:
+      release_version: ${{ needs.release_identity.outputs.release_version }}
+      candidate_dist_tag: ${{ needs.release_identity.outputs.candidate_dist_tag }}
+      ref: ${{ needs.release_identity.outputs.release_tag }}
+    secrets: inherit
+
+  # The only channel mutation in the recovery path, and only after validation.
+  promote_release_channel:
+    name: Promote Release Channel
+    needs:
+      - release_identity
+      - publish_non_plugin_packages
+      - published_consumer_validation
+    if: ${{ needs.published_consumer_validation.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.release_identity.outputs.release_version }}
+      RELEASE_DIST_TAG: ${{ needs.release_identity.outputs.dist_tag }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.release_identity.outputs.release_tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Download published-consumer validation evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: published-consumer-validation
+          path: artifacts/published-consumer
+
+      - name: Move every public package's channel tag to the validated version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-promotion.cjs promote \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --evidence artifacts/published-consumer/validation.json
+
       # Every public package, never a sample: the release is only complete when
       # the channel tag of each one resolves to exactly this release version.
       - name: Assert every public package resolves the release version
@@ -340,6 +413,7 @@ jobs:
     needs:
       - release_identity
       - publish_non_plugin_packages
+      - promote_release_channel
     uses: ./.github/workflows/sync-external-plugins.yml
     with:
       branch: develop

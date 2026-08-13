@@ -108,6 +108,24 @@ The version/dist-tag path described above is now closed in code:
   the tag, synchronizes every manifest on every channel, skips tags the publish workflow already
   published from, and publishes in dependency-graph order.
 
+## FIX-010 remediation status (landed on `fix/remediation-program`)
+
+The recovery sequence above (publish candidates → validate the exact version → promote) is no
+longer a manual procedure: it is the only path the workflows implement.
+
+- `scripts/publish-package-from-tag.mjs` publishes under the non-production candidate dist-tag
+  `candidate-<version>` and never writes `latest`, `staging` or `develop`.
+- `.github/workflows/live-stack-published.yml` takes the EXACT version as a required
+  `workflow_call` / `workflow_dispatch` input (dist-tags and ranges are rejected), installs that
+  exact version from npm, and records machine-readable validation evidence as a workflow artifact.
+- `scripts/verify-published-release.mjs` installs every public package at the exact version into a
+  clean consumer, imports each root and exported subpath, and smokes every declared bin.
+- `scripts/release-promotion.cjs promote` is the only channel mutation in the pipeline; it refuses
+  to run without evidence that this exact version passed every required check, and re-asserts the
+  channel afterwards.
+- A failed validation therefore leaves the candidate versions installable by exact version and
+  under their candidate tag for diagnosis, with the channel still on the previous release.
+
 Registry recovery itself (Wave 5) is unchanged and still requires release-owner approval.
 
 ## Containment exit criteria status

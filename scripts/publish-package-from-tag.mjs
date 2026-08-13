@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
 const { parseReleaseTag, readReleasePlan, reconcileReleaseVersion } = require('./lib/release-version.cjs');
+const { candidateDistTagFor } = require('./lib/release-promotion.cjs');
 
 const workspace = getArg('--workspace');
 const skipBuild = hasFlag('--skip-build') || process.env.PUBLISH_PACKAGE_FROM_TAG_SKIP_BUILD === '1';
@@ -23,6 +24,10 @@ if (!target) {
   fail(`Workspace not found: ${workspace}`);
 }
 
+// The channel this release is INTENDED for is still reconciled here (a run that
+// cannot name its channel is a hard error), but publication no longer writes it:
+// see the candidate dist-tag below.
+//
 // FIX-001: the version being published is an INPUT, never something inferred
 // from whatever manifest happens to be checked out. Every independently
 // derived value — the caller's flag, the environment, the release plan carried
@@ -31,7 +36,14 @@ if (!target) {
 // incident promoted `latest` back to 6.0.0 precisely because this helper
 // trusted a stale checked-out manifest (docs/release-incident-2026-08-13.md).
 const release = resolveRelease();
-const tag = release.distTag;
+// FIX-010: publication targets a NON-PRODUCTION candidate dist-tag derived from
+// the exact release version. It never writes `latest`, `staging` or `develop`:
+// the channel moves only in `scripts/release-promotion.cjs promote`, after the
+// published-consumer workflow installed and exercised this exact version
+// (.github/workflows/live-stack-published.yml). Before this, publishing a
+// package WAS promoting it — nothing had ever installed the release from npm at
+// that point.
+const tag = candidateDistTagFor(release.releaseVersion);
 const packageSpec = `${target.manifest.name}@${release.releaseVersion}`;
 
 if (target.manifest.version !== release.releaseVersion) {
@@ -50,7 +62,7 @@ if (npmView(packageSpec)) {
     console.log(`${packageSpec} already exists; NODE_AUTH_TOKEN is not configured, so dist-tag ${tag} was not changed.`);
     process.exit(0);
   }
-  console.log(`${packageSpec} already exists; ensuring dist-tag ${tag}.`);
+  console.log(`${packageSpec} already exists; ensuring candidate dist-tag ${tag}.`);
   run('npm', ['dist-tag', 'add', packageSpec, tag], { allowFailure: true });
   process.exit(0);
 }
@@ -86,7 +98,7 @@ const publishResult = run('npm', ['publish', '--workspace', target.manifest.name
 if (publishResult.status !== 0) {
   const stderr = (publishResult.stderr || '').toString();
   if (stderr.includes('You cannot publish over the previously published')) {
-    console.log(`${packageSpec} was published by a concurrent job; ensuring dist-tag ${tag}.`);
+    console.log(`${packageSpec} was published by a concurrent job; ensuring candidate dist-tag ${tag}.`);
     run('npm', ['dist-tag', 'add', packageSpec, tag], { allowFailure: true });
   } else {
     console.error(stderr);
