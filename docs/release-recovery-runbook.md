@@ -415,6 +415,33 @@ in one dependency-ordered invocation). Reports: `artifacts/release-verifier/`.
 
 Totals: 12 passed, 0 failed of 12.
 
+#### Full 43-package matrix (2026-08-14)
+
+Rerun after the release path stopped tolerating known packed-artifact failures
+(`.github/workflows/publish.yml` now passes `allow_known_failures: 'false'`;
+`scripts/known-package-defects.json` `packedArtifact` is empty and stays empty).
+
+Command: `node scripts/verify-release-artifacts.mjs` (no `--package`, no
+`--allow-known-failures`). Running the complete matrix for the first time
+surfaced four consumer-facing defects that the 12-package rehearsal never
+covered. All four are fixed at the source — none is allowlisted:
+
+| Package | Defect found by the strict matrix | Fix |
+| --- | --- | --- |
+| `@a5c-ai/genty-platform` | published `./runtime` subpath resolved to a declaration file with no top-level export, so a consumer `import` failed to typecheck (TS2306) | `export {}` in the intentionally-empty barrel |
+| `@a5c-ai/transport-adapter` | `adapters-transport-proxy --help` (and the deprecated `adapters-proxy`) answered "Error: Missing targetProvider" with exit 1 | real usage text on stdout, exit 0, pinned by `tests/bin-smoke.test.ts` |
+| `@a5c-ai/channels-adapter` | `adapters-channels --help` was treated as the config path and answered "invalid config" with exit 1 | `--help`/`--version` handled before the config path, pinned by `src/__tests__/cli-bin-smoke.test.ts` |
+| `@a5c-ai/kradle` | `kradle-server --help` started the HTTP server and hung until the gate timed it out | both flags answered before the server module is imported, pinned by `tests/bin-smoke.test.js` |
+
+One gate correction, in the same class as the bin-only-metapackage correction
+above: `@a5c-ai/genty-ui` is a React Native component library whose entrypoint
+transitively evaluates react-native's Flow-typed `index.js`. No publishing
+change makes that importable by bare Node. The package now declares its runtime
+through the standard top-level `"react-native"` resolution field, and the
+verifier skips exactly that one step for packages carrying that declaration —
+`surfaces`, `install`, `typecheck`, `bins` and `verify:release` still run, and
+direct-dependency ownership is audited separately for all 43 packages.
+
 #### Release-gate defect found by this rehearsal, and fixed
 
 The first pass failed `@a5c-ai/babysitter` at the `imports` step:
