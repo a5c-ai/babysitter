@@ -115,14 +115,34 @@ function hasTypesTarget(value) {
 }
 
 /**
+ * Whether the manifest declares anything a consumer can import at the ROOT:
+ * `exports`, `main`, or `module`.
+ *
+ * A bin-only package (`@a5c-ai/babysitter`: no `main`, no `module`, no
+ * `exports`, `files` = `bin/` + `README.md`) declares none of them — its entire
+ * consumer surface is its executable. Synthesizing a root import for it made
+ * Node fall back to legacy main resolution, look for an `index.js` the package
+ * deliberately never ships, and fail the release with ERR_MODULE_NOT_FOUND.
+ * That false positive fired in BOTH release gates, so it also blocked channel
+ * promotion (FIX-010).
+ */
+function hasImportableRoot(manifest) {
+  return Boolean(
+    manifest.exports || normalizeTarget(manifest.main) || normalizeTarget(manifest.module),
+  );
+}
+
+/**
  * The import specifiers a consumer may use: the package root plus every
  * exported runtime subpath (types-only subpaths carry nothing to import).
+ * A package with no importable root contributes no root specifier.
  *
  * @returns {Array<{id: string, json: boolean, types: boolean}>}
  */
 function runtimeImportSpecs(manifest) {
   const exportsField = manifest.exports;
   if (!exportsField || typeof exportsField === 'string' || Array.isArray(exportsField)) {
+    if (!hasImportableRoot(manifest)) return [];
     return [{ id: manifest.name, json: false, types: Boolean(manifest.types) }];
   }
   const keys = Object.keys(exportsField);
@@ -152,6 +172,24 @@ function runtimeImportSpecs(manifest) {
   return specs;
 }
 
+/**
+ * "Nothing to check" is NOT a pass. Omitting the synthesized root import for
+ * bin-only packages must not let a package with no importable root AND no bin
+ * sail through both release gates having verified nothing at all. Such a
+ * package is unusable by any consumer, and both gates must say so explicitly.
+ *
+ * @returns {string|null} the diagnostic, or null when the package has a surface
+ */
+function consumerSurfaceProblem(manifest) {
+  if (runtimeImportSpecs(manifest).length > 0) return null;
+  if (binEntries(manifest).length > 0) return null;
+  return (
+    `${manifest.name} declares no consumer surface: no importable root (main/module/exports), ` +
+    'no exported runtime subpath and no bin. Nothing about this package can be imported or ' +
+    'executed by a consumer, so the release gates cannot verify it.'
+  );
+}
+
 /** Filesystem-safe report basename for a scoped package name. */
 function safeReportName(packageName) {
   return packageName.replace(/^@/, '').replace(/\//g, '__');
@@ -163,6 +201,8 @@ module.exports = {
   binSmokeArgs,
   collectExportTargets,
   collectSurfaceTargets,
+  consumerSurfaceProblem,
+  hasImportableRoot,
   hasTypesTarget,
   normalizeTarget,
   resolveRuntimeTarget,

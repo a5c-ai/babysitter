@@ -55,7 +55,13 @@ const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { listPublishablePackages } = require('./lib/publishable-packages.cjs');
 const { assertExactReleaseVersion, assertInstalledExactVersions } = require('./lib/release-promotion.cjs');
-const { binEntries, binSmokeArgs, runtimeImportSpecs, safeReportName } = require('./lib/package-surface.cjs');
+const {
+  binEntries,
+  binSmokeArgs,
+  consumerSurfaceProblem,
+  runtimeImportSpecs,
+  safeReportName,
+} = require('./lib/package-surface.cjs');
 
 const DEFAULT_REPORT_DIR = path.join('artifacts', 'published-consumer');
 const INSTALL_TIMEOUT_MS = 20 * 60 * 1000;
@@ -212,6 +218,17 @@ function main() {
         continue;
       }
       const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      // A bin-only package legitimately has no importable root, but a package
+      // with neither an importable root NOR a bin verifies nothing at all — and
+      // "nothing to check" must never unlock channel promotion.
+      const surfaceProblem = consumerSurfaceProblem(manifest);
+      if (surfaceProblem) {
+        report.checks[CHECK_ROOT_IMPORT] = { status: 'failure', detail: surfaceProblem };
+        rootImportFailures.push(`${packageName}: ${surfaceProblem}`);
+        packageReports.push(report);
+        writeJson(path.join(reportDir, 'packages', `${safeReportName(packageName)}.json`), report);
+        continue;
+      }
       const specsToImport = runtimeImportSpecs(manifest);
       const rootSpecs = specsToImport.filter((spec) => spec.id === packageName);
       const subpathSpecs = specsToImport.filter((spec) => spec.id !== packageName);

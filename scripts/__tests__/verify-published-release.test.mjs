@@ -332,6 +332,68 @@ test('FIX-010: a declared bin that the published artifact does not ship fails th
   assert.match(JSON.stringify(result.checks), /fixture-leaf/);
 });
 
+// The @a5c-ai/babysitter metapackage shape: no main, no module, no exports —
+// only a bin. The gate must not demand a root import it never promised, or the
+// published-consumer job fails and `promote_release_channel` never runs.
+const BIN_ONLY_METAPACKAGE = {
+  'package.json': {
+    name: '@a5c-ai/fixture-consumer',
+    version: RELEASE_VERSION,
+    type: 'commonjs',
+    bin: { 'fixture-metapackage': './bin/cli.js' },
+    files: ['bin/'],
+  },
+  'bin/cli.js': "#!/usr/bin/env node\nprocess.stdout.write('fixture-metapackage ok\\n');\n",
+};
+
+test('FIX-010: a bin-only metapackage passes — no importable root means no synthesized root import', (t) => {
+  const fixture = createFixture(t, {
+    registryPackages: {
+      [`@a5c-ai/fixture-leaf@${RELEASE_VERSION}`]: HEALTHY_LEAF,
+      [`@a5c-ai/fixture-consumer@${RELEASE_VERSION}`]: BIN_ONLY_METAPACKAGE,
+    },
+  });
+
+  const result = runVerifier(fixture);
+
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  assert.equal(result.summary.status, 'success');
+  assert.equal(statusOf(result.checks, 'root-import'), 'success');
+  assert.equal(statusOf(result.checks, 'bin-smoke'), 'success');
+  assert.doesNotMatch(JSON.stringify(result.checks), /index\.js/);
+  const report = JSON.parse(
+    fs.readFileSync(
+      path.join(fixture.root, 'artifacts', 'published-consumer', 'packages', 'a5c-ai__fixture-consumer.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(report.checks['root-import'].status, 'skipped');
+  assert.equal(report.checks['bin-smoke'].status, 'success');
+});
+
+test('FIX-010: a package with no importable root AND no bin fails instead of verifying nothing', (t) => {
+  const fixture = createFixture(t, {
+    registryPackages: {
+      [`@a5c-ai/fixture-leaf@${RELEASE_VERSION}`]: HEALTHY_LEAF,
+      [`@a5c-ai/fixture-consumer@${RELEASE_VERSION}`]: {
+        'package.json': {
+          name: '@a5c-ai/fixture-consumer',
+          version: RELEASE_VERSION,
+          type: 'commonjs',
+          files: ['README.md'],
+        },
+        'README.md': 'nothing importable, nothing executable\n',
+      },
+    },
+  });
+
+  const result = runVerifier(fixture);
+
+  assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
+  assert.equal(statusOf(result.checks, 'root-import'), 'failure');
+  assert.match(JSON.stringify(result.checks), /no consumer surface/i);
+});
+
 // ---------------------------------------------------------------------------
 // The whole gate, end to end: verify the exact version -> record evidence ->
 // promote (or refuse to).

@@ -73,6 +73,7 @@ const {
   binEntries,
   binSmokeArgs,
   collectSurfaceTargets,
+  consumerSurfaceProblem,
   normalizeTarget,
   runtimeImportSpecs,
   safeReportName,
@@ -314,6 +315,13 @@ function verifyPackage({ pkg, options, tempRoot, installScriptAllowlist, nonHois
     if (!tarballFiles.has('package.json')) {
       throw new StepFailure('tarball does not contain package.json');
     }
+    // A package with neither an importable root nor a bin would otherwise pass
+    // every remaining step vacuously once the bin-only-package root import is
+    // no longer synthesized. Refuse it here instead.
+    const surfaceProblem = consumerSurfaceProblem(manifest);
+    if (surfaceProblem) {
+      throw new StepFailure(surfaceProblem);
+    }
     const missing = collectSurfaceTargets(manifest).filter(({ target }) => !tarballFiles.has(target));
     if (missing.length > 0) {
       throw new StepFailure(
@@ -386,6 +394,14 @@ function verifyPackage({ pkg, options, tempRoot, installScriptAllowlist, nonHois
   // --- 6. import the root and every exported runtime subpath -------------
   const importSpecs = runtimeImportSpecs(manifest);
   step('imports', () => {
+    if (importSpecs.length === 0) {
+      // A bin-only package (no main/module/exports). The `surfaces` step already
+      // proved it declares a bin, and the `bins` step below exercises it.
+      return {
+        skipped: true,
+        reason: 'package declares no importable root or exported runtime subpath',
+      };
+    }
     const scriptLines = [
       "import { createRequire } from 'node:module';",
       'const cjsRequire = createRequire(import.meta.url);',

@@ -148,6 +148,42 @@ test('a package that only works via the repository root node_modules fails in th
   );
 });
 
+// A bin-only metapackage (@a5c-ai/babysitter: no main, no module, no exports,
+// files = bin/ + README.md) has NO importable root. The gate used to synthesize
+// one anyway, so Node fell back to legacy main resolution, looked for an
+// index.js the package deliberately never ships, and failed the release with
+// ERR_MODULE_NOT_FOUND. Because scripts/verify-published-release.mjs shares
+// runtimeImportSpecs, that false positive also blocked channel promotion.
+test('a bin-only metapackage passes: no importable root means no synthesized root import', { timeout: VERIFY_TIMEOUT_MS }, async () => {
+  const reportDir = makeReportDir('bin-only');
+  const result = await runVerifier('bin-only-metapackage', reportDir);
+  assert.equal(result.code, 0, `expected exit 0, got ${result.code}\n${result.stdout}\n${result.stderr}`);
+  const report = readReport(reportDir, 'fix011-bin-only-metapackage');
+  assert.equal(report.status, 'passed');
+  assert.equal(report.steps.imports.status, 'skipped', 'a bin-only package has nothing to import');
+  assert.match(report.steps.imports.reason, /no importable root/);
+  assert.equal(report.steps.bins.status, 'passed', 'the bin IS the consumer surface and must be smoked');
+  assert.ok(
+    JSON.stringify(report.steps.bins).includes('fix011-bin-only'),
+    `the declared bin must be exercised: ${JSON.stringify(report.steps.bins)}`,
+  );
+});
+
+// Dropping the synthesized root import must not turn "nothing to check" into a
+// pass. A package with neither an importable root nor a bin is unverifiable and
+// unpublishable, and the gate must say so instead of reporting zero checks.
+test('a package with no importable root AND no bin fails loudly instead of passing vacuously', { timeout: VERIFY_TIMEOUT_MS }, async () => {
+  const reportDir = makeReportDir('no-surface');
+  const result = await runVerifier('no-consumer-surface', reportDir);
+  assert.notEqual(result.code, 0, 'verifier must fail a package with no consumer surface at all');
+  const report = readReport(reportDir, 'fix011-no-consumer-surface');
+  assert.equal(report.status, 'failed');
+  assert.ok(
+    report.failures.some((failure) => /no consumer surface/i.test(failure)),
+    `failures must name the missing consumer surface: ${JSON.stringify(report.failures)}`,
+  );
+});
+
 test('verifier writes a machine-readable summary covering every verified package', { timeout: VERIFY_TIMEOUT_MS }, async () => {
   const reportDir = makeReportDir('summary');
   await runVerifier('good-package', reportDir);

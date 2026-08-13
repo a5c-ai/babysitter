@@ -377,40 +377,54 @@ in one dependency-ordered invocation). Reports: `artifacts/release-verifier/`.
 | `@a5c-ai/hooks-adapter-gemini` | PASS (FIX-006) | — |
 | `@a5c-ai/hooks-adapter-cli` | PASS (FIX-005/FIX-006) | — |
 | `@a5c-ai/babysitter-sdk` | PASS | — |
-| `@a5c-ai/babysitter` | **FAIL** | `imports` |
+| `@a5c-ai/babysitter` | PASS (FIX-007) — after the gate defect below was fixed | — |
 
-Totals: 11 passed, 1 failed of 12.
+Totals: 12 passed, 0 failed of 12.
 
-#### The one failure — a verifier defect, not a packaging defect (release-blocking)
+#### Release-gate defect found by this rehearsal, and fixed
 
-`@a5c-ai/babysitter` is a **bin-only metapackage**: it declares no `main`, no
-`module`, no `exports`, and ships only `bin/` + `README.md`. Its `build`,
-`pack`, `surfaces`, `shebangs` and `install` steps all pass; the run aborts at
-`imports` with:
+The first pass failed `@a5c-ai/babysitter` at the `imports` step:
 
 ```
 Error: Cannot find package '<consumer>/node_modules/@a5c-ai/babysitter/index.js'
   imported from <consumer>/fix011-import-check.mjs   (ERR_MODULE_NOT_FOUND)
 ```
 
-Root cause: `scripts/lib/package-surface.cjs:123-127` — when a manifest has no
-`exports` field, `runtimeImportSpecs()` unconditionally synthesizes a root
-import specifier, without first checking that the package declares something
-importable (`main` / `module` / `exports`). Node then falls back to legacy main
-resolution and looks for `index.js`, which this package intentionally does not
-ship. The metapackage's real consumer surface — the `babysitter` bin and its
-exit-code propagation (FIX-007) — is fully covered and green under
-`npm run test:babysitter-metapackage` (6/6).
+`@a5c-ai/babysitter` is a **bin-only metapackage**: no `main`, no `module`, no
+`exports`, `files` = `bin/` + `README.md`. Its `build`, `pack`, `surfaces`,
+`shebangs` and `install` steps all passed — the failure was the gate asserting
+something the package never promised.
 
-Why it blocks the recovery release: `scripts/verify-published-release.mjs`
+Root cause: `scripts/lib/package-surface.cjs` `runtimeImportSpecs()`
+synthesized a root import specifier for any manifest without an `exports`
+field, without first checking that the package declares an importable root, so
+Node fell back to legacy main resolution and looked for an `index.js` this
+package deliberately never ships.
+
+Why it was release-blocking, not cosmetic: `scripts/verify-published-release.mjs`
 (FIX-010, the post-publication gate whose evidence unlocks promotion) imports
-the **same** `runtimeImportSpecs` from `scripts/lib/package-surface.cjs`, so the
-`published_consumer` job would fail on `@a5c-ai/babysitter` for the same reason
-and `promote_release_channel` would never run.
+the **same** `runtimeImportSpecs`, so the `published_consumer` job would have
+failed on `@a5c-ai/babysitter` for the same reason and `promote_release_channel`
+would never have run.
 
-Fix before executing section 3: make `runtimeImportSpecs()` return no root spec
-for a manifest that declares no root entrypoint (bin-only package), and add a
-fixture covering it. That is a one-place change shared by both verifiers.
+Fix (commit "fix(release-tooling): package-surface omits root import spec for
+bin-only packages" on `fix/remediation-program`):
+
+- `runtimeImportSpecs()` returns no root spec when the manifest declares no
+  `main`, no `module` and no `exports`;
+- a new shared `consumerSurfaceProblem()` keeps "nothing to check" from becoming
+  a pass: a package with **neither** an importable root **nor** a bin now fails
+  loudly in both gates (`surfaces` step pre-publication, `root-import` check
+  post-publication);
+- two fixtures under `scripts/__tests__/fixtures/fix011/`
+  (`bin-only-metapackage`, `no-consumer-surface`) and four regression tests —
+  two in `scripts/__tests__/verify-release-artifacts.test.mjs`, two in
+  `scripts/__tests__/verify-published-release.test.mjs` — all proven RED against
+  the pre-fix source and GREEN after.
+
+After the fix `@a5c-ai/babysitter` passes with `imports` recorded as skipped
+(`package declares no importable root or exported runtime subpath`) and its
+`babysitter` bin smoked.
 
 ### Wave-5 named behaviors
 
@@ -429,8 +443,13 @@ gate, not by inspection.
 
 ### Rehearsal verdict
 
-The repaired packages are ready to be published as candidates: 11 of 12
-verified tarballs install, import, typecheck and expose their bins from a clean
-consumer, and every Wave 5 behavior is green. **One release-gate defect must be
-fixed first** (the bin-only-metapackage root-import false positive above),
-because the same code path gates channel promotion in FIX-010.
+**Ready.** All 12 verified tarballs install, import, typecheck and expose their
+bins from a clean consumer, and every Wave 5 behavior is green. The one gate
+defect this rehearsal exposed (the bin-only-metapackage root-import false
+positive, which would have blocked channel promotion in FIX-010) was fixed with
+regression coverage in both gates. Repository gates re-run green afterwards:
+`verify:metadata`, `guard:packages`, `test:binary-renames`, and
+`test:release-tooling` (107/107).
+
+Nothing on the registry has changed. Section 3 remains unexecuted and still
+requires release-owner approval.

@@ -1,0 +1,11 @@
+{
+  "name": "fix011-no-consumer-surface",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: a package that declares NO importable root (no main/module/exports) and NO bin. There is nothing a consumer could import or execute, so the release gates must FAIL it loudly instead of reporting a pass with zero checks.",
+  "license": "MIT",
+  "type": "commonjs",
+  "files": [
+    "README.md"
+  ]
+}
