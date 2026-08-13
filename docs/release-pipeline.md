@@ -52,7 +52,7 @@ exercised.
 The operator-facing command sequence for a recovery release — version selection, local pre-flight
 gates, candidate publication, published-consumer validation, promotion, full-inventory channel
 assertion, and the separately approved `npm deprecate` notices — is
-[docs/release-recovery-runbook.md](./release-recovery-runbook.md).
+`docs/release-recovery-runbook.md`.
 
 ## Package inventory and release matrices
 
@@ -87,7 +87,7 @@ A public package **owns** every module it imports at runtime. `scripts/lib/depen
 - **Scope.** Shipped runtime sources only — `src/`, `bin/`, `lib/`. Test suites, fixtures, examples, docs, dev scripts, `*.test.*`, `*.config.*`, and `*.d.ts` are excluded, because they do not run in a consumer installation.
 - **`devDependencies` do not satisfy runtime ownership.** Inside the monorepo, workspace hoisting silently supplies an undeclared package, so the workspace build passes while the published tarball is broken. That is precisely the FIX-002 (tasks adapter → `@modelcontextprotocol/sdk`) and FIX-006 (hooks leaves → `@a5c-ai/atlas`) failure mode.
 - **Type-only imports are not runtime dependencies** and are deliberately not conflated with them. `ms` and `express` in the tasks adapter are `import type` only and were not turned into runtime dependencies by FIX-002; declaration closure is validated separately by the packed-artifact typecheck.
-- **Optional native capabilities use exactly one ownership model: an optional peer dependency, with an explicit tested contract.** `node-pty` in `@a5c-ai/comm-adapter` is the reference case: declared as `peerDependencies` + `peerDependenciesMeta.optional`, loaded ESM-safely through `createRequire(import.meta.url)`, and governed by `RunOptions.ptyMode`. An **absent** optional peer is the only condition that may degrade a run, it degrades only under `ptyMode: 'preferred'`, and it always emits an observable `PTY_NOT_AVAILABLE` diagnostic first. An installed-but-unusable native binding is an environment defect and fails loudly in both modes — required behavior never degrades silently. See [packages/adapters/core/README.md](../packages/adapters/core/README.md#interactive-pty-node-pty-optional-peer-dependency) and [docs/adapters/reference/03-run-handle-and-interaction.md](./adapters/reference/03-run-handle-and-interaction.md#73-node-pty-dependency).
+- **Optional native capabilities use exactly one ownership model: an optional peer dependency, with an explicit tested contract.** `node-pty` in `@a5c-ai/comm-adapter` is the reference case: declared as `peerDependencies` + `peerDependenciesMeta.optional`, loaded ESM-safely through `createRequire(import.meta.url)`, and governed by `RunOptions.ptyMode`. An **absent** optional peer is the only condition that may degrade a run, it degrades only under `ptyMode: 'preferred'`, and it always emits an observable `PTY_NOT_AVAILABLE` diagnostic first. An installed-but-unusable native binding is an environment defect and fails loudly in both modes — required behavior never degrades silently. See `packages/adapters/core/README.md` (section "Interactive PTY (node-pty, optional peer dependency)") and `docs/adapters/reference/03-run-handle-and-interaction.md` § 7.3.
 - **Internal workspace dependencies pin the exact release version** and are rewritten by `sync-workspace-versions.mjs`, which is why publication order must come from the dependency graph.
 
 ## Workflow Overview
@@ -126,9 +126,9 @@ A public package **owns** every module it imports at runtime. `scripts/lib/depen
 
 Rolling back a *release* is not the same as rolling back a *channel*.
 
-- **Channel rollback (npm).** Publication is immutable; the only reversible surface is the dist-tag. Move the channel back to a previously validated exact version with `scripts/release-promotion.cjs` and re-run `release-version.cjs assert-channel-tags final` over the whole inventory. This is an approved operational action, never an ordinary code-review step — the procedure and approval requirements are in [docs/release-recovery-runbook.md](./release-recovery-runbook.md). Never unpublish or republish an existing version; recover forward through a new patch version.
+- **Channel rollback (npm).** Publication is immutable; the only reversible surface is the dist-tag. Move the channel back to a previously validated exact version with `scripts/release-promotion.cjs` and re-run `release-version.cjs assert-channel-tags final` over the whole inventory. This is an approved operational action, never an ordinary code-review step — the procedure and approval requirements are in `docs/release-recovery-runbook.md`. Never unpublish or republish an existing version; recover forward through a new patch version.
 - **Git tag / GitHub Release rollback.** `scripts/rollback-release.sh vX.Y.Z` deletes the GitHub Release and remote tag (it assumes `gh` CLI authentication via `GH_TOKEN` or `gh auth login`). It is a manual helper, not part of any workflow, and it predates the `babysitter/<branch>/v<releaseVersion>` tag naming, so check the tag name before running it.
-- Document every rollback action — command, actor, timestamp, result — in the incident ticket so the GO/NO-GO log stays auditable. The worked example is [docs/release-incident-2026-08-13.md](./release-incident-2026-08-13.md).
+- Document every rollback action — command, actor, timestamp, result — in the incident ticket so the GO/NO-GO log stays auditable. The worked example is `docs/release-incident-2026-08-13.md`.
 
 ## Channel Behavior
 - `main`, `staging`, and `develop` all publish through the same `publish.yml` contract and differ only in the resolved version shape and channel dist-tag: `main` publishes `X.Y.Z` to `latest`; `staging` and `develop` publish `X.Y.(Z+1)-<branch>.<short-sha>` to `staging` / `develop`.
@@ -138,5 +138,5 @@ Rolling back a *release* is not the same as rolling back a *channel*.
 
 ## Operational Checklist
 1. Ensure release-notes.md matches the changelog section before approving the release.
-2. Tabletop the channel-rollback procedure in [docs/release-recovery-runbook.md](./release-recovery-runbook.md) quarterly (Release Eng + Security) to confirm the dist-tag correction and channel-assertion steps are still valid.
+2. Tabletop the channel-rollback procedure in `docs/release-recovery-runbook.md` quarterly (Release Eng + Security) to confirm the dist-tag correction and channel-assertion steps are still valid.
 3. When adding or removing a public package from the central release set, follow [How a new public package joins the matrices](#how-a-new-public-package-joins-the-matrices) — there is no longer a set of hand-maintained ownership lists to update in lockstep, and `npm run verify:metadata` is the check that proves coverage.

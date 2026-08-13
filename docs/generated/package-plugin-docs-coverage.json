@@ -281,7 +281,7 @@
     {
       "surface": "packages/adapters/extensions",
       "packageName": "@a5c-ai/extensions-adapter",
-      "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+      "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into one AI coding agent plugin format per registered target",
       "hasReadme": true,
       "status": "Public package",
       "canonicalHome": "../packages/adapters/extensions/README.md",

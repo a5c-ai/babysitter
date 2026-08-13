@@ -62,7 +62,13 @@ npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
 
 ## CLI Setup
 
-The bin name is `adapters-tasks`.
+The package declares two bins. `adapters-tasks` (`./dist/cli/index.js`) is the
+supported executable and the one used throughout this guide. `tasks-adapter`
+(`./dist/cli/tasks-adapter.js`) is a deprecation shim kept for the previous bin
+name: it writes a deprecation notice to stderr and then loads the same CLI
+entrypoint. Both are checked by `npm run test:binary-renames`
+(`scripts/check-binary-renames.cjs`), which proves each bin target is actually
+emitted by the build.
 
 ```bash
 adapters-tasks --help
@@ -117,18 +123,34 @@ The package also exports HTTP MCP helpers from `@a5c-ai/tasks-adapter/mcp`, but 
 
 ## Registered MCP Tools
 
-The stdio server currently registers these eight tools:
+`src/mcp/server.ts` is the authoritative registration list. Every tool below is
+registered unconditionally, in this order, and
+`src/__tests__/mcp-documented-surface.test.ts` fails if this table and that file
+disagree. Parameter schemas live in `src/mcp/tools/*` (`<tool>Params`); the
+column below records them at the time of writing.
 
-| Tool | Current parameters |
-| --- | --- |
-| `ask_breakpoint` | `question`, `context`, `markdown`, `codeSnippets`, `fileReferences`, `tags`, `domain`, `urgency`, `interactionKind`, `targetResponders`, `routingStrategy`, `timeout`, `breakpointId`, `backend`, `breakpointsDir`, `proven` |
-| `check_breakpoint_status` | `breakpointId`, `backend`, `breakpointsDir` |
-| `list_breakpoints` | `responderId`, `backend`, `breakpointsDir` |
-| `answer_breakpoint` | `breakpointId`, `text`, `approved`, `responderId`, `responderName`, `confidence`, `references`, `sign`, `keyFingerprint`, `backend`, `breakpointsDir` |
-| `verify_breakpoint_answer` | `breakpointId`, `backend`, `breakpointsDir` |
-| `list_responders` | `domain`, `tags`, `backend`, `breakpointsDir` |
-| `claim_breakpoint` | `breakpointId`, `responderId`, `backend`, `breakpointsDir` |
-| `poll_breakpoints` | `responderId`, `waitSeconds`, `backend`, `breakpointsDir` |
+| Tool | Side | Current parameters |
+| --- | --- | --- |
+| `ask_breakpoint` | submitter | `question`, `context`, `markdown`, `codeSnippets`, `fileReferences`, `tags`, `domain`, `urgency`, `interactionKind`, `targetResponders`, `routingStrategy`, `timeout`, `breakpointId`, `backend`, `breakpointsDir`, `proven` |
+| `check_breakpoint_status` | submitter | `breakpointId`, `backend`, `breakpointsDir` |
+| `list_breakpoints` | submitter | `responderId`, `backend`, `breakpointsDir` |
+| `create_todo` | submitter | `title`, `description`, `responderId`, `responderType`, `adapter`, `model`, `provider`, `trackerBackend`, `fallbackType`, `tags`, `domain`, `urgency`, `priority`, `dependsOn`, `sourceUrl`, `metadata`, `projectId`, `repoId`, `backend`, `breakpointsDir` |
+| `create_task` | submitter | `title`, `instructions`, `responderId`, `responderType`, `adapter`, `model`, `provider`, `trackerBackend`, `fallbackType`, `tags`, `domain`, `urgency`, `priority`, `dependsOn`, `sourceUrl`, `metadata`, `projectId`, `repoId`, `backend`, `breakpointsDir` |
+| `assign_task` | submitter | `taskId`, `title`, `instructions`, `assignee`, `responderId`, `responderType`, `adapter`, `model`, `provider`, `trackerBackend`, `fallbackType`, `tags`, `domain`, `urgency`, `priority`, `dependsOn`, `sourceUrl`, `metadata`, `projectId`, `repoId`, `backend`, `breakpointsDir` |
+| `search_tasks` | submitter | `query`, `status`, `priority`, `assigneeId`, `responderId`, `domain`, `tags`, `sortBy`, `sortDirection`, `offset`, `limit`, `backend`, `breakpointsDir` |
+| `cancel_breakpoint` | submitter | `breakpointId`, `backend`, `breakpointsDir` |
+| `add_comment` | submitter | `taskId`, `authorId`, `authorName`, `text`, `metadata`, `backend`, `breakpointsDir` |
+| `add_comment_to_breakpoint` | submitter | `breakpointId`, `authorId`, `authorName`, `text`, `metadata`, `backend`, `breakpointsDir` |
+| `bulk_update_tasks` | submitter | `ids`, `action`, `actorId`, `assigneeId`, `assigneeName`, `status`, `message`, `backend`, `breakpointsDir` |
+| `task_stats` | submitter | `status`, `priority`, `assigneeId`, `responderId`, `tags`, `domain`, `backend`, `breakpointsDir` |
+| `export_tasks` | submitter | `status`, `priority`, `assigneeId`, `responderId`, `tags`, `domain`, `backend`, `breakpointsDir` |
+| `escalate` | submitter | `taskId`, `title`, `reason`, `targetResponderId`, `responderId`, `responderType`, `adapter`, `model`, `provider`, `trackerBackend`, `fallbackType`, `tags`, `domain`, `urgency`, `priority`, `dependsOn`, `sourceUrl`, `metadata`, `projectId`, `repoId`, `backend`, `breakpointsDir` |
+| `escalate_breakpoint` | submitter | `breakpointId`, `reason`, `targetResponderId`, `responderId`, `responderType`, `adapter`, `model`, `provider`, `trackerBackend`, `fallbackType`, `tags`, `domain`, `urgency`, `priority`, `dependsOn`, `sourceUrl`, `metadata`, `projectId`, `repoId`, `backend`, `breakpointsDir` |
+| `answer_breakpoint` | submitter | `breakpointId`, `text`, `approved`, `responderId`, `responderName`, `confidence`, `references`, `sign`, `keyFingerprint`, `backend`, `breakpointsDir` |
+| `verify_breakpoint_answer` | submitter | `breakpointId`, `backend`, `breakpointsDir` |
+| `list_responders` | responder | `domain`, `tags`, `backend`, `breakpointsDir` |
+| `claim_breakpoint` | responder | `breakpointId`, `responderId`, `backend`, `breakpointsDir` |
+| `poll_breakpoints` | responder | `responderId`, `waitSeconds`, `backend`, `breakpointsDir` |
 
 ## Configuration
 

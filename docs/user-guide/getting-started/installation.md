@@ -186,6 +186,16 @@ babysitter --version
 
 #### Step 2: Install the Adapters CLI (host-side track)
 
+> **Version numbers on this page are under release recovery.** The 2026-08-13
+> release left most packages' `latest` dist-tag on the stale **6.0.0** artifact
+> even though newer versions exist — see
+> [docs/release-incident-2026-08-13.md](../../release-incident-2026-08-13.md)
+> and [docs/release-recovery-runbook.md](../../release-recovery-runbook.md).
+> Every `6.0.0` below therefore describes what `latest` resolves to today, not
+> the intended current release. They are deliberately **not** being bumped ahead
+> of the recovery: the recovery release refreshes them, and the commands on this
+> page (which install `latest`) keep working unchanged either way.
+
 The **Adapters CLI** (`adapters`) is a host-side binary for running and managing harnesses directly from your shell. It is published separately as `@a5c-ai/adapters-cli` (version **6.0.0**) and needs **Node >=22.13.0**:
 
 ```bash

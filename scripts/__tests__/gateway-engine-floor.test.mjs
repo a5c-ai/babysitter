@@ -100,6 +100,10 @@ test('FIX-008: the packages that inherit the floor document the same number', ()
     'docs/user-guide/reference/error-catalog.md',
     'docs/adapters/reference/10-cli-reference.md',
     'docs/adapters/reference/11-process-lifecycle-and-platform.md',
+    // The adapters reference facts table. Its `Runtime` row published 20.9.0
+    // for `@a5c-ai/adapters` long after that package inherited the gateway
+    // floor, and nothing checked it; it is a surface now.
+    'docs/adapters/reference/01-core-types-and-client.md',
   ];
   const { reaching } = collectGatewayReachingPackages(repoRoot);
   const inheritingNames = reaching.map((entry) => entry.name);

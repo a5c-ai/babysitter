@@ -16,9 +16,17 @@ npm install @a5c-ai/hooks-adapter-genty @a5c-ai/hooks-adapter-core
 > [docs/release-recovery-runbook.md](../../../../docs/release-recovery-runbook.md).
 > Until then, consume this package from the workspace
 > (`npm run build --workspace=@a5c-ai/hooks-adapter-genty`). `@a5c-ai/hooks-adapter-cli`
-> pins this package exactly, so the CLI is not installable from npm until this
-> package publishes first. This note must be deleted once the install command has
-> been verified against the registry.
+> does **not** pin this package yet: the exact pin is deliberately deferred,
+> recorded as the `//deferred-dependency` note in
+> `packages/adapters/hooks/cli/package.json`, because pinning an unpublished
+> version would fail clean-consumer verification and the publish helper's
+> exact-internal-dependency registry gate. The CLI does not consume this adapter
+> today either — `src/cli/adapter-loader.ts` excludes `genty` from
+> `KNOWN_ADAPTERS`. Adding the pin (and regenerating the lockfile) immediately
+> after this package first publishes is a checklist step of
+> [docs/release-recovery-runbook.md](../../../../docs/release-recovery-runbook.md)
+> § 3.8. This note must be deleted once the install command has been verified
+> against the registry and the pin is in place.
 
 This package ships the built adapter runtime in `dist/` and this package README for npm publish-surface auditing.
 

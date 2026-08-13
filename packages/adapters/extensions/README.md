@@ -43,8 +43,11 @@ The current public CLI commands are:
 - `validate --source <dir>` to validate a unified plugin directory without writing output
 - `init --name <name> [--template <minimal|full|hooks-only>] [--output <dir>]` to scaffold a valid unified plugin source tree
 - `list-targets` to print the supported target registry
+- `diff --target <name> --existing <dir> [--source <dir>] [--json] [--verbose]` to compare compiled output against an existing plugin directory (implemented in `src/diff.ts`; exit `0` on match, `1` on drift). It takes one target at a time — `--target all` is rejected.
 
-The `diff` command is still reserved and currently exits with a not-implemented error. The supported targets are `claude-code`, `codex`, `cursor`, `gemini`, `github-copilot`, `pi`, `oh-my-pi`, `opencode`, and `openclaw`.
+The supported targets are not a hand-maintained list: `TARGET_REGISTRY` (`src/targets/index.ts`) is derived at load time from `listPluginTargetDescriptors()` in the Atlas catalog (`@a5c-ai/atlas/catalog`), so `adapters-extensions list-targets` is always authoritative and `src/__tests__/targets.contract.test.ts` asserts the registry keys equal the descriptor ids. That derivation currently resolves 12 targets:
+
+`antigravity-cli`, `claude-code`, `codex`, `cursor`, `gemini-cli`, `genty`, `github-copilot`, `hermes`, `oh-my-pi`, `openclaw`, `opencode`, `pi`
 
 ## API Surface
 

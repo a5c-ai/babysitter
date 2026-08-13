@@ -1,7 +1,7 @@
 {
   "name": "@a5c-ai/extensions-adapter",
   "version": "6.0.0",
-  "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+  "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into one AI coding agent plugin format per registered target",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
