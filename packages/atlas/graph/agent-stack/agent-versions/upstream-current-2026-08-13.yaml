@@ -1,0 +1,355 @@
+# Additive upstream release records from the 2026-08-13 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1786595533-g5ba330
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1786595533-g5ba330"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1786595533-g5ba330"
+  currentVersion: "0.0.1786595533-g5ba330"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1786595533-g5ba330"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1786320433-geeee54 to 0.0.1786595533-g5ba330."
+    - "npm metadata identifies @ampcode/cli as the Amp CLI package and keeps the latest dist-tag on 0.0.1786595533-g5ba330."
+    - "No public build-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1786595533-g5ba330."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1786595533-g5ba330-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-229
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.229"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.229"
+  currentVersion: "2.1.229"
+  releasedAt: "2026-08-12"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.229"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.229"
+  cliCommand: "claude"
+  summary: "Claude Code release adding Remote Control continuation docs, server-supplied self-hosted-runner hooks, gateway SSE keepalive pings, plugin marketplace command sources, and multiple terminal/Remote Control reliability fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.226 to 2.1.229."
+    - "Documented claude remote-control --continue affects Remote Control launch/resume command modeling."
+    - "Server-supplied Claude Code hook support for self-hosted runner sessions affects hook-adapter parity with managed environments."
+    - "SSE keepalive pings during long thinking pauses affect gateway streaming timeout assumptions for Vertex and Bedrock upstreams."
+    - "Plugin marketplace command sources allow a local command to resolve a plugin directory each session; plugin discovery/install metadata should model command-backed sources and mode: link."
+    - "ListAgents now distinguishes offline Remote Control sessions and cloud sessions, affecting session-state projections."
+    - "Changed /commit-push-pr safety so git/gh commands with dangerous flags such as --force, --amend, and --no-verify are no longer auto-approved."
+    - "Self-hosted runner Windows startup now requires explicit --base-dir."
+    - "Install command remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "claude remote-control --continue documentation."
+    - "Server-supplied hooks for self-hosted runner sessions."
+    - "SSE keepalive pings for gateway streaming responses."
+    - "Plugin marketplace command sources with link mode."
+    - "Remote Control session offline/cloud labels."
+    - "Safer /commit-push-pr auto-approval behavior."
+  installMethods:
+    - install:npm
+  launchBehavior:
+    promptExtraFlags:
+      - flag: "--base-dir"
+        valueName: "path"
+        appliesTo: "self-hosted runner Windows startup"
+        introducedIn: "2.1.229"
+        notes: "Required explicitly on Windows self-hosted runners; there is no default checkout directory."
+  remoteControl:
+    continueMostRecentCommand: "claude remote-control --continue"
+    listAgentsSessionStates:
+      - "offline"
+      - "cloud"
+  pluginDiscovery:
+    marketplaceCommandSources: true
+    sourceMode:
+      - "link"
+    notes: "A command source can print a plugin directory that is re-resolved every session and applied without a restart."
+  gatewayStreaming:
+    sseKeepalivePings: true
+    upstreams:
+      - "Vertex"
+      - "Bedrock"
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-229-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-229
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.229"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.229"
+  currentVersion: "0.3.229"
+  releasedAt: "2026-08-12"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.229"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.229"
+  summary: "Claude Agent SDK TypeScript release adding terminal slash-command metadata and correcting over-limit request terminal reasons."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.226 to 0.3.229."
+    - "System init messages now include terminal_slash_commands, affecting Remote Control clients that need to hide terminal-only commands."
+    - "Conversations whose messages exceed the API 32 MB request limit now end with terminal_reason api_error instead of image_error; StopFailure error_details begins with request_body_over_limit."
+    - "No transport, package-name, install-method, or migration change was documented."
+    - "Official update commands remain npm, yarn, pnpm, and bun package upgrade commands for @anthropic-ai/claude-agent-sdk@0.3.229."
+  releaseHighlights:
+    - "terminal_slash_commands added to system init message."
+    - "Over-32 MB request failures now report terminal_reason api_error."
+  installMethods:
+    - install:npm
+  sdkSurface:
+    systemInitFields:
+      - "terminal_slash_commands"
+    terminalReasons:
+      overRequestBodyLimit: "api_error"
+      previousOverRequestBodyLimit: "image_error"
+    stopFailureErrorDetailsPrefix: "request_body_over_limit"
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-229-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-195-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.195.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.195.0"
+  currentVersion: "0.195.0"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.195.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.191.1 to 0.195.0."
+    - "npm metadata identifies @factory/cli as Factory Droid CLI and points repository metadata at Factory-AI/factory."
+    - "No public 0.195.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @factory/cli."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.195.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-195-0-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:gemini:0-55-1
+attributes:
+  agentId: "gemini"
+  agentProductId: agent:gemini-cli
+  displayName: "Gemini CLI 0.55.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.55.1"
+  currentVersion: "0.55.1"
+  releasedAt: "2026-08-11"
+  sourcePackage: "@google/gemini-cli"
+  upstreamReleaseTag: "v0.55.1"
+  releaseNotesUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.55.1"
+  cliCommand: "gemini"
+  summary: "Gemini CLI release adding tool registry discovery and multiple core/security fixes around path blocklists, memory import symlink escapes, macOS sandbox gitconfig access, A2A cancellation, and prompt-injection loop mitigation."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.54.4 to 0.55.1."
+    - "Tool registry discovery affects tool capability discovery metadata."
+    - "Vertex base URL updates affect provider endpoint configuration."
+    - "Sensitive path blocklists are enforced case-insensitively and VS Code human-in-the-loop handling was hardened."
+    - "Memory import symlink escape fixes and macOS sandbox ~/.gitconfig read-only policy affect sandbox/security modeling."
+    - "A2A server cancellation and workspace trust/task isolation fixes affect multi-agent transport/session handling."
+    - "No package-name or install-method migration was published; install remains npm install -g @google/gemini-cli."
+  releaseHighlights:
+    - "Tool registry discovery."
+    - "Vertex base URL update."
+    - "Case-insensitive sensitive path blocklist enforcement."
+    - "Symlink escape fix in memory import processor."
+    - "Read-only ~/.gitconfig in the macOS sandbox."
+    - "A2A cancellation, workspace trust, and task isolation fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:gemini-cli
+  sourced_from:
+    - evidence:gemini-cli-0-55-1-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:17-2-15
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 17.2.15"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "17.2.15"
+  currentVersion: "17.2.15"
+  releasedAt: "2026-08-12"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v17.2.15"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.2.15"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release adding external thinking activation, omp compress, expanded omp cleanse discovery, and fixes for MCP Streamable HTTP 2025-11-25, print-mode startup plans, handoff artifacts, tar parsing, and model/provider metadata."
+  assimilationNotes:
+    - "Latest npm moved from recorded 17.2.12 to 17.2.15."
+    - "New --external-thinking CLI flag affects launchBehavior promptExtraFlags."
+    - "New omp compress command uses an isolated two-tool agent loop to rewrite one or more text files into dense prompt registers."
+    - "omp cleanse now discovers Go, Python, JS/TS, GitHub Workflow checkers, supports natural-language requests, and shows an interactive picker on TTY with no args."
+    - "MCP Streamable HTTP now sends MCP-Protocol-Version and negotiates 2025-11-25; reconnecting SSE parsing now includes id and retry fields."
+    - "Headless omp -p no longer hangs when plan.defaultOnStartup is true because startup defaults are disabled in print mode."
+    - "/handoff copies local artifacts across session boundaries, affecting session migration assumptions."
+    - "libarchive tar parsing was replaced with a hardened in-process tar reader."
+    - "No package-name or install-method migration was published; install remains npm install -g @oh-my-pi/pi-coding-agent."
+  releaseHighlights:
+    - "--external-thinking CLI flag."
+    - "omp compress dense prompt-register command."
+    - "Expanded omp cleanse checker discovery and natural-language mode."
+    - "MCP Streamable HTTP protocol 2025-11-25 negotiation."
+    - "SSE id/retry parsing for reconnecting transports."
+    - "Print-mode startup-plan hang fix."
+    - "Handoff artifact copying."
+    - "Hardened in-process tar reader."
+  installMethods:
+    - install:npm
+  launchBehavior:
+    promptExtraFlags:
+      - flag: "--external-thinking"
+        introducedIn: "17.2.15"
+        notes: "Forces external thinking tool activation."
+  commands:
+    - name: "omp compress"
+      introducedIn: "17.2.15"
+      notes: "Rewrites single or multiple text files, including glob patterns and concurrent processing, into dense prompt registers."
+    - name: "omp cleanse"
+      changedIn: "17.2.15"
+      notes: "Adds checker discovery, natural-language request mode, and TTY picker behavior."
+  mcp:
+    streamableHttpProtocolVersion: "2025-11-25"
+    sendsProtocolHeader: true
+    sseFields:
+      - "id"
+      - "retry"
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-17-2-15-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-18-18
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.18.18"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.18.18"
+  currentVersion: "1.18.18"
+  releasedAt: "2026-08-13"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.18.18"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.18"
+  cliCommand: "opencode"
+  summary: "OpenCode release fixing Kimi provider system prompt selection and xAI xhigh reasoning effort."
+  assimilationNotes:
+    - "Latest npm moved from recorded 1.18.16 to 1.18.18."
+    - "Official Moonshot and Kimi providers now select the Kimi system prompt correctly, affecting provider prompt-template metadata."
+    - "xhigh reasoning effort for xAI models was fixed, affecting model reasoning-effort mapping."
+    - "No package-name, install-method, CLI flag, transport/API, or migration change was published."
+    - "Install command remains npm install -g opencode-ai."
+  releaseHighlights:
+    - "Kimi system prompt selection fix for Moonshot/Kimi providers."
+    - "xAI xhigh reasoning-effort fix."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+  sourced_from:
+    - evidence:opencode-1-18-18-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-21-11
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.21.11"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.21.11"
+  currentVersion: "0.21.11"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.21.11"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.11"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding Agent Plugins v1, /coordinate native multi-agent workflows, bounded ACP NDJSON buffers, Goal v3 ACP sessions, Channels web-shell view, OpenTelemetry session lifecycle events, and multiple provider/session fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.21.8 to 0.21.11."
+    - "Agent Plugins v1 support affects plugin discovery, installation, and capability metadata."
+    - "New /coordinate command enables native multi-agent workflows with read-only teammates and automated result forwarding to the leader agent."
+    - "Bound daemon ACP NDJSON buffers and Goal v3 ACP sessions affect ACP adapter buffering, create/edit/pause/resume/clear action handling, and turn scheduling."
+    - "OpenTelemetry session.start and session.end lifecycle events affect observability mappings."
+    - "Web Shell Channels view tracks DingTalk, Feishu, and WeCom integration sessions alongside tasks."
+    - "Web Shell supports Qwen 3.8 reasoning controls from the model chip, including Thinking mode and effort selection."
+    - "No package-name or install-method migration was published; install remains npm install -g @qwen-code/qwen-code."
+  releaseHighlights:
+    - "Agent Plugins v1."
+    - "/coordinate read-only teammate workflows."
+    - "Bound daemon ACP NDJSON buffers."
+    - "ACP Goal v3 create/edit/pause/resume/clear runtime."
+    - "OpenTelemetry session lifecycle events."
+    - "Channels view for DingTalk, Feishu, and WeCom."
+    - "Qwen 3.8 reasoning controls in Web Shell."
+  installMethods:
+    - install:npm
+  pluginDiscovery:
+    agentPluginsV1: true
+    introducedIn: "0.21.11"
+  multiAgent:
+    coordinateCommand: "/coordinate"
+    teammateMode: "read-only"
+    automatedResultForwarding: true
+  acp:
+    boundedDaemonNdjsonBuffers: true
+    goalV3Actions:
+      - "create"
+      - "edit"
+      - "pause"
+      - "resume"
+      - "clear"
+  telemetry:
+    sessionLifecycleEvents:
+      - "session.start"
+      - "session.end"
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-21-11-2026-08-13
