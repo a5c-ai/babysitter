@@ -74,10 +74,10 @@
       "displayName": "Cursor",
       "source": "Cursor official changelog RSS",
       "previousRecorded": "2026-08-03-changelog",
-      "latest": "2026-08-11-changelog",
+      "latest": "2026-08-13-changelog",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1770",
-      "issueNumber": 1770
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1771",
+      "issueNumber": 1771
     },
     {
       "id": "droid",
@@ -170,7 +170,7 @@
     "claude 2.1.232",
     "claude-agent-sdk 0.3.232",
     "copilot 1.0.80",
-    "cursor 2026-08-11-changelog",
+    "cursor 2026-08-13-changelog",
     "droid 0.196.0",
     "gemini 0.55.1",
     "hermes 0.20.1",
@@ -205,10 +205,9 @@
       "url": "https://github.com/a5c-ai/babysitter/issues/1766"
     },
     {
-      "title": "Track Cursor CLI changelog 2026-08-11",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1770",
-      "created": true,
-      "number": 1770
+      "number": 1771,
+      "title": "Track Cursor changelog 2026-08-13",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1771"
     },
     {
       "number": 1767,
@@ -262,6 +261,11 @@
       "agent": "pi",
       "version": "0.84.1",
       "url": "https://github.com/a5c-ai/babysitter/issues/1668"
+    },
+    {
+      "agent": "omp",
+      "version": "17.3.3",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1769"
     }
   ],
   "changedFiles": [
