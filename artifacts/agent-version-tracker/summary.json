@@ -8,7 +8,8 @@
       "previousRecorded": "0.0.1786320433-geeee54",
       "latest": "0.0.1786681855-gd3dce4",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1762"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1762",
+      "issueNumber": 1762
     },
     {
       "id": "antigravity",
@@ -17,7 +18,8 @@
       "previousRecorded": "1.1.11",
       "latest": "1.1.13",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1763"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1763",
+      "issueNumber": 1763
     },
     {
       "id": "claude",
@@ -26,7 +28,8 @@
       "previousRecorded": "2.1.226",
       "latest": "2.1.232",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1764"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1764",
+      "issueNumber": 1764
     },
     {
       "id": "claude-agent-sdk",
@@ -35,7 +38,8 @@
       "previousRecorded": "0.3.226",
       "latest": "0.3.232",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1765"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1765",
+      "issueNumber": 1765
     },
     {
       "id": "codex",
@@ -62,16 +66,18 @@
       "previousRecorded": "1.0.78",
       "latest": "1.0.80",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1766"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1766",
+      "issueNumber": 1766
     },
     {
       "id": "cursor",
       "displayName": "Cursor",
       "source": "Cursor official changelog RSS",
       "previousRecorded": "2026-08-03-changelog",
-      "latest": "2026-08-13-changelog",
+      "latest": "2026-08-11-changelog",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1771"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1770",
+      "issueNumber": 1770
     },
     {
       "id": "droid",
@@ -80,7 +86,8 @@
       "previousRecorded": "0.191.1",
       "latest": "0.196.0",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1767"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1767",
+      "issueNumber": 1767
     },
     {
       "id": "gemini",
@@ -98,7 +105,8 @@
       "previousRecorded": "0.20.0",
       "latest": "0.20.1",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1768"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1768",
+      "issueNumber": 1768
     },
     {
       "id": "omp",
@@ -107,7 +115,8 @@
       "previousRecorded": "17.2.12",
       "latest": "17.3.3",
       "graphAction": "added AgentVersion",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1772"
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1769",
+      "issueNumber": 1769
     },
     {
       "id": "openclaw",
@@ -161,7 +170,7 @@
     "claude 2.1.232",
     "claude-agent-sdk 0.3.232",
     "copilot 1.0.80",
-    "cursor 2026-08-13-changelog",
+    "cursor 2026-08-11-changelog",
     "droid 0.196.0",
     "gemini 0.55.1",
     "hermes 0.20.1",
@@ -196,9 +205,10 @@
       "url": "https://github.com/a5c-ai/babysitter/issues/1766"
     },
     {
-      "title": "Track Cursor changelog 2026-08-13",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1771",
-      "created": true
+      "title": "Track Cursor CLI changelog 2026-08-11",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1770",
+      "created": true,
+      "number": 1770
     },
     {
       "number": 1767,
@@ -212,8 +222,9 @@
     },
     {
       "title": "Track Oh-My-Pi 17.3.3",
-      "url": "https://github.com/a5c-ai/babysitter/issues/1772",
-      "created": true
+      "url": "https://github.com/a5c-ai/babysitter/issues/1769",
+      "created": true,
+      "number": 1769
     }
   ],
   "issuesExisting": [
