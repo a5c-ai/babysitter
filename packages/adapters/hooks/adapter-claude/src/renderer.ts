@@ -25,10 +25,7 @@ export interface ClaudePostToolUseOutput {
 export interface ClaudeStopOutput {
   /** If true, the session continues instead of stopping. */
   continue?: boolean;
-  /**
-   * Holds the agent in its turn when set. Claude Code only keeps a turn
-   * alive on {"decision":"block"}, which the orchestration loop relies on.
-   */
+  /** Block the agent in its turn so the orchestration loop can continue. */
   decision?: 'block';
   /** Optional reason for the decision. */
   reason?: string;
@@ -200,17 +197,21 @@ function renderPostToolUseOutput(result: UnifiedHookResult): Record<string, unkn
 function renderStopOutput(result: UnifiedHookResult): Record<string, unknown> {
   const output: Record<string, unknown> = {};
 
+  // Claude Code holds an agent in its turn only on an explicit block
+  // decision, so surface it when a handler blocked the session. The
+  // `continue` field is not part of the Stop decision-control
+  // schema, so a block omits it: emitting it (even as false) alongside
+  // `decision: "block"` could let the turn end normally.
   if (result.decision === 'block') {
-    // Claude Code holds an agent in its turn only on {"decision":"block"},
-    // and the merge engine aggregates handler decisions, so a blocking stop
-    // handler has to surface here or the continuation loop never engages.
-    // Emitting 'continue' alongside would let the turn end normally.
     output['decision'] = 'block';
   } else if (result.continueSession != null) {
     output['continue'] = result.continueSession;
   }
 
-  if (result.stopReason != null) {
+  // The merge engine defaults stopReason to an empty string, which would
+  // otherwise shadow a real reason from the handler. Claude Code requires
+  // reason when decision is "block", so an empty stopReason must not win.
+  if (result.stopReason != null && result.stopReason !== '') {
     output['reason'] = result.stopReason;
   } else if (result.reason != null) {
     output['reason'] = result.reason;

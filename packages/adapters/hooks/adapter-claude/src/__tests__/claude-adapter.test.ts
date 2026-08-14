@@ -665,6 +665,24 @@ describe('renderClaudeOutput', () => {
         reason: 'Babysitter iteration 3 | Continue orchestration (run:iterate).',
       });
     });
+
+    it('keeps the handler reason when the merged stopReason defaults to an empty string', () => {
+      // The merge engine defaults stopReason to '', which must not shadow
+      // the real reason the SDK handler produced: Claude Code requires
+      // reason when decision is "block".
+      const output = renderClaudeOutput(
+        {
+          decision: 'block',
+          reason: 'Babysitter iteration 3 | Continue orchestration.',
+          stopReason: '',
+        },
+        'Stop',
+      );
+      expect(output).toEqual({
+        decision: 'block',
+        reason: 'Babysitter iteration 3 | Continue orchestration.',
+      });
+    });
   });
 
   describe('SessionStart rendering', () => {
