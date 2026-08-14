@@ -79,6 +79,7 @@ const {
   runtimeImportSpecs,
   safeReportName,
 } = require('./lib/package-surface.cjs');
+const { installScriptAllowlist: readInstallScriptAllowlist } = require('./lib/known-package-defects.cjs');
 
 const KNOWN_DEFECTS_PATH = path.join(repoRoot, 'scripts', 'known-package-defects.json');
 const DEFAULT_REPORT_DIR = path.join('artifacts', 'release-verifier');
@@ -230,6 +231,7 @@ function parseNpmPackJson(output) {
 function loadKnownDefects() {
   return JSON.parse(fs.readFileSync(KNOWN_DEFECTS_PATH, 'utf8'));
 }
+
 
 function createStepRecorder(report) {
   return function step(name, fn) {
@@ -543,9 +545,13 @@ function main() {
   }
 
   const knownDefects = loadKnownDefects();
-  const installScriptAllowlist = (knownDefects.installScripts ?? []).map((entry) =>
-    typeof entry === 'string' ? entry : entry.package,
-  );
+  // Structured entries only: `{ package, fixId, reason }`, the same shape every
+  // other section of scripts/known-package-defects.json uses. The bare
+  // package-name string this used to accept is what let the one allowlist that
+  // switches OFF a security control (everyone else installs with
+  // `--ignore-scripts`) escape the fixId and staleness discipline that
+  // scripts/check-package-metadata.cjs enforces. End-state: EMPTY.
+  const installScriptAllowlist = readInstallScriptAllowlist(knownDefects, KNOWN_DEFECTS_PATH);
 
   let selected;
   if (options.packageDirs.length > 0 || options.packages.length > 0) {
