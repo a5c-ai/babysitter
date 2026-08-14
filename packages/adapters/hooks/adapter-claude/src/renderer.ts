@@ -198,17 +198,19 @@ function renderStopOutput(result: UnifiedHookResult): Record<string, unknown> {
   const output: Record<string, unknown> = {};
 
   // Claude Code holds an agent in its turn only on an explicit block
-  // decision, so surface it when a handler blocked the session.
+  // decision, so surface it when a handler blocked the session. The
+  // `continue` field is not part of the Stop decision-control
+  // schema, so a block omits it: emitting it (even as false) alongside
+  // `decision: "block"` could let the turn end normally.
   if (result.decision === 'block') {
     output['decision'] = 'block';
-  }
-
-  if (result.continueSession != null) {
+  } else if (result.continueSession != null) {
     output['continue'] = result.continueSession;
   }
 
   // The merge engine defaults stopReason to an empty string, which would
-  // otherwise shadow a real reason from the handler.
+  // otherwise shadow a real reason from the handler. Claude Code requires
+  // reason when decision is "block", so an empty stopReason must not win.
   if (result.stopReason != null && result.stopReason !== '') {
     output['reason'] = result.stopReason;
   } else if (result.reason != null) {

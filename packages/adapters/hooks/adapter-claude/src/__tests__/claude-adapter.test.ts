@@ -684,7 +684,10 @@ describe('renderClaudeOutput', () => {
       const output = renderClaudeOutput(merged, 'Stop');
 
       expect(output.decision).toBe('block');
-      expect(output.continue).toBe(false);
+      // A block omits the continue field entirely: the Stop decision-control
+      // schema only knows decision, and a block must not also signal that
+      // the turn can end.
+      expect(output.continue).toBeUndefined();
       expect(output.reason).toContain('Continue orchestration');
     });
   });
