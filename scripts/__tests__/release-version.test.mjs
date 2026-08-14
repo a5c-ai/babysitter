@@ -135,6 +135,47 @@ test('backward channel movement is detectable by version ordering', () => {
 });
 
 // ---------------------------------------------------------------------------
+// A commit sha is IDENTITY, not ORDER.
+//
+// staging/develop releases are `<base>-<channel>.<12-hex-sha>`. Plain semver
+// compares those identifiers lexically, so `6.0.4-staging.f0aa...` "outranks"
+// `6.0.4-staging.0b12...` purely because `f` sorts after `0` — which would have
+// rejected roughly half of all successive staging releases as "backward".
+// ---------------------------------------------------------------------------
+
+test('successive commit-pinned prereleases of the same base are never a backward move, in either direction', () => {
+  const low = '6.0.4-staging.0b12ab34cd56';
+  const high = '6.0.4-staging.f0aa11bb22cc';
+  // Plain semver precedence really does order these (the defect being pinned).
+  assert.ok(lib.compareVersions(high, low) > 0);
+  // The channel predicate does not.
+  assert.equal(lib.isBackwardChannelMove(high, low), false);
+  assert.equal(lib.isBackwardChannelMove(low, high), false);
+  assert.equal(lib.isBackwardChannelMove(low, low), false);
+});
+
+test('an all-digit commit sha is unordered against a hex one, not "older"', () => {
+  const digits = '6.0.4-develop.123456789012';
+  const hex = '6.0.4-develop.abcdef123456';
+  // Semver ranks numeric identifiers below alphanumeric ones — meaningless for shas.
+  assert.ok(lib.compareVersions(hex, digits) > 0);
+  assert.equal(lib.isBackwardChannelMove(hex, digits), false);
+  assert.equal(lib.isBackwardChannelMove(digits, hex), false);
+});
+
+test('a base bump is forward and a base regression is backward, prerelease or not', () => {
+  assert.equal(lib.isBackwardChannelMove('6.0.4-staging.abc1234def56', '6.0.5-staging.0000000000aa'), false);
+  assert.equal(lib.isBackwardChannelMove('6.0.5-staging.abc1234def56', '6.0.4-staging.ffffffffffff'), true);
+  assert.equal(lib.isBackwardChannelMove('6.0.5', '6.0.3'), true);
+  assert.equal(lib.isBackwardChannelMove('6.0.0', '6.0.3'), false);
+});
+
+test('a channel already on the final release must not move to a prerelease of the same base', () => {
+  assert.equal(lib.isBackwardChannelMove('6.0.4', '6.0.4-staging.abc123def456'), true);
+  assert.equal(lib.isBackwardChannelMove('6.0.4-staging.abc123def456', '6.0.4'), false);
+});
+
+// ---------------------------------------------------------------------------
 // Manifest synchronization contract, exercised through the real CLI.
 // ---------------------------------------------------------------------------
 
@@ -201,6 +242,9 @@ function createFixtureRepo(t, { rootVersion = '6.0.3', packageVersion = '6.0.0' 
       '#!/bin/sh',
       'echo "$*" >> "$NPM_FAKE_LOG"',
       'if [ "$1" = "view" ]; then',
+      // A registry that is reachable but broken (5xx, auth, DNS): non-zero exit,
+      // and NOT an E404. The gate must abort rather than read it as "unpublished".
+      '  if [ -n "$NPM_FAKE_VIEW_ERROR" ]; then echo "$NPM_FAKE_VIEW_ERROR" >&2; exit 1; fi',
       '  RESULT=$(node -e "const t=JSON.parse(process.env.NPM_FAKE_DIST_TAGS||\'{}\');const v=t[process.argv[1]];if(!v){process.exit(1)}process.stdout.write(JSON.stringify(v))" "$2")',
       '  STATUS=$?',
       '  if [ "$STATUS" != "0" ]; then echo "npm error code E404" >&2; exit 1; fi',
@@ -216,7 +260,7 @@ function createFixtureRepo(t, { rootVersion = '6.0.3', packageVersion = '6.0.0' 
   return { root, binDir, logPath: path.join(root, 'npm-invocations.log') };
 }
 
-function runCli(fixture, args, { distTags = {} } = {}) {
+function runCli(fixture, args, { distTags = {}, viewError = '' } = {}) {
   fs.writeFileSync(fixture.logPath, '');
   const result = spawnSync(process.execPath, ['scripts/release-version.cjs', ...args], {
     cwd: fixture.root,
@@ -226,6 +270,7 @@ function runCli(fixture, args, { distTags = {} } = {}) {
       PATH: `${fixture.binDir}${path.delimiter}${process.env.PATH}`,
       NPM_FAKE_LOG: fixture.logPath,
       NPM_FAKE_DIST_TAGS: JSON.stringify(distTags),
+      NPM_FAKE_VIEW_ERROR: viewError,
     },
   });
   const invocations = fs.readFileSync(fixture.logPath, 'utf8').split('\n').filter(Boolean);
@@ -437,6 +482,52 @@ test('FIX-001: the preflight assertion refuses a release that would move a chann
     },
   });
   assert.equal(forward.status, 0, `${forward.stdout}${forward.stderr}`);
+});
+
+test('FIX-001: the preflight admits the next staging release whose sha sorts BELOW the current one', (t) => {
+  const fixture = createFixtureRepo(t, { packageVersion: '6.0.4-staging.0b12ab34cd56' });
+  const next = runCli(
+    fixture,
+    ['assert-channel-tags', '--version', '6.0.4-staging.0b12ab34cd56', '--dist-tag', 'staging', '--mode', 'preflight'],
+    {
+      distTags: {
+        '@a5c-ai/fixture-leaf': { staging: '6.0.4-staging.f0aa11bb22cc' },
+        '@a5c-ai/fixture-consumer': { staging: '6.0.4-staging.f0aa11bb22cc' },
+      },
+    },
+  );
+  assert.equal(
+    next.status,
+    0,
+    `a commit sha is identity, not order: the next staging release must not be rejected\n${next.stdout}${next.stderr}`,
+  );
+});
+
+test('FIX-001: a registry query that fails for any reason other than E404 aborts the preflight', (t) => {
+  const fixture = createFixtureRepo(t, { packageVersion: '6.0.3' });
+  const outage = runCli(
+    fixture,
+    ['assert-channel-tags', '--version', '6.0.3', '--dist-tag', 'latest', '--mode', 'preflight'],
+    { viewError: 'npm error code E500\nnpm error 500 Internal Server Error - GET https://registry.npmjs.org/...' },
+  );
+
+  assert.equal(
+    outage.status,
+    1,
+    `a registry outage must abort the never-move-backward gate, not silently pass it\n${outage.stdout}${outage.stderr}`,
+  );
+  assert.match(outage.stderr, /without reporting E404/);
+  assert.match(outage.stderr, /E500/);
+});
+
+test('FIX-001: a genuinely unpublished package (E404) still leaves the preflight free to pass', (t) => {
+  const fixture = createFixtureRepo(t, { packageVersion: '6.0.3' });
+  const unpublished = runCli(
+    fixture,
+    ['assert-channel-tags', '--version', '6.0.3', '--dist-tag', 'latest', '--mode', 'preflight'],
+    { distTags: {} },
+  );
+  assert.equal(unpublished.status, 0, `${unpublished.stdout}${unpublished.stderr}`);
 });
 
 // ---------------------------------------------------------------------------

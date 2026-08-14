@@ -103,9 +103,13 @@ function parseSemver(version) {
 }
 
 /**
- * Ordering used only to detect BACKWARD channel movement. Prerelease
- * identifiers are compared as dot-separated semver identifiers; a release
- * outranks a prerelease of the same numeric version.
+ * Plain semver precedence. Prerelease identifiers are compared as dot-separated
+ * semver identifiers; a release outranks a prerelease of the same numeric
+ * version.
+ *
+ * NOTE: this is NOT the channel-movement predicate. See
+ * {@link isBackwardChannelMove} — this repository's prerelease identifier is a
+ * commit sha, which semver orders lexically even though a sha carries no order.
  *
  * @returns {number} negative when a < b, 0 when equal, positive when a > b
  */
@@ -136,6 +140,54 @@ function compareVersions(a, b) {
     }
   }
   return 0;
+}
+
+/**
+ * A commit-pinned prerelease exactly as {@link resolveReleaseVersion} builds it:
+ * `<channel>.<short-sha>`, e.g. `staging.120926cf0abc`.
+ *
+ * @returns {{channel: string, sha: string}|null}
+ */
+function parseCommitPinnedPrerelease(prerelease) {
+  const match = /^([a-z][a-z0-9-]*)\.([0-9a-f]{7,40})$/.exec(String(prerelease || ''));
+  if (!match) return null;
+  if (!CHANNELS[match[1]]) return null;
+  return { channel: match[1], sha: match[2] };
+}
+
+/**
+ * The preflight predicate: would publishing `releaseVersion` move a channel
+ * whose tag currently resolves to `currentVersion` to an OLDER release?
+ *
+ * A COMMIT SHA IS IDENTITY, NOT ORDER. `staging` and `develop` releases are
+ * `<base>-<channel>.<short-sha>` (see resolveReleaseVersion), and semver
+ * compares those identifiers lexically — so `6.0.4-staging.f0aa...` "outranks"
+ * `6.0.4-staging.0b12...` purely because `f` sorts after `0`. Roughly half of
+ * all successive staging/develop releases would therefore be rejected as
+ * "backward" by plain semver precedence, even though each one is strictly newer
+ * than the last. Nothing about the two shas says which commit came first.
+ *
+ * So: two commit-pinned prereleases of the SAME numeric base on the SAME
+ * channel are unordered — never a backward move. Everything the release process
+ * does order — the numeric base, and a final release versus a prerelease of the
+ * same base — is still compared by semver precedence, which is what actually
+ * guards the channel.
+ *
+ * @param {string} currentVersion version the channel dist-tag resolves to today
+ * @param {string} releaseVersion version about to be released
+ * @returns {boolean}
+ */
+function isBackwardChannelMove(currentVersion, releaseVersion) {
+  const current = parseSemver(currentVersion);
+  const next = parseSemver(releaseVersion);
+  for (const key of ['major', 'minor', 'patch']) {
+    if (current[key] !== next[key]) return current[key] > next[key];
+  }
+  if (current.prerelease === next.prerelease) return false;
+  const currentPin = parseCommitPinnedPrerelease(current.prerelease);
+  const nextPin = parseCommitPinnedPrerelease(next.prerelease);
+  if (currentPin && nextPin && currentPin.channel === nextPin.channel) return false;
+  return compareVersions(currentVersion, releaseVersion) > 0;
 }
 
 /**
@@ -436,13 +488,46 @@ function collectVersionDivergences({ repoRoot, releaseVersion }) {
   return divergences;
 }
 
+/**
+ * "This package has never been published" as npm actually reports it: `npm view`
+ * exits non-zero with an E404 code (`npm error code E404` on npm 10+, `npm ERR!
+ * code E404` before that) or a bare `404 Not Found`.
+ *
+ * Anything else — DNS failure, ECONNRESET, 401/403, a registry 5xx — is a
+ * FAILED QUERY, not evidence of absence.
+ */
+const NPM_NOT_FOUND_PATTERN = /\bE404\b|404\s+Not\s+Found/i;
+
+/**
+ * @returns {{published: boolean, tags: object}}
+ * @throws when the registry query itself failed. A never-move-backward gate
+ *   that treats "npm could not be reached" as "nothing is published there"
+ *   passes having checked nothing at all, which is precisely the class of
+ *   silent no-op the FIX-001 gates exist to prevent — during a registry outage
+ *   it would wave through a release that moves every channel backward.
+ */
 function npmDistTags({ packageName, npmBin = 'npm', cwd = process.cwd() }) {
   const result = spawnSync(npmBin, ['view', packageName, 'dist-tags', '--json'], {
     cwd,
     encoding: 'utf8',
     shell: process.platform === 'win32',
   });
-  if (result.status !== 0) return { published: false, tags: {} };
+  if (result.error) {
+    throw new Error(
+      `Could not run ${npmBin} to query dist-tags for ${packageName}: ${result.error.message}. ` +
+        'The channel-tag assertion cannot verify anything without the registry and refuses to pass.',
+    );
+  }
+  if (result.status !== 0) {
+    const stderr = `${result.stderr || ''}${result.stdout || ''}`;
+    if (NPM_NOT_FOUND_PATTERN.test(stderr)) return { published: false, tags: {} };
+    throw new Error(
+      `Registry query for ${packageName} dist-tags failed (exit ${result.status}) without reporting E404, ` +
+        'so npm could not tell us what the channel currently resolves to. The channel-tag assertion ' +
+        'aborts instead of assuming the package is unpublished. npm said:\n' +
+        `${stderr.trim().slice(0, 2000)}`,
+    );
+  }
   const stdout = (result.stdout || '').trim();
   if (!stdout) return { published: true, tags: {} };
   try {
@@ -459,9 +544,12 @@ function npmDistTags({ packageName, npmBin = 'npm', cwd = process.cwd() }) {
  * mode 'final'     — every package's channel tag must equal releaseVersion.
  *                    Re-running the same release is therefore idempotent and a
  *                    release that skipped packages fails loudly.
- * mode 'preflight' — no package's channel tag may already be NEWER than
- *                    releaseVersion; publishing would move the channel
- *                    backward.
+ * mode 'preflight' — no package's channel tag may already resolve to a version
+ *                    this release would move BACKWARD from (see
+ *                    {@link isBackwardChannelMove}: commit-pinned prereleases of
+ *                    the same base on the same channel are unordered).
+ *                    A registry query that fails for any reason other than E404
+ *                    aborts the assertion rather than passing it vacuously.
  *
  * @returns {{mode: string, releaseVersion: string, distTag: string, checked: number, problems: Array<object>}}
  */
@@ -492,7 +580,7 @@ function assertChannelTags({ repoRoot, releaseVersion, distTag, mode = 'final', 
       continue;
     }
     if (!published || current === undefined) continue;
-    if (compareVersions(current, releaseVersion) > 0) {
+    if (isBackwardChannelMove(current, releaseVersion)) {
       problems.push({
         package: packageName,
         reason: `${distTag} already resolves to a NEWER version; releasing would move the channel backward`,
@@ -563,6 +651,7 @@ module.exports = {
   formatReleaseTag,
   formatTagMessage,
   gitShortSha,
+  isBackwardChannelMove,
   listChannels,
   listSyncedManifests,
   parseReleaseTag,

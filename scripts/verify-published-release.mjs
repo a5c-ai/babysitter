@@ -13,6 +13,10 @@
  *      the resolved map for incident review;
  *   3. imports every package root;
  *   4. imports every exported runtime subpath;
+ *      (3 and 4 are skipped — with a recorded reason — for a package that
+ *      declares a bundler runtime in its own manifest, exactly as the
+ *      pre-publication gate does; see bundlerOnlyRuntime in
+ *      scripts/lib/package-surface.cjs);
  *   5. invokes every declared bin with a harmless allowlisted argument.
  *
  * Consumer surfaces come from the INSTALLED manifest (what a user really
@@ -58,6 +62,7 @@ const { assertExactReleaseVersion, assertInstalledExactVersions } = require('./l
 const {
   binEntries,
   binSmokeArgs,
+  bundlerOnlyRuntime,
   consumerSurfaceProblem,
   runtimeImportSpecs,
   safeReportName,
@@ -229,12 +234,33 @@ function main() {
         writeJson(path.join(reportDir, 'packages', `${safeReportName(packageName)}.json`), report);
         continue;
       }
-      const specsToImport = runtimeImportSpecs(manifest);
-      const rootSpecs = specsToImport.filter((spec) => spec.id === packageName);
-      const subpathSpecs = specsToImport.filter((spec) => spec.id !== packageName);
+      // A package that declares a bundler runtime in its own manifest (the
+      // standard `"react-native"` resolution field) is resolved by Metro /
+      // webpack / Vite, never by bare Node — its entrypoint statically imports
+      // `react-native`, whose own entrypoint is Flow source. Asking "does bare
+      // Node import this?" asserts something the package never promised, and no
+      // publishing change can make it true. The pre-publication gate
+      // (scripts/verify-release-artifacts.mjs) already narrows exactly this one
+      // step for exactly this declaration; this gate must narrow it identically,
+      // or the first full release blocks promotion on `@a5c-ai/genty-ui`
+      // forever. The escape is a per-manifest declaration — never a name-keyed
+      // allowlist — and it narrows ONLY the Node import steps: install, exact
+      // version, and bin smoke still run.
+      const bundlerOnly = bundlerOnlyRuntime(manifest);
+      if (bundlerOnly) {
+        const reason =
+          `package declares a bundler runtime via the "${bundlerOnly.field}" manifest field ` +
+          `(-> ${bundlerOnly.target}); bare Node cannot evaluate it`;
+        report.checks[CHECK_ROOT_IMPORT] = { status: 'skipped', detail: reason, declaredRuntimeField: bundlerOnly.field };
+        report.checks[CHECK_SUBPATH_IMPORT] = { status: 'skipped', detail: reason, declaredRuntimeField: bundlerOnly.field };
+      } else {
+        const specsToImport = runtimeImportSpecs(manifest);
+        const rootSpecs = specsToImport.filter((spec) => spec.id === packageName);
+        const subpathSpecs = specsToImport.filter((spec) => spec.id !== packageName);
 
-      report.checks[CHECK_ROOT_IMPORT] = importCheck(consumerDir, packageName, rootSpecs, rootImportFailures);
-      report.checks[CHECK_SUBPATH_IMPORT] = importCheck(consumerDir, packageName, subpathSpecs, subpathImportFailures);
+        report.checks[CHECK_ROOT_IMPORT] = importCheck(consumerDir, packageName, rootSpecs, rootImportFailures);
+        report.checks[CHECK_SUBPATH_IMPORT] = importCheck(consumerDir, packageName, subpathSpecs, subpathImportFailures);
+      }
 
       const declaredBins = binEntries(manifest);
       if (declaredBins.length === 0) {

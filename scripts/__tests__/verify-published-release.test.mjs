@@ -395,6 +395,78 @@ test('FIX-010: a package with no importable root AND no bin fails instead of ver
 });
 
 // ---------------------------------------------------------------------------
+// A package whose declared runtime is a bundler, not Node (`@a5c-ai/genty-ui`
+// declares the standard `"react-native"` resolution field). The PRE-publication
+// gate already skips only the Node import step for it; this gate must skip it
+// identically, or the first full release fails the root import of a package
+// that never promised to be importable by bare Node — permanently blocking
+// channel promotion.
+// ---------------------------------------------------------------------------
+
+const BUNDLER_ONLY_PACKAGE = {
+  'package.json': {
+    name: '@a5c-ai/fixture-consumer',
+    version: RELEASE_VERSION,
+    type: 'module',
+    main: 'index.js',
+    'react-native': 'index.js',
+    exports: { '.': './index.js', './extra': './extra.js' },
+    bin: { 'fixture-bundler': './cli.js' },
+  },
+  // Statically imports a bundler-resolved module: unevaluable by bare Node,
+  // exactly like react-native's Flow entrypoint.
+  'index.js': "import 'react-native';\nexport const ui = true;\n",
+  'extra.js': "import 'react-native';\nexport const extra = true;\n",
+  'cli.js': "#!/usr/bin/env node\nprocess.stdout.write('fixture-bundler ok\\n');\n",
+};
+
+test('FIX-010: a package that declares a bundler runtime skips ONLY the Node import steps', (t) => {
+  const fixture = createFixture(t, {
+    registryPackages: {
+      [`@a5c-ai/fixture-leaf@${RELEASE_VERSION}`]: HEALTHY_LEAF,
+      [`@a5c-ai/fixture-consumer@${RELEASE_VERSION}`]: BUNDLER_ONLY_PACKAGE,
+    },
+  });
+
+  const result = runVerifier(fixture);
+
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  assert.equal(result.summary.status, 'success');
+  const report = JSON.parse(
+    fs.readFileSync(
+      path.join(fixture.root, 'artifacts', 'published-consumer', 'packages', 'a5c-ai__fixture-consumer.json'),
+      'utf8',
+    ),
+  );
+  assert.equal(report.checks['root-import'].status, 'skipped');
+  assert.equal(report.checks['subpath-import'].status, 'skipped');
+  assert.match(report.checks['root-import'].detail, /react-native/);
+  assert.match(report.checks['root-import'].detail, /bare Node cannot evaluate it/);
+  // Everything the package DID promise still had to pass.
+  assert.equal(report.checks['bin-smoke'].status, 'success');
+  assert.equal(statusOf(result.checks, 'package-install'), 'success');
+  assert.equal(statusOf(result.checks, 'bin-smoke'), 'success');
+});
+
+test('FIX-010: the bundler-runtime skip requires the manifest declaration', (t) => {
+  const { ['react-native']: _declared, ...manifestWithoutDeclaration } = BUNDLER_ONLY_PACKAGE['package.json'];
+  const fixture = createFixture(t, {
+    registryPackages: {
+      [`@a5c-ai/fixture-leaf@${RELEASE_VERSION}`]: HEALTHY_LEAF,
+      [`@a5c-ai/fixture-consumer@${RELEASE_VERSION}`]: {
+        ...BUNDLER_ONLY_PACKAGE,
+        'package.json': manifestWithoutDeclaration,
+      },
+    },
+  });
+
+  const result = runVerifier(fixture);
+
+  assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
+  assert.equal(statusOf(result.checks, 'root-import'), 'failure');
+});
+
+// ---------------------------------------------------------------------------
 // The whole gate, end to end: verify the exact version -> record evidence ->
 // promote (or refuse to).
 // ---------------------------------------------------------------------------
