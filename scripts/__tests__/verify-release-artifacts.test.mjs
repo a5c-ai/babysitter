@@ -363,6 +363,38 @@ test('FIX-011: tag recovery runs the strict matrix against the tag before it pub
   );
 });
 
+test('the recovery workflow acts on the RESOLVED release tag, never on github.sha', () => {
+  // Every job in the recovery lane must operate on the tree the release tag
+  // names. `github.sha` is the head of whatever ref triggered the run — for a
+  // workflow_dispatch recovery that is the dispatch branch, a different tree
+  // than the one being published. `sync_external_plugins_develop` passed
+  // `github.sha`, so plugin bundles were generated from the wrong source while
+  // every other job used the tag.
+  const { jobs } = readWorkflowJobs('publish-packages-from-tag.yml');
+  for (const [jobName, job] of Object.entries(jobs)) {
+    const refs = [];
+    if (job.with && job.with.ref !== undefined) refs.push(String(job.with.ref));
+    for (const step of job.steps ?? []) {
+      if (String(step.uses || '').startsWith('actions/checkout') && step.with && step.with.ref !== undefined) {
+        refs.push(String(step.with.ref));
+      }
+    }
+    for (const ref of refs) {
+      assert.doesNotMatch(
+        ref,
+        /github\.sha/,
+        `${jobName} must act on the resolved release tag, not github.sha (got ${ref})`,
+      );
+    }
+  }
+
+  assert.match(
+    String(jobs.sync_external_plugins_develop.with.ref),
+    /needs\.release_identity\.outputs\.release_tag/,
+    'plugin bundles must be generated from the release tag tree',
+  );
+});
+
 test('FIX-011: the reusable verifier is strict by default on every lane', () => {
   const { triggers, jobs } = readWorkflowJobs('release-artifact-verifier.yml');
   assert.equal(

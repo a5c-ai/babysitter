@@ -439,6 +439,11 @@ jobs:
     uses: ./.github/workflows/sync-external-plugins.yml
     with:
       branch: develop
-      ref: ${{ github.sha }}
+      # The RESOLVED release tag, exactly like every other job in this workflow.
+      # `github.sha` is the head of whatever ref triggered the run, which for a
+      # workflow_dispatch recovery is the dispatch branch — so the plugin
+      # bundles would be generated from a different tree than the one being
+      # published.
+      ref: ${{ needs.release_identity.outputs.release_tag }}
       release_version: ${{ needs.release_identity.outputs.release_version }}
     secrets: inherit
