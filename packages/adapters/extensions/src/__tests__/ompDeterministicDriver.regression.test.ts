@@ -258,6 +258,10 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const handlers = new Map<string, (event: unknown, ctx: Record<string, unknown>) => unknown>();
     const tools = new Map<string, {
       execute: (...args: unknown[]) => Promise<Record<string, unknown>>;
+      renderResult?: (
+        result: Record<string, unknown>,
+        options: { expanded: boolean },
+      ) => { render: (width: number) => string[] };
     }>();
     const commands = new Map<string, (args: unknown, ctx: Record<string, unknown>) => unknown>();
     const sentMessages: string[] = [];
@@ -303,6 +307,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         ],
       },
     });
+    let runIterateThrown: unknown;
+    let runIterateCompleted = false;
+    let runIterateShellFailure = 0;
     const pi: Record<string, unknown> = {
       hostVersion: '16.5.2',
       setTodoProjection: (...args: unknown[]) => {
@@ -315,7 +322,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         string: () => schema,
         unknown: () => schema,
       },
-      registerTool: (tool: { name: string; execute: (...args: unknown[]) => Promise<Record<string, unknown>> }) => {
+      registerTool: (tool: {
+        name: string;
+        execute: (...args: unknown[]) => Promise<Record<string, unknown>>;
+        renderResult?: (
+          result: Record<string, unknown>,
+          options: { expanded: boolean },
+        ) => { render: (width: number) => string[] };
+      }) => {
         tools.set(tool.name, tool);
       },
       registerCommand: (
@@ -364,11 +378,33 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           notifyRunIterate?.();
           return await pendingRunIterate;
         }
+        if (args[0] === 'run:iterate' && runIterateThrown !== undefined) {
+          throw runIterateThrown;
+        }
+        if (args[0] === 'run:iterate' && runIterateShellFailure > 0) {
+          runIterateShellFailure += 1;
+          return {
+            code: 0,
+            stdout: runIterateShellFailure === 2
+              ? waiting(action('shell', {
+                shell: { command: process.execPath, args: ['-e', 'process.exit(7)'] },
+              }))
+              : JSON.stringify({ status: 'waiting', nextActions: [] }),
+            stderr: '',
+          };
+        }
         if (args[0] === 'run:iterate' && runIterateFailure) {
           return {
             code: 1,
             stdout: '',
-            stderr: 'authorization=driver-terminal-secret',
+            stderr: 'babysitter daemon unavailable; authorization=driver-terminal-secret',
+          };
+        }
+        if (args[0] === 'run:iterate' && runIterateCompleted) {
+          return {
+            code: 0,
+            stdout: JSON.stringify({ status: 'completed', completionProof: 'durable-proof' }),
+            stderr: '',
           };
         }
         return {
@@ -424,11 +460,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const driveTool = tools.get('babysitter_drive');
     if (!driveTool) throw new Error('missing babysitter_drive tool');
     const driveAbort = new AbortController();
+    const waitingUpdates: Array<Record<string, unknown>> = [];
     const driveResult = await driveTool.execute(
       'tool-call-1',
       { i: 'exercise optional update callback', runDir: output },
       driveAbort.signal,
-      undefined,
+      (update: Record<string, unknown>) => { waitingUpdates.push(update); },
       {
         cwd: '/workspace-drive',
         ui: {
@@ -439,6 +476,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     );
     expect(driveResult).toMatchObject({ details: { state: 'waiting' } });
     expect(driveResult).not.toHaveProperty('isError', true);
+    expect(waitingUpdates.length).toBeGreaterThan(0);
+    expect(JSON.stringify(waitingUpdates)).toContain('waiting');
     expect(runIterateSignal).toBe(driveAbort.signal);
     expect(process.cwd()).not.toBe('/workspace-drive');
     expect(runIterateCwd).toBe('/workspace-drive');
@@ -687,17 +726,127 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     }
 
     runIterateFailure = true;
+    const failureUpdates: Array<Record<string, unknown>> = [];
+    const failureStatusWrites: unknown[][] = [];
     const failedDrive = await driveTool.execute(
       'tool-call-secret-failure',
       { i: 'exercise sanitized terminal failure', runDir: output },
       undefined,
-      undefined,
-      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+      (update: Record<string, unknown>) => { failureUpdates.push(update); },
+      {
+        ui: {
+          setStatus: (...args: unknown[]) => { failureStatusWrites.push(args); },
+          setWidget: () => undefined,
+        },
+      },
     );
-    expect(failedDrive).toMatchObject({ isError: true });
+    expect(failedDrive).toMatchObject({
+      isError: true,
+      content: [{
+        type: 'text',
+        text: 'run:iterate failed: babysitter daemon unavailable; authorization=[redacted]',
+      }],
+    });
+    expect(failureUpdates).toEqual([]);
+    expect(JSON.stringify(failedDrive)).toContain('babysitter daemon unavailable');
     expect(JSON.stringify(failedDrive)).toContain('authorization=[redacted]');
     expect(JSON.stringify(failedDrive)).not.toContain('driver-terminal-secret');
+    expect(JSON.stringify(failureStatusWrites)).toContain('babysitter daemon unavailable');
+    expect(JSON.stringify(failureStatusWrites)).not.toContain('driver-terminal-secret');
     runIterateFailure = false;
+
+    runIterateShellFailure = 1;
+    const shellFailureUpdates: Array<Record<string, unknown>> = [];
+    const shellFailureRun = await tempRun('omp-shell-failed-progress-');
+    const shellFailureDrive = await driveTool.execute(
+      'tool-call-shell-failed-progress',
+      { i: 'preserve nonterminal failed progress', runDir: shellFailureRun },
+      undefined,
+      (update: Record<string, unknown>) => { shellFailureUpdates.push(update); },
+      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+    );
+    expect(shellFailureDrive).toMatchObject({ details: { state: 'waiting' } });
+    expect(shellFailureUpdates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        details: expect.objectContaining({
+          progress: expect.objectContaining({ stage: 'shell_finish', state: 'failed' }),
+        }),
+      }),
+    ]));
+    runIterateShellFailure = 0;
+
+    runIterateThrown = new Error('connection refused; token=driver-error-secret');
+    const thrownErrorUpdates: Array<Record<string, unknown>> = [];
+    const thrownErrorDrive = await driveTool.execute(
+      'tool-call-thrown-error',
+      { i: 'preserve safe Error detail', runDir: output },
+      undefined,
+      (update: Record<string, unknown>) => { thrownErrorUpdates.push(update); },
+      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+    );
+    expect(thrownErrorDrive).toMatchObject({ isError: true });
+    expect(thrownErrorUpdates).toEqual([]);
+    expect(JSON.stringify(thrownErrorDrive)).toContain('connection refused');
+    expect(JSON.stringify(thrownErrorDrive)).toContain('token=[redacted]');
+    expect(JSON.stringify(thrownErrorDrive)).not.toContain('driver-error-secret');
+
+    const longSecret = 'long-render-secret';
+    runIterateThrown = new Error(`connection refused ${'x'.repeat(320)} token=${longSecret}`);
+    const longDiagnosticUpdates: Array<Record<string, unknown>> = [];
+    const longDiagnosticDrive = await driveTool.execute(
+      'tool-call-long-diagnostic',
+      { i: 'render canonical long terminal detail', runDir: output },
+      undefined,
+      (update: Record<string, unknown>) => { longDiagnosticUpdates.push(update); },
+      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+    );
+    const renderDriveResult = driveTool.renderResult;
+    if (!renderDriveResult) throw new Error('missing babysitter_drive renderResult');
+    const longDiagnosticText = (
+      longDiagnosticDrive.content as Array<{ type: string; text: string }>
+    )[0].text;
+    const renderedLongDiagnostic = renderDriveResult(
+      longDiagnosticDrive,
+      { expanded: false },
+    ).render(1000).join('\n');
+    expect(longDiagnosticUpdates).toEqual([]);
+    expect(longDiagnosticText.length).toBeGreaterThan(240);
+    expect(renderedLongDiagnostic).toBe(longDiagnosticText);
+    expect(renderedLongDiagnostic).toContain('token=[redacted]');
+    expect(renderedLongDiagnostic).not.toContain(longSecret);
+
+    runIterateThrown = { authorization: 'unsafe-object-secret' };
+    const unavailableDetailUpdates: Array<Record<string, unknown>> = [];
+    const unavailableDetailDrive = await driveTool.execute(
+      'tool-call-unsafe-detail',
+      { i: 'fall back for unavailable safe detail', runDir: output },
+      undefined,
+      (update: Record<string, unknown>) => { unavailableDetailUpdates.push(update); },
+      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+    );
+    expect(unavailableDetailDrive).toMatchObject({
+      isError: true,
+      content: [{ type: 'text', text: 'Babysitter deterministic driver failed' }],
+    });
+    expect(unavailableDetailUpdates).toEqual([]);
+    expect(JSON.stringify(unavailableDetailDrive)).not.toContain('unsafe-object-secret');
+    runIterateThrown = undefined;
+
+    runIterateCompleted = true;
+    const completedUpdates: Array<Record<string, unknown>> = [];
+    const completedDrive = await driveTool.execute(
+      'tool-call-completed',
+      { i: 'preserve successful updates', runDir: output },
+      undefined,
+      (update: Record<string, unknown>) => { completedUpdates.push(update); },
+      { ui: { setStatus: () => undefined, setWidget: () => undefined } },
+    );
+    expect(completedDrive).toMatchObject({ details: { state: 'completed' } });
+    expect(completedDrive).not.toHaveProperty('isError', true);
+    expect(JSON.stringify(completedDrive)).toContain('durable-proof');
+    expect(completedUpdates.length).toBeGreaterThan(0);
+    expect(JSON.stringify(completedUpdates)).toContain('Run completed');
+    runIterateCompleted = false;
 
     const unreadableProjectionRun = await tempRun('omp-unreadable-projection-');
     await fs.writeFile(path.join(unreadableProjectionRun, 'journal'), 'not a directory');

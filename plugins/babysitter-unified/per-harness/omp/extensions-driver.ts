@@ -423,7 +423,7 @@ export class OmpDeterministicDriver {
         runDir,
         "failure",
         "failed",
-        "Deterministic driver failed",
+        driverFailureDiagnostic(error),
         error instanceof DriverError && error.effectId ? { effectId: error.effectId, invocationKey: "", kind: "unknown" } : undefined,
       );
       throw error;
@@ -2414,6 +2414,11 @@ function shellProgressMessage(progress: ShellExecutionProgress): string {
 export function sanitizeDiagnosticText(value: string): string {
   const normalized = redactSensitiveText(value).replace(/\s+/g, " ").trim();
   return normalized.length > 2000 ? `${normalized.slice(0, 2000)}…` : normalized;
+}
+
+export function driverFailureDiagnostic(error: unknown): string {
+  if (!(error instanceof Error)) return "Babysitter deterministic driver failed";
+  return boundedDiagnostic(error.message) || "Babysitter deterministic driver failed";
 }
 
 function boundedDiagnostic(value: string): string {

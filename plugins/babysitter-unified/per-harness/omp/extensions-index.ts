@@ -7,6 +7,7 @@ import {
   executeHostShell,
   type DriverResult,
   type ProjectionTodoPhase,
+  driverFailureDiagnostic,
   OmpDeterministicDriver,
   reconstructBabysitterProjection,
   sanitizeDiagnosticText,
@@ -450,6 +451,7 @@ export default function activate(pi: ExtensionAPI): void {
         const unsubscribe = driver.onProgress((progress) => {
           if (progress.operationId !== operationId) return;
           toolProgress = progress;
+          if (progress.stage === "failure") return;
           onUpdate?.({
             content: [{ type: "text", text: progressText(progress) }],
             details: { state: "running", progress } satisfies DriverToolDetails,
@@ -471,7 +473,7 @@ export default function activate(pi: ExtensionAPI): void {
           return {
             content: [{
               type: "text",
-              text: sanitizeDiagnosticText(error instanceof Error ? error.message : String(error)),
+              text: driverFailureDiagnostic(error),
             }],
             details: {
               state: "operator_attention",
@@ -484,6 +486,7 @@ export default function activate(pi: ExtensionAPI): void {
           unsubscribe();
         }
       });
+
     },
     renderCall(args) {
       return new ReadOnlyProjectionText(`Babysitter deterministic driver · ${path.basename(args.runDir)}`);
@@ -491,10 +494,13 @@ export default function activate(pi: ExtensionAPI): void {
     renderResult(result, options) {
       const details = result.details as DriverToolDetails | undefined;
       const progress = details?.progress;
-      const summary = progress
+      const terminalDiagnostic = result.isError
+        ? result.content.find((part) => part.type === "text")?.text
+        : undefined;
+      const summary = terminalDiagnostic ?? (progress
         ? progressText(progress)
-        : `Babysitter · ${details?.result?.state ?? details?.state ?? (result.isError ? "operator attention" : "completed")}`;
-      const text = options.expanded && progress
+        : `Babysitter · ${details?.result?.state ?? details?.state ?? "completed"}`);
+      const text = !terminalDiagnostic && options.expanded && progress
         ? `${summary}\n${progress.key} · update ${progress.sequence}`
         : summary;
       return new ReadOnlyProjectionText(text);
