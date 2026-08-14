@@ -168,9 +168,6 @@ export {
   type WorktreeInfo,
   type WorktreeExecOptions,
   type WorktreeExecFn,
-  // Deprecated alias for WorktreeExecFn — the executor contract is now
-  // (file, args) rather than a shell command string (FIX-003).
-  type ExecSyncFn,
 } from "./worktreeIsolation";
 
 // Streaming parallelism (GAP-PAR-006)

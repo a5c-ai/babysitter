@@ -67,8 +67,13 @@ listWorktrees("/repo", exec);
 removeWorktree("/tmp/my worktree", exec);
 ```
 
-`ExecSyncFn` remains exported as a deprecated alias of `WorktreeExecFn`. The old
-shell-command-string executor shape is no longer accepted.
+**Breaking change (FIX-003): `ExecSyncFn` has been REMOVED.** It was kept for one
+release as an alias of `WorktreeExecFn`, but an alias is not a migration: the
+executor contract changed from a single shell command string to `(file, args,
+options)`, so a legacy two-parameter executor still typechecked through the
+alias and then failed at runtime — the harness passes `args` as an array of
+literal arguments and never builds a command string. Rename the type to
+`WorktreeExecFn` and change your executor's signature; there is no shim.
 
 ## Local Build
 

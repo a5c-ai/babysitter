@@ -49,13 +49,43 @@ const HOSTILE_VALUES: ReadonlyArray<readonly [string, string]> = [
   ['env expansion', 'https://example.com/$HOME-${IFS}.git'],
 ];
 
+/**
+ * The subset of HOSTILE_VALUES that is still a well-formed https URL. These
+ * must reach git verbatim as one argv entry — that is the shell-injection
+ * defense. The rest are rejected outright by the transport allowlist below.
+ */
+const HOSTILE_BUT_ALLOWED_URLS = HOSTILE_VALUES.filter(([label]) => label !== 'leading dash' && label !== 'newline');
+
+/**
+ * Values that must never reach git at all. Passing a URL as a literal argv
+ * entry does not make it safe: git EXECUTES `ext::` URLs (transport helpers)
+ * and READS `file://` and local paths, and a URL whose final segment is empty
+ * or `..` aims the install directory at, or above, the extensions root.
+ */
+const REJECTED_URLS: ReadonlyArray<readonly [string, string, RegExp]> = [
+  ['ext:: transport helper', 'ext::sh -c "touch /tmp/pwned"', /Unsupported git URL/],
+  ['ext:: with a plausible suffix', 'ext::sh -c touch% /tmp/pwned%/repo.git', /Unsupported git URL/],
+  ['file:// URL', 'file:///etc/passwd', /Unsupported git URL/],
+  ['bare local path', '/etc/passwd', /Unsupported git URL/],
+  ['relative local path', '../../../etc', /Unsupported git URL/],
+  ['cleartext http', 'http://example.com/repo.git', /Unsupported git URL/],
+  ['unauthenticated git protocol', 'git://example.com/repo.git', /Unsupported git URL/],
+  ['ssh:// spelling', 'ssh://git@example.com/repo.git', /Unsupported git URL/],
+  ['leading dash', '--upload-pack=touch /tmp/pwned', /Unsupported git URL/],
+  ['newline injection', 'https://example.com/r.git\ntouch /tmp/pwned', /Unsupported git URL/],
+  ['trailing slash (empty name)', 'https://example.com/repo/', /Cannot derive an extension directory/],
+  ['parent traversal', 'https://example.com/..', /Cannot derive an extension directory/],
+  ['dot-git-only traversal', 'https://example.com/...git', /Cannot derive an extension directory/],
+  ['current directory', 'https://example.com/.', /Cannot derive an extension directory/],
+];
+
 function makeExec(): ReturnType<typeof vi.fn<InstallerExecFn>> {
   return vi.fn<InstallerExecFn>(() => undefined);
 }
 
 describe('FIX-003: the extension installer never builds shell command strings', () => {
   describe('installFromGit', () => {
-    it('invokes git with an argument array and option termination', () => {
+    it('invokes git with an argument array, a transport allowlist, and option termination', () => {
       const exec = makeExec();
       // loadManifest throws because nothing was really cloned; the executor
       // contract is what this suite asserts.
@@ -65,9 +95,19 @@ describe('FIX-003: the extension installer never builds shell command strings', 
 
       const [file, args] = exec.mock.calls[0]!;
       expect(file).toBe('git');
-      expect(args.slice(0, 6)).toEqual(['clone', '--depth', '1', '--branch', 'main', '--']);
-      expect(args[6]).toBe('https://example.com/repo.git');
-      expect(args).toHaveLength(8);
+      // Transport policy precedes the subcommand: git itself may only speak the
+      // transports this installer allowlists.
+      expect(args.slice(0, 6)).toEqual([
+        '-c',
+        'protocol.allow=never',
+        '-c',
+        'protocol.https.allow=always',
+        '-c',
+        'protocol.ssh.allow=always',
+      ]);
+      expect(args.slice(6, 12)).toEqual(['clone', '--depth', '1', '--branch', 'main', '--']);
+      expect(args[12]).toBe('https://example.com/repo.git');
+      expect(args).toHaveLength(14);
     });
 
     it('omits --branch entirely when no ref is given', () => {
@@ -75,10 +115,30 @@ describe('FIX-003: the extension installer never builds shell command strings', 
       expect(() => installFromGit('https://example.com/repo.git', undefined, exec)).toThrow();
       const [, args] = exec.mock.calls[0]!;
       expect(args).not.toContain('--branch');
-      expect(args.slice(0, 4)).toEqual(['clone', '--depth', '1', '--']);
+      expect(args.slice(6, 10)).toEqual(['clone', '--depth', '1', '--']);
     });
 
-    it.each(HOSTILE_VALUES)(
+    it.each(REJECTED_URLS)(
+      'refuses a git URL git itself would act on (%s) before anything is executed',
+      (_label, hostile, expected) => {
+        const exec = makeExec();
+        expect(() => installFromGit(hostile, undefined, exec)).toThrow(expected);
+        expect(exec).not.toHaveBeenCalled();
+      },
+    );
+
+    it('accepts the two allowlisted transports', () => {
+      for (const url of ['https://example.com/owner/repo.git', 'git@example.com:owner/repo.git']) {
+        const exec = makeExec();
+        expect(() => installFromGit(url, undefined, exec)).toThrow(/No package\.json found/);
+        const [, args] = exec.mock.calls[0]!;
+        expect(args[args.indexOf('--') + 1]).toBe(url);
+        // Both forms derive the same ordinary directory component.
+        expect(args[args.indexOf('--') + 2]).toMatch(/[/\\]repo$/);
+      }
+    });
+
+    it.each(HOSTILE_BUT_ALLOWED_URLS)(
       'passes a hostile git URL (%s) through as one literal argument after --',
       (_label, hostile) => {
         const exec = makeExec();

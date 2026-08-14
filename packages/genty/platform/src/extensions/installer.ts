@@ -58,6 +58,97 @@ const NPM_BIN = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const NPM_PACKAGE_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
 const NPM_VERSION_SPEC_PATTERN = /^[A-Za-z0-9.\-+~^><=|* ]+$/;
 
+/**
+ * Git transports this installer accepts, as an explicit ALLOWLIST.
+ *
+ * Passing the URL as a literal argv entry stops shell injection, but it does
+ * not stop git itself from executing the URL. `ext::sh -c "<command>"` makes
+ * git run an arbitrary command as a "transport helper" — command execution with
+ * no shell metacharacter anywhere in the string — and `file://` / bare local
+ * paths turn a clone into an arbitrary filesystem read (plus, historically, a
+ * hook-execution vector). Neither is rejected by "does this contain `;` or
+ * backticks".
+ *
+ * Accepted, and nothing else:
+ *   - `https://<rest>`            — the only fetchable web transport;
+ *   - `git@<host>:<path>`         — the scp-like SSH form.
+ *
+ * Deliberately rejected: `ext::` and every other transport helper, `file://`
+ * and local paths, `http://` (cleartext), `git://` (unauthenticated),
+ * `ssh://`-spelled URLs (use the scp-like form), and any value carrying control
+ * characters. Control characters are excluded rather than all whitespace: a
+ * space in a URL path is inert as a single argv entry, a newline is not
+ * (it can forge additional lines in files git writes).
+ */
+const HTTPS_GIT_URL_PATTERN = /^https:\/\/.+/;
+const SSH_GIT_URL_PATTERN = /^git@[A-Za-z0-9._-]+:.+/;
+
+/** A newline, NUL or other control character never belongs in a git URL. */
+function hasControlCharacters(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code < 0x20 || code === 0x7f) return true;
+  }
+  return false;
+}
+
+/**
+ * Defense in depth: even for an allowlisted URL, git is told which transports
+ * it may use at all. `protocol.allow=never` denies everything not explicitly
+ * re-enabled, so a redirect or a submodule cannot smuggle `ext::` or `file://`
+ * back in.
+ */
+const GIT_TRANSPORT_POLICY = [
+  '-c',
+  'protocol.allow=never',
+  '-c',
+  'protocol.https.allow=always',
+  '-c',
+  'protocol.ssh.allow=always',
+];
+
+function assertAllowedGitUrl(url: string): void {
+  if (
+    typeof url !== 'string' ||
+    hasControlCharacters(url) ||
+    !(HTTPS_GIT_URL_PATTERN.test(url) || SSH_GIT_URL_PATTERN.test(url))
+  ) {
+    throw new Error(
+      `Unsupported git URL: ${JSON.stringify(url)}. Extensions may only be installed from ` +
+        'https://<host>/<path> or git@<host>:<path>; transport helpers (ext::), local and file:// ' +
+        'paths, http://, git:// and control characters are rejected.',
+    );
+  }
+}
+
+/**
+ * The install directory name derived from the URL, validated rather than
+ * sanitized.
+ *
+ * `url.split('/').pop()` returned `''` for a trailing-slash URL (which made the
+ * install path the extensions directory ITSELF) and `'..'` for a URL ending in
+ * `..` (which escaped it). A name that is not a single, ordinary directory
+ * component is a rejected input, not something to repair into a guess.
+ */
+function deriveRepoName(url: string): string {
+  const lastSeparator = Math.max(url.lastIndexOf('/'), url.lastIndexOf(':'));
+  const repoName = url.slice(lastSeparator + 1).replace(/\.git$/, '');
+  if (
+    repoName.length === 0 ||
+    repoName === '.' ||
+    repoName === '..' ||
+    repoName.includes('/') ||
+    repoName.includes('\\')
+  ) {
+    throw new Error(
+      `Cannot derive an extension directory from git URL ${JSON.stringify(url)}: the final path segment ` +
+        `${JSON.stringify(repoName)} is not a single directory name. Use a URL whose last segment names ` +
+        'the repository.',
+    );
+  }
+  return repoName;
+}
+
 const EXTENSIONS_DIR = join(homedir(), '.genty', 'extensions');
 
 export function getExtensionsDir(): string {
@@ -102,14 +193,23 @@ export function installFromGit(
   ref?: string,
   exec: InstallerExecFn = defaultExec,
 ): InstalledExtension {
+  // Validate BEFORE anything is created or executed: an `ext::` URL is command
+  // execution through git's transport-helper mechanism even when it is passed
+  // as one literal argv entry, and a URL whose last segment is empty or `..`
+  // aims the install directory at (or above) the extensions root.
+  assertAllowedGitUrl(url);
+  const repoName = deriveRepoName(url);
+
   const dir = ensureExtensionsDir();
-  const repoName = url.split('/').pop()?.replace('.git', '') ?? 'unknown';
   const installDir = join(dir, repoName);
 
   // `git clone [<options>] [--] <repository> [<directory>]`: `--` makes the URL
   // and target directory operands, so leading-dash values cannot become flags.
   // `ref` is the value of `--branch` and is already a separate argv element.
-  const cloneArgs = ['clone', '--depth', '1'];
+  // GIT_TRANSPORT_POLICY precedes the subcommand and re-states the same
+  // allowlist to git itself, so a redirect or submodule cannot reintroduce a
+  // denied transport.
+  const cloneArgs = [...GIT_TRANSPORT_POLICY, 'clone', '--depth', '1'];
   if (ref) cloneArgs.push('--branch', ref);
   cloneArgs.push('--', url, installDir);
   exec('git', cloneArgs, { stdio: 'pipe' });

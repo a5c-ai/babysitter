@@ -50,13 +50,6 @@ export type WorktreeExecFn = (
   options?: WorktreeExecOptions,
 ) => Buffer;
 
-/**
- * @deprecated Renamed to {@link WorktreeExecFn}. The executor contract changed
- * from a shell command string to `(file, args)` in FIX-003; a shell-string
- * executor is no longer accepted.
- */
-export type ExecSyncFn = WorktreeExecFn;
-
 // ---------------------------------------------------------------------------
 // Default executor
 // ---------------------------------------------------------------------------
