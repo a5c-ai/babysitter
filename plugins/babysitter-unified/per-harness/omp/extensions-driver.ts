@@ -296,7 +296,11 @@ export interface AgentAttemptTransition {
 export type AgentRetryAuthorization = AgentAttemptTransition;
 
 class DriverError extends Error {
-  constructor(message: string, readonly effectId?: string) {
+  constructor(
+    message: string,
+    readonly effectId?: string,
+    readonly publicDiagnostic?: string,
+  ) {
     super(message);
     this.name = "DriverError";
   }
@@ -2389,7 +2393,11 @@ function parseCliJson<T>(stdout: string, operation: string): T {
   try {
     return JSON.parse(stdout) as T;
   } catch (error) {
-    throw new DriverError(`${operation} returned invalid JSON: ${boundedDiagnostic(stdout)} (${String(error)})`);
+    throw new DriverError(
+      `${operation} returned invalid JSON: ${boundedDiagnostic(stdout)} (${String(error)})`,
+      undefined,
+      "Deterministic driver failed",
+    );
   }
 }
 
@@ -2417,8 +2425,12 @@ export function sanitizeDiagnosticText(value: string): string {
 }
 
 export function driverFailureDiagnostic(error: unknown): string {
-  if (!(error instanceof Error)) return "Babysitter deterministic driver failed";
-  return boundedDiagnostic(error.message) || "Babysitter deterministic driver failed";
+  const fallback = "Deterministic driver failed";
+  if (!(error instanceof Error)) return fallback;
+  const diagnostic = error instanceof DriverError && error.publicDiagnostic !== undefined
+    ? error.publicDiagnostic
+    : error.message;
+  return boundedDiagnostic(diagnostic) || fallback;
 }
 
 function boundedDiagnostic(value: string): string {

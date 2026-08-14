@@ -283,6 +283,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     let pendingRunIterate: Promise<{ code: number; stdout: string; stderr: string }> | undefined;
     let notifyRunIterate: (() => void) | undefined;
     let runIterateFailure = false;
+    let runIterateMalformed = false;
     let shellProgressRunDir: string | undefined;
     const progressSecrets = [
       'json-progress-token',
@@ -339,6 +340,9 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       sendUserMessage: (message: string) => { sentMessages.push(message); },
       exec: async (command: string, args: string[], options?: { cwd?: string; signal?: AbortSignal }) => {
         if (command !== 'babysitter') {
+          if (args[0] === '-e' && args[1] === 'process.exit(7)') {
+            return { code: 7, stdout: '', stderr: '', killed: false };
+          }
           if (command !== pendingShellEffect.taskDef.shell.command) {
             throw new Error(`unexpected shell command ${command}`);
           }
@@ -377,6 +381,13 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         if (args[0] === 'run:iterate' && pendingRunIterate) {
           notifyRunIterate?.();
           return await pendingRunIterate;
+        }
+        if (args[0] === 'run:iterate' && runIterateMalformed) {
+          return {
+            code: 0,
+            stdout: '{malformed "token":"raw adapter malformed secret"',
+            stderr: '',
+          };
         }
         if (args[0] === 'run:iterate' && runIterateThrown !== undefined) {
           throw runIterateThrown;
@@ -755,6 +766,31 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(JSON.stringify(failureStatusWrites)).not.toContain('driver-terminal-secret');
     runIterateFailure = false;
 
+    runIterateMalformed = true;
+    const malformedUpdates: Array<Record<string, unknown>> = [];
+    const malformedStatusWrites: unknown[][] = [];
+    const malformedDrive = await driveTool.execute(
+      'tool-call-malformed-iterate',
+      { i: 'hide malformed CLI output', runDir: output },
+      undefined,
+      (update: Record<string, unknown>) => { malformedUpdates.push(update); },
+      {
+        ui: {
+          setStatus: (...args: unknown[]) => { malformedStatusWrites.push(args); },
+          setWidget: () => undefined,
+        },
+      },
+    );
+    expect(malformedDrive).toMatchObject({
+      isError: true,
+      content: [{ type: 'text', text: 'Deterministic driver failed' }],
+    });
+    expect(malformedUpdates).toEqual([]);
+    expect(JSON.stringify(malformedStatusWrites)).toContain('Deterministic driver failed');
+    expect(JSON.stringify(malformedDrive)).not.toContain('raw adapter malformed secret');
+    expect(JSON.stringify(malformedStatusWrites)).not.toContain('raw adapter malformed secret');
+    runIterateMalformed = false;
+
     runIterateShellFailure = 1;
     const shellFailureUpdates: Array<Record<string, unknown>> = [];
     const shellFailureRun = await tempRun('omp-shell-failed-progress-');
@@ -765,7 +801,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       (update: Record<string, unknown>) => { shellFailureUpdates.push(update); },
       { ui: { setStatus: () => undefined, setWidget: () => undefined } },
     );
-    expect(shellFailureDrive).toMatchObject({ details: { state: 'waiting' } });
+    expect(shellFailureDrive).toMatchObject({ details: { state: 'operator_attention' } });
     expect(shellFailureUpdates).toEqual(expect.arrayContaining([
       expect.objectContaining({
         details: expect.objectContaining({
@@ -826,7 +862,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     );
     expect(unavailableDetailDrive).toMatchObject({
       isError: true,
-      content: [{ type: 'text', text: 'Babysitter deterministic driver failed' }],
+      content: [{ type: 'text', text: 'Deterministic driver failed' }],
     });
     expect(unavailableDetailUpdates).toEqual([]);
     expect(JSON.stringify(unavailableDetailDrive)).not.toContain('unsafe-object-secret');
