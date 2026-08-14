@@ -77,6 +77,18 @@ function createFixtureRepo(t) {
       '#!/bin/sh',
       'echo "$*" >> "$NPM_FAKE_LOG"',
       'if [ "$1" = "view" ]; then',
+      // A registry that is reachable but broken (5xx / auth / DNS): a non-zero
+      // exit that is NOT an E404, which must never read as "unpublished".
+      '  if [ -n "$NPM_FAKE_VIEW_ERROR" ]; then echo "$NPM_FAKE_VIEW_ERROR" >&2; exit 1; fi',
+      // Read-after-write lag: this spec 404s for the first N queries and is
+      // then visible, exactly as a dependency published seconds earlier behaves.
+      '  if [ -n "$NPM_FAKE_APPEAR_AFTER_SPEC" ] && [ "$2" = "$NPM_FAKE_APPEAR_AFTER_SPEC" ]; then',
+      '    COUNT=$(cat "$NPM_FAKE_COUNTER" 2>/dev/null || echo 0)',
+      '    COUNT=$((COUNT + 1))',
+      '    echo "$COUNT" > "$NPM_FAKE_COUNTER"',
+      '    if [ "$COUNT" -gt "$NPM_FAKE_APPEAR_AFTER_COUNT" ]; then echo "1.0.0"; exit 0; fi',
+      '    echo "npm error code E404" >&2; exit 1',
+      '  fi',
       '  case ":$NPM_FAKE_PUBLISHED:" in',
       '    *":$2:"*) echo "1.0.0"; exit 0 ;;',
       '    *) echo "npm error code E404" >&2; exit 1 ;;',
@@ -88,15 +100,28 @@ function createFixtureRepo(t) {
   );
   fs.chmodSync(npmShim, 0o755);
 
-  return { root, binDir, logPath: path.join(root, 'npm-invocations.log') };
+  return {
+    root,
+    binDir,
+    logPath: path.join(root, 'npm-invocations.log'),
+    counterPath: path.join(root, 'npm-view-counter'),
+  };
 }
 
 function runHelper(
   fixture,
   workspace,
-  { published = [], refName = 'develop', releaseVersion = '1.0.0', args = [] } = {},
+  {
+    published = [],
+    refName = 'develop',
+    releaseVersion = '1.0.0',
+    args = [],
+    viewError = '',
+    appearAfter = null,
+  } = {},
 ) {
   fs.writeFileSync(fixture.logPath, '');
+  fs.rmSync(fixture.counterPath, { force: true });
   const env = {
     ...process.env,
     PATH: `${fixture.binDir}${path.delimiter}${process.env.PATH}`,
@@ -104,6 +129,13 @@ function runHelper(
     GITHUB_REF_NAME: refName,
     NPM_FAKE_LOG: fixture.logPath,
     NPM_FAKE_PUBLISHED: published.join(':'),
+    NPM_FAKE_VIEW_ERROR: viewError,
+    NPM_FAKE_COUNTER: fixture.counterPath,
+    NPM_FAKE_APPEAR_AFTER_SPEC: appearAfter ? appearAfter.spec : '',
+    NPM_FAKE_APPEAR_AFTER_COUNT: appearAfter ? String(appearAfter.after) : '0',
+    // The real backoff is 5s/10s/20s/40s; the suite exercises the schedule, not
+    // the wall clock.
+    PUBLISH_PACKAGE_FROM_TAG_DEPENDENCY_RETRY_BASE_MS: '1',
   };
   delete env.RELEASE_VERSION;
   if (releaseVersion !== null) env.RELEASE_VERSION = releaseVersion;
@@ -141,6 +173,63 @@ test('publication proceeds when the exact internal dependency exists in the regi
     result.invocations.some((line) => line.startsWith('publish --workspace @fixture/consumer')),
     `expected a publish invocation; saw: ${result.invocations.join(' | ')}`,
   );
+});
+
+// ---------------------------------------------------------------------------
+// The dependency gate must survive the registry's read-after-write lag.
+//
+// Publication waves are seconds apart: wave N+1 queries a dependency wave N
+// published moments earlier, and npm's read path is eventually consistent. A
+// stale 404 there aborted the run HALF-PUBLISHED — earlier waves live, later
+// waves missing. The retry is bounded and the gate still hard-fails after it.
+// ---------------------------------------------------------------------------
+
+test('a dependency that 404s twice and then appears is published, not treated as missing', (t) => {
+  const fixture = createFixtureRepo(t);
+  const result = runHelper(fixture, '@fixture/consumer', {
+    appearAfter: { spec: '@fixture/leaf@1.0.0', after: 2 },
+  });
+
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  assert.equal(
+    result.invocations.filter((line) => line.startsWith('view @fixture/leaf@1.0.0')).length,
+    3,
+    `the gate must retry the just-published dependency; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.ok(
+    result.invocations.some((line) => line.startsWith('publish --workspace @fixture/consumer')),
+    `publication must proceed once the dependency is visible; saw: ${result.invocations.join(' | ')}`,
+  );
+});
+
+test('a dependency that never appears still fails with the dependency-order message, after a bounded retry', (t) => {
+  const fixture = createFixtureRepo(t);
+  const result = runHelper(fixture, '@fixture/consumer', { published: [] });
+
+  assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
+  assert.match(result.stderr, /Required internal dependency @fixture\/leaf@1\.0\.0 is not published yet/);
+  assert.equal(
+    result.invocations.filter((line) => line.startsWith('view @fixture/leaf@1.0.0')).length,
+    5,
+    `the retry must be bounded at 5 attempts; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.ok(!result.invocations.some((line) => line.startsWith('publish')));
+});
+
+test('a non-404 registry failure aborts immediately instead of being retried as "unpublished"', (t) => {
+  const fixture = createFixtureRepo(t);
+  const result = runHelper(fixture, '@fixture/consumer', {
+    viewError: 'npm error code E500\nnpm error 500 Internal Server Error - GET https://registry.npmjs.org/...',
+  });
+
+  assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
+  assert.match(result.stderr, /without reporting E404/);
+  assert.equal(
+    result.invocations.filter((line) => line.startsWith('view')).length,
+    1,
+    `a failed query is not a 404 and must not be retried; saw: ${result.invocations.join(' | ')}`,
+  );
+  assert.ok(!result.invocations.some((line) => line.startsWith('publish')));
 });
 
 test('range-based internal dependencies are not gated on an exact registry version', (t) => {

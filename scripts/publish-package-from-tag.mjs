@@ -13,6 +13,20 @@ const { candidateDistTagFor } = require('./lib/release-promotion.cjs');
 const workspace = getArg('--workspace');
 const skipBuild = hasFlag('--skip-build') || process.env.PUBLISH_PACKAGE_FROM_TAG_SKIP_BUILD === '1';
 
+/**
+ * "This exact version has never been published" as npm reports it: a non-zero
+ * exit carrying an E404 code (`npm error code E404`, or `npm ERR! code E404` on
+ * npm < 10) or a bare `404 Not Found`. Every other failure — DNS, ECONNRESET,
+ * 401/403, a registry 5xx — is a FAILED QUERY, not evidence of absence.
+ */
+const NPM_NOT_FOUND_PATTERN = /\bE404\b|404\s+Not\s+Found/i;
+
+/** Bounded registry-visibility retry; see awaitPublishedDependency. */
+const DEPENDENCY_VISIBILITY_ATTEMPTS = 5;
+const DEPENDENCY_VISIBILITY_BASE_DELAY_MS = Number(
+  process.env.PUBLISH_PACKAGE_FROM_TAG_DEPENDENCY_RETRY_BASE_MS ?? 5000,
+);
+
 if (!workspace) {
   fail('Usage: node scripts/publish-package-from-tag.mjs --workspace=<package-name>');
 }
@@ -57,7 +71,7 @@ if (target.manifest.version !== release.releaseVersion) {
   );
 }
 
-if (npmView(packageSpec)) {
+if (isPublished(packageSpec)) {
   if (!process.env.NODE_AUTH_TOKEN) {
     console.log(`${packageSpec} already exists; NODE_AUTH_TOKEN is not configured, so dist-tag ${tag} was not changed.`);
     process.exit(0);
@@ -79,9 +93,12 @@ if (!process.env.NODE_AUTH_TOKEN) {
 // successfully while pinning `@a5c-ai/hooks-adapter-genty`, a package that had
 // never been published at all (docs/release-incident-2026-08-13.md). A local
 // workspace proves nothing about what a clean consumer can install.
+//
+// The check tolerates the registry's read-after-write lag with a BOUNDED retry
+// (see awaitPublishedDependency) and then still hard-fails.
 for (const dependency of collectInternalDependencies(target.manifest)) {
   if (!isExactVersion(dependency.range)) continue;
-  if (!npmView(`${dependency.name}@${dependency.range}`)) {
+  if (!awaitPublishedDependency(`${dependency.name}@${dependency.range}`)) {
     fail(
       `Required internal dependency ${dependency.name}@${dependency.range} is not published yet. ` +
         `Publish it before ${packageSpec} (dependency-ordered publication).`,
@@ -210,8 +227,58 @@ function run(command, args, options = {}) {
   return result;
 }
 
-function npmView(spec) {
-  return run('npm', ['view', spec, 'version'], { allowFailure: true, stdio: 'pipe' }).status === 0;
+/**
+ * @returns {boolean} whether the exact spec is on the registry
+ * @throws (exits 1) when npm could not answer the question at all. Reading a
+ *   registry outage as "not published" would either re-publish over an existing
+ *   version or abort a half-finished release for the wrong reason.
+ */
+function isPublished(spec) {
+  const result = run('npm', ['view', spec, 'version'], { allowFailure: true, stdio: 'pipe' });
+  if (result.status === 0) return true;
+  const output = `${result.stderr || ''}${result.stdout || ''}`;
+  if (NPM_NOT_FOUND_PATTERN.test(output)) return false;
+  fail(
+    `Registry query for ${spec} failed (exit ${result.status}) without reporting E404, so npm could not ` +
+      'tell us whether that version exists. Refusing to guess mid-release. npm said:\n' +
+      `${output.trim().slice(0, 2000)}`,
+  );
+  return false; // unreachable: fail() exits
+}
+
+/**
+ * Registry visibility of a just-published dependency, with a BOUNDED retry.
+ *
+ * Publication waves are minutes apart at most: wave N+1 queries the registry
+ * seconds after wave N published, and npm's read path is eventually consistent,
+ * so a package that WAS published can still 404 briefly. Failing on that first
+ * 404 aborts the run half-published — every earlier wave live on npm, every
+ * later one missing — which is the worst possible release state.
+ *
+ * This is not a fallback and it does not weaken the gate: after the last
+ * attempt the missing dependency is still a hard failure with the same
+ * dependency-order message. Non-404 failures are not retried at all; they abort
+ * immediately via {@link isPublished}.
+ *
+ * Default schedule: 5 attempts, 5s/10s/20s/40s backoff — under 80 seconds.
+ */
+function awaitPublishedDependency(spec) {
+  for (let attempt = 1; attempt <= DEPENDENCY_VISIBILITY_ATTEMPTS; attempt += 1) {
+    if (isPublished(spec)) return true;
+    if (attempt === DEPENDENCY_VISIBILITY_ATTEMPTS) return false;
+    const delay = DEPENDENCY_VISIBILITY_BASE_DELAY_MS * 2 ** (attempt - 1);
+    console.log(
+      `${spec} is not visible on the registry yet (attempt ${attempt}/${DEPENDENCY_VISIBILITY_ATTEMPTS}); ` +
+        `retrying in ${delay}ms in case the wave that publishes it has not propagated.`,
+    );
+    sleepSync(delay);
+  }
+  return false;
+}
+
+function sleepSync(ms) {
+  if (!(ms > 0)) return;
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
 function fail(message) {
