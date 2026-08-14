@@ -17,8 +17,16 @@ import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const { listGroup, listGroupIds, hooksBuildOrder, publicationOrder, derivedWorkflowCoverage } = require('../lib/release-matrix.cjs');
+const {
+  listGroup,
+  listGroupIds,
+  hooksBuildOrder,
+  publicationOrder,
+  derivedWorkflowCoverage,
+  releaseMatrixCoverageViolations,
+} = require('../lib/release-matrix.cjs');
 const { listPublishablePackages } = require('../lib/publishable-packages.cjs');
+const { stripYamlComments } = require('../lib/workflow-text.cjs');
 
 const BRANCH_WORKFLOW = '.github/workflows/publish.yml';
 const TAG_WORKFLOW = '.github/workflows/publish-packages-from-tag.yml';
@@ -307,6 +315,102 @@ test('a publication order may only be derived from the complete dependency graph
       ),
     /requires --group all-publishable/,
   );
+});
+
+// ---------------------------------------------------------------------------
+// Workflow coverage must not be spoofable by a comment.
+//
+// The gate credits a package as published when its name appears in the
+// workflow. Matching raw text also matched comments, so one comment line could
+// satisfy the gate for a package nothing publishes — reproducing the exact
+// omission (`@a5c-ai/hooks-adapter-genty`) the gate exists to prevent.
+// ---------------------------------------------------------------------------
+
+test('the comment stripper removes comment bodies and keeps everything executable', () => {
+  const source = [
+    '# @a5c-ai/only-in-a-comment',
+    'jobs:',
+    '  publish:',
+    '    run: npm publish --workspace=@a5c-ai/real-package # @a5c-ai/trailing-comment',
+    '    args: "a # b"',
+    "    quoted: 'c # d'",
+    '    shell: if [ "$#" -gt 0 ]; then echo @a5c-ai/after-a-positional-count; fi',
+    '    fragment: https://example.com/page#@a5c-ai/anchor',
+  ].join('\n');
+
+  const stripped = stripYamlComments(source);
+
+  assert.doesNotMatch(stripped, /@a5c-ai\/only-in-a-comment/);
+  assert.doesNotMatch(stripped, /@a5c-ai\/trailing-comment/);
+  assert.match(stripped, /@a5c-ai\/real-package/);
+  assert.match(stripped, /"a # b"/, 'a # inside a quoted scalar is literal');
+  assert.match(stripped, /'c # d'/);
+  assert.match(stripped, /@a5c-ai\/after-a-positional-count/, '"$#" is not a comment start');
+  assert.match(stripped, /@a5c-ai\/anchor/, 'a # not preceded by whitespace is not a comment start');
+  assert.equal(stripped.split('\n').length, source.split('\n').length, 'line structure must survive');
+});
+
+test('a package named ONLY in a workflow comment is not covered', () => {
+  const packages = [{ name: '@a5c-ai/atlas' }];
+  const commented = [
+    'jobs:',
+    '  publish:',
+    '    steps:',
+    '      # @a5c-ai/atlas is published elsewhere, honest',
+    '      - run: echo nothing',
+  ].join('\n');
+
+  assert.deepEqual(
+    releaseMatrixCoverageViolations({
+      repoRoot,
+      packages,
+      workflowContents: commented,
+      surface: 'fixture.yml',
+    }),
+    [{ package: '@a5c-ai/atlas', surface: 'fixture.yml' }],
+  );
+});
+
+test('a package named in a real workflow step is covered', () => {
+  const packages = [{ name: '@a5c-ai/atlas' }];
+  const executed = [
+    'jobs:',
+    '  publish:',
+    '    steps:',
+    '      - run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/atlas',
+  ].join('\n');
+
+  assert.deepEqual(
+    releaseMatrixCoverageViolations({ repoRoot, packages, workflowContents: executed, surface: 'fixture.yml' }),
+    [],
+  );
+});
+
+test('a release-matrix group invocation that exists only in a comment credits nothing', () => {
+  const commentOnly = ['jobs:', '  build:', '    # node scripts/release-matrix.cjs --group hooks-leaves', '    steps: []'].join('\n');
+  assert.equal(derivedWorkflowCoverage(repoRoot, commentOnly).size, 0);
+
+  const executed = ['jobs:', '  build:', '    steps:', '      - run: node scripts/release-matrix.cjs --group hooks-leaves'].join('\n');
+  const derived = derivedWorkflowCoverage(repoRoot, executed);
+  for (const leaf of EXPECTED_HOOKS_LEAVES) {
+    assert.ok(derived.has(leaf), `${leaf} must be credited by a real generator invocation`);
+  }
+});
+
+test('both release workflows still cover the whole inventory once comments are ignored', () => {
+  const inventory = listPublishablePackages(repoRoot);
+  for (const surface of [BRANCH_WORKFLOW, TAG_WORKFLOW]) {
+    assert.deepEqual(
+      releaseMatrixCoverageViolations({
+        repoRoot,
+        packages: inventory,
+        workflowContents: readRepoFile(surface),
+        surface,
+      }),
+      [],
+      `${surface} must publish every public package through executable configuration, not comments`,
+    );
+  }
 });
 
 test('the FIX-005 release-matrix gaps are no longer tolerated by the allowlist', () => {

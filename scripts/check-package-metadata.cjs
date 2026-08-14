@@ -553,7 +553,11 @@ const {
   collectDependencyOwnershipViolations,
   matchKnownDefects,
 } = require('./lib/dependency-ownership.cjs');
-const { derivedWorkflowCoverage } = require('./lib/release-matrix.cjs');
+const { releaseMatrixCoverageViolations } = require('./lib/release-matrix.cjs');
+const {
+  collectSchemaProblems,
+  collectStaleInstallScriptEntries,
+} = require('./lib/known-package-defects.cjs');
 
 const KNOWN_PACKAGE_DEFECTS_PATH = 'scripts/known-package-defects.json';
 const RELEASE_MATRIX_SURFACES = [
@@ -569,16 +573,38 @@ try {
   fail(`publishable-package inventory generation failed: ${error.message}`);
 }
 
+// Every section — `installScripts` included — carries the same structured
+// entry: an object naming the package, the FIX id that will delete it, and why
+// it is tolerated. `installScripts` used to also accept a bare package-name
+// string, which is how the one allowlist that switches OFF a security control
+// escaped both the fixId requirement and staleness detection.
 function verifyKnownDefectEntriesNameFixIds() {
-  for (const section of ['dependencyOwnership', 'releaseMatrixCoverage', 'packedArtifact']) {
-    for (const entry of knownPackageDefects[section] || []) {
-      if (typeof entry.fixId !== 'string' || !/^FIX-\d+$/.test(entry.fixId)) {
-        fail(
-          `${KNOWN_PACKAGE_DEFECTS_PATH} ${section} entry for ${JSON.stringify(entry.package)} ` +
-            'must reference its FIX id (e.g. "FIX-002")',
-        );
-      }
-    }
+  const problems = collectSchemaProblems(knownPackageDefects, KNOWN_PACKAGE_DEFECTS_PATH);
+  if (problems.length) fail(problems.join('\n'));
+}
+
+/**
+ * Staleness for the installScripts allowlist, mirroring every other section:
+ * an entry is stale when the defect it tolerates no longer reproduces. The
+ * enforced end-state of the list is EMPTY.
+ */
+function verifyInstallScriptAllowlist() {
+  const stale = collectStaleInstallScriptEntries({
+    defects: knownPackageDefects,
+    inventory: publishableInventory,
+  });
+  if (stale.length) {
+    fail(
+      `stale installScripts entries in ${KNOWN_PACKAGE_DEFECTS_PATH} — these no longer reproduce, delete them:\n` +
+        stale.map((line) => `  - ${line}`).join('\n'),
+    );
+  }
+  if ((knownPackageDefects.installScripts || []).length) {
+    console.warn(
+      `Tolerating ${knownPackageDefects.installScripts.length} package(s) that run install scripts in the ` +
+        `clean-consumer verification, tracked in ${KNOWN_PACKAGE_DEFECTS_PATH}: ` +
+        knownPackageDefects.installScripts.map((entry) => `${entry.fixId} (${entry.package})`).join(', '),
+    );
   }
 }
 
@@ -599,10 +625,6 @@ function verifyInventoryDocsCoverage() {
   }
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function verifyReleaseMatrixCoverage() {
   const violations = [];
   for (const surface of RELEASE_MATRIX_SURFACES) {
@@ -610,18 +632,20 @@ function verifyReleaseMatrixCoverage() {
     if (!fs.existsSync(fullPath)) {
       fail(`release matrix surface ${surface} is missing`);
     }
-    const contents = fs.readFileSync(fullPath, 'utf8');
     // FIX-005: a package is covered either by being named in the workflow or
     // by belonging to a release-matrix group the workflow derives from the
     // authoritative inventory (scripts/release-matrix.cjs --group <id>).
     // Derived coverage is what makes a hand-maintained omission impossible.
-    const derived = derivedWorkflowCoverage(repoRoot, contents);
-    for (const entry of publishableInventory) {
-      const pattern = new RegExp(`${escapeRegExp(entry.name)}(?![\\w.-])`);
-      if (!pattern.test(contents) && !derived.has(entry.name)) {
-        violations.push({ package: entry.name, surface });
-      }
-    }
+    // Coverage is judged against the comment-stripped workflow: a name that
+    // appears only in a comment publishes nothing.
+    violations.push(
+      ...releaseMatrixCoverageViolations({
+        repoRoot,
+        packages: publishableInventory,
+        workflowContents: fs.readFileSync(fullPath, 'utf8'),
+        surface,
+      }),
+    );
   }
   const known = knownPackageDefects.releaseMatrixCoverage || [];
   const keyOf = (item) => `${item.package} ${item.surface}`;
@@ -698,6 +722,7 @@ function verifyDependencyOwnership() {
 }
 
 verifyKnownDefectEntriesNameFixIds();
+verifyInstallScriptAllowlist();
 verifyInventoryDocsCoverage();
 verifyReleaseMatrixCoverage();
 verifyDependencyOwnership();

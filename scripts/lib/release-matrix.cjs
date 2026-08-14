@@ -24,6 +24,7 @@
 'use strict';
 
 const { listPublishablePackages } = require('./publishable-packages.cjs');
+const { stripYamlComments } = require('./workflow-text.cjs');
 
 /**
  * A derived group selects members of the authoritative inventory. Workflows
@@ -200,22 +201,57 @@ function escapeRegExp(value) {
  * Packages a workflow covers because it invokes the release-matrix generator
  * for a group, rather than naming the packages one by one.
  *
+ * Comments are stripped first: a workflow that only MENTIONS the generator in a
+ * comment (publish.yml does exactly that, next to the derived hooks-leaves
+ * matrix) runs nothing, and must credit nothing.
+ *
  * @param {string} repoRoot absolute path to the repository root
  * @param {string} workflowContents raw workflow YAML text
  * @returns {Set<string>} covered package names
  */
 function derivedWorkflowCoverage(repoRoot, workflowContents) {
+  const executable = stripYamlComments(workflowContents);
   const covered = new Set();
   for (const groupId of listGroupIds()) {
     const invocation = new RegExp(
       `scripts/release-matrix\\.cjs[^\\n]*--group[= ]${escapeRegExp(groupId)}(?![\\w-])`,
     );
-    if (!invocation.test(workflowContents)) continue;
+    if (!invocation.test(executable)) continue;
     for (const member of listGroup(repoRoot, groupId)) {
       covered.add(member.name);
     }
   }
   return covered;
+}
+
+/**
+ * The release-matrix coverage gate: which publishable packages a workflow does
+ * NOT publish.
+ *
+ * A package is covered when the workflow either names it in an executable
+ * position or derives it from a release-matrix group the workflow actually
+ * invokes. Coverage is decided against the COMMENT-STRIPPED workflow, because a
+ * package named only in a comment is published by nothing — crediting it is the
+ * same silent omission (`@a5c-ai/hooks-adapter-genty` was public, documented and
+ * pinned by the hooks CLI, yet published by no workflow) that this gate exists
+ * to make impossible.
+ *
+ * @param {object} input
+ * @param {string} input.repoRoot absolute path to the repository root
+ * @param {Array<{name: string}>} input.packages authoritative inventory entries
+ * @param {string} input.workflowContents raw workflow YAML text
+ * @param {string} input.surface workflow path, echoed into each violation
+ * @returns {Array<{package: string, surface: string}>}
+ */
+function releaseMatrixCoverageViolations({ repoRoot, packages, workflowContents, surface }) {
+  const executable = stripYamlComments(workflowContents);
+  const derived = derivedWorkflowCoverage(repoRoot, workflowContents);
+  const violations = [];
+  for (const entry of packages) {
+    const named = new RegExp(`${escapeRegExp(entry.name)}(?![\\w.-])`).test(executable);
+    if (!named && !derived.has(entry.name)) violations.push({ package: entry.name, surface });
+  }
+  return violations;
 }
 
 module.exports = {
@@ -226,4 +262,5 @@ module.exports = {
   publicationOrder,
   nonHoistedVerificationPackages,
   derivedWorkflowCoverage,
+  releaseMatrixCoverageViolations,
 };
