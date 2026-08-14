@@ -25,6 +25,11 @@ export interface ClaudePostToolUseOutput {
 export interface ClaudeStopOutput {
   /** If true, the session continues instead of stopping. */
   continue?: boolean;
+  /**
+   * Holds the agent in its turn when set. Claude Code only keeps a turn
+   * alive on {"decision":"block"}, which the orchestration loop relies on.
+   */
+  decision?: 'block';
   /** Optional reason for the decision. */
   reason?: string;
   /** Follow-up message to send if continuing. */
@@ -195,7 +200,13 @@ function renderPostToolUseOutput(result: UnifiedHookResult): Record<string, unkn
 function renderStopOutput(result: UnifiedHookResult): Record<string, unknown> {
   const output: Record<string, unknown> = {};
 
-  if (result.continueSession != null) {
+  if (result.decision === 'block') {
+    // Claude Code holds an agent in its turn only on {"decision":"block"},
+    // and the merge engine aggregates handler decisions, so a blocking stop
+    // handler has to surface here or the continuation loop never engages.
+    // Emitting 'continue' alongside would let the turn end normally.
+    output['decision'] = 'block';
+  } else if (result.continueSession != null) {
     output['continue'] = result.continueSession;
   }
 

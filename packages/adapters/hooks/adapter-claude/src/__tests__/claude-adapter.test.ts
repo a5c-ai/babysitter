@@ -647,6 +647,24 @@ describe('renderClaudeOutput', () => {
       );
       expect(output).toEqual({ reason: 'specific stop' });
     });
+
+    it('renders a block decision so Claude holds the agent in its turn', () => {
+      const output = renderClaudeOutput(
+        {
+          decision: 'block',
+          reason: 'Babysitter iteration 3 | Continue orchestration (run:iterate).',
+          continueSession: true,
+        },
+        'Stop',
+      );
+      // The merged result keeps continueSession=true (the handler only
+      // returned a decision), but emitting 'continue' alongside a block
+      // would let the turn end normally and the loop never fire again.
+      expect(output).toEqual({
+        decision: 'block',
+        reason: 'Babysitter iteration 3 | Continue orchestration (run:iterate).',
+      });
+    });
   });
 
   describe('SessionStart rendering', () => {
