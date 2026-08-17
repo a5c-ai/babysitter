@@ -28,6 +28,8 @@
     "node": ">=20.9.0"
   },
   "main": "./dist/index.js",
+  "//react-native": "Standard Metro/React Native resolution field. This library statically imports react-native, whose own entrypoint is Flow source, so it is resolved by a bundler and is not evaluable by bare Node — declaring the field states that contract to consumers and to the FIX-011 release gate.",
+  "react-native": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

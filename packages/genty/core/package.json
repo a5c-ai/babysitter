@@ -74,6 +74,9 @@
     "@a5c-ai/trust-core": "6.0.0",
     "@sinclair/typebox": "^0.34.48"
   },
+  "optionalDependencies": {
+    "@vscode/ripgrep": "^1.15.9"
+  },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "rimraf": "^6.1.3",

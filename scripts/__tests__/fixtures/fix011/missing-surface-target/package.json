@@ -1,0 +1,16 @@
+{
+  "name": "fix011-missing-surface-target",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: main/types/bin all point at dist/ files that do not exist and are never built, so the packed tarball is missing every declared surface target.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "fix011-missing-surface": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

@@ -48,7 +48,9 @@ const binaryRenames = [
     manifestPath: "packages/adapters/hooks/cli/package.json",
     canonicalBin: "adapters-hooks",
     canonicalTarget: "dist/cli/main.js",
-    canonicalSource: "packages/adapters/hooks/cli/src/index.ts",
+    // The bin target dist/cli/main.js is emitted from src/cli/main.ts, not from
+    // the library entrypoint src/index.ts.
+    canonicalSource: "packages/adapters/hooks/cli/src/cli/main.ts",
     legacyBin: "a5c-hooks-adapter",
     legacyTarget: "dist/cli/a5c-hooks-adapter.js",
     legacySource: "packages/adapters/hooks/cli/src/cli/a5c-hooks-adapter.ts",
@@ -59,9 +61,13 @@ const binaryRenames = [
     canonicalBin: "adapters-extensions",
     canonicalTarget: "./dist/cli.js",
     canonicalSource: "packages/adapters/extensions/src/cli.ts",
+    // The authoritative compatibility source is SINGULAR
+    // (src/extension-adapter.ts); tsc emits dist/extension-adapter.js from it.
+    // FIX-004: the manifest and this guard previously pointed at a plural
+    // dist/extensions-adapter.js that no build step ever produced.
     legacyBin: "extensions-adapter",
-    legacyTarget: "./dist/extensions-adapter.js",
-    legacySource: "packages/adapters/extensions/src/extensions-adapter.ts",
+    legacyTarget: "./dist/extension-adapter.js",
+    legacySource: "packages/adapters/extensions/src/extension-adapter.ts",
   },
   {
     packageName: "@a5c-ai/triggers-adapter",
@@ -107,9 +113,19 @@ function exists(relativePath) {
   return fs.existsSync(path.join(rootDir, relativePath));
 }
 
+/**
+ * Some entries keep the same published name as their canonical binary
+ * (`adapters`, `adapters-tui`): they were never renamed, so there is no
+ * deprecated alias to document or to warn about. They are still validated as
+ * canonical binaries (manifest target, source, emitted path).
+ */
+function hasLegacyAlias(rename) {
+  return Boolean(rename.legacyBin) && rename.legacyBin !== rename.canonicalBin;
+}
+
 function validateSpecRows(errors) {
   const spec = readFile(specPath);
-  for (const rename of binaryRenames.filter((entry) => entry.legacyBin)) {
+  for (const rename of binaryRenames.filter(hasLegacyAlias)) {
     const requiredCells = [
       `\`${rename.legacyBin}\``,
       `\`${rename.packageName}\``,
@@ -166,6 +182,10 @@ function validateSources(rename, errors) {
     errors.push(`Missing canonical source entrypoint ${rename.canonicalSource}.`);
   }
 
+  if (!hasLegacyAlias(rename)) {
+    return;
+  }
+
   if (!exists(rename.legacySource)) {
     errors.push(`Missing deprecated alias source entrypoint ${rename.legacySource}.`);
     return;
@@ -178,6 +198,77 @@ function validateSources(rename, errors) {
   }
 }
 
+function normalizeManifestTarget(target) {
+  return target.replace(/^\.\//, "");
+}
+
+function stripTrailingSlash(value) {
+  return value.replace(/\/+$/, "");
+}
+
+/**
+ * FIX-004: a declared bin target must be the file the build actually EMITS from
+ * the declared source. The published extensions adapter declared
+ * `dist/extensions-adapter.js` (plural) while the only source was
+ * `src/extension-adapter.ts` (singular), so the compatibility bin target never
+ * existed in the tarball. Deriving the emitted path from the package tsconfig
+ * (`rootDir` -> `outDir`, `.ts`/`.tsx` -> `.js`) makes that class of drift a
+ * guard failure instead of a broken published artifact.
+ */
+function validateEmittedTargets(rename, errors) {
+  if (rename.delegatedTo) {
+    return;
+  }
+
+  const packageDir = path.posix.dirname(rename.manifestPath.split(path.sep).join("/"));
+  const tsconfigRelative = `${packageDir}/tsconfig.json`;
+  if (!exists(tsconfigRelative)) {
+    errors.push(`${rename.packageName} has no ${tsconfigRelative}; cannot derive emitted bin targets.`);
+    return;
+  }
+
+  let compilerOptions;
+  try {
+    compilerOptions = JSON.parse(readFile(tsconfigRelative)).compilerOptions ?? {};
+  } catch (error) {
+    errors.push(`${tsconfigRelative} is not valid JSON: ${error.message}`);
+    return;
+  }
+
+  const rootDir = compilerOptions.rootDir;
+  const outDir = compilerOptions.outDir;
+  if (typeof rootDir !== "string" || typeof outDir !== "string") {
+    errors.push(
+      `${tsconfigRelative} must declare compilerOptions.rootDir and compilerOptions.outDir so bin targets can be derived from sources.`,
+    );
+    return;
+  }
+
+  const rootPrefix = `${packageDir}/${stripTrailingSlash(rootDir)}/`;
+  const outPrefix = `${stripTrailingSlash(outDir)}/`;
+
+  const pairs = [
+    { bin: rename.canonicalBin, source: rename.canonicalSource, target: rename.canonicalTarget },
+    { bin: rename.legacyBin, source: rename.legacySource, target: rename.legacyTarget },
+  ];
+
+  for (const pair of pairs) {
+    if (!pair.source || !pair.target) continue;
+    const source = pair.source.split(path.sep).join("/");
+    if (!source.startsWith(rootPrefix)) {
+      errors.push(`${source} is outside the compiled rootDir ${rootPrefix} of ${rename.packageName}.`);
+      continue;
+    }
+    const emitted = `${outPrefix}${source.slice(rootPrefix.length).replace(/\.tsx?$/, ".js")}`;
+    const declared = normalizeManifestTarget(pair.target);
+    if (emitted !== declared) {
+      errors.push(
+        `${rename.manifestPath} bin.${pair.bin} declares ${declared}, but ${source} is emitted as ${emitted}.`,
+      );
+    }
+  }
+}
+
 function main() {
   const errors = [];
   const canonicalOwners = new Map();
@@ -187,6 +278,7 @@ function main() {
   for (const rename of binaryRenames) {
     validateManifest(rename, errors, canonicalOwners);
     validateSources(rename, errors);
+    validateEmittedTargets(rename, errors);
   }
 
   if (errors.length > 0) {
@@ -197,7 +289,10 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`Binary rename guardrail passed for ${binaryRenames.filter((entry) => entry.legacyBin).length} renamed binaries.`);
+  console.log(
+    `Binary rename guardrail passed for ${binaryRenames.filter(hasLegacyAlias).length} renamed binaries ` +
+      `and ${binaryRenames.filter((entry) => !entry.delegatedTo).length} emitted bin targets.`,
+  );
 }
 
 main();

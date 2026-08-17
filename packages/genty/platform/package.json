@@ -138,6 +138,9 @@
     "ws": "^8.20.0",
     "zod": "^4.0.0"
   },
+  "optionalDependencies": {
+    "@vscode/ripgrep": "^1.15.9"
+  },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "@types/ws": "^8.18.1",

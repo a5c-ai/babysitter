@@ -1004,6 +1004,16 @@ throw new AgentMuxError(
 );
 ```
 
+**As implemented (FIX-009).** `packages/adapters/core/src/pty.ts` owns PTY acquisition. It loads `node-pty` through `createRequire(import.meta.url)` (a bare `require` is a `ReferenceError` in this ESM package) and classifies every failure:
+
+| Reason | Meaning | May degrade to pipes? |
+| --- | --- | --- |
+| `module-missing` | `node-pty` is genuinely not installed | only when `ptyMode` is `preferred` |
+| `module-load-failed` | installed, but resolution/loading threw (native binding built for another Node ABI, corrupt install) | never |
+| `module-invalid` | loaded, but exposes no `spawn()` | never |
+
+`RunOptions.ptyMode` selects the contract: `'required'` raises `PTY_NOT_AVAILABLE` and never continues on pipes; `'preferred'` (the default unless `capabilities.requiresPty` is set, which defaults to `'required'`) emits an observable `debug`/`warn` event naming `PTY_NOT_AVAILABLE` **before** falling back, and only for `module-missing`. A PTY that fails to open after a successful load also raises `PTY_NOT_AVAILABLE` — it is an environment defect, not an absent optional dependency.
+
 ---
 
 ## 8. Platform Differences

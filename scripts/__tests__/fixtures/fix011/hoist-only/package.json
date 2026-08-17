@@ -1,0 +1,12 @@
+{
+  "name": "fix011-hoist-only",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: imports a package (typescript) that resolves inside this monorepo only through the repository root node_modules. It must fail in a fresh temporary consumer with no workspace links.",
+  "license": "MIT",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ]
+}

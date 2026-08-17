@@ -2,6 +2,15 @@
 
 Thanks for your interest. This doc covers local dev setup and the manual release flow.
 
+> **Historical: the release sections below no longer describe this monorepo.** They
+> were written for the standalone `adapters` repository. In the Babysitter monorepo
+> the adapters packages are published by `.github/workflows/publish.yml` like every
+> other public package: one authoritative release version, candidate dist-tag,
+> published-consumer validation, then channel promotion. There is no changesets
+> "Version Packages" PR, no `release.yml` workflow, and no supported manual
+> bump-and-publish path. See [docs/release-pipeline.md](../../../../docs/release-pipeline.md).
+> The local development section above is still accurate.
+
 ## Local development
 
 ```bash

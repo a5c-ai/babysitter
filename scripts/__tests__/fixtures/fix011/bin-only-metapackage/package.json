@@ -1,0 +1,15 @@
+{
+  "name": "fix011-bin-only-metapackage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: a bin-only metapackage replica of @a5c-ai/babysitter — it declares no main, no module and no exports, ships only bin/ and README.md, and is consumed exclusively through its executable. The verifier must PASS it: there is no importable root to demand.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "fix011-bin-only": "bin/fix011-bin-only.js"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ]
+}

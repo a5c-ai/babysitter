@@ -243,10 +243,10 @@ adapters: command not found
 ### Unsupported Node.js version (adapters)
 
 ```
-Error: @a5c-ai/adapters-cli requires Node.js >=20.9.0
+Error: @a5c-ai/adapters-gateway requires Node.js >=22.13.0, but this process is running Node.js v20.19.0.
 ```
 
-**Meaning:** The `adapters` CLI pins a higher Node floor (>=20.9.0) than the rest of the Babysitter toolchain (>=20.0.0).
+**Meaning:** The `adapters` CLI pins a higher Node floor (>=22.13.0) than the rest of the Babysitter toolchain (>=20.0.0). The CLI root loads `@a5c-ai/adapters-gateway`, which uses the built-in `node:sqlite` module — unflagged only from Node.js 22.13.0.
 
 **Causes:**
 - An older Node.js is active in the current shell

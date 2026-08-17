@@ -416,7 +416,38 @@ interface VtStripper {
 }
 ```
 
-If `node-pty` is not installed and the selected agent requires PTY:
+`node-pty` is declared under exactly one ownership model — a documented optional
+peer — so the consumer decides whether to install it. It is loaded explicitly
+and ESM-safely through `createRequire(import.meta.url)`, resolved from the
+package's installed location, so a consumer-supplied copy is found by the
+ordinary `node_modules` walk.
+
+#### `RunOptions.ptyMode` (FIX-009)
+
+Whether an unavailable PTY fails the run or degrades it is a declared contract,
+never an implicit fallback:
+
+| `ptyMode` | `node-pty` not installed | `node-pty` installed but broken, or the PTY cannot be opened |
+| --- | --- | --- |
+| `'required'` | run fails with `PTY_NOT_AVAILABLE` | run fails with `PTY_NOT_AVAILABLE` |
+| `'preferred'` (default) | **observable** `debug`/`warn` event naming `PTY_NOT_AVAILABLE`, then the run continues on ordinary pipes | run fails with `PTY_NOT_AVAILABLE` |
+
+Default: `'required'` when the adapter declares `capabilities.requiresPty`,
+otherwise `'preferred'`.
+
+An **absent** optional peer is the only condition that may ever degrade a run to
+pipes, and the degradation is always announced on the run handle first:
+
+```typescript
+const handle = client.run({ agent: 'claude', prompt: 'hi', interactive: true });
+handle.on('debug', (event) => {
+  if (event.level === 'warn' && event.message.includes('PTY_NOT_AVAILABLE')) {
+    // the run is on pipes, not a TTY
+  }
+});
+```
+
+In `'required'` mode the absent peer raises:
 
 ```typescript
 throw new AgentMuxError(
@@ -426,7 +457,14 @@ throw new AgentMuxError(
 );
 ```
 
-**Native module caveat:** `node-pty` requires platform-specific compilation via `node-gyp`. If the Node.js version changes after installation (e.g., `nvm use` to a different version), the native bindings may become invalid. The error manifests as a module load failure, which the stream engine catches and re-throws as `PTY_NOT_AVAILABLE` with an amended message suggesting reinstallation.
+**Native module caveat:** `node-pty` requires platform-specific compilation via `node-gyp`. If the Node.js version changes after installation (e.g., `nvm use` to a different version), the native bindings may become invalid. An installed-but-unusable `node-pty` — native binding compiled for a different Node.js ABI, missing prebuild, or no free PTY device — is an **environment defect**, not an absent optional dependency: the module load failure is caught and re-thrown as `PTY_NOT_AVAILABLE` in **both** modes rather than silently downgrading to pipes. Use `npm rebuild node-pty` after switching Node versions.
+
+`loadPtyModule()`, `ptyFallbackIsPermitted()`, `resolvePtyMode()`,
+`PtyNotAvailableError`, and the `PtyMode` / `PtyLoadResult` types are exported
+from the `@a5c-ai/comm-adapter` root for callers that want to probe PTY
+availability up front. See `packages/adapters/core/README.md` and
+[03-run-handle-and-interaction.md](./03-run-handle-and-interaction.md) §7.3 for
+the authoritative contract.
 
 ### 6.5 PTY Resource Limits
 
@@ -970,6 +1008,7 @@ Iterating over a `RunHandle` after the run has completed yields all buffered eve
 | Requirement | Minimum Version | Rationale |
 |---|---|---|
 | Node.js | 20.9.0 | Stable Web Streams API, `structuredClone()`, improved `AbortSignal` support |
+| Node.js (`@a5c-ai/adapters-cli`, `@a5c-ai/adapters`) | 22.13.0 | Their roots load `@a5c-ai/adapters-gateway`, which uses the built-in `node:sqlite` module (unflagged only from 22.13.0) |
 | npm | 10.0.0 | Workspace protocol support for monorepo package structure |
 | TypeScript (development) | 5.3 | `satisfies` operator, const type parameters |
 
@@ -980,6 +1019,16 @@ The `engines` field in `package.json`:
   "engines": {
     "node": ">=20.9.0",
     "npm": ">=10.0.0"
+  }
+}
+```
+
+Packages whose root import graph reaches the gateway declare the higher floor instead:
+
+```json
+{
+  "engines": {
+    "node": ">=22.13.0"
   }
 }
 ```

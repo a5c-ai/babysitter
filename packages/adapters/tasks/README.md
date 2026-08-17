@@ -11,9 +11,27 @@ npm install --save-dev @a5c-ai/tasks-adapter
 npx --yes @a5c-ai/tasks-adapter --help
 ```
 
+> **Pin an explicit version until the recovery release lands.** As of the
+> 2026-08-13 registry snapshot, `latest` for this package still resolves to
+> `6.0.0`, which omits its `@modelcontextprotocol/sdk` runtime dependency and
+> fails on any MCP import (FIX-002). The fix ships in the recovery release; the
+> unversioned commands above resolve a working artifact only once `latest` has
+> been promoted to it. See
+> [docs/release-incident-2026-08-13.md](../../../docs/release-incident-2026-08-13.md)
+> and [docs/release-recovery-runbook.md](../../../docs/release-recovery-runbook.md).
+> Delete this note once the promotion has been verified against the registry.
+
 ## CLI
 
-The published executable is `adapters-tasks`. The supported consumer workflow is either:
+The package publishes **two** bins, both declared in `package.json` and enforced by
+`npm run test:binary-renames` (`scripts/check-binary-renames.cjs`):
+
+| Bin | Target | Status |
+| --- | --- | --- |
+| `adapters-tasks` | `./dist/cli/index.js` | The supported executable. |
+| `tasks-adapter` | `./dist/cli/tasks-adapter.js` | Deprecation shim for the old name. It prints a deprecation notice and forwards to `adapters-tasks`; use `adapters-tasks` in new setups. |
+
+The supported consumer workflow is either:
 
 - run the published package with `npx --yes @a5c-ai/tasks-adapter ...`
 - install `@a5c-ai/tasks-adapter` and invoke `adapters-tasks ...`
@@ -60,24 +78,35 @@ The `tasks` command group is backed by the local git-native backend and supports
 
 ## MCP Tools
 
-The MCP server currently registers these tools:
+`src/mcp/server.ts` is the authoritative registration list; every tool below is
+registered unconditionally, and `src/__tests__/mcp-documented-surface.test.ts`
+fails if this list and that file disagree.
+
+Submitter-side:
 
 - `ask_breakpoint`
 - `check_breakpoint_status`
 - `list_breakpoints`
-- `answer_breakpoint`
-- `verify_breakpoint_answer`
-- `list_responders`
-- `claim_breakpoint`
-- `poll_breakpoints`
 - `create_todo`
+- `create_task`
 - `assign_task`
 - `search_tasks`
+- `cancel_breakpoint`
 - `add_comment`
+- `add_comment_to_breakpoint`
 - `bulk_update_tasks`
 - `task_stats`
 - `export_tasks`
 - `escalate`
+- `escalate_breakpoint`
+- `answer_breakpoint`
+- `verify_breakpoint_answer`
+
+Responder-side:
+
+- `list_responders`
+- `claim_breakpoint`
+- `poll_breakpoints`
 
 Backends advertise task-management capabilities. The git-native backend implements search/filtering, bulk updates, assignment/reassignment, comments, history/audit, metrics, and export. Other backends expose partial capability metadata and should return explicit unsupported-feature errors for operations they cannot safely map to their external API.
 
@@ -121,5 +150,7 @@ npm run typecheck --workspace=@a5c-ai/tasks-adapter
 npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter
 npm pack --json --dry-run --workspace=@a5c-ai/tasks-adapter
 ```
+
+`test:packaged-surface-parity` (`src/__tests__/packaged-surface-parity.test.ts`) builds and packs the adapter, installs the exact tarball into a clean temporary consumer, imports the package root plus every `exports` subpath, typechecks a consumer, and asserts the tarball matches the published contents listed above. In CI it runs in the `test` job of `.github/workflows/ci.yml` and, as a prepublication gate, in the `validate_mux` job of `.github/workflows/publish.yml` — in both places strictly (no `--allow-known-failures`), because the adapter has no tracked packaging defect left in `scripts/known-package-defects.json` since FIX-002 declared `@modelcontextprotocol/sdk` as a direct runtime dependency.
 
 Keep this README aligned with the exported CLI, MCP, and package topology surfaced by `packages/adapters/tasks/`.

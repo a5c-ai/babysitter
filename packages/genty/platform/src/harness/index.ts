@@ -166,7 +166,8 @@ export {
   parsePorcelainOutput,
   type WorktreeConfig,
   type WorktreeInfo,
-  type ExecSyncFn,
+  type WorktreeExecOptions,
+  type WorktreeExecFn,
 } from "./worktreeIsolation";
 
 // Streaming parallelism (GAP-PAR-006)

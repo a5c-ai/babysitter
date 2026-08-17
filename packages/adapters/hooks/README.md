@@ -14,15 +14,29 @@ A universal hooks proxy system that normalizes lifecycle hooks across multiple A
 |---------|-------------|
 | `@a5c-ai/hooks-adapter-core` | Canonical schemas, types, session store, and merge engine |
 | `@a5c-ai/hooks-adapter-cli` | CLI entrypoint (`a5c-hooks-adapter`) |
+| `@a5c-ai/hooks-adapter-antigravity` | Antigravity harness adapter |
 | `@a5c-ai/hooks-adapter-claude` | Claude Code harness adapter |
 | `@a5c-ai/hooks-adapter-codex` | Codex harness adapter |
-| `@a5c-ai/hooks-adapter-gemini` | Gemini CLI harness adapter |
 | `@a5c-ai/hooks-adapter-copilot` | GitHub Copilot harness adapter |
 | `@a5c-ai/hooks-adapter-cursor` | Cursor harness adapter |
-| `@a5c-ai/hooks-adapter-pi` | Pi harness adapter |
+| `@a5c-ai/hooks-adapter-gemini` | Gemini CLI harness adapter |
+| `@a5c-ai/hooks-adapter-genty` | Genty harness adapter — **not yet on npm**, publishes first in the recovery release (FIX-005) |
+| `@a5c-ai/hooks-adapter-hermes` | Hermes harness adapter |
 | `@a5c-ai/hooks-adapter-oh-my-pi` | oh-my-pi harness adapter |
-| `@a5c-ai/hooks-adapter-opencode` | OpenCode harness adapter |
 | `@a5c-ai/hooks-adapter-openclaw` | OpenClaw harness adapter |
+| `@a5c-ai/hooks-adapter-opencode` | OpenCode harness adapter |
+| `@a5c-ai/hooks-adapter-pi` | Pi harness adapter |
+
+This table is documentation only. The authoritative list of harness leaves is
+derived from the workspace manifests by the `hooks-leaves` release-matrix group
+(`node scripts/release-matrix.cjs --group hooks-leaves`), which is what the build
+and publish workflows expand; a new leaf directory under
+`packages/adapters/hooks/adapter-*` joins those matrices automatically. See
+[docs/release-pipeline.md](../../../docs/release-pipeline.md#package-inventory-and-release-matrices).
+
+Every leaf and the CLI declare `@a5c-ai/atlas` as a direct dependency (FIX-006);
+none of them rely on transitive hoisting for their Atlas imports, and
+`npm run verify:metadata` fails if that regresses.
 
 ## Quick Start
 

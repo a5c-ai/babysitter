@@ -59,7 +59,7 @@ See the [Adapters feature guide](../features/adapters.md) for the runtime story 
 | Adapter | Package | Why you care |
 |---------|---------|--------------|
 | **triggers** | `@a5c-ai/triggers-adapter` | The CI / GitHub Action entrypoint — normalizes Git-forge events into one shape and launches a run non-interactively. |
-| **extensions** | `@a5c-ai/extensions-adapter` | Compiles a single `plugin.json` manifest into **9** AI-coding-agent plugin formats. |
+| **extensions** | `@a5c-ai/extensions-adapter` | Compiles a single `plugin.json` manifest into one AI-coding-agent plugin format per target in the Atlas-derived target registry — **12** today (`adapters-extensions list-targets` is the authoritative list). |
 | **hooks** | `@a5c-ai/hooks-adapter-cli` + `@a5c-ai/hooks-adapter-core` | The cross-harness **mandatory-stop** lifecycle layer — this is what makes obedience work on every harness. |
 | **proxy** | `adapters-proxy` (Python) | A LiteLLM bridge to **140+ providers** — frees vendor-locked harnesses from a single backend. |
 | **tasks** | `@a5c-ai/tasks-adapter` | The **Breakpoints Adapter** — durable, serverless-ready human-approval breakpoints (e.g. GitHub Issues). |

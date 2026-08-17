@@ -89,6 +89,28 @@ jobs:
           set -euo pipefail
           npm run verify:metadata 2>&1 | tee artifacts/test-logs/metadata.log
 
+      - name: Release tooling tests (inventory, dependency ownership, packed-artifact verifier)
+        run: |
+          set -euo pipefail
+          npm run test:release-tooling 2>&1 | tee artifacts/test-logs/release-tooling.log
+
+      # FIX-004: proves every declared bin target (including the extensions
+      # compatibility bin) resolves to a tsconfig-derived emitted path.
+      - name: Binary rename guardrail
+        run: |
+          set -euo pipefail
+          npm run test:binary-renames 2>&1 | tee artifacts/test-logs/binary-renames.log
+
+      # FIX-007: packed-metapackage exit-code gate — packs @a5c-ai/babysitter,
+      # installs the exact tarball into a clean temporary consumer with a
+      # deterministic SDK CLI stub, and asserts the shim propagates the CLI's
+      # resolved exit code (0 and 7), reports a rejection as one handled error
+      # with exit 1, and still prints missing-SDK repair guidance.
+      - name: Metapackage shim tests (packed exit-code propagation)
+        run: |
+          set -euo pipefail
+          npm run test:babysitter-metapackage 2>&1 | tee artifacts/test-logs/babysitter-metapackage-tests.log
+
       - name: Architecture boundary gate
         run: |
           set -euo pipefail
@@ -118,6 +140,18 @@ jobs:
         run: |
           set -euo pipefail
           npm run test --workspace=@a5c-ai/tasks-adapter 2>&1 | tee artifacts/test-logs/adapters-tasks-tests.log
+
+      # FIX-012: packaged-surface parity gate — builds and packs the tasks
+      # adapter, installs the exact tarball into a clean temporary consumer,
+      # imports the root plus every exports subpath, and typechecks a consumer.
+      # FIX-002 landed (@modelcontextprotocol/sdk is now a declared direct
+      # runtime dependency) and its scripts/known-package-defects.json
+      # packedArtifact entry was deleted, so this gate runs strictly: any
+      # clean-consumer packaging failure fails CI.
+      - name: adapters-tasks packaged-surface parity
+        run: |
+          set -euo pipefail
+          npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter 2>&1 | tee artifacts/test-logs/tasks-adapter-test-packaged-surface-parity.log
 
       - name: Build hooks-adapter
         run: |
@@ -182,6 +216,17 @@ jobs:
         run: |
           set -euo pipefail
           npm run verify:release --workspace=@a5c-ai/comm-adapter 2>&1 | tee artifacts/test-logs/agent-comm-adapter-release.log
+
+      # FIX-009: the adapters-core (@a5c-ai/comm-adapter) suite is the ONLY lane
+      # that executes the PTY contract — tests/pty.test.ts and the packaged
+      # consumer test tests/pty-consumer.packaged.test.ts. It previously ran in
+      # publish.yml's validate_mux alone, so a PTY regression stayed invisible
+      # until release time. This is the PR-time copy; the step is named for PTY
+      # so the coverage is greppable from the workflow.
+      - name: adapters-core PTY contract (@a5c-ai/comm-adapter suite)
+        run: |
+          set -euo pipefail
+          node scripts/adapters-build.cjs test packages/adapters/core 2>&1 | tee artifacts/test-logs/adapters-core-pty-contract.log
 
       - name: Build realtime flow surfaces
         run: |
@@ -257,6 +302,72 @@ jobs:
             packages/adapters/webui/.tmp/playwright-report
             packages/adapters/webui/.tmp/playwright-test-results
           if-no-files-found: ignore
+
+  # FIX-008: @a5c-ai/adapters-gateway loads the built-in node:sqlite module from
+  # its package root, and node:sqlite is only importable without
+  # --experimental-sqlite from Node 22.13.0 onward. This job runs the gateway
+  # suite (including tests/node-engine-floor.test.ts, which re-derives the floor
+  # from the built root import graph and pins README + this matrix to it) on the
+  # exact declared minimum as well as on the current 22.x line.
+  #
+  # The same floor is inherited by every package whose published entrypoints
+  # statically evaluate the gateway — today @a5c-ai/adapters-cli and
+  # @a5c-ai/adapters. That set is derived from the sources (not a hand list) by
+  # scripts/__tests__/gateway-engine-floor.test.mjs, and the CLI's runtime proof
+  # (packages/adapters/cli/tests/node-engine-floor.test.ts) runs in this matrix
+  # too so the floor is exercised on the exact declared minimum.
+  gateway-node-engine:
+    name: Gateway Node engine floor
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # The first entry MUST equal the engines.node floor of
+        # packages/adapters/gateway/package.json.
+        node-version: ['22.13.0', '22']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefer-offline --legacy-peer-deps
+          # Workaround: npm ci on Windows-generated lockfile may miss linux optional deps
+          npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
+
+      - name: Build adapters gateway
+        run: |
+          set -euo pipefail
+          npm run build --workspace=@a5c-ai/adapters-gateway
+
+      - name: Gateway tests (SQLite-backed, on Node ${{ matrix.node-version }})
+        run: |
+          set -euo pipefail
+          npm run test --workspace=@a5c-ai/adapters-gateway
+
+      - name: Build adapters CLI
+        run: |
+          set -euo pipefail
+          npm run build:adapters:non-realtime
+
+      - name: Adapters CLI Node engine floor (on Node ${{ matrix.node-version }})
+        run: |
+          set -euo pipefail
+          npx vitest run --config packages/adapters/cli/vitest.config.ts packages/adapters/cli/tests/node-engine-floor.test.ts
+
+      - name: Gateway-inherited engine floors (manifests and docs)
+        run: |
+          set -euo pipefail
+          node --test scripts/__tests__/gateway-engine-floor.test.mjs
 
   workspace-coverage:
     name: Workspace Coverage

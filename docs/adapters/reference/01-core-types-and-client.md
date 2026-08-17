@@ -15,7 +15,7 @@
 | Convenience meta-package | `@a5c-ai/adapters` |
 | CLI binary | `adapters` |
 | Language | TypeScript, strict mode |
-| Runtime | Node.js 20.9.0 or later (first LTS release of v20) |
+| Runtime | Node.js >= 22.13.0 for `@a5c-ai/adapters` and `@a5c-ai/adapters-cli` — both reach the gateway, so they inherit its floor (FIX-008). The gateway floor is the authoritative number: `packages/adapters/gateway/package.json` `engines.node`, machine-enforced by `scripts/__tests__/gateway-engine-floor.test.mjs`. |
 | Module system | ESM package (`"type": "module"`); `import`, `require`, and `default` export-map conditions all resolve to the same ESM build |
 | License | MIT |
 | Canonical package doc | `packages/adapters/core/README.md` |

@@ -19,7 +19,10 @@ permissions:
   id-token: write
 
 env:
-  NPM_TAG: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
+  # FIX-001/FIX-010: the channel is NOT derived here. `prepare_staging_publish`
+  # resolves the one release identity (version + dist_tag + candidate_dist_tag)
+  # and every downstream job consumes it explicitly; publication writes the
+  # candidate tag and only `promote_release_channel` writes the channel.
   PUBLISH_BRANCH: ${{ github.ref_name }}
   NPM_CONFIG_AUDIT: "true"
   NPM_CONFIG_FUND: "false"
@@ -128,9 +131,15 @@ jobs:
           run_bg bash -lc '
             set -euo pipefail
             npm run build --workspace=@a5c-ai/hooks-adapter-core
-            # Adapters are independent (only depend on core) — build in parallel
-            for adapter in claude codex gemini copilot cursor pi oh-my-pi opencode openclaw hermes; do
-              npm run build --workspace=@a5c-ai/hooks-adapter-$adapter &
+            # FIX-005: the hooks leaves are DERIVED from the authoritative
+            # publishable-package inventory, never hand-listed here, so a new
+            # public leaf cannot be silently left unbuilt (that omission is how
+            # @a5c-ai/hooks-adapter-genty went unpublished).
+            # Leaves are independent (they depend only on core) — build in parallel.
+            HOOKS_LEAVES=()
+            while IFS= read -r leaf; do HOOKS_LEAVES+=("$leaf"); done < <(node scripts/release-matrix.cjs --group hooks-leaves --format workspaces)
+            for workspace in "${HOOKS_LEAVES[@]}"; do
+              npm run build --workspace="$workspace" &
             done
             wait
             npm run build --workspace=@a5c-ai/hooks-adapter-cli
@@ -189,6 +198,26 @@ jobs:
           path: /tmp/build-all-dist.tar.gz
           if-no-files-found: error
 
+  # FIX-011: full packed-artifact release gate. Runs the complete
+  # build/pack/install matrix for all 43 public packages and uploads the
+  # per-package reports and tarball inventories as CI artifacts.
+  # `allow_known_failures: 'false'` — the `packedArtifact` section of
+  # scripts/known-package-defects.json is empty and its enforced end-state is
+  # empty, so the release path carries no tolerance: any packed-artifact
+  # failure marks the release run failed. `prepare_staging_publish` declares
+  # this job in its `needs`, so the matrix GATES publication rather than merely
+  # reporting on it: nothing is published when a packed artifact fails.
+  # Promotion-blocking ordering is wired by FIX-001/FIX-010.
+  verify_release_artifacts:
+    needs: [build_all, lint]
+    name: Verify Release Artifacts
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-artifact-verifier.yml
+    with:
+      packages: ''
+      allow_known_failures: 'false'
+
   validate_core:
     needs: [build_all, lint]
     name: Validate Core Runtime
@@ -238,6 +267,16 @@ jobs:
         run: |
           set -euo pipefail
           npm run test:architecture 2>&1 | tee artifacts/core-logs/architecture.log
+
+      # FIX-007: the packed-metapackage exit-code gate. `@a5c-ai/babysitter` is
+      # the package end users install, and this suite packs it, installs the
+      # exact tarball into a clean consumer and asserts the shim propagates the
+      # SDK CLI's exit code. It ran in ci.yml only, so the release path — the
+      # one that actually publishes the metapackage — never proved the shim.
+      - name: Metapackage shim tests (packed exit-code propagation)
+        run: |
+          set -euo pipefail
+          npm run test:babysitter-metapackage 2>&1 | tee artifacts/core-logs/babysitter-metapackage-tests.log
 
       - name: SDK tests
         run: |
@@ -336,6 +375,18 @@ jobs:
           set -euo pipefail
           npm run verify:release --workspace=@a5c-ai/comm-adapter 2>&1 | tee artifacts/adapter-logs/agent-comm-adapter-release.log
           npm run verify:release --workspace=@a5c-ai/genty-tui 2>&1 | tee artifacts/adapter-logs/adapters-tui-release.log
+
+      # FIX-012: tasks-adapter packaged-surface parity prepublication gate —
+      # packs the exact tarball, installs it into a clean temporary consumer,
+      # imports the root plus every exports subpath, and typechecks a consumer.
+      # FIX-002 landed (@modelcontextprotocol/sdk is now a declared direct
+      # runtime dependency) and its scripts/known-package-defects.json
+      # packedArtifact entry was deleted, so this gate runs strictly: any
+      # clean-consumer packaging failure blocks publication.
+      - name: tasks-adapter packaged-surface parity
+        run: |
+          set -euo pipefail
+          npm run test:packaged-surface-parity --workspace=@a5c-ai/tasks-adapter 2>&1 | tee artifacts/adapter-logs/tasks-adapter-packaged-surface-parity.log
 
       - name: Validate transport-adapter runtime owner
         run: |
@@ -643,6 +694,7 @@ jobs:
       && needs.validate_cloud.result == 'success'
       && needs.validate_kradle.result == 'success'
       && needs.validate_observer_and_compiler.result == 'success'
+      && needs.verify_release_artifacts.result == 'success'
     name: Prepare Publish
     needs:
       - lint
@@ -653,11 +705,27 @@ jobs:
       - validate_cloud
       - validate_kradle
       - validate_observer_and_compiler
+      # FIX-011: the strict 43-package packed-artifact matrix GATES publication.
+      # `prepare_staging_publish` is the first job of the publication chain, so
+      # a failing packed artifact stops every downstream publish job before any
+      # immutable version reaches npm.
+      - verify_release_artifacts
     runs-on: ubuntu-latest-l
     permissions:
       contents: write
     outputs:
-      staging_version_sdk: ${{ steps.version.outputs.staging_version_sdk }}
+      # FIX-001: THE release version, resolved exactly once here and passed
+      # explicitly to every downstream job, reusable workflow and helper. It is
+      # never re-derived from a manifest, a branch name or a tag downstream.
+      release_version: ${{ steps.version.outputs.release_version }}
+      dist_tag: ${{ steps.version.outputs.dist_tag }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
+      hooks_leaves: ${{ steps.release_matrix.outputs.hooks_leaves }}
+      # FIX-010: the non-production dist-tag every candidate is published under.
+      # The channel tag (dist_tag) is written later, by promote_release_channel,
+      # and only after the published-consumer workflow validated this exact
+      # version.
+      candidate_dist_tag: ${{ steps.candidate.outputs.candidate_dist_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -673,6 +741,18 @@ jobs:
           registry-url: https://registry.npmjs.org/
           token: ${{ secrets.NPM_TOKEN }}
 
+      # FIX-005: publication matrices are derived from the authoritative
+      # publishable-package inventory. This is the last job with a git
+      # checkout before the publish jobs (they consume the publish-source
+      # tarball, which excludes .git), so the matrix is resolved here.
+      - name: Resolve derived publication matrices
+        id: release_matrix
+        run: |
+          set -euo pipefail
+          HOOKS_LEAVES="$(node scripts/release-matrix.cjs --group hooks-leaves)"
+          echo "Derived hooks leaf publication matrix: $HOOKS_LEAVES"
+          echo "hooks_leaves=$HOOKS_LEAVES" >> "$GITHUB_OUTPUT"
+
       - name: Restore node_modules cache
         id: nm-cache
         uses: actions/cache@v5
@@ -685,47 +765,50 @@ jobs:
           npm ci --force
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Set publish version
+      # FIX-001: the ONE authoritative release version. Everything downstream —
+      # manifest synchronization, publication, tag creation, external plugin
+      # sync and the final channel-tag assertion — consumes this value.
+      # release-version.json travels inside the publication workspace tarball,
+      # so every publish job publishes the same immutable version.
+      - name: Resolve the authoritative release version
         id: version
         run: |
           set -euo pipefail
-          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
           SHORT_SHA=$(git rev-parse --short=12 HEAD)
-          case "${GITHUB_REF_NAME}" in
-            main)
-              PUBLISH_VERSION="$BASE_VERSION"
-              ;;
-            staging|develop)
-              IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-              NEXT_PATCH=$((PATCH + 1))
-              PUBLISH_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-${GITHUB_REF_NAME}.${SHORT_SHA}"
-              ;;
-            *)
-              echo "Unsupported publish branch: ${GITHUB_REF_NAME}" >&2
-              exit 1
-              ;;
-          esac
-          echo "publish_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_unified=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_sdk=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_agent_mux=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_codex=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_github=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_cursor=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_gemini=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_pi=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_omp=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_opencode=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "staging_version_openclaw=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Setting ${GITHUB_REF_NAME} publish version: $PUBLISH_VERSION"
-          node scripts/sync-workspace-versions.mjs --version "$PUBLISH_VERSION"
+          node scripts/release-version.cjs resolve \
+            --branch "${GITHUB_REF_NAME}" \
+            --sha "$SHORT_SHA" \
+            --commit "$(git rev-parse HEAD)" \
+            --write release-version.json \
+            --github-output
 
-      - name: Prepare workspace manifests for publish
+      # FIX-010: candidates publish here, channels move later.
+      - name: Resolve the candidate dist-tag
+        id: candidate
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
         run: |
           set -euo pipefail
-          node scripts/sync-workspace-versions.mjs --version "$STAGING_VERSION"
+          CANDIDATE="$(node scripts/release-promotion.cjs candidate-tag --version "$RELEASE_VERSION")"
+          echo "candidate_dist_tag=$CANDIDATE" >> "$GITHUB_OUTPUT"
+          echo "Candidates publish under $CANDIDATE; $RELEASE_VERSION reaches a channel only after validation."
+
+      - name: Prepare workspace manifests for publish
         env:
-          STAGING_VERSION: ${{ steps.version.outputs.staging_version_sdk }}
+          RELEASE_VERSION: ${{ steps.version.outputs.release_version }}
+          RELEASE_DIST_TAG: ${{ steps.version.outputs.dist_tag }}
+        run: |
+          set -euo pipefail
+          node scripts/sync-workspace-versions.mjs --version "$RELEASE_VERSION"
+          # Proves the workspace this release publishes from is actually AT the
+          # release version. The 2026-08-13 incident published from a workspace
+          # whose manifests still said 6.0.0.
+          node scripts/release-version.cjs verify-manifests --version "$RELEASE_VERSION"
+          # Refuses a release that would move any channel tag backward.
+          node scripts/release-version.cjs assert-channel-tags \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --mode preflight
 
       - name: Refresh publish lockfile
         run: |
@@ -888,6 +971,9 @@ jobs:
           - name: agent-comm-adapter
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/adapters-observability && npm run build --workspace=@a5c-ai/comm-adapter
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/comm-adapter --skip-build
+          # FIX-004: the publish helper runs with lifecycle scripts disabled, so
+          # dist/ must be built here; the package's verify:release gate (run by
+          # publish-package-from-tag.mjs) refuses to publish without it.
           - name: adapters-extensions
             build: npm run build --workspace=@a5c-ai/atlas && npm run build --workspace=@a5c-ai/extensions-adapter
             publish: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/extensions-adapter --skip-build
@@ -938,38 +1024,25 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: ${{ matrix.publish }}
 
+  # FIX-005: the hooks leaf publication matrix is DERIVED from the
+  # authoritative publishable-package inventory
+  # (node scripts/release-matrix.cjs --group hooks-leaves, resolved in
+  # prepare_staging_publish). It used to be hand-maintained here, which is why
+  # the public, documented @a5c-ai/hooks-adapter-genty was never published
+  # (docs/release-incident-2026-08-13.md). Every public leaf now publishes here,
+  # before publish_staging_hooks_cli, which pins hooks leaves exactly.
   publish_staging_hooks_adapters:
     name: Publish Hooks Adapter - ${{ matrix.name }}
-    needs: publish_staging_hooks_and_core
+    needs:
+      - prepare_staging_publish
+      - publish_staging_hooks_and_core
     runs-on: ubuntu-latest-l
     permissions:
       contents: read
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: hooks-adapter-adapter-claude
-            workspace: '@a5c-ai/hooks-adapter-claude'
-          - name: hooks-adapter-adapter-codex
-            workspace: '@a5c-ai/hooks-adapter-codex'
-          - name: hooks-adapter-adapter-gemini
-            workspace: '@a5c-ai/hooks-adapter-gemini'
-          - name: hooks-adapter-adapter-copilot
-            workspace: '@a5c-ai/hooks-adapter-copilot'
-          - name: hooks-adapter-adapter-cursor
-            workspace: '@a5c-ai/hooks-adapter-cursor'
-          - name: hooks-adapter-adapter-pi
-            workspace: '@a5c-ai/hooks-adapter-pi'
-          - name: hooks-adapter-adapter-oh-my-pi
-            workspace: '@a5c-ai/hooks-adapter-oh-my-pi'
-          - name: hooks-adapter-adapter-opencode
-            workspace: '@a5c-ai/hooks-adapter-opencode'
-          - name: hooks-adapter-adapter-openclaw
-            workspace: '@a5c-ai/hooks-adapter-openclaw'
-          - name: hooks-adapter-adapter-hermes
-            workspace: '@a5c-ai/hooks-adapter-hermes'
-          - name: hooks-adapter-adapter-antigravity
-            workspace: '@a5c-ai/hooks-adapter-antigravity'
+        include: ${{ fromJson(needs.prepare_staging_publish.outputs.hooks_leaves) }}
     steps:
       - name: Download publish workspace
         uses: actions/download-artifact@v4
@@ -2692,7 +2765,7 @@ jobs:
         if: ${{ github.ref_name == 'staging' && vars.A5C_CLOUD_STAGING_DEPLOY_ENABLED == 'true' }}
         env:
           A5C_CLOUD_ENVIRONMENT: staging
-          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.staging_version_sdk }}
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.release_version }}
           A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_STAGING_TARGET_TYPE }}
           A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_STAGING_KUBE_CONTEXT }}
           A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_STAGING_NAMESPACE }}
@@ -2711,7 +2784,7 @@ jobs:
         if: ${{ github.ref_name == 'main' && vars.A5C_CLOUD_PROD_DEPLOY_ENABLED == 'true' }}
         env:
           A5C_CLOUD_ENVIRONMENT: prod
-          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.staging_version_sdk }}
+          A5C_CLOUD_RELEASE_TAG: ${{ needs.prepare_staging_publish.outputs.release_version }}
           A5C_CLOUD_TARGET_TYPE: ${{ vars.A5C_CLOUD_PROD_TARGET_TYPE }}
           A5C_CLOUD_KUBE_CONTEXT: ${{ vars.A5C_CLOUD_PROD_KUBE_CONTEXT }}
           A5C_CLOUD_NAMESPACE: ${{ vars.A5C_CLOUD_PROD_NAMESPACE }}
@@ -2769,34 +2842,151 @@ jobs:
           npm ci --force
           npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Publish babysitter metapackage to npm ($NPM_TAG tag)
+      - name: Publish babysitter metapackage candidate to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
 
+  # FIX-010: every exact version now exists on npm under the candidate dist-tag,
+  # and NO channel tag has moved. This is the point where the release is
+  # installed from the registry — by exact version — and exercised end to end.
+  # Its verdict (published-consumer-validation evidence) is the only thing that
+  # can unlock promotion below.
+  published_consumer_validation:
+    name: Published Consumer Validation
+    needs:
+      - prepare_staging_publish
+      - publish_staging_metapackage
+    uses: ./.github/workflows/live-stack-published.yml
+    with:
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
+      candidate_dist_tag: ${{ needs.prepare_staging_publish.outputs.candidate_dist_tag }}
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  # FIX-010: the ONLY place a release channel tag moves. It runs after — and
+  # only after — the published-consumer validation of this exact version
+  # succeeded. When validation fails this job does not run: the candidate stays
+  # installable by exact version and under its candidate tag for diagnosis, and
+  # the channel keeps pointing at the previous release.
+  promote_release_channel:
+    name: Promote Release Channel
+    needs:
+      - prepare_staging_publish
+      - publish_staging_metapackage
+      - published_consumer_validation
+    if: ${{ needs.published_consumer_validation.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Download published-consumer validation evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: published-consumer-validation
+          path: artifacts/published-consumer
+
+      - name: Move every public package's channel tag to the validated version
+        env:
+          RELEASE_VERSION: ${{ needs.prepare_staging_publish.outputs.release_version }}
+          RELEASE_DIST_TAG: ${{ needs.prepare_staging_publish.outputs.dist_tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-promotion.cjs promote \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --evidence artifacts/published-consumer/validation.json
+
+      - name: Upload promotion evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-promotion-evidence
+          path: artifacts/published-consumer
+          if-no-files-found: error
+
+  # FIX-001: the release is not complete until the channel tag of EVERY public
+  # package — the full authoritative inventory, never a sample — resolves to
+  # exactly the release version. On 2026-08-13, 37 of 43 packages were left on
+  # a stale `latest` while the release was reported as successful. This gate is
+  # also the idempotency check: re-running the same release passes it and moves
+  # nothing.
+  assert_release_channel_tags:
+    name: Assert Release Channel Tags
+    needs:
+      - prepare_staging_publish
+      - publish_staging_metapackage
+      - promote_release_channel
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Assert every public package resolves the release version
+        env:
+          RELEASE_VERSION: ${{ needs.prepare_staging_publish.outputs.release_version }}
+          RELEASE_DIST_TAG: ${{ needs.prepare_staging_publish.outputs.dist_tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-version.cjs assert-channel-tags \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG"
+
   create_release_tag:
     name: Create Release Tag
     needs:
+      - prepare_staging_publish
       - publish_staging_metapackage
+      - assert_release_channel_tags
     uses: ./.github/workflows/release-tags.yml
+    with:
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
+      branch: ${{ github.ref_name }}
     secrets: inherit
 
   sync_external_plugins:
     name: Sync External Plugins
     needs:
+      - prepare_staging_publish
       - create_release_tag
     uses: ./.github/workflows/sync-external-plugins.yml
     with:
       branch: ${{ github.ref_name }}
       ref: ${{ github.sha }}
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
     secrets: inherit
 
   sync_atlas_plugins:
     name: Sync Atlas Plugins
     needs:
+      - prepare_staging_publish
       - create_release_tag
     uses: ./.github/workflows/sync-atlas-plugins.yml
     with:
+      release_version: ${{ needs.prepare_staging_publish.outputs.release_version }}
       branch: ${{ github.ref_name }}
       ref: ${{ github.sha }}
     secrets: inherit

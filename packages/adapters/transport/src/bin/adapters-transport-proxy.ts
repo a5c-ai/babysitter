@@ -8,6 +8,34 @@ import { fileURLToPath } from 'node:url';
 
 import { createProxyConfig, readProxyConfigFromEnv, validateProxyConfig } from '../config.js';
 import { startProxyServer } from '../server.js';
+import { SUPPORTED_TRANSPORTS } from '../types.js';
+
+const USAGE = `Usage: adapters-transport-proxy [--help] [--version]
+
+Starts the transport proxy that exposes a supported wire transport in front of a
+target provider. All configuration is supplied through the environment; there
+are no positional arguments.
+
+Options:
+  -h, --help       Show this message and exit
+  -v, --version    Print the package version and exit
+
+Required environment:
+  AGENT_MUX_PROXY_TARGET_PROVIDER    Provider to proxy to
+  AGENT_MUX_PROXY_TARGET_MODEL       Model to request from that provider
+  AGENT_MUX_PROXY_EXPOSED_TRANSPORT  Wire transport to expose (default: openai-chat)
+                                     One of: ${SUPPORTED_TRANSPORTS.join(', ')}
+
+Optional environment:
+  AGENT_MUX_PROXY_AUTH_TOKEN         Bearer token clients must present
+                                     (a random token is generated when unset)
+  AGENT_MUX_PROXY_API_BASE           Override the upstream API base URL
+  AGENT_MUX_PROXY_HOST               Listen host (default: 127.0.0.1)
+  AGENT_MUX_PROXY_PORT               Listen port (default: 0 — ephemeral)
+
+On startup a single JSON line is written to stdout:
+  {"event":"ready","port":<port>,"auth_token":"<token>","url":"<url>"}
+`;
 
 function readPackageVersion(): string {
   const __filename = fileURLToPath(import.meta.url);
@@ -19,6 +47,15 @@ function readPackageVersion(): string {
 async function main(): Promise<void> {
   if (process.argv.includes('--version') || process.argv.includes('-v')) {
     process.stdout.write(`${readPackageVersion()}\n`);
+    return;
+  }
+
+  // `--help` used to fall through to config validation, so the published bin
+  // answered `adapters-transport-proxy --help` with "Error: Missing
+  // targetProvider" and exit 1 (found by the FIX-011 packed-artifact bin smoke
+  // test). Usage is not an error: it prints on stdout and exits 0.
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    process.stdout.write(USAGE);
     return;
   }
 

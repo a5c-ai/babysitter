@@ -247,9 +247,10 @@ Only `npm run test:architecture` is a current repository guarantee in this slice
 
 The gate runs in:
 
-- `.github/workflows/ci.yml`,
-- `.github/workflows/release.yml`,
-- `.github/workflows/staging-publish.yml`.
+- `.github/workflows/ci.yml` (job `test`),
+- `.github/workflows/publish.yml` (job `validate_core`).
+
+The former `release.yml` / `staging-publish.yml` pair is retired; `publish.yml` is the single branch publication workflow.
 
 ### Exit Criteria
 

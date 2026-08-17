@@ -55,7 +55,7 @@ flowchart TB
     end
 
     subgraph Adapters["@a5c-ai/adapters — the family (20 packages)"]
-        ADP["sdk = unified dispatch · core(comm) · codecs(per-harness)<br/>cli (adapters) · launch (PTY spawn) · config (host detect)<br/>transport · proxy (LiteLLM, 140+ providers)<br/>hooks (canonical lifecycle, MANDATORY STOP cross-harness)<br/>tasks (durable breakpoints) · tools · observability<br/>triggers (CI / GitHub Action) · extensions (1 manifest → 9 plugin formats)"]
+        ADP["sdk = unified dispatch · core(comm) · codecs(per-harness)<br/>cli (adapters) · launch (PTY spawn) · config (host detect)<br/>transport · proxy (LiteLLM, 140+ providers)<br/>hooks (canonical lifecycle, MANDATORY STOP cross-harness)<br/>tasks (durable breakpoints) · tools · observability<br/>triggers (CI / GitHub Action) · extensions (1 manifest → 1 plugin format per Atlas target)"]
     end
 
     subgraph Runtime["Agent runtime"]

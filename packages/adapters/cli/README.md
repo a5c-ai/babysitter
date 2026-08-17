@@ -10,7 +10,7 @@ npm install -g @a5c-ai/adapters-cli
 npx @a5c-ai/adapters-cli --help
 ```
 
-Requires Node.js >= 20.9.0.
+Requires Node.js >= 22.13.0. The CLI root statically loads `@a5c-ai/adapters-gateway`, which uses the built-in `node:sqlite` module (unflagged only from Node.js 22.13.0).
 
 ## Usage
 

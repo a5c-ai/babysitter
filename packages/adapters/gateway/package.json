@@ -22,7 +22,7 @@
     "sdk"
   ],
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.13.0"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -45,7 +45,8 @@
   },
   "scripts": {
     "build": "tsc --build && tsc --emitDeclarationOnly --declarationMap false -p tsconfig.json",
-    "test": "vitest run tests/builtin-adapters.test.ts tests/e2e.test.ts tests/event-log.test.ts tests/manager.test.ts tests/protocol.test.ts tests/server.test.ts tests/session-runtime.test.ts tests/tokens.test.ts tests/webhook-out.test.ts",
+    "test": "vitest run tests/builtin-adapters.test.ts tests/e2e.test.ts tests/event-log.test.ts tests/manager.test.ts tests/node-engine-floor.test.ts tests/protocol.test.ts tests/server.test.ts tests/session-runtime.test.ts tests/tokens.test.ts tests/webhook-out.test.ts",
+    "test:node-engine-floor": "vitest run tests/node-engine-floor.test.ts",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

@@ -5,7 +5,7 @@ import {
   listWorktrees,
   isInsideWorktree,
   parsePorcelainOutput,
-  type ExecSyncFn,
+  type WorktreeExecFn,
 } from '../worktreeIsolation';
 
 // ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ describe('parsePorcelainOutput', () => {
 
 describe('createWorktree', () => {
   it('executes git worktree add with correct arguments', () => {
-    const exec = vi.fn<ExecSyncFn>(() => Buffer.from(''));
+    const exec = vi.fn<WorktreeExecFn>(() => Buffer.from(''));
     createWorktree('/repo', {
       baseBranch: 'main',
       worktreePath: '/tmp/wt-feature',
@@ -80,7 +80,8 @@ describe('createWorktree', () => {
     }, exec);
 
     expect(exec).toHaveBeenCalledWith(
-      'git worktree add "/tmp/wt-feature" "main"',
+      'git',
+      ['worktree', 'add', '--', '/tmp/wt-feature', 'main'],
       { cwd: '/repo' },
     );
   });
@@ -92,10 +93,10 @@ describe('createWorktree', () => {
 
 describe('removeWorktree', () => {
   it('executes git worktree remove with the path', () => {
-    const exec = vi.fn<ExecSyncFn>(() => Buffer.from(''));
+    const exec = vi.fn<WorktreeExecFn>(() => Buffer.from(''));
     removeWorktree('/tmp/wt-feature', exec);
 
-    expect(exec).toHaveBeenCalledWith('git worktree remove "/tmp/wt-feature"');
+    expect(exec).toHaveBeenCalledWith('git', ['worktree', 'remove', '--', '/tmp/wt-feature']);
   });
 });
 
@@ -116,11 +117,11 @@ describe('listWorktrees', () => {
       '',
     ].join('\n');
 
-    const exec = vi.fn<ExecSyncFn>(() => Buffer.from(porcelain));
+    const exec = vi.fn<WorktreeExecFn>(() => Buffer.from(porcelain));
     const result = listWorktrees('/repo', exec);
 
     expect(result).toHaveLength(2);
-    expect(exec).toHaveBeenCalledWith('git worktree list --porcelain', { cwd: '/repo' });
+    expect(exec).toHaveBeenCalledWith('git', ['worktree', 'list', '--porcelain'], { cwd: '/repo' });
   });
 });
 
@@ -130,26 +131,26 @@ describe('listWorktrees', () => {
 
 describe('isInsideWorktree', () => {
   it('returns true when git-dir contains /worktrees/', () => {
-    const exec = vi.fn<ExecSyncFn>(() =>
+    const exec = vi.fn<WorktreeExecFn>(() =>
       Buffer.from('/home/user/repo/.git/worktrees/feature\n'),
     );
     expect(isInsideWorktree('/home/user/wt', exec)).toBe(true);
   });
 
   it('returns true when git-dir contains \\worktrees\\ (Windows)', () => {
-    const exec = vi.fn<ExecSyncFn>(() =>
+    const exec = vi.fn<WorktreeExecFn>(() =>
       Buffer.from('C:\\repo\\.git\\worktrees\\feature\n'),
     );
     expect(isInsideWorktree('C:\\repo-wt', exec)).toBe(true);
   });
 
   it('returns false for main working tree', () => {
-    const exec = vi.fn<ExecSyncFn>(() => Buffer.from('.git\n'));
+    const exec = vi.fn<WorktreeExecFn>(() => Buffer.from('.git\n'));
     expect(isInsideWorktree('/home/user/repo', exec)).toBe(false);
   });
 
   it('returns false when git command fails', () => {
-    const exec = vi.fn<ExecSyncFn>(() => {
+    const exec = vi.fn<WorktreeExecFn>(() => {
       throw new Error('not a git repo');
     });
     expect(isInsideWorktree('/tmp/random', exec)).toBe(false);

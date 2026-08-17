@@ -1,19 +1,21 @@
 {
   "name": "@a5c-ai/extensions-adapter",
   "version": "6.0.0",
-  "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into 9 AI coding agent plugin formats",
+  "description": "Cross-harness plugin compiler — compiles a single plugin.json manifest into one AI coding agent plugin format per registered target",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "adapters-extensions": "./dist/cli.js",
-    "extensions-adapter": "./dist/extensions-adapter.js"
+    "extensions-adapter": "./dist/extension-adapter.js"
   },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
     "test": "vitest run",
     "test:watch": "vitest watch",
+    "test:packaged-surface-parity": "npm exec --yes --package=tsx@4.19.2 -- tsx src/__tests__/packaged-surface-parity.test.ts",
+    "verify:release": "node ./scripts/verify-release.mjs",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "prepublishOnly": "npm run clean && npm run build"
   },

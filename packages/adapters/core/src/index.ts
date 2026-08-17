@@ -199,6 +199,23 @@ export { HARNESS_IMAGE_CATALOG, lookupHarnessImage } from './invocation.js';
 export { buildInvocationCommand } from './spawn-runner.js';
 export type { InvocationCommand } from './spawn-runner.js';
 
+// Interactive PTY (optional peer dependency: node-pty)
+export type {
+  PtyMode,
+  PtyUnavailableReason,
+  PtyLoadResult,
+  PtyModule,
+  PtyProcess,
+  PtySpawnOptions,
+} from './pty.js';
+export {
+  PTY_PACKAGE_NAME,
+  PtyNotAvailableError,
+  loadPtyModule,
+  ptyFallbackIsPermitted,
+  resolvePtyMode,
+} from './pty.js';
+
 // Run Options
 export type { RunOptions } from './run-options.js';
 export {

@@ -1,0 +1,17 @@
+{
+  "name": "fix011-fix004-extensions-replica",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture replicating the published extensions-adapter@6.0.0 tarball (FIX-004): declared main/types, a primary bin, and a compatibility bin, while the tarball actually contains only package.json and README.md.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "adapters-extensions-replica": "dist/cli.js",
+    "extensions-adapter-replica": "dist/extensions-adapter.js"
+  },
+  "files": [
+    "dist/**",
+    "README.md"
+  ]
+}

@@ -30,6 +30,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@a5c-ai/atlas": "6.0.0",
     "@a5c-ai/hooks-adapter-core": "6.0.0"
   },
   "devDependencies": {

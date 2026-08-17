@@ -1,26 +1,149 @@
+# Manual / recovery publication from an immutable release tag (FIX-001).
+#
+# The BRANCH release workflow (.github/workflows/publish.yml) is the sole owner
+# of normal publication and channel promotion. This workflow exists only for
+# manual recovery, and may act on a tag exclusively when it derives the exact
+# version FROM the tag and first synchronizes every manifest to it.
+#
+# On 2026-08-13 this workflow did the opposite: it re-synchronized manifests
+# only for staging tags, so a main tag published from the checked-out (stale)
+# manifests and moved `latest` back to 6.0.0
+# (docs/release-incident-2026-08-13.md). It now:
+#   1. derives version + channel from the tag name (one exact version);
+#   2. refuses to run for a tag the publish workflow already published from —
+#      no second, conflicting publication or dist-tag mutation;
+#   3. gates publication on the strict 43-package packed-artifact matrix
+#      (.github/workflows/release-artifact-verifier.yml, allow_known_failures
+#      'false') run against the release TAG's tree (FIX-011);
+#   4. synchronizes EVERY manifest to that version, on every channel, and
+#      verifies the synchronization before publishing;
+#   5. publishes in dependency order derived from the package graph, under the
+#      non-production candidate dist-tag (FIX-010);
+#   6. validates that exact version from npm through the published-consumer
+#      workflow (.github/workflows/live-stack-published.yml);
+#   7. only then moves the channel tag, and asserts the channel tag of every
+#      public package equals that version.
 name: Publish Packages From Tag
 
 on:
   push:
     tags:
       - 'babysitter/**'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to recover from (babysitter/<branch>/v<version>).
+        required: true
+        type: string
 
 permissions:
   contents: write
   id-token: write
 
 concurrency:
-  group: package-publish-${{ github.ref }}
+  group: package-publish-${{ inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
-  publish_non_plugin_packages:
-    runs-on: ubuntu-latest-l
+  release_identity:
+    name: Resolve Release Identity
+    runs-on: ubuntu-latest
+    outputs:
+      release_tag: ${{ steps.identity.outputs.release_tag }}
+      release_version: ${{ steps.identity.outputs.release_version }}
+      dist_tag: ${{ steps.identity.outputs.dist_tag }}
+      candidate_dist_tag: ${{ steps.candidate.outputs.candidate_dist_tag }}
+      should_publish: ${{ steps.gate.outputs.should_publish }}
     steps:
       - name: Checkout release tag
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # Derives the EXACT version and channel from the tag name and reports who
+      # created the tag. Ambiguous pre-FIX-001 tags (version + commit sha in one
+      # name) are rejected rather than reinterpreted.
+      - name: Resolve release identity from the tag
+        id: identity
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          node scripts/release-version.cjs tag-source --tag "$RELEASE_TAG" --github-output
+
+      # FIX-010: recovery publishes candidates too; the channel moves only after
+      # the published-consumer validation of this exact version.
+      - name: Resolve the candidate dist-tag
+        id: candidate
+        env:
+          RELEASE_VERSION: ${{ steps.identity.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          CANDIDATE="$(node scripts/release-promotion.cjs candidate-tag --version "$RELEASE_VERSION")"
+          echo "candidate_dist_tag=$CANDIDATE" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether this run may publish
+        id: gate
+        env:
+          MANUAL_RECOVERY: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+          PUBLISHED_BY_RELEASE_WORKFLOW: ${{ steps.identity.outputs.published_by_release_workflow }}
+          RELEASE_TAG: ${{ steps.identity.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+          if [ "$MANUAL_RECOVERY" = "true" ]; then
+            echo "Manual recovery publication requested for ${RELEASE_TAG}."
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$PUBLISHED_BY_RELEASE_WORKFLOW" = "true" ]; then
+            echo "::notice::${RELEASE_TAG} was created by the branch release workflow, which already published" \
+              "and promoted this release. Skipping to avoid a second, conflicting publication (FIX-001)."
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "${RELEASE_TAG} was not created by the branch release workflow; publishing from the tag."
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+
+  # FIX-011: recovery publication runs the SAME strict packed-artifact gate as
+  # the branch release. Recovery is the lane that produced the 2026-08-13
+  # incident, so it must not be the lane that can push an unverified tarball to
+  # npm. The full 43-package matrix runs against the release tag's tree, with no
+  # tolerance for known defects, and `publish_non_plugin_packages` needs it.
+  verify_release_artifacts:
+    name: Verify Release Artifacts
+    needs: release_identity
+    if: needs.release_identity.outputs.should_publish == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-artifact-verifier.yml
+    with:
+      packages: ''
+      allow_known_failures: 'false'
+      ref: ${{ needs.release_identity.outputs.release_tag }}
+
+  publish_non_plugin_packages:
+    name: Publish Packages From Tag
+    needs:
+      - release_identity
+      - verify_release_artifacts
+    if: needs.release_identity.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest-l
+    env:
+      RELEASE_VERSION: ${{ needs.release_identity.outputs.release_version }}
+      RELEASE_DIST_TAG: ${{ needs.release_identity.outputs.dist_tag }}
+      RELEASE_TAG: ${{ needs.release_identity.outputs.release_tag }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -37,12 +160,23 @@ jobs:
           npm ci --prefer-offline --legacy-peer-deps
           npm install --no-save @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu lightningcss-linux-x64-gnu @next/swc-linux-x64-gnu @unrs/resolver-binding-linux-x64-gnu 2>/dev/null || true
 
-      - name: Prepare staging prerelease manifests
-        if: startsWith(github.ref_name, 'babysitter/staging/')
+      # ONE synchronization contract for every channel. The staging-only
+      # condition that used to guard this step is exactly what let a main tag
+      # publish and promote the stale checked-in manifest versions.
+      - name: Synchronize every manifest to the tag version
         run: |
           set -euo pipefail
-          STAGING_VERSION="${GITHUB_REF_NAME#babysitter/staging/v}"
-          node scripts/sync-workspace-versions.mjs --version "$STAGING_VERSION"
+          node scripts/release-version.cjs from-tag --tag "$RELEASE_TAG" --write release-version.json
+          node scripts/sync-workspace-versions.mjs --version "$RELEASE_VERSION"
+          node scripts/release-version.cjs verify-manifests --version "$RELEASE_VERSION"
+
+      - name: Refuse a release that would move a channel backward
+        run: |
+          set -euo pipefail
+          node scripts/release-version.cjs assert-channel-tags \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --mode preflight
 
       - name: Build publish packages once
         run: |
@@ -94,9 +228,13 @@ jobs:
           echo "Building @a5c-ai/atlas catalog foundation"
           npm run build --workspace=@a5c-ai/atlas
 
+          # FIX-016: @a5c-ai/kradle is published from this workflow like every
+          # other public package, so it must be built here too — the publish
+          # step runs with lifecycle scripts disabled.
           run_many "Build foundation packages" \
             @a5c-ai/trust-core \
             @a5c-ai/tasks-adapter \
+            @a5c-ai/kradle \
             @a5c-ai/kradle-installer \
             @a5c-ai/adapters-observability \
             @a5c-ai/triggers-adapter \
@@ -109,10 +247,24 @@ jobs:
           run_many "Build policy layer" \
             @a5c-ai/policy-adapter
 
+          # FIX-004: @a5c-ai/extensions-adapter is published below with
+          # PUBLISH_PACKAGE_FROM_TAG_SKIP_BUILD=1 (lifecycle scripts disabled),
+          # so its dist/ must exist from this build step; its verify:release
+          # gate refuses to publish a package without build output.
           run_many "Build core packages" \
             @a5c-ai/hooks-adapter-core \
             @a5c-ai/comm-adapter \
             @a5c-ai/extensions-adapter
+
+          # FIX-005: the hooks leaves are DERIVED from the authoritative
+          # publishable-package inventory instead of being hand-listed here.
+          # The hand-maintained list omitted @a5c-ai/hooks-adapter-genty
+          # entirely (never published) and @a5c-ai/hooks-adapter-antigravity /
+          # @a5c-ai/hooks-adapter-hermes from this workflow
+          # (docs/release-incident-2026-08-13.md).
+          HOOKS_LEAVES=()
+          while IFS= read -r leaf; do HOOKS_LEAVES+=("$leaf"); done < <(node scripts/release-matrix.cjs --group hooks-leaves --format workspaces)
+          echo "Derived hooks leaves: ${HOOKS_LEAVES[*]}"
 
           run_many "Build leaf adapter packages" \
             @a5c-ai/adapters-codecs \
@@ -120,15 +272,7 @@ jobs:
             @a5c-ai/transport-adapter \
             @a5c-ai/config-adapter \
             @a5c-ai/genty-ui \
-            @a5c-ai/hooks-adapter-claude \
-            @a5c-ai/hooks-adapter-codex \
-            @a5c-ai/hooks-adapter-gemini \
-            @a5c-ai/hooks-adapter-copilot \
-            @a5c-ai/hooks-adapter-cursor \
-            @a5c-ai/hooks-adapter-pi \
-            @a5c-ai/hooks-adapter-oh-my-pi \
-            @a5c-ai/hooks-adapter-opencode \
-            @a5c-ai/hooks-adapter-openclaw
+            "${HOOKS_LEAVES[@]}"
 
           run_many "Build packages depending on leaf adapters" \
             @a5c-ai/launch-adapter \
@@ -174,90 +318,132 @@ jobs:
       - name: Verify SDK package health
         run: npm run verify:package-health --workspace=@a5c-ai/babysitter-sdk
 
-      - name: Publish packages from tag
+      # FIX-001: the publication order is DERIVED from the authoritative
+      # package dependency graph instead of a hand-curated sequence of groups.
+      # `publish-package-from-tag.mjs` hard-fails a package whose exactly
+      # pinned internal dependency is not on the registry yet, so ordering is a
+      # correctness requirement; and the derived waves cover every public
+      # package, so none can be silently omitted (FIX-005, FIX-016).
+      - name: Publish packages from tag (dependency-ordered waves)
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           PUBLISH_PACKAGE_FROM_TAG_SKIP_BUILD: '1'
         run: |
           set -euo pipefail
 
-          publish_many() {
-            local label="$1"
-            shift
-            echo "::group::${label}"
-            local pids=()
-            local status=0
-            for workspace in "$@"; do
-              echo "Publishing ${workspace}"
-              node scripts/publish-package-from-tag.mjs --workspace="${workspace}" --skip-build &
+          WAVES_FILE="$(mktemp)"
+          node scripts/release-matrix.cjs --group all-publishable --format waves > "$WAVES_FILE"
+          echo "Derived publication waves:"
+          cat -n "$WAVES_FILE"
+
+          wave_index=0
+          while IFS= read -r wave; do
+            [ -n "$wave" ] || continue
+            wave_index=$((wave_index + 1))
+            echo "::group::Publish wave ${wave_index}: ${wave}"
+            pids=()
+            status=0
+            for workspace in $wave; do
+              echo "Publishing ${workspace} at ${RELEASE_VERSION}"
+              node scripts/publish-package-from-tag.mjs \
+                --workspace="${workspace}" \
+                --release-version="${RELEASE_VERSION}" \
+                --skip-build &
               pids+=("$!")
             done
             for pid in "${pids[@]}"; do
               wait "$pid" || status=1
             done
             echo "::endgroup::"
-            return "$status"
-          }
+            if [ "$status" != "0" ]; then
+              echo "::error::Publication wave ${wave_index} failed; later waves depend on it."
+              exit "$status"
+            fi
+          done < "$WAVES_FILE"
 
-          publish_many "Publish foundation packages" \
-            @a5c-ai/atlas \
-            @a5c-ai/trust-core \
-            @a5c-ai/tasks-adapter \
-            @a5c-ai/kradle-installer \
-            @a5c-ai/adapters-observability \
-            @a5c-ai/triggers-adapter \
-            @a5c-ai/babysitter-observer-dashboard
+  # FIX-010: recovery follows the same candidate -> validate -> promote model as
+  # the branch release. Publication above wrote only the candidate dist-tag, so
+  # no channel has moved yet; this validates the exact recovered version from
+  # npm before anything is promoted.
+  published_consumer_validation:
+    name: Published Consumer Validation
+    needs:
+      - release_identity
+      - publish_non_plugin_packages
+    uses: ./.github/workflows/live-stack-published.yml
+    with:
+      release_version: ${{ needs.release_identity.outputs.release_version }}
+      candidate_dist_tag: ${{ needs.release_identity.outputs.candidate_dist_tag }}
+      ref: ${{ needs.release_identity.outputs.release_tag }}
+    secrets: inherit
 
-          publish_many "Publish core packages" \
-            @a5c-ai/policy-adapter \
-            @a5c-ai/hooks-adapter-core \
-            @a5c-ai/comm-adapter \
-            @a5c-ai/extensions-adapter
+  # The only channel mutation in the recovery path, and only after validation.
+  promote_release_channel:
+    name: Promote Release Channel
+    needs:
+      - release_identity
+      - publish_non_plugin_packages
+      - published_consumer_validation
+    if: ${{ needs.published_consumer_validation.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.release_identity.outputs.release_version }}
+      RELEASE_DIST_TAG: ${{ needs.release_identity.outputs.dist_tag }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.release_identity.outputs.release_tag }}
 
-          publish_many "Publish leaf adapter packages" \
-            @a5c-ai/adapters-codecs \
-            @a5c-ai/adapters-harness-mock \
-            @a5c-ai/transport-adapter \
-            @a5c-ai/config-adapter \
-            @a5c-ai/launch-adapter \
-            @a5c-ai/tools-adapter \
-            @a5c-ai/genty-ui \
-            @a5c-ai/hooks-adapter-claude \
-            @a5c-ai/hooks-adapter-codex \
-            @a5c-ai/hooks-adapter-gemini \
-            @a5c-ai/hooks-adapter-copilot \
-            @a5c-ai/hooks-adapter-cursor \
-            @a5c-ai/hooks-adapter-pi \
-            @a5c-ai/hooks-adapter-oh-my-pi \
-            @a5c-ai/hooks-adapter-opencode \
-            @a5c-ai/hooks-adapter-openclaw
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
 
-          publish_many "Publish aggregate packages" \
-            @a5c-ai/adapters-gateway \
-            @a5c-ai/hooks-adapter-cli \
-            @a5c-ai/genty-web-app
+      - name: Download published-consumer validation evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: published-consumer-validation
+          path: artifacts/published-consumer
 
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters-cli --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/adapters --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/channels-adapter --skip-build
+      - name: Move every public package's channel tag to the validated version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-promotion.cjs promote \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG" \
+            --evidence artifacts/published-consumer/validation.json
 
-          publish_many "Publish runtime packages" \
-            @a5c-ai/babysitter-sdk \
-            @a5c-ai/genty-tui
-
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-core --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-runtime --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty-platform --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/genty --skip-build
-          node scripts/publish-package-from-tag.mjs --workspace=@a5c-ai/babysitter --skip-build
+      # Every public package, never a sample: the release is only complete when
+      # the channel tag of each one resolves to exactly this release version.
+      - name: Assert every public package resolves the release version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/release-version.cjs assert-channel-tags \
+            --version "$RELEASE_VERSION" \
+            --dist-tag "$RELEASE_DIST_TAG"
 
   sync_external_plugins_develop:
-    if: startsWith(github.ref_name, 'babysitter/develop/')
+    if: needs.release_identity.outputs.dist_tag == 'develop'
     name: Sync External Plugins (develop)
     needs:
+      - release_identity
       - publish_non_plugin_packages
+      - promote_release_channel
     uses: ./.github/workflows/sync-external-plugins.yml
     with:
       branch: develop
-      ref: ${{ github.sha }}
+      # The RESOLVED release tag, exactly like every other job in this workflow.
+      # `github.sha` is the head of whatever ref triggered the run, which for a
+      # workflow_dispatch recovery is the dispatch branch — so the plugin
+      # bundles would be generated from a different tree than the one being
+      # published.
+      ref: ${{ needs.release_identity.outputs.release_tag }}
+      release_version: ${{ needs.release_identity.outputs.release_version }}
     secrets: inherit

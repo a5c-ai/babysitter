@@ -104,7 +104,7 @@ These are marked deprecated throughout the docs and will be removed in a future 
 
 ## Migration Checklist
 
-1. [ ] Upgrade Node.js to >=20.9.0 (for the Adapters CLI).
+1. [ ] Upgrade Node.js to >=22.13.0 (for the Adapters CLI).
 2. [ ] Install `@a5c-ai/babysitter` and `@a5c-ai/adapters-cli`.
 3. [ ] Replace `BABYSITTER_SESSION_ID` with `AGENT_SESSION_ID` in env/scripts.
 4. [ ] Remove `--plugin-root` from any commands.

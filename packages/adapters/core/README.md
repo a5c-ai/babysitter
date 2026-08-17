@@ -71,6 +71,60 @@ The supported public import seams are:
 - `@a5c-ai/comm-adapter/kanban`
 - `@a5c-ai/comm-adapter/automation`
 
+## Interactive PTY (`node-pty` optional peer dependency)
+
+`RunOptions.interactive` spawns the harness on a real terminal so it gets a TTY
+(colors, prompt input, tool-approval UIs). The PTY backend is
+[`node-pty`](https://www.npmjs.com/package/node-pty), a **native** module. This
+package declares it under exactly one ownership model — a documented **optional
+peer dependency** — so the consumer decides whether to install it:
+
+```json
+{
+  "peerDependencies": { "node-pty": ">=1.0.0" },
+  "peerDependenciesMeta": { "node-pty": { "optional": true } }
+}
+```
+
+```bash
+npm install node-pty   # only needed for interactive/PTY runs
+```
+
+`node-pty` is loaded explicitly and ESM-safely via `createRequire(import.meta.url)`,
+resolved from this package's installed location, so a consumer-supplied copy is
+found by the ordinary `node_modules` walk.
+
+### `RunOptions.ptyMode`
+
+| `ptyMode` | `node-pty` not installed | `node-pty` installed but broken, or the PTY cannot be opened |
+| --- | --- | --- |
+| `'required'` | run fails with `PTY_NOT_AVAILABLE` | run fails with `PTY_NOT_AVAILABLE` |
+| `'preferred'` (default) | **observable** `debug`/`warn` event naming `PTY_NOT_AVAILABLE`, then the run continues on ordinary pipes | run fails with `PTY_NOT_AVAILABLE` |
+
+Default: `'required'` when the adapter declares `capabilities.requiresPty`,
+otherwise `'preferred'`.
+
+An **absent** optional peer is the only condition that may ever degrade a run to
+pipes, and that degradation is always announced first:
+
+```ts
+const handle = client.run({ agent: 'claude', prompt: 'hi', interactive: true });
+handle.on('debug', (event) => {
+  if (event.level === 'warn' && event.message.includes('PTY_NOT_AVAILABLE')) {
+    // the run is on pipes, not a TTY
+  }
+});
+```
+
+An installed-but-unusable `node-pty` (native binding compiled for a different
+Node.js ABI, missing prebuild, no free PTY device) is an **environment defect**,
+not an absent optional dependency: it fails loudly in both modes rather than
+silently downgrading. Use `npm rebuild node-pty` after switching Node versions.
+
+`loadPtyModule()`, `ptyFallbackIsPermitted()`, `resolvePtyMode()`,
+`PtyNotAvailableError`, and the `PtyMode` / `PtyLoadResult` types are exported
+from the package root for callers that want to probe PTY availability up front.
+
 ## Release Verification
 
 Use the package-local release checks to confirm the documented export map still

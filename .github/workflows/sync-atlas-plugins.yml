@@ -11,12 +11,24 @@ on:
         description: Commit, tag, or branch ref to checkout before generating plugins.
         required: false
         type: string
+      release_version:
+        description: >-
+          FIX-001: the exact version the release published. Passed in by the
+          branch release workflow; never re-derived here, because a locally
+          inferred version would pin generated plugins to a version that was
+          never published.
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       branch:
         description: Branch whose atlas plugin repositories should be synced.
         required: false
         default: staging
+        type: string
+      release_version:
+        description: Exact published version to pin generated atlas plugins to.
+        required: true
         type: string
 
 permissions:
@@ -57,18 +69,14 @@ jobs:
       - name: Generate atlas plugin bundles
         env:
           SYNC_BRANCH: ${{ inputs.branch || github.ref_name }}
+          TARGET_VERSION: ${{ inputs.release_version }}
         run: |
           set -euo pipefail
-          # Pin generated atlas plugins to the SAME version the monorepo publish ships
-          # (so @a5c-ai/atlas-github's @a5c-ai/babysitter-sdk dep resolves to a published version).
-          BASE_VERSION=$(node -p "require('./package.json').version.split('-')[0]")
-          TARGET_VERSION="$BASE_VERSION"
-          if [ "${SYNC_BRANCH}" = "staging" ]; then
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-            NEXT_PATCH=$((PATCH + 1))
-            SHORT_SHA=$(git rev-parse --short=12 HEAD)
-            TARGET_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-staging.${SHORT_SHA}"
-          fi
+          # FIX-001: generated atlas plugins are pinned to the EXACT version the
+          # release published, passed in by the release workflow. Re-deriving it
+          # here produced a different version on every channel but main, so
+          # @a5c-ai/atlas-github's @a5c-ai/babysitter-sdk dependency could point
+          # at a version that was never published.
           node scripts/sync-workspace-versions.mjs --version "$TARGET_VERSION"
           npm run build --workspace=@a5c-ai/atlas
           npm run build --workspace=@a5c-ai/extensions-adapter

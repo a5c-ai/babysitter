@@ -1,0 +1,25 @@
+{
+  "name": "fix011-good-package",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIX-011 verifier fixture: a fully healthy publishable artifact (all surfaces exist, bin has a shebang, no undeclared runtime imports).",
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "fix011-good": "./cli.js"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "cli.js",
+    "README.md"
+  ]
+}

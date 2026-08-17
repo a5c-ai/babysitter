@@ -52,7 +52,7 @@ As of v6, Babysitter is harness-agnostic via its **Adapters** runtime: the same 
 
 ## Prerequisites
 
-- **Node.js**: Version 20.0.0+ (22.x LTS recommended). The host-side `adapters` CLI pins a slightly higher floor of 20.9.0+.
+- **Node.js**: Version 20.0.0+ (22.x LTS recommended). The host-side `adapters` CLI pins a higher floor of 22.13.0+ (it loads the gateway's built-in `node:sqlite`, unflagged only from Node 22.13.0).
 - **A supported AI coding harness**: any of the 12 harnesses covered in the [install matrix](docs/user-guide/harnesses/install-matrix.md) (e.g. Claude Code — [docs](https://code.claude.com/docs/en/quickstart)).
 - **Git**: For cloning (optional)
 
@@ -63,7 +63,7 @@ As of v6, Babysitter is harness-agnostic via its **Adapters** runtime: the same 
 Babysitter v6 has two install tracks that should not be conflated: the **host-side `adapters` CLI** for running any harness directly from your shell, and the **in-session per-harness plugin** for driving full orchestration runs from inside your harness. Most people want both. The package split is:
 
 - `@a5c-ai/babysitter` is the recommended end-user install for the main `babysitter` CLI.
-- `@a5c-ai/adapters-cli` provides the host-side `adapters` CLI (Node >=20.9.0) for running and managing any supported harness from your shell. See the [Adapters CLI reference](docs/user-guide/reference/adapters-cli.md).
+- `@a5c-ai/adapters-cli` provides the host-side `adapters` CLI (Node >=22.13.0) for running and managing any supported harness from your shell. See the [Adapters CLI reference](docs/user-guide/reference/adapters-cli.md).
 - `@a5c-ai/babysitter-sdk` is the public SDK/library package and the underlying implementation behind the core CLI.
 - `@a5c-ai/genty-platform` is the optional runtime CLI for `genty call`, `resume`, `start-server`, `tui`, and other orchestration/runtime commands.
 - Harness plugins such as `@a5c-ai/babysitter-codex` or `@a5c-ai/babysitter-cursor` integrate Babysitter into a specific host tool. They do not replace the core CLI packages.

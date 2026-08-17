@@ -26,6 +26,7 @@ import { DEFAULT_RETRY_POLICY } from './retry.js';
 import type { ErrorCode, RetryPolicy } from './types.js';
 import type { InvocationMode } from './invocation.js';
 import { ActiveSpawn, computeDelay, isWindows, resolveExitOutcome, resolveSpawnArgs } from './spawn-runner-utils.js';
+import { loadPtyModule, ptyFallbackIsPermitted, resolvePtyMode, type PtyProcess } from './pty.js';
 import { buildInvocationCommand, runCleanupDetached, type InvocationCommandWithCleanup, type Gate3Options } from './spawn-invocation.js';
 import { resolveSpawnGate3, resolveSpawnGate3FromConfig } from './policy-spawn-gate.js';
 export { buildInvocationCommand, type InvocationCommand, type InvocationCommandWithCleanup, type K8sCleanup } from './spawn-invocation.js';
@@ -182,47 +183,100 @@ async function runOnce(
   });
 
   let child!: ChildProcess;
-  let ptyProcess: any = null;
+  let ptyProcess: PtyProcess | null = null;
   let ptyLineBuf = '';
 
   // Interactive mode: spawn via node-pty so the harness gets a real TTY.
   // Output is tee'd through feedLine for event parsing + hook dispatch.
+  //
+  // FIX-009: node-pty is loaded explicitly and ESM-safely by ./pty.ts, and the
+  // outcome is CLASSIFIED. A `required` PTY never degrades; a `preferred` PTY
+  // degrades to pipes only when the optional peer is genuinely absent, and only
+  // after an observable warning. An installed-but-broken node-pty, or a PTY that
+  // fails to open, is an environment defect and terminates the run.
   if (options.interactive) {
-    try {
-      const nodePty: any = require('node-pty');
-      ptyProcess = nodePty.spawn(invocationCmd.command, invocationCmd.args, {
-        name: 'xterm-256color',
-        cols: (process.stdout as any).columns || 120,
-        rows: (process.stdout as any).rows || 40,
-        cwd: invocationCmd.cwd,
-        env: { ...process.env, ...invocationCmd.env },
+    const ptyMode = resolvePtyMode(options.ptyMode, adapter.capabilities?.requiresPty);
+    const ptyLoad = loadPtyModule();
+
+    if (!ptyLoad.available) {
+      const mayFallBack = ptyMode === 'preferred' && ptyFallbackIsPermitted(ptyLoad);
+      if (!mayFallBack) {
+        handle.emit({
+          type: 'error',
+          runId: handle.runId,
+          agent: handle.agent,
+          timestamp: Date.now(),
+          code: 'PTY_NOT_AVAILABLE',
+          message:
+            `Interactive run requires a PTY (ptyMode="${ptyMode}", reason="${ptyLoad.reason}"): ${ptyLoad.message}`,
+          recoverable: false,
+        });
+        finalize('PTY_NOT_AVAILABLE', 'crashed', null, null);
+        return;
+      }
+      // Permitted, observable degradation — the ONLY sanctioned fallback.
+      handle.emit({
+        type: 'debug',
+        runId: handle.runId,
+        agent: handle.agent,
+        timestamp: Date.now(),
+        level: 'warn',
+        message:
+          `PTY_NOT_AVAILABLE (reason="${ptyLoad.reason}"): ${ptyLoad.message} ` +
+          'Continuing on ordinary pipes because ptyMode="preferred"; the agent will not see a TTY. ' +
+          'Set RunOptions.ptyMode="required" to fail instead.',
       });
+    } else {
+      try {
+        ptyProcess = ptyLoad.module.spawn(invocationCmd.command, invocationCmd.args, {
+          name: 'xterm-256color',
+          cols: (process.stdout as any).columns || 120,
+          rows: (process.stdout as any).rows || 40,
+          cwd: invocationCmd.cwd,
+          env: { ...process.env, ...invocationCmd.env },
+        });
+      } catch (err) {
+        // node-pty is present and healthy but the PTY could not be opened
+        // (no free pty device, sandbox, spawn-helper permissions, ...). That is
+        // not "the optional dependency is absent" — never fall through to pipes.
+        handle.emit({
+          type: 'error',
+          runId: handle.runId,
+          agent: handle.agent,
+          timestamp: Date.now(),
+          code: 'PTY_NOT_AVAILABLE',
+          message:
+            `node-pty (${ptyLoad.resolvedPath}) failed to open a PTY for ` +
+            `${invocationCmd.command}: ${err instanceof Error ? err.message : String(err)}`,
+          recoverable: false,
+        });
+        finalize('PTY_NOT_AVAILABLE', 'crashed', null, null);
+        return;
+      }
 
       // Create a ChildProcess-like facade for the rest of spawn-runner
+      const pty = ptyProcess;
       child = {
-        pid: ptyProcess.pid,
+        pid: pty.pid,
         stdin: null,
         stdout: null,
         stderr: null,
-        kill: (sig?: string) => { try { ptyProcess.kill(sig); } catch (e) { process.stderr.write(`[adapters] PTY kill failed: ${e instanceof Error ? e.message : String(e)}\n`); } },
+        kill: (sig?: string) => { try { pty.kill(sig); } catch (e) { process.stderr.write(`[adapters] PTY kill failed: ${e instanceof Error ? e.message : String(e)}\n`); } },
         on: (event: string, cb: (...args: any[]) => void) => {
           if (event === 'close' || event === 'exit') {
-            ptyProcess.onExit((e: { exitCode: number; signal?: number }) => cb(e.exitCode, e.signal));
+            pty.onExit((e: { exitCode: number; signal?: number }) => cb(e.exitCode, e.signal));
           }
           return child;
         },
         once: (event: string, cb: (...args: any[]) => void) => {
           if (event === 'close' || event === 'exit') {
-            ptyProcess.onExit((e: { exitCode: number; signal?: number }) => cb(e.exitCode, e.signal));
+            pty.onExit((e: { exitCode: number; signal?: number }) => cb(e.exitCode, e.signal));
           }
           return child;
         },
         removeListener: () => child,
         removeAllListeners: () => child,
       } as unknown as ChildProcess;
-    } catch {
-      ptyProcess = null;
-      // node-pty unavailable — fall through to regular spawn below
     }
   }
 
