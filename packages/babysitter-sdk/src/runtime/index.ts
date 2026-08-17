@@ -1,4 +1,6 @@
 export { createRun } from "./createRun";
+export { createRunConvergent, ConvergentRunError } from "./createRunConvergent";
+export type { CreateRunConvergentOptions, CreateRunConvergentResult } from "./convergentRun/contracts";
 export { orchestrateIteration } from "./orchestrateIteration";
 export { commitEffectResult, commitEffectCancellation } from "./commitEffectResult";
 export { createReplayEngine } from "./replay";
