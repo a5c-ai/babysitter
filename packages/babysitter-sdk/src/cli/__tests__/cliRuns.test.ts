@@ -608,34 +608,32 @@ describe("babysitter run:create CLI", () => {
     expect(journal[0].data.prompt).toBe("Build a REST API with user authentication");
   });
 
-  it("validates entry modules that import the SDK by preparing a local fallback dependency", async () => {
+  it("validates entry modules that import the SDK by preparing a portable local fallback dependency", async () => {
     const entryDir = path.join(runsRoot, "external-process");
     const entryFile = path.join(entryDir, "process.mjs");
-    const fallbackSdkDir = await writeFakeSdkPackage(path.join(runsRoot, "fallback-sdk"), "fallback");
     await fs.mkdir(entryDir, { recursive: true });
     await fs.writeFile(
       entryFile,
       [
-        'import { __marker } from "@a5c-ai/babysitter-sdk";',
-        "export const sdkMarker = __marker;",
+        'import { defineTask } from "@a5c-ai/babysitter-sdk";',
+        'export const fallbackTask = defineTask("fallback/task", () => ({ kind: "agent", title: "Fallback", agent: { prompt: { task: "ok" } } }));',
         'export async function process() { return "ok"; }',
         "",
       ].join("\n"),
       "utf8",
     );
 
-    await expect(
-      runSupportModule.validateProcessEntrypoint(entryFile, "process", {
-        resolveSdkPackageDir: () => fallbackSdkDir,
-      }),
-    ).resolves.toBeUndefined();
+    await expect(runSupportModule.validateProcessEntrypoint(entryFile, "process")).resolves.toBeUndefined();
 
-    await expect(fs.realpath(path.join(entryDir, "node_modules", "@a5c-ai", "babysitter-sdk"))).resolves.toBe(
-      fallbackSdkDir,
-    );
+    const localFallbackDir = path.join(entryDir, "node_modules", "@a5c-ai", "babysitter-sdk");
+    await expect(fs.realpath(localFallbackDir)).resolves.toBe(localFallbackDir);
+    const fallbackStats = await fs.lstat(localFallbackDir);
+    expect(fallbackStats.isDirectory()).toBe(true);
+    expect(fallbackStats.isSymbolicLink()).toBe(false);
+    await expect(fs.readFile(path.join(localFallbackDir, "package.json"), "utf8")).resolves.toContain("@a5c-ai/babysitter-sdk");
 
     const loaded = await import(`${pathToFileURL(entryFile).href}?marker=fallback`);
-    expect(loaded.sdkMarker).toBe("fallback");
+    expect(loaded.fallbackTask.id).toBe("fallback/task");
   });
 
   it("prefers an existing project-local SDK dependency over the fallback link", async () => {
@@ -647,7 +645,6 @@ describe("babysitter run:create CLI", () => {
       "local",
       true,
     );
-    const fallbackSdkDir = await writeFakeSdkPackage(path.join(runsRoot, "fallback-sdk-local"), "fallback");
     await fs.mkdir(entryDir, { recursive: true });
     await fs.writeFile(
       entryFile,
@@ -660,11 +657,7 @@ describe("babysitter run:create CLI", () => {
       "utf8",
     );
 
-    await expect(
-      runSupportModule.validateProcessEntrypoint(entryFile, "process", {
-        resolveSdkPackageDir: () => fallbackSdkDir,
-      }),
-    ).resolves.toBeUndefined();
+    await expect(runSupportModule.validateProcessEntrypoint(entryFile, "process")).resolves.toBeUndefined();
 
     await expect(
       fs.access(path.join(entryDir, "node_modules", "@a5c-ai", "babysitter-sdk")),
