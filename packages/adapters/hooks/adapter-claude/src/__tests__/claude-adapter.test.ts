@@ -3,6 +3,7 @@ import { createAdapter } from '../adapter';
 import { CLAUDE_PHASE_MAPPINGS, getClaudePhaseMapping, getSupportedPhases } from '../mappings';
 import { normalizeClaude, setAdapterName, parseStdin, buildPayload, isStopHookRecursion } from '../normalizer';
 import { renderClaudeOutput } from '../renderer';
+import { mergeResults, parseHookResult } from '@a5c-ai/hooks-adapter-core';
 import { resolveSessionId } from '../session-resolver';
 import * as fixtures from './fixtures/claude-payloads';
 
@@ -646,6 +647,48 @@ describe('renderClaudeOutput', () => {
         'Stop',
       );
       expect(output).toEqual({ reason: 'specific stop' });
+    });
+
+    it('emits a block decision when the handler blocked', () => {
+      const output = renderClaudeOutput(
+        { decision: 'block', reason: 'Babysitter iteration 3 | Continue orchestration.' },
+        'Stop',
+      );
+      expect(output).toEqual({
+        decision: 'block',
+        reason: 'Babysitter iteration 3 | Continue orchestration.',
+      });
+    });
+
+    it('keeps the handler reason when stopReason is an empty string', () => {
+      // The merge engine defaults stopReason to '', which must not shadow
+      // the real reason the SDK handler produced.
+      const output = renderClaudeOutput(
+        { decision: 'block', reason: 'real reason', stopReason: '' },
+        'Stop',
+      );
+      expect(output).toEqual({ decision: 'block', reason: 'real reason' });
+    });
+
+    it('survives the round trip from the SDK handler to adapter output', () => {
+      // The SDK stop handler writes exactly this to stdout; it must reach
+      // Claude Code as a block decision, not as continue:true.
+      const handlerOutput = JSON.stringify({
+        decision: 'block',
+        reason: 'Babysitter iteration 3 | Continue orchestration (run:iterate).',
+        systemMessage: 'Babysitter iteration 3/65000 [created]',
+      });
+
+      const result = parseHookResult(handlerOutput);
+      const merged = mergeResults([result]);
+      const output = renderClaudeOutput(merged, 'Stop');
+
+      expect(output.decision).toBe('block');
+      // A block omits the continue field entirely: the Stop decision-control
+      // schema only knows decision, and a block must not also signal that
+      // the turn can end.
+      expect(output.continue).toBeUndefined();
+      expect(output.reason).toContain('Continue orchestration');
     });
   });
 
