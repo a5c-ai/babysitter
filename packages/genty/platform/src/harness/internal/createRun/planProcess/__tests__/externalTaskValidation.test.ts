@@ -118,4 +118,51 @@ describe("issue #606 external responder process validation", () => {
     await expect(validateProcessExport(processPath)).resolves.toBeUndefined();
     expect(warn).toHaveBeenCalledWith(expect.stringContaining("agent responder tasks"));
   });
+
+  it("links the SDK into the workspace with a relative target so archived workspaces stay extractable", async () => {
+    const processPath = path.join(tmpDir, "portable-sdk-link-process.mjs");
+    await fs.writeFile(
+      processPath,
+      `
+      import { defineTask } from "@a5c-ai/babysitter-sdk";
+
+      const externalReview = defineTask("portable-sdk-link/review", () => ({
+        kind: "agent",
+        title: "External review",
+        agent: {
+          responderType: "agent",
+          adapter: "codex",
+          fallbackType: "internal",
+          prompt: { task: "review" }
+        }
+      }));
+
+      export async function process(inputs, ctx) {
+        return await ctx.task(externalReview, inputs);
+      }
+      `,
+      "utf8",
+    );
+
+    await expect(validateProcessExport(processPath)).resolves.toBeUndefined();
+
+    // ensureSdkResolvable symlinks the SDK package under the workspace's
+    // node_modules. The link must survive being archived, so its target has
+    // to be relative to the link's parent rather than absolute.
+    const sdkLink = path.join(tmpDir, "node_modules", "@a5c-ai", "babysitter-sdk");
+    const resolvedSdk = await fs.realpath(sdkLink);
+    const sdkPkgJson = JSON.parse(
+      await fs.readFile(path.join(resolvedSdk, "package.json"), "utf8"),
+    ) as { name?: string };
+    expect(sdkPkgJson.name).toBe("@a5c-ai/babysitter-sdk");
+
+    if (process.platform !== "win32") {
+      const target = await fs.readlink(sdkLink);
+      expect(path.isAbsolute(target)).toBe(false);
+      // The relative target must still resolve back to the SDK package dir.
+      await expect(
+        fs.realpath(path.resolve(path.dirname(sdkLink), target)),
+      ).resolves.toBe(resolvedSdk);
+    }
+  });
 });
