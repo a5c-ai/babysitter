@@ -1,0 +1,93 @@
+nodeKind: Claim
+id: claim:model-version-gemini-omni-flash-preview-issue-1827-exists
+attributes:
+  subjectId: model:gemini-omni-flash-preview@current
+  attribute: modelCardUrl
+  value: source-confirmed
+  subjectKind: ModelVersion
+  statement: Google lists gemini-omni-flash-preview as Gemini Omni Flash Preview, a preview Gemini API model for conversational video generation and editing.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-omni-flash-issue-1827
+    - evidence:google-gemini-omni-guide-issue-1827
+  claimedAt: "2026-08-19T07:30:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-omni-flash-issue-1827
+    - evidence:google-gemini-omni-guide-issue-1827
+  about_subject:
+    - model:gemini-omni-flash-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-omni-flash-preview-issue-1827-context-window
+attributes:
+  subjectId: model:gemini-omni-flash-preview@current
+  attribute: contextWindowTokens
+  value: 1048576
+  subjectKind: ModelVersion
+  statement: Google AI Developers lists Gemini Omni Flash Preview with a 1,048,576-token context window.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-omni-flash-issue-1827
+  claimedAt: "2026-08-19T07:30:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-omni-flash-issue-1827
+  about_subject:
+    - model:gemini-omni-flash-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-omni-flash-preview-issue-1827-cloud-lifecycle
+attributes:
+  subjectId: model:gemini-omni-flash-preview@current
+  attribute: lifecycleStatus
+  value: preview
+  subjectKind: ModelVersion
+  statement: Google Cloud lists Gemini Omni Flash Preview as preview with release date 2026-06-30 and deprecation date 2027-06-30.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-cloud-gemini-omni-flash-issue-1827
+  claimedAt: "2026-08-19T07:30:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:google-cloud-gemini-omni-flash-issue-1827
+  about_subject:
+    - model:gemini-omni-flash-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-omni-flash-preview-issue-1827-modalities
+attributes:
+  subjectId: model:gemini-omni-flash-preview@current
+  attribute: modalities
+  value: text, image, audio, video
+  subjectKind: ModelVersion
+  statement: Google DeepMind describes Gemini Omni Flash as a native multimodal model accepting text, image, audio, and video inputs and producing video output.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-deepmind-gemini-omni-flash-card-issue-1827
+  claimedAt: "2026-08-19T07:30:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:google-deepmind-gemini-omni-flash-card-issue-1827
+  about_subject:
+    - model:gemini-omni-flash-preview@current
