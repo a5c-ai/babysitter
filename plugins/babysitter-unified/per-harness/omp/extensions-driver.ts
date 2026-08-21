@@ -11,6 +11,68 @@ export const MAX_CAPTURE_BYTES = 1024 * 1024;
 export const MAX_DRIVER_STEPS = 100;
 export const SHELL_HEARTBEAT_INTERVAL_MS = 5_000;
 
+export async function assertOmpRunOwnership(runDirInput: string, sessionId: string): Promise<void> {
+  if (!/^[A-Za-z0-9._:-]{1,256}$/.test(sessionId)) {
+    throw new Error("Authoritative OMP session binding is unavailable or invalid");
+  }
+  if (!path.isAbsolute(runDirInput)) {
+    throw new Error("Babysitter run directory must be absolute");
+  }
+  const runDir = await fs.realpath(runDirInput);
+  let metadata: Record<string, unknown>;
+  try {
+    const parsed = JSON.parse(await fs.readFile(path.join(runDir, "run.json"), "utf8")) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("run.json must contain an object");
+    }
+    metadata = parsed as Record<string, unknown>;
+  } catch (error) {
+    throw new Error(`Babysitter run ownership metadata is unavailable or invalid: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  const binding = metadata.sessionBinding;
+  if (
+    metadata.runId !== path.basename(runDir)
+    || metadata.harness !== "oh-my-pi"
+    || !binding
+    || typeof binding !== "object"
+    || Array.isArray(binding)
+  ) {
+    throw new Error("Babysitter run does not declare valid OMP session ownership");
+  }
+  const owner = binding as Record<string, unknown>;
+  if (owner.harness !== "oh-my-pi" || owner.sessionId !== sessionId) {
+    throw new Error("Babysitter run is owned by a different OMP session");
+  }
+}
+
+export async function assertOmpLiveSessionOwnership(payload: unknown, runDirInput: string): Promise<void> {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("OMP session state response is malformed");
+  }
+  const response = payload as Record<string, unknown>;
+  const state = response.state;
+  if (response.found !== true || !state || typeof state !== "object" || Array.isArray(state)) {
+    throw new Error("OMP session has no authoritative live run binding");
+  }
+  const sessionState = state as Record<string, unknown>;
+  const runDir = await fs.realpath(runDirInput);
+  let stateRunDir: string | undefined;
+  if (typeof sessionState.runDir === "string") {
+    try {
+      stateRunDir = await fs.realpath(sessionState.runDir);
+    } catch {
+      stateRunDir = undefined;
+    }
+  }
+  if (
+    sessionState.active !== true
+    || sessionState.runId !== path.basename(runDir)
+    || stateRunDir !== runDir
+  ) {
+    throw new Error("OMP session state does not own the selected active run");
+  }
+}
+
 interface JsonObject {
   [key: string]: unknown;
 }
@@ -1480,7 +1542,25 @@ export async function executeHostShell(
 ): Promise<ShellExecutionResult> {
   const shell = readObject(action.taskDef?.shell) ?? readObject(action.taskDef?.metadata) ?? {};
   const command = typeof shell.command === "string" && shell.command.trim() ? shell.command : "echo";
-  const args = Array.isArray(shell.args) ? shell.args.filter((value): value is string => typeof value === "string") : [];
+  const rawArgs = shell.args;
+  const hasExplicitArgs = Array.isArray(rawArgs);
+  if (hasExplicitArgs && rawArgs.some((value) => typeof value !== "string")) {
+    throw new Error("Every shell argument must be a string");
+  }
+  const args = hasExplicitArgs ? rawArgs as string[] : [];
+  const interpreter = shell.interpreter;
+  if (interpreter !== undefined && interpreter !== "bash") {
+    throw new Error('Deterministic shell task interpreter must be "bash" when provided');
+  }
+  if (interpreter === "bash" && hasExplicitArgs) {
+    throw new Error('Deterministic Bash shell tasks must put the complete trusted program in command without args');
+  }
+  const trustedBashProgram = interpreter === "bash";
+  if (!hasExplicitArgs && !trustedBashProgram && !/^[A-Za-z0-9_./:+-]+$/.test(command)) {
+    throw new Error('Shell source requires interpreter: "bash" as an explicit trust boundary; otherwise provide structured command and args');
+  }
+  const executable = trustedBashProgram ? "/bin/bash" : command;
+  const executableArgs = trustedBashProgram ? ["-lc", command] : args;
   const cwd = typeof shell.cwd === "string" ? path.resolve(defaultCwd, shell.cwd) : defaultCwd;
   if (shell.env !== undefined) {
     throw new Error("Deterministic shell task env overrides are unsupported by the host-owned OMP executor");
@@ -1524,7 +1604,7 @@ export async function executeHostShell(
     ? scheduler.setInterval(() => notifyProgress("heartbeat"), SHELL_HEARTBEAT_INTERVAL_MS)
     : undefined;
   try {
-    const result = await execute(command, args, { cwd, timeout: timeoutMs, signal });
+    const result = await execute(executable, executableArgs, { cwd, timeout: timeoutMs, signal });
     if (signal?.aborted) throw signal.reason ?? new DOMException("The operation was aborted", "AbortError");
     const boundedStdout = boundCapturedText(result.stdout, MAX_CAPTURE_BYTES);
     const boundedStderr = boundCapturedText(result.stderr, MAX_CAPTURE_BYTES);
@@ -2429,8 +2509,22 @@ export function driverFailureDiagnostic(error: unknown): string {
   if (!(error instanceof Error)) return fallback;
   const diagnostic = error instanceof DriverError && error.publicDiagnostic !== undefined
     ? error.publicDiagnostic
-    : error.message;
+    : conciseSpawnDiagnostic(error);
   return boundedDiagnostic(diagnostic) || fallback;
+}
+
+function conciseSpawnDiagnostic(error: Error): string {
+  const systemError = error as NodeJS.ErrnoException;
+  if (systemError.code === "ENAMETOOLONG") {
+    const syscall = systemError.syscall === "spawn" || systemError.syscall === "posix_spawn"
+      ? `, ${systemError.syscall}`
+      : "";
+    return `ENAMETOOLONG: name too long${syscall} (command omitted)`;
+  }
+  const embeddedCommand = error.message.match(
+    /(ENAMETOOLONG:\s*name too long,\s*(?:posix_spawn|spawn))\b/is,
+  );
+  return embeddedCommand ? `${embeddedCommand[1]} (command omitted)` : error.message;
 }
 
 function boundedDiagnostic(value: string): string {

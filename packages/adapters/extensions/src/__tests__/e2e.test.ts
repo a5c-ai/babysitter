@@ -304,7 +304,7 @@ describe('e2e: sample plugin compilation', () => {
         fs.readFileSync(path.join(result.outputDir, 'package.json'), 'utf-8')
       );
       expect(packageJson.peerDependencies).toEqual({
-        '@oh-my-pi/pi-coding-agent': '>=16.5.2 <17',
+        '@oh-my-pi/pi-coding-agent': '>=16.5.2 <18',
       });
       expect(packageJson.scripts['sync:commands']).toBeUndefined();
     });

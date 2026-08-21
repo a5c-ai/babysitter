@@ -4,6 +4,8 @@ import * as path from "node:path";
 import { initI18n, t } from "./i18n.js";
 import {
   type DriverProgress,
+  assertOmpLiveSessionOwnership,
+  assertOmpRunOwnership,
   executeHostShell,
   type DriverResult,
   type ProjectionTodoPhase,
@@ -247,7 +249,7 @@ export default function activate(pi: ExtensionAPI): void {
     const text = progressText(progress);
     try {
       activeContext?.ui.setStatus(PROJECTION_NAMESPACE, text);
-      activeContext?.ui.setWidget(PROJECTION_NAMESPACE, [text]);
+      activeContext?.ui.setWidget(PROJECTION_NAMESPACE, progress.stage === "failure" ? undefined : [text]);
     } catch (error) {
       reportProjectionFailure(error, "operation_flush");
     }
@@ -458,6 +460,30 @@ export default function activate(pi: ExtensionAPI): void {
           });
         });
         try {
+          const hasContextSession = typeof ctx?.sessionManager?.getSessionId === "function";
+          const sessionId = hasContextSession ? syncSessionEnvironment(ctx) : ownedSessionId;
+          if (!sessionId) throw new Error("Authoritative OMP session binding is unavailable or invalid");
+          await assertOmpRunOwnership(params.runDir, sessionId);
+          const sessionStateResult = await pi.exec("babysitter", [
+            "session:state",
+            "--session-id",
+            sessionId,
+            "--json",
+          ], {
+            cwd: typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd(),
+            timeout: 30_000,
+            signal,
+          });
+          if (sessionStateResult.code !== 0) {
+            throw new Error("Failed to verify authoritative OMP session state");
+          }
+          let sessionStatePayload: unknown;
+          try {
+            sessionStatePayload = JSON.parse(sessionStateResult.stdout);
+          } catch {
+            throw new Error("OMP session state response is malformed");
+          }
+          await assertOmpLiveSessionOwnership(sessionStatePayload, params.runDir);
           const result = await driveContext.run(
             ctx,
             () => driver.drive(params.runDir, signal, operationId),
@@ -655,7 +681,7 @@ export default function activate(pi: ExtensionAPI): void {
     driver.setWorkspaceCwd(ctx.cwd);
     const sessionId = ctx.sessionManager.getSessionId();
     process.env.OMP_PLUGIN_ROOT = PLUGIN_ROOT;
-    if (!sessionId) {
+    if (!sessionId || !/^[A-Za-z0-9._:-]{1,256}$/.test(sessionId)) {
       clearOwnedSessionEnvironment();
       return undefined;
     }
@@ -692,9 +718,16 @@ export default function activate(pi: ExtensionAPI): void {
 
   // Register slash commands after lifecycle binding. Merely loading the
   // extension must never invoke session setup or create a session-less run.
+  const withSessionBinding = (prompt: string, sessionId: string | undefined): string => {
+    if (!sessionId || !/^[A-Za-z0-9._:-]{1,256}$/.test(sessionId)) {
+      return "Babysitter OMP operator attention: authoritative session binding is unavailable or invalid. Restart the OMP session before creating or resuming a run.";
+    }
+    const quotedSessionId = JSON.stringify(sessionId);
+    return `${prompt}\n\nOMP session binding: prefix every Babysitter CLI command executed through a shell worker with \`OMP_SESSION_ID=${quotedSessionId} BABYSITTER_SESSION_ID=${quotedSessionId}\`.`;
+  };
   const forwardBabysit = async (args: unknown, ctx: ExtensionContext) => {
-    syncSessionEnvironment(ctx);
-    pi.sendUserMessage(toSkillPrompt("babysit", String(args ?? "").trim()));
+    const sessionId = syncSessionEnvironment(ctx);
+    pi.sendUserMessage(withSessionBinding(toSkillPrompt("babysit", String(args ?? "").trim()), sessionId));
   };
 
   pi.registerCommand("babysit", {
@@ -709,8 +742,8 @@ export default function activate(pi: ExtensionAPI): void {
 
   for (const name of COMMANDS) {
     const forward = async (args: unknown, ctx: ExtensionContext) => {
-      syncSessionEnvironment(ctx);
-      pi.sendUserMessage(toSkillPrompt(name, String(args ?? "").trim()));
+      const sessionId = syncSessionEnvironment(ctx);
+      pi.sendUserMessage(withSessionBinding(toSkillPrompt(name, String(args ?? "").trim()), sessionId));
     };
 
     pi.registerCommand(name, {

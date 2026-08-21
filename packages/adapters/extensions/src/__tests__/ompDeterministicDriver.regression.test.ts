@@ -10,6 +10,9 @@ import { compile } from '../compiler.js';
 import {
   type AgentRetryInput,
   type DriverProgress,
+  assertOmpLiveSessionOwnership,
+  assertOmpRunOwnership,
+  driverFailureDiagnostic,
   executeHostShell,
   MAX_CAPTURE_BYTES,
   OmpDeterministicDriver,
@@ -36,6 +39,14 @@ async function tempRun(prefix: string): Promise<string> {
 async function writeJson(file: string, value: unknown): Promise<void> {
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(value, null, 2) + '\n');
+}
+
+async function bindOmpRun(runDir: string, sessionId: string): Promise<void> {
+  await writeJson(path.join(runDir, 'run.json'), {
+    runId: path.basename(runDir),
+    harness: 'oh-my-pi',
+    sessionBinding: { harness: 'oh-my-pi', sessionId },
+  });
 }
 
 async function within<T>(promise: Promise<T>, label: string): Promise<T> {
@@ -119,6 +130,43 @@ afterEach(async () => {
 
 
 describe('OMP deterministic driver regressions (#1578, #1579)', () => {
+  it('enforces OMP session ownership before deterministic execution', async () => {
+    const runDir = await tempRun('omp-drive-ownership-');
+    await writeJson(path.join(runDir, 'run.json'), {
+      runId: path.basename(runDir),
+      harness: 'oh-my-pi',
+      sessionBinding: { harness: 'oh-my-pi', sessionId: 'session-a' },
+    });
+
+    await expect(assertOmpRunOwnership(runDir, 'session-a')).resolves.toBeUndefined();
+    await expect(assertOmpRunOwnership(runDir, 'session-b')).rejects.toThrow(/different OMP session/i);
+    await writeJson(path.join(runDir, 'run.json'), {
+      runId: 'different-run-id',
+      harness: 'oh-my-pi',
+      sessionBinding: { harness: 'oh-my-pi', sessionId: 'session-a' },
+    });
+    await expect(assertOmpRunOwnership(runDir, 'session-a')).rejects.toThrow(/does not declare valid OMP session ownership/i);
+  });
+
+  it('fails closed when deterministic execution ownership metadata is absent', async () => {
+    const runDir = await tempRun('omp-drive-unowned-');
+    await writeJson(path.join(runDir, 'run.json'), { harness: 'oh-my-pi' });
+
+    await expect(assertOmpRunOwnership(runDir, 'session-a')).rejects.toThrow(/does not declare valid OMP session ownership/i);
+  });
+
+  it('requires authoritative live session state for deterministic execution', async () => {
+    const runDir = await tempRun('omp-live-session-owner-');
+    await expect(assertOmpLiveSessionOwnership({
+      found: true,
+      state: { active: true, runId: path.basename(runDir), runDir },
+    }, runDir)).resolves.toBeUndefined();
+    await expect(assertOmpLiveSessionOwnership({
+      found: true,
+      state: { active: true, runId: 'run-b', runDir },
+    }, runDir)).rejects.toThrow(/does not own/i);
+  });
+
   it('ships corrected generated instructions with the driver and blocking bridge agent', async () => {
     const output = await tempRun('omp-driver-package-');
     const result = compile({ source: UNIFIED_PLUGIN_DIR, target: 'oh-my-pi', output });
@@ -154,7 +202,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(instructions).not.toContain('/babysitter:status');
     const manifest = JSON.parse(await fs.readFile(path.join(result.outputDir, 'package.json'), 'utf8'));
     expect(manifest.files).toContain('agents/');
-    expect(manifest.peerDependencies).toEqual({ '@oh-my-pi/pi-coding-agent': '>=16.5.2 <17' });
+    expect(manifest.peerDependencies).toEqual({ '@oh-my-pi/pi-coding-agent': '>=16.5.2 <18' });
     expect(manifest.dependencies).toEqual({ zod: '^4.4.3' });
   });
 
@@ -370,7 +418,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
           return {
             code: sessionStateCode,
             stdout: JSON.stringify(sessionStateRunDir
-              ? { found: true, state: { runDir: sessionStateRunDir } }
+              ? {
+                  found: true,
+                  state: {
+                    active: true,
+                    runId: path.basename(sessionStateRunDir),
+                    runDir: sessionStateRunDir,
+                  },
+                }
               : { found: false }),
             stderr: sessionStateCode === 0 ? '' : 'authorization=restore-command-secret',
           };
@@ -465,11 +520,26 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await commands.get('babysitter')?.('review this', commandContext);
     await commands.get('babysitter:call')?.('process.json', commandContext);
     expect(sentMessages).toEqual([
-      '/skill:babysit review this',
-      '/skill:call process.json',
+      '/skill:babysit review this\n\nOMP session binding: prefix every Babysitter CLI command executed through a shell worker with `OMP_SESSION_ID="omp-command-session" BABYSITTER_SESSION_ID="omp-command-session"`.',
+      '/skill:call process.json\n\nOMP session binding: prefix every Babysitter CLI command executed through a shell worker with `OMP_SESSION_ID="omp-command-session" BABYSITTER_SESSION_ID="omp-command-session"`.',
     ]);
+    const operatorAttention = 'Babysitter OMP operator attention: authoritative session binding is unavailable or invalid. Restart the OMP session before creating or resuming a run.';
+    await commands.get('resume')?.('', {
+      ...commandContext,
+      sessionManager: { ...commandContext.sessionManager, getSessionId: () => '' },
+    });
+    await commands.get('babysitter')?.('', {
+      ...commandContext,
+      sessionManager: { ...commandContext.sessionManager, getSessionId: () => 'invalid\nsession' },
+    });
+    expect(sentMessages.slice(-2)).toEqual([operatorAttention, operatorAttention]);
+    expect(sentMessages.slice(-2).some((message) => message.startsWith('/skill:'))).toBe(false);
+    expect(process.env.OMP_SESSION_ID).toBeUndefined();
+    expect(process.env.BABYSITTER_SESSION_ID).toBeUndefined();
     const driveTool = tools.get('babysitter_drive');
     if (!driveTool) throw new Error('missing babysitter_drive tool');
+    await bindOmpRun(output, 'omp-command-session');
+    sessionStateRunDir = output;
     const driveAbort = new AbortController();
     const waitingUpdates: Array<Record<string, unknown>> = [];
     const driveResult = await driveTool.execute(
@@ -479,6 +549,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       (update: Record<string, unknown>) => { waitingUpdates.push(update); },
       {
         cwd: '/workspace-drive',
+        sessionManager: commandContext.sessionManager,
         ui: {
           setStatus: (...args: unknown[]) => { uiStatusWrites.push(args); },
           setWidget: (...args: unknown[]) => { uiWidgetWrites.push(args); },
@@ -496,7 +567,25 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(uiWidgetWrites.some(([, value]) => String(value).includes('waiting'))).toBe(true);
     expect(projectionWrites.some(([namespace]) => namespace === 'babysitter')).toBe(true);
     expect(String(uiStatusWrites.at(-1)?.[1])).toContain('waiting');
+    const foreignDrive = await driveTool.execute(
+      'tool-call-foreign-session',
+      { i: 'must not drive another session run', runDir: output },
+      undefined,
+      undefined,
+      {
+        cwd: '/workspace-foreign',
+        sessionManager: {
+          getSessionId: () => 'omp-foreign-session',
+          getSessionFile: () => '/sessions/omp-foreign-session.jsonl',
+        },
+        ui: { setStatus: () => undefined, setWidget: () => undefined },
+      },
+    );
+    expect(foreignDrive).toMatchObject({ isError: true, details: { state: 'operator_attention' } });
+    expect(JSON.stringify(foreignDrive)).toContain('different OMP session');
     const pendingShellRun = await tempRun('omp-pending-shell-progress-');
+    await bindOmpRun(pendingShellRun, 'omp-command-session');
+    sessionStateRunDir = pendingShellRun;
     shellProgressRunDir = pendingShellRun;
     const pendingShellAbort = new AbortController();
     const shellProgressObserved = Promise.withResolvers<void>();
@@ -518,6 +607,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       },
       {
         cwd: output,
+        sessionManager: commandContext.sessionManager,
         ui: {
           setStatus: (...args: unknown[]) => { uiStatusWrites.push(args); },
           setWidget: (...args: unknown[]) => { uiWidgetWrites.push(args); },
@@ -551,7 +641,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         getSessionFile: () => '/sessions/omp-session-1.jsonl',
       },
     });
-    expect(sessionStateCalls).toBe(1);
+    expect(sessionStateCalls).toBe(3);
     sessionStateFailure = new Error('authorization=restore-rejection-secret');
     await expect(sessionStart({}, {
       cwd: '/workspace',
@@ -579,7 +669,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     });
     expect(process.env.OMP_SESSION_ID).toBeUndefined();
     expect(process.env.BABYSITTER_SESSION_ID).toBeUndefined();
-    expect(sessionStateCalls).toBe(3);
+    expect(sessionStateCalls).toBe(5);
 
     const malformedProjectionRun = await tempRun('omp-malformed-projection-');
     await fs.mkdir(path.join(malformedProjectionRun, 'journal'));
@@ -617,6 +707,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const runIterateStarted = Promise.withResolvers<void>();
     notifyRunIterate = runIterateStarted.resolve;
     let staleDriveSettled = false;
+    await bindOmpRun(output, 'omp-session-malformed-projection');
+    sessionStateRunDir = output;
     const staleDrive = driveTool.execute(
       'tool-call-stale-session',
       { i: 'delay old session drive', runDir: output },
@@ -647,6 +739,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     notifyRunIterate = undefined;
 
     const inFlightProjectionRun = await tempRun('omp-in-flight-old-projection-');
+    await bindOmpRun(inFlightProjectionRun, 'omp-session-after-switch');
+    sessionStateRunDir = inFlightProjectionRun;
     await writeJson(path.join(inFlightProjectionRun, 'journal', '0001.json'), {
       type: 'EFFECT_REQUESTED',
       data: {
@@ -699,6 +793,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         stdout: JSON.stringify({ status: 'waiting', nextActions: [] }),
         stderr: '',
       });
+      await bindOmpRun(output, 'omp-session-after-switch');
+      sessionStateRunDir = output;
       const newerDrive = driveTool.execute(
         'tool-call-newer-projection-owner',
         { i: 'wait behind the active projection owner', runDir: output },
@@ -736,9 +832,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       notifyRunIterate = undefined;
     }
 
+    sessionStateRunDir = output;
+
     runIterateFailure = true;
     const failureUpdates: Array<Record<string, unknown>> = [];
     const failureStatusWrites: unknown[][] = [];
+    const failureWidgetWrites: unknown[][] = [];
     const failedDrive = await driveTool.execute(
       'tool-call-secret-failure',
       { i: 'exercise sanitized terminal failure', runDir: output },
@@ -747,7 +846,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       {
         ui: {
           setStatus: (...args: unknown[]) => { failureStatusWrites.push(args); },
-          setWidget: () => undefined,
+          setWidget: (...args: unknown[]) => { failureWidgetWrites.push(args); },
         },
       },
     );
@@ -764,6 +863,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(JSON.stringify(failedDrive)).not.toContain('driver-terminal-secret');
     expect(JSON.stringify(failureStatusWrites)).toContain('babysitter daemon unavailable');
     expect(JSON.stringify(failureStatusWrites)).not.toContain('driver-terminal-secret');
+    expect(failureWidgetWrites.at(-1)).toEqual(['babysitter', undefined]);
     runIterateFailure = false;
 
     runIterateMalformed = true;
@@ -794,6 +894,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     runIterateShellFailure = 1;
     const shellFailureUpdates: Array<Record<string, unknown>> = [];
     const shellFailureRun = await tempRun('omp-shell-failed-progress-');
+    await bindOmpRun(shellFailureRun, 'omp-session-after-switch');
+    sessionStateRunDir = shellFailureRun;
     const shellFailureDrive = await driveTool.execute(
       'tool-call-shell-failed-progress',
       { i: 'preserve nonterminal failed progress', runDir: shellFailureRun },
@@ -810,6 +912,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       }),
     ]));
     runIterateShellFailure = 0;
+    sessionStateRunDir = output;
 
     runIterateThrown = new Error('connection refused; token=driver-error-secret');
     const thrownErrorUpdates: Array<Record<string, unknown>> = [];
@@ -825,6 +928,38 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(JSON.stringify(thrownErrorDrive)).toContain('connection refused');
     expect(JSON.stringify(thrownErrorDrive)).toContain('token=[redacted]');
     expect(JSON.stringify(thrownErrorDrive)).not.toContain('driver-error-secret');
+
+    const spawnSecret = 'oversized-spawn-command-secret';
+    runIterateThrown = new Error(
+      `ENAMETOOLONG: name too long, posix_spawn 'cd /workspace && node -e "${'x'.repeat(320)} token=${spawnSecret}"'`,
+    );
+    const spawnFailureUpdates: Array<Record<string, unknown>> = [];
+    const spawnFailureStatusWrites: unknown[][] = [];
+    const spawnFailureDrive = await driveTool.execute(
+      'tool-call-spawn-failure',
+      { i: 'omit unlaunchable command from diagnostic', runDir: output },
+      undefined,
+      (update: Record<string, unknown>) => { spawnFailureUpdates.push(update); },
+      {
+        ui: {
+          setStatus: (...args: unknown[]) => { spawnFailureStatusWrites.push(args); },
+          setWidget: () => undefined,
+        },
+      },
+    );
+    expect(spawnFailureDrive).toMatchObject({
+      isError: true,
+      content: [{
+        type: 'text',
+        text: 'ENAMETOOLONG: name too long, posix_spawn (command omitted)',
+      }],
+    });
+    expect(spawnFailureUpdates).toEqual([]);
+    expect(JSON.stringify(spawnFailureStatusWrites)).toContain(
+      'ENAMETOOLONG: name too long, posix_spawn (command omitted)',
+    );
+    expect(JSON.stringify(spawnFailureDrive)).not.toContain(spawnSecret);
+    expect(JSON.stringify(spawnFailureStatusWrites)).not.toContain(spawnSecret);
 
     const longSecret = 'long-render-secret';
     runIterateThrown = new Error(`connection refused ${'x'.repeat(320)} token=${longSecret}`);
@@ -885,6 +1020,8 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     runIterateCompleted = false;
 
     const unreadableProjectionRun = await tempRun('omp-unreadable-projection-');
+    await bindOmpRun(unreadableProjectionRun, 'omp-session-after-switch');
+    sessionStateRunDir = unreadableProjectionRun;
     await fs.writeFile(path.join(unreadableProjectionRun, 'journal'), 'not a directory');
     const successfulDriveWithProjectionFailure = await driveTool.execute(
       'tool-call-projection-read-failure',
@@ -1033,6 +1170,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
         args: ['-e', 'process.stdout.write(JSON.stringify({ cwd: process.cwd() }))'],
       },
     });
+    await bindOmpRun(runDir, 'modeled-session');
+    await bindOmpRun(activeRunDir, 'modeled-session');
+    const modeledSessionManager = {
+      getSessionId: () => 'modeled-session',
+      getSessionFile: () => '/sessions/modeled-session.jsonl',
+    };
     const activeIterationStarted = Promise.withResolvers<void>();
     const releaseActiveIteration = Promise.withResolvers<void>();
     let activeIterations = 0;
@@ -1041,6 +1184,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const handlers = new Map<string, (...args: unknown[]) => Promise<Record<string, unknown> | undefined>>();
     let effectResolved = false;
     let posts = 0;
+    let modeledLiveRunDir = runDir;
     const sentMessages: string[] = [];
     const pi: Record<string, unknown> = {
       logger: { warn: () => undefined },
@@ -1064,6 +1208,20 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
             stdout: JSON.stringify({ cwd: options?.cwd }),
             stderr: '',
             killed: false,
+          };
+        }
+        if (args[0] === 'session:state') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({
+              found: true,
+              state: {
+                active: true,
+                runId: path.basename(modeledLiveRunDir),
+                runDir: modeledLiveRunDir,
+              },
+            }),
+            stderr: '',
           };
         }
         if (args[0] === 'run:iterate' && args[1] === activeRunDir) {
@@ -1125,7 +1283,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       { i: 'Dispatch modeled agent', runDir },
       undefined,
       undefined,
-      {},
+      { cwd: runDir, sessionManager: modeledSessionManager },
     );
     const driveText = driveResult.content?.[0]?.text;
     if (!driveText) throw new Error('missing modeled dispatch result');
@@ -1156,6 +1314,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       reason: 'operator approved modeled retry',
     });
     expect(retryInput).toMatchObject({ model: 'openai-codex/gpt-5.6-sol:high' });
+    modeledLiveRunDir = activeRunDir;
     const activeDrive = driveTool.execute(
       'active-drive-during-retry',
       { i: 'preserve active drive cwd', runDir: activeRunDir },
@@ -1163,6 +1322,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       undefined,
       {
         cwd: activeWorkspace,
+        sessionManager: modeledSessionManager,
         ui: { setStatus: () => undefined, setWidget: () => undefined },
       },
     );
@@ -1274,6 +1434,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const continuationRunDir = await tempRun('omp-completion-agent-run-');
     const activeWorkspace = await tempRun('omp-completion-active-workspace-');
     const continuationWorkspace = await tempRun('omp-completion-agent-workspace-');
+    await bindOmpRun(activeRunDir, 'completion-session');
+    const completionSessionManager = {
+      getSessionId: () => 'completion-session',
+      getSessionFile: () => '/sessions/completion-session.jsonl',
+    };
     const activeStarted = Promise.withResolvers<void>();
     const releaseActive = Promise.withResolvers<void>();
     const order: string[] = [];
@@ -1318,7 +1483,20 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       },
       registerCommand: () => undefined,
       sendUserMessage: (message: string) => { sentMessages.push(message); },
-      exec: async () => ({ code: 0, stdout: '{}', stderr: '' }),
+      exec: async (_command: string, args: string[]) => args[0] === 'session:state'
+        ? {
+            code: 0,
+            stdout: JSON.stringify({
+              found: true,
+              state: {
+                active: true,
+                runId: path.basename(activeRunDir),
+                runDir: activeRunDir,
+              },
+            }),
+            stderr: '',
+          }
+        : { code: 0, stdout: '{}', stderr: '' },
       on: (event: string, handler: (...args: unknown[]) => Promise<Record<string, unknown> | undefined>) => {
         handlers.set(event, handler);
       },
@@ -1334,7 +1512,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       { i: 'hold active drive', runDir: activeRunDir },
       undefined,
       undefined,
-      { cwd: activeWorkspace, ui: { setStatus: () => undefined, setWidget: () => undefined } },
+      {
+        cwd: activeWorkspace,
+        sessionManager: completionSessionManager,
+        ui: { setStatus: () => undefined, setWidget: () => undefined },
+      },
     );
     await within(activeStarted.promise, 'active drive start');
     const completionContext = {
@@ -1361,7 +1543,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       expect(sentMessages).toHaveLength(1);
     });
     expect(order).toEqual(['active-start', 'active-end', `continuation:${continuationRunDir}`]);
-    expect(workspaceCwds).toEqual([path.resolve(activeWorkspace), path.resolve(continuationWorkspace)]);
+    expect(workspaceCwds).toEqual([
+      path.resolve(activeWorkspace),
+      path.resolve(activeWorkspace),
+      path.resolve(continuationWorkspace),
+    ]);
     expect(sentMessages[0]).toContain('"state": "completed"');
   });
 
@@ -2912,6 +3098,65 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(result).toMatchObject({ exitCode: 0, stdout: 'ok', stderr: '', timedOut: false });
   });
 
+  it('preserves an explicitly structured no-args executable even when its path contains spaces', async () => {
+    const calls: unknown[][] = [];
+    const executable = '/Applications/Tool Name/bin/tool';
+    await executeHostShell(action('shell', {
+      shell: { command: executable, args: [] },
+    }), '/workspace', undefined, async (command, args, options) => {
+      calls.push([command, args, options]);
+      return { code: 0, stdout: '', stderr: '', killed: false };
+    });
+
+    expect(calls).toEqual([[
+      executable,
+      [],
+      expect.objectContaining({ cwd: '/workspace' }),
+    ]]);
+  });
+
+  it('rejects explicit argument arrays containing non-string values', async () => {
+    let calls = 0;
+    await expect(executeHostShell(action('shell', {
+      shell: { command: 'tool', args: ['safe', { changed: true }, 'tail'] },
+    }), '/workspace', undefined, async () => {
+      calls += 1;
+      return { code: 0, stdout: '', stderr: '', killed: false };
+    })).rejects.toThrow(/every shell argument must be a string/i);
+    expect(calls).toBe(0);
+  });
+
+  it('executes an explicitly trusted multiline Bash program without changing the script', async () => {
+    const calls: unknown[][] = [];
+    const script = [
+      "cd '/workspace/project'",
+      "node --input-type=module -e 'process.stdout.write(\"ok\")'",
+    ].join('\n');
+
+    await executeHostShell(action('shell', {
+      shell: { command: script, interpreter: 'bash', timeout: 9876 },
+    }), '/workspace', undefined, async (command, args, options) => {
+      calls.push([command, args, options]);
+      return { code: 0, stdout: 'ok', stderr: '', killed: false };
+    });
+
+    expect(calls).toEqual([[
+      '/bin/bash',
+      ['-lc', script],
+      expect.objectContaining({ cwd: '/workspace', timeout: 9876 }),
+    ]]);
+  });
+
+  it('redacts wrapped ENAMETOOLONG spawn diagnostics without exposing the command', () => {
+    const secret = 'wrapped-spawn-command-secret';
+    const diagnostic = driverFailureDiagnostic(new Error(
+      `host executor failed: ENAMETOOLONG: name too long, posix_spawn 'node -e "token=${secret}"'`,
+    ));
+
+    expect(diagnostic).toBe('ENAMETOOLONG: name too long, posix_spawn (command omitted)');
+    expect(diagnostic).not.toContain(secret);
+  });
+
   it('fails closed instead of dropping shell env overrides at the host boundary', async () => {
     let calls = 0;
     await expect(executeHostShell(action('shell', {
@@ -2923,20 +3168,58 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(calls).toBe(0);
   });
 
-  it('passes no-args commands verbatim without shell interpretation or concatenation', async () => {
+  it('executes an explicitly trusted single-line Bash program', async () => {
     const calls: unknown[][] = [];
+    const script = 'printf "one two" | wc -w';
     await executeHostShell(action('shell', {
-      shell: { command: 'printf "one two" | wc -w' },
+      shell: { command: script, interpreter: 'bash' },
     }), '/workspace', undefined, async (command, args, options) => {
       calls.push([command, args, options]);
       return { code: 0, stdout: '', stderr: '', killed: false };
     });
 
     expect(calls).toEqual([[
-      'printf "one two" | wc -w',
-      [],
+      '/bin/bash',
+      ['-lc', script],
       expect.objectContaining({ cwd: '/workspace' }),
     ]]);
+  });
+
+  it.each([
+    'echo hello',
+    'cd /tmp',
+    "printf '%s' value",
+    'echo "$HOME"',
+    'printf "%s\\n" *.ts',
+    'FOO=value env',
+    '~/bin/check',
+    'printf "%s\\n" file?.ts',
+    'printf "%s\\n" {one,two}',
+  ])('executes explicitly trusted Bash syntax: %s', async (script) => {
+    const calls: unknown[][] = [];
+    await executeHostShell(action('shell', {
+      shell: { command: script, interpreter: 'bash' },
+    }), '/workspace', undefined, async (command, args, options) => {
+      calls.push([command, args, options]);
+      return { code: 0, stdout: '', stderr: '', killed: false };
+    });
+
+    expect(calls).toEqual([[
+      '/bin/bash',
+      ['-lc', script],
+      expect.objectContaining({ cwd: '/workspace' }),
+    ]]);
+  });
+
+  it('rejects shell source without an explicit Bash trust boundary', async () => {
+    let calls = 0;
+    await expect(executeHostShell(action('shell', {
+      shell: { command: 'printf "unsafe %s" "$USER" | wc -c' },
+    }), '/workspace', undefined, async () => {
+      calls += 1;
+      return { code: 0, stdout: '', stderr: '', killed: false };
+    })).rejects.toThrow(/interpreter.*bash.*explicit trust boundary/i);
+    expect(calls).toBe(0);
   });
 
   it.each([

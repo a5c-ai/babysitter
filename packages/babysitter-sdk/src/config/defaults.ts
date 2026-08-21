@@ -8,6 +8,7 @@
 
 import * as path from "node:path";
 import * as os from "node:os";
+import { realpathSync } from "node:fs";
 
 /**
  * Log level type for SDK logging configuration
@@ -79,7 +80,13 @@ export function getConfiguredGlobalStateRoot(): string {
 }
 
 function normalizeComparablePath(value: string): string {
-  const normalized = path.normalize(path.resolve(value));
+  const resolved = path.resolve(value);
+  let normalized: string;
+  try {
+    normalized = path.normalize(realpathSync.native(resolved));
+  } catch {
+    normalized = path.normalize(resolved);
+  }
   return process.platform === "win32"
     ? normalized.toLowerCase()
     : normalized;
