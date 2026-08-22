@@ -323,6 +323,9 @@ export interface AgentToolCallDecision {
   handled: boolean;
   block?: boolean;
   reason?: string;
+  modelOverride?: string;
+  ownerName?: string;
+  envelopeSha256?: string;
 }
 
 export interface AgentToolResultEvent {
@@ -516,7 +519,7 @@ export class OmpDeterministicDriver {
     }
 
     const item = readTaskItem(input);
-    const model = item?.model;
+    const model = descriptor.model;
     if (checkpoint.requestedModel !== model) {
       return {
         handled: true,
@@ -573,7 +576,12 @@ export class OmpDeterministicDriver {
         `Agent attempt ${owner.attempt} claimed`,
         checkpoint,
       );
-      return { handled: true };
+      return {
+        handled: true,
+        ...(checkpoint.requestedModel ? { modelOverride: checkpoint.requestedModel } : {}),
+        ownerName: checkpoint.ownerName,
+        envelopeSha256: checkpoint.taskEnvelopeSha256,
+      };
     } catch (error) {
       if (!isAlreadyExists(error)) throw error;
       const existing = await readJson<AgentOwner>(ownerPath);
@@ -1135,7 +1143,6 @@ export class OmpDeterministicDriver {
       name: checkpoint.ownerName,
       agent: "babysitter-task" as const,
       task: buildAgentPrompt(action, descriptor),
-      ...(checkpoint.requestedModel ? { model: checkpoint.requestedModel } : {}),
       ...(outputSchema ? { outputSchema, schemaMode: "strict" as const } : {}),
     };
     const dispatch: Extract<DriverResult, { state: "agent" }> = {

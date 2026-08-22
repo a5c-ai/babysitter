@@ -85,6 +85,13 @@ function bridgeDescriptor(prompt: string): Omit<AgentRetryInput, 'reason'> {
   return JSON.parse(bridgeLine.trim().slice(prefix.length)) as Omit<AgentRetryInput, 'reason'>;
 }
 
+function replaceBridgeDescriptor(prompt: string, patch: Partial<Omit<AgentRetryInput, 'reason'>>): string {
+  const prefix = 'BABYSITTER_OMP_BRIDGE ';
+  return prompt.split(/\r?\n/).map((line) => line.trim().startsWith(prefix)
+    ? `${prefix}${JSON.stringify({ ...bridgeDescriptor(prompt), ...patch })}`
+    : line).join('\n');
+}
+
 async function recordCommittedResult(runDir: string, effect: Action, value: unknown): Promise<void> {
   await writeJson(path.join(runDir, 'tasks', effect.effectId, 'result.json'), {
     effectId: effect.effectId,
@@ -360,6 +367,10 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     let runIterateCompleted = false;
     let runIterateShellFailure = 0;
     const pi: Record<string, unknown> = {
+      pi: {
+        registerTrustedTaskInvocationModelOverride: () => undefined,
+        clearTrustedTaskInvocationModelOverride: () => undefined,
+      },
       hostVersion: '16.5.2',
       setTodoProjection: (...args: unknown[]) => {
         projectionWrites.push(args);
@@ -1186,7 +1197,12 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     let posts = 0;
     let modeledLiveRunDir = runDir;
     const sentMessages: string[] = [];
+    const trustedModelOverrides: unknown[] = [];
     const pi: Record<string, unknown> = {
+      pi: {
+        registerTrustedTaskInvocationModelOverride: (override: unknown) => { trustedModelOverrides.push(override); },
+        clearTrustedTaskInvocationModelOverride: () => undefined,
+      },
       logger: { warn: () => undefined },
       zod: {
         object: objectSchema,
@@ -1289,14 +1305,23 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     if (!driveText) throw new Error('missing modeled dispatch result');
     const dispatch = JSON.parse(driveText) as {
       state: string;
-      task: { tasks: Array<{ task: string }> };
+      task: { tasks: Array<{ name: string; task: string }> };
     };
     expect(dispatch.state).toBe('agent');
+    expect(dispatch.task.tasks[0]).not.toHaveProperty('model');
     await expect(taskCall({
       toolName: 'task',
       toolCallId: 'modeled-owner',
       input: dispatch.task,
-    })).resolves.toBeUndefined();
+    }, { cwd: runDir, sessionManager: modeledSessionManager })).resolves.toBeUndefined();
+    expect(trustedModelOverrides[0]).toMatchObject({
+      scopeId: 'modeled-session',
+      toolCallId: 'modeled-owner',
+      model: 'openai-codex/gpt-5.6-sol:high',
+      agent: 'babysitter-task',
+      name: dispatch.task.tasks[0].name,
+    });
+    expect((trustedModelOverrides[0] as { envelopeSha256: string }).envelopeSha256).toMatch(/^[a-f0-9]{64}$/);
 
     const descriptor = bridgeDescriptor(dispatch.task.tasks[0].task);
     expect(descriptor.model).toBe('openai-codex/gpt-5.6-sol:high');
@@ -1381,7 +1406,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       toolName: 'task',
       toolCallId: 'modeled-owner-retry',
       input: continuationTask,
-    })).resolves.toBeUndefined();
+    }, { cwd: runDir, sessionManager: modeledSessionManager })).resolves.toBeUndefined();
+    expect(trustedModelOverrides.at(-1)).toMatchObject({
+      scopeId: 'modeled-session',
+      toolCallId: 'modeled-owner-retry',
+      model: 'openai-codex/gpt-5.6-sol:high',
+      agent: 'babysitter-task',
+      name: continuationOwnerName,
+    });
     await expect(taskResult({
       toolName: 'task',
       toolCallId: 'modeled-owner-retry',
@@ -1396,7 +1428,11 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       },
       isError: false,
       content: [],
-    }, { cwd: retryWorkspace, ui: { setStatus: () => undefined, setWidget: () => undefined } })).resolves.toBeUndefined();
+    }, {
+      cwd: retryWorkspace,
+      sessionManager: modeledSessionManager,
+      ui: { setStatus: () => undefined, setWidget: () => undefined },
+    })).resolves.toBeUndefined();
     await vi.waitFor(() => {
       expect(sentMessages).toHaveLength(1);
     });
@@ -1472,6 +1508,10 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       describe() { return schema; },
     };
     const pi: Record<string, unknown> = {
+      pi: {
+        registerTrustedTaskInvocationModelOverride: () => undefined,
+        clearTrustedTaskInvocationModelOverride: () => undefined,
+      },
       logger: { warn: () => undefined },
       zod: {
         object: () => schema,
@@ -1521,6 +1561,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await within(activeStarted.promise, 'active drive start');
     const completionContext = {
       cwd: continuationWorkspace,
+      sessionManager: completionSessionManager,
       ui: { setStatus: () => undefined, setWidget: () => undefined },
     };
     await within(taskResult({
@@ -2839,13 +2880,17 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(dispatch.task.tasks).toHaveLength(1);
     expect(dispatch.task.tasks[0]).toMatchObject({
       agent: 'babysitter-task',
-      model: 'openai-codex/gpt-5.6-sol:high',
     });
+    expect(dispatch.task.tasks[0]).not.toHaveProperty('model');
+    expect(bridgeDescriptor(dispatch.task.tasks[0].task).model).toBe('openai-codex/gpt-5.6-sol:high');
+    const firstClaim = await driver.claimAgentToolCall(dispatch.task as unknown as Record<string, unknown>, 'model-owner');
+    expect(firstClaim).toMatchObject({ handled: true, modelOverride: 'openai-codex/gpt-5.6-sol:high' });
+    const replayedClaim = await driver.claimAgentToolCall(dispatch.task as unknown as Record<string, unknown>, 'model-owner');
+    expect(replayedClaim).toEqual({ handled: true });
 
     await expect(driver.drive(runDir)).resolves.toMatchObject({
-      state: 'operator_attention',
-      effectId: effect.effectId,
-      reason: expect.stringContaining('orphaned'),
+      state: 'waiting',
+      reason: expect.stringContaining('remains owned'),
     });
   });
 
@@ -2867,7 +2912,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       reason: expect.stringContaining('orphaned'),
     });
     const input = dispatch.task as unknown as Record<string, unknown>;
-    await expect(ownedDriver.claimAgentToolCall(input, 'skill-owner-call')).resolves.toEqual({ handled: true });
+    await expect(ownedDriver.claimAgentToolCall(input, 'skill-owner-call')).resolves.toMatchObject({ handled: true });
     await expect(ownedDriver.drive(ownedRunDir)).resolves.toMatchObject({
       state: 'waiting',
       reason: expect.stringContaining('skill-owner-call'),
@@ -3017,11 +3062,14 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     }
     await expect(driver.claimAgentToolCall({
       ...dispatch.task,
-      tasks: [{ ...item, model: 'openai-codex/gpt-5.6-sol:low' }],
+      tasks: [{
+        ...item,
+        task: replaceBridgeDescriptor(item.task as string, { model: 'openai-codex/gpt-5.6-sol:low' }),
+      }],
     }, 'changed-model-call')).resolves.toMatchObject({
       handled: true,
       block: true,
-      reason: expect.stringContaining('Model mismatch'),
+      reason: expect.stringContaining('identity mismatch'),
     });
     await expect(driver.claimAgentToolCall({
       ...dispatch.task,
@@ -3031,7 +3079,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       block: true,
       reason: expect.stringContaining('schema mismatch'),
     });
-    await expect(driver.claimAgentToolCall(dispatch.task, 'owner-call')).resolves.toEqual({ handled: true });
+    await expect(driver.claimAgentToolCall(dispatch.task, 'owner-call')).resolves.toMatchObject({ handled: true });
   });
 
   it('renders the complete SDK structured AgentPrompt deterministically', async () => {
@@ -3343,7 +3391,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     expect(dispatch.state).toBe('agent');
     if (dispatch.state !== 'agent') throw new Error('expected agent dispatch');
     const input = dispatch.task as unknown as Record<string, unknown>;
-    await expect(driver.claimAgentToolCall(input, 'owner-call')).resolves.toEqual({ handled: true });
+    await expect(driver.claimAgentToolCall(input, 'owner-call')).resolves.toMatchObject({ handled: true });
     await expect(driver.claimAgentToolCall(input, 'duplicate-call')).resolves.toMatchObject({
       handled: true,
       block: true,
@@ -3382,7 +3430,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const dispatch = await driver.drive(runDir);
     if (dispatch.state !== 'agent') throw new Error('expected agent dispatch');
     const input = dispatch.task as unknown as Record<string, unknown>;
-    await expect(driver.claimAgentToolCall(input, 'owner-call')).resolves.toEqual({ handled: true });
+    await expect(driver.claimAgentToolCall(input, 'owner-call')).resolves.toMatchObject({ handled: true });
     await expect(driver.completeAgentToolCall({
       toolCallId: 'owner-call',
       input,
@@ -3572,7 +3620,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const dispatch = await driver.drive(runDir);
     if (dispatch.state !== 'agent') throw new Error('expected agent dispatch');
     const input = dispatch.task as unknown as Record<string, unknown>;
-    await expect(driver.claimAgentToolCall(input, 'strict-owner-call')).resolves.toEqual({ handled: true });
+    await expect(driver.claimAgentToolCall(input, 'strict-owner-call')).resolves.toMatchObject({ handled: true });
     await expect(driver.completeAgentToolCall({
       toolCallId: 'strict-owner-call',
       input,
@@ -4193,7 +4241,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     if (second.state !== 'agent') throw new Error('expected retry dispatch');
     expect(bridgeDescriptor(second.task.tasks[0].task).dispatchToken).toBe('attempt-two');
     const secondInput = second.task as unknown as Record<string, unknown>;
-    await expect(driver.claimAgentToolCall(secondInput, 'owner-two')).resolves.toEqual({ handled: true });
+    await expect(driver.claimAgentToolCall(secondInput, 'owner-two')).resolves.toMatchObject({ handled: true });
     await expect(driver.completeAgentToolCall({
       toolCallId: 'owner-two',
       input: secondInput,
@@ -4588,7 +4636,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     await expect(driver.claimAgentToolCall(
       second.task as unknown as Record<string, unknown>,
       'orphan-retry-owner',
-    )).resolves.toEqual({ handled: true });
+    )).resolves.toMatchObject({ handled: true });
     await expect(driver.drive(runDir)).resolves.toMatchObject({
       state: 'waiting',
       reason: expect.stringContaining('orphan-retry-owner'),

@@ -533,7 +533,7 @@ export default function activate(pi: ExtensionAPI): void {
     },
   });
 
-  pi.on("tool_call", async (event) => {
+  pi.on("tool_call", async (event, ctx) => {
     if (event.toolName !== "task") return;
     const operationId = projectionOwner?.operationId;
     try {
@@ -542,6 +542,25 @@ export default function activate(pi: ExtensionAPI): void {
         () => driver.claimAgentToolCall(event.input, event.toolCallId),
       );
       if (decision.block) return { block: true, reason: decision.reason };
+      if (decision.modelOverride) {
+        if (!decision.ownerName) return { block: true, reason: "Babysitter model override has no validated owner" };
+        if (!decision.envelopeSha256) return { block: true, reason: "Babysitter model override has no validated envelope digest" };
+        try {
+          pi.pi.registerTrustedTaskInvocationModelOverride({
+            scopeId: ctx.sessionManager.getSessionId(),
+            toolCallId: event.toolCallId,
+            model: decision.modelOverride,
+            agent: "babysitter-task",
+            name: decision.ownerName,
+            envelopeSha256: decision.envelopeSha256,
+          });
+        } catch (error) {
+          return {
+            block: true,
+            reason: `Babysitter model override registration failed: ${sanitizeDiagnosticText(error instanceof Error ? error.message : String(error))}`,
+          };
+        }
+      }
     } finally {
       await flushProjectionProgress(operationId);
     }
@@ -600,6 +619,10 @@ export default function activate(pi: ExtensionAPI): void {
         isError: true,
       };
     } finally {
+      pi.pi.clearTrustedTaskInvocationModelOverride(
+        completionContext.sessionManager.getSessionId(),
+        event.toolCallId,
+      );
       await flushProjectionProgress(operationId);
     }
   });
