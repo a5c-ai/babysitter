@@ -6,19 +6,35 @@ import { BreakpointApproval } from "./breakpoint-approval";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Hand, CheckCircle2 } from "lucide-react";
 import { TruncatedId } from "@/components/shared/truncated-id";
+import {
+  BREAKPOINT_NO_QUESTION_FALLBACK,
+  BREAKPOINT_ORPHANED_SEMANTICS,
+  BREAKPOINT_READONLY_CONTRACT,
+} from "@/lib/breakpoint-payload";
 import type { TaskDetail } from "@/types";
 
 interface BreakpointPanelProps {
   task: TaskDetail;
   runId: string;
+  /**
+   * UX-R2 §13.4: the run's driver liveness (from run.lock + pid), threaded
+   * down from the run-detail page. Drives the honest orphaned-semantics line
+   * and the post-submit confirmation copy (AC-44/AC-45).
+   */
+  runDriver?: "live" | "orphaned" | "none" | "scheduled";
 }
 
-export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
+export function BreakpointPanel({ task, runId, runDriver }: BreakpointPanelProps) {
   const breakpoint = task.breakpoint;
-  const question = breakpoint?.question || task.breakpointQuestion || "Approval required";
+  // Honest last resort (UX-R2 §13.1 AC-32): when no question exists in any
+  // on-disk source, say so — never a bare "Approval required".
+  const question =
+    breakpoint?.question || task.breakpointQuestion || BREAKPOINT_NO_QUESTION_FALLBACK;
   const title = breakpoint?.title || task.title || "Breakpoint";
   const files = breakpoint?.context?.files || [];
   const isWaiting = task.status === "requested";
+  // §13.4: no live driver attached (same predicate as run-list isOrphaned).
+  const orphaned = runDriver === "orphaned" || runDriver === "none";
 
   return (
     <ScrollArea className="h-full">
@@ -63,9 +79,27 @@ export function BreakpointPanel({ task, runId }: BreakpointPanelProps) {
           </div>
         </div>
 
-        {/* Local approval form — only for pending breakpoints */}
+        {/* Local approval form — only for pending breakpoints. §13.4/AC-43:
+            the read-only contract line renders verbatim ABOVE any input; on an
+            orphaned run the honest semantics line follows it (AC-44). */}
         {isWaiting && (
-          <BreakpointApproval task={task} runId={runId} />
+          <div className="space-y-2">
+            <p
+              data-testid="bp-readonly-contract"
+              className="text-xs leading-snug text-foreground-muted"
+            >
+              {BREAKPOINT_READONLY_CONTRACT}
+            </p>
+            {orphaned && (
+              <p
+                data-testid="bp-orphaned-semantics"
+                className="text-xs leading-snug font-medium text-status-stalled"
+              >
+                {BREAKPOINT_ORPHANED_SEMANTICS}
+              </p>
+            )}
+            <BreakpointApproval task={task} runId={runId} orphaned={orphaned} />
+          </div>
         )}
 
         {/* Attached files */}

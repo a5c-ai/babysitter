@@ -1,6 +1,6 @@
 {
   "name": "@a5c-ai/babysitter-sdk",
-  "version": "6.0.0",
+  "version": "6.0.3-local.6",
   "description": "Storage and run-registry primitives for event-sourced babysitter workflows.",
   "license": "MIT",
   "type": "commonjs",

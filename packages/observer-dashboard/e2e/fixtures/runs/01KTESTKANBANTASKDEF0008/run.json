@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANTASKDEF0008",
+  "request": "kanban/taskdef-gate",
+  "processId": "kanban/taskdef-gate",
+  "projectName": "kanban-board-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-taskdef-gate.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-taskdef-gate.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-01T11:00:00.000Z",
+  "completionSecret": "e2ekanbanfixture00080000"
+}

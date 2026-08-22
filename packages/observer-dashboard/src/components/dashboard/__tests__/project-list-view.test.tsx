@@ -144,7 +144,7 @@ describe('ProjectListView', () => {
     expect(screen.queryByTestId('project-grid-history')).not.toBeInTheDocument();
   });
 
-  it('shows "In Progress" header in status sort mode', () => {
+  it('shows "Active & Recent" header in status sort mode', () => {
     const projects = [createMockProjectSummary({ projectName: 'proj1' })];
     render(
       <ProjectListView
@@ -155,7 +155,7 @@ describe('ProjectListView', () => {
         statusFilter="all"
       />
     );
-    expect(screen.getByText('In Progress')).toBeInTheDocument();
+    expect(screen.getByText('Active & Recent')).toBeInTheDocument();
   });
 
   it('shows "Recent Activity" header in activity sort mode', () => {

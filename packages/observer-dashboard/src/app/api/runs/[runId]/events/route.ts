@@ -12,10 +12,10 @@ function isValidId(id: string): boolean {
 
 export async function GET(
   request: Request,
-  { params }: { params: { runId: string } }
+  { params }: { params: Promise<{ runId: string }> }
 ) {
   try {
-    const { runId } = params;
+    const { runId } = await params;
     if (!isValidId(runId)) {
       return NextResponse.json({ error: "Invalid run ID" }, { status: 400 });
     }

@@ -1,0 +1,45 @@
+{
+  "problemStatement": "Decide and optimize weighted internal-synergy density over nonempty researcher groups using a submodular-minimization oracle and exact binary arithmetic.",
+  "packageRoot": "../../..",
+  "sourceArtifacts": [
+    "README.md"
+  ],
+  "workspace": "run",
+  "domainProfile": "../../../profiles/submodular-optimization.json",
+  "requiredSections": [
+    "Submodularity",
+    "Nonempty enforcement",
+    "Soundness and completeness",
+    "Bit complexity"
+  ],
+  "maxRevisionRounds": 2,
+  "requiredScore": 100,
+  "strictness": "publication",
+  "breakpointPolicy": "on-disagreement",
+  "toolPolicy": {
+    "latexCompile": "optional",
+    "unavailable": "report"
+  },
+  "applicableModules": [
+    {
+      "id": "multilinear-extension",
+      "applicable": false,
+      "rationale": "density input has no multilinear extension"
+    },
+    {
+      "id": "matroid-maximization",
+      "applicable": false,
+      "rationale": "density input has no matroid constraint"
+    },
+    {
+      "id": "density-reduction",
+      "applicable": true,
+      "rationale": "selected by the density example"
+    },
+    {
+      "id": "graphical-specialization",
+      "applicable": false,
+      "rationale": "example is not a graphical specialization"
+    }
+  ]
+}

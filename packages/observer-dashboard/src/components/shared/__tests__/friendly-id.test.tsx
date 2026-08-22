@@ -6,14 +6,15 @@ import { FriendlyId } from '../friendly-id';
 
 describe('FriendlyId', () => {
   it('renders without crashing', () => {
-    render(<FriendlyId id="abc123def456" />);
-    // formatShortId("abc123def456") defaults to 4 chars => "...f456"
-    expect(screen.getByText('...f456')).toBeInTheDocument();
+    render(<FriendlyId id="01ARZ3NDEKTSV4RRFFQ69G5FAV" />);
+    // Machine ids (ULID) tail-truncate: formatShortId(..., 4) => "...5FAV"
+    expect(screen.getByText('...5FAV')).toBeInTheDocument();
   });
 
-  it('renders truncated ID using formatShortId', () => {
+  it('renders human-named ids in full via formatShortId (QA F9)', () => {
     render(<FriendlyId id="my-long-test-id" />);
-    expect(screen.getByText('...t-id')).toBeInTheDocument();
+    // Not "...t-id" — human-named ids keep their meaningful head.
+    expect(screen.getByText('my-long-test-id')).toBeInTheDocument();
   });
 
   it('renders as a button element', () => {

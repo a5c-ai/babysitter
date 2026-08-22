@@ -10,8 +10,10 @@ const ESTIMATED_CARD_HEIGHT = 140;
 /** Number of items to render outside the visible area for smooth scrolling */
 const OVERSCAN_COUNT = 3;
 
-/** Threshold below which we skip virtualization (overhead not worthwhile) */
-const VIRTUALIZATION_THRESHOLD = 15;
+/** Threshold below which we skip virtualization (overhead not worthwhile).
+ *  Exported so the kanban board columns reuse the exact same cutoff
+ *  (SPEC-vibekanban §7). */
+export const VIRTUALIZATION_THRESHOLD = 15;
 
 interface VirtualizedRunListProps {
   /** Runs to display — must be pre-sorted by caller */

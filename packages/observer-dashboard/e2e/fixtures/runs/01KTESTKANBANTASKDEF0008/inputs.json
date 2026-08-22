@@ -1,0 +1,4 @@
+{
+  "scope": "kanban/taskdef-gate",
+  "description": "UX-R2 §13.1 fixture: SDK 6.0.2 ctx.breakpoint shape — question/options only under task.json → .breakpoint (metadata null, no input.json, no question in inputs); replicates run 01KWRJGED9BEE39SSPMH0M4JE3/01KWS6QP63XWADWW6N7HBGQ3GH"
+}

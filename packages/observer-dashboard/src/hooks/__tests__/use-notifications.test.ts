@@ -227,4 +227,48 @@ describe('useNotifications', () => {
 
     expect(Notification.requestPermission).toHaveBeenCalled();
   });
+
+  // ---- D3: cap + dedupe ----
+  it('dedupes identical alerts (same title/body/href) instead of stacking', () => {
+    const { result } = renderHook(() => useNotifications());
+
+    act(() => {
+      result.current.notify('Breakpoint', 'Needs approval', 'warning', { href: '/runs/abc', persistent: true });
+      result.current.notify('Breakpoint', 'Needs approval', 'warning', { href: '/runs/abc', persistent: true });
+      result.current.notify('Breakpoint', 'Needs approval', 'warning', { href: '/runs/abc', persistent: true });
+    });
+
+    expect(result.current.notifications).toHaveLength(1);
+  });
+
+  it('caps visible toasts at 5, dropping the oldest non-persistent first', () => {
+    const { result } = renderHook(() => useNotifications());
+
+    act(() => {
+      for (let i = 0; i < 8; i++) {
+        result.current.notify(`Alert ${i}`, `Body ${i}`, 'info');
+      }
+    });
+
+    expect(result.current.notifications).toHaveLength(5);
+    // Oldest (Alert 0..2) dropped; newest retained.
+    expect(result.current.notifications[result.current.notifications.length - 1].title).toBe('Alert 7');
+  });
+
+  it('never drops persistent toasts to satisfy the cap', () => {
+    const { result } = renderHook(() => useNotifications());
+
+    act(() => {
+      // 5 persistent breakpoints (distinct) + more non-persistent
+      for (let i = 0; i < 5; i++) {
+        result.current.notify(`BP ${i}`, `Body ${i}`, 'warning', { href: `/runs/${i}`, persistent: true });
+      }
+      for (let i = 0; i < 4; i++) {
+        result.current.notify(`Info ${i}`, `Body ${i}`, 'info');
+      }
+    });
+
+    const persistentCount = result.current.notifications.filter((n) => n.persistent).length;
+    expect(persistentCount).toBe(5);
+  });
 });

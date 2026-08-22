@@ -1,88 +1,53 @@
 "use server";
 
-import { promises as fs } from "fs";
-import path from "path";
-import crypto from "crypto";
-import { monotonicFactory } from "ulid";
+// Deep subpath import (the SDK publishes no "exports" map, so dist paths are
+// the supported deep-import surface): pulls only the commit-path module graph,
+// not the SDK root export whose graph reaches the dist harness modules and
+// optional adapter packages. The server webpack build additionally
+// externalizes every @a5c-ai/babysitter-sdk specifier (see next.config.mjs),
+// so this stays a runtime require against the installed package.
+import { commitEffectResult } from "@a5c-ai/babysitter-sdk/dist/runtime/commitEffectResult";
+import path from "node:path";
 import { findRunDir } from "@/lib/path-resolver";
+import { parseJournalDir, readTaskDefinition } from "@/lib/parser";
 
 export interface ApproveBreakpointResult {
   success: boolean;
   error?: string;
-}
-
-const nextUlid = monotonicFactory();
-
-function resolveContainedPath(parentDir: string, childName: string): string | null {
-  const parent = path.resolve(parentDir);
-  const child = path.resolve(parent, childName);
-  return child === parent || child.startsWith(`${parent}${path.sep}`) ? child : null;
-}
-
-/**
- * Determine the next journal sequence number by scanning existing files.
- */
-async function getNextJournalSeq(journalDir: string): Promise<number> {
-  try {
-    const files = await fs.readdir(journalDir);
-    let max = 0;
-    for (const f of files) {
-      const seqStr = f.split(".")[0];
-      const seq = Number(seqStr);
-      if (Number.isFinite(seq) && seq > max) max = seq;
-    }
-    return max + 1;
-  } catch {
-    // Journal dir may not exist yet — seq 1
-    return 1;
-  }
+  /**
+   * UX-R3 §14.5 (AC-62): true when the SDK refused the commit because the
+   * effect is already resolved. The first recorded answer stands — nothing was
+   * written by this call, so the UI must not present it as a change.
+   */
+  alreadyResolved?: boolean;
 }
 
 /**
- * Write an EFFECT_RESOLVED journal entry using the same format as the
- * babysitter SDK: SHA-256 checksum of the JSON payload (without checksum)
- * serialized as `JSON.stringify(payload, null, 2) + "\n"`.
- */
-async function appendJournalEntry(
-  runDir: string,
-  effectId: string,
-  now: string,
-): Promise<void> {
-  const journalDir = path.join(runDir, "journal");
-  await fs.mkdir(journalDir, { recursive: true });
-
-  const seq = await getNextJournalSeq(journalDir);
-  const ulid = nextUlid();
-  const filename = `${seq.toString().padStart(6, "0")}.${ulid}.json`;
-
-  const eventPayload = {
-    type: "EFFECT_RESOLVED",
-    recordedAt: now,
-    data: {
-      effectId,
-      status: "ok",
-      resultRef: `tasks/${effectId}/result.json`,
-      startedAt: now,
-      finishedAt: now,
-    },
-  };
-
-  const contents = JSON.stringify(eventPayload, null, 2) + "\n";
-  const checksum = crypto.createHash("sha256").update(contents).digest("hex");
-  const payloadWithChecksum = JSON.stringify({ ...eventPayload, checksum }, null, 2) + "\n";
-
-  await fs.writeFile(path.join(journalDir, filename), payloadWithChecksum, "utf-8");
-}
-
-/**
- * Server Action: approve a breakpoint by writing both the result.json AND
- * an EFFECT_RESOLVED journal entry. This ensures the SDK's state machine
- * recognizes the resolution on the next `run:iterate` (the SDK auto-rebuilds
- * its state cache when it detects journal head mismatch).
+ * Server Action: record a breakpoint answer for a run.
  *
- * Previous implementation only wrote result.json, leaving the journal
- * untouched — the SDK never knew the breakpoint was resolved, causing runs
- * to stay stuck in "Waiting" state permanently.
+ * This action remains the ONE sanctioned run-write in the observer dashboard
+ * (everything else is strictly read-only), but it no longer hand-writes
+ * tasks/<effectId>/result.json or journal entries itself. It delegates to the
+ * babysitter SDK's supported commit path, `commitEffectResult`, which:
+ *
+ * - serializes the run mutation under the SDK's run lock (no journal-sequence
+ *   races between near-simultaneous submits),
+ * - applies the SDK's own enforcement (unknown/already-resolved effects and
+ *   the runtime task.completed hook policy) BEFORE any result/journal
+ *   emission. NOTE: the SDK does NOT enforce breakpoint-kind — that guard
+ *   lives HERE (fail closed, see below), and breakpoint-kind-only
+ *   enforcement is this action's own responsibility,
+ * - writes the result and the EFFECT_RESOLVED journal event in the SDK's
+ *   canonical format and rebuilds the state cache, so the run resumes on the
+ *   next `run:iterate` without this action forging SDK internals.
+ *
+ * Double-answer semantics (UX-R3 §14.5 / AC-62): the SDK refuses a second
+ * commit for an already-resolved effect, which guarantees there is never a
+ * duplicate EFFECT_RESOLVED entry. We surface that refusal as the existing
+ * "already recorded" success flow (the first answer stands) rather than an
+ * error. Any other SDK rejection (enforcement, unknown effect, policy) is
+ * returned as { success: false, error } so the UI reports it honestly —
+ * never a silent success.
  */
 export async function approveBreakpoint(
   runId: string,
@@ -112,40 +77,103 @@ export async function approveBreakpoint(
     if (!found) {
       return { success: false, error: `Run not found: ${runId}` };
     }
-    const runDir = path.resolve(found.runDir);
+    const runDir = found.runDir;
 
-    // --- Verify the task directory exists ---
-    const tasksDir = path.resolve(runDir, "tasks");
-    const taskDir = resolveContainedPath(tasksDir, effectId);
-    if (!taskDir) {
-      return { success: false, error: "Invalid task path" };
+    // --- Breakpoint-only guard (review rounds 3+4, blocker) ---
+    // This action is the observer's breakpoint answer path ONLY — a
+    // shell/agent/node effect must never be completable from the dashboard.
+    // The guard FAILS CLOSED (round 4 blocker): the SDK's commitEffectResult
+    // validates that the effect exists and is unresolved but does NOT enforce
+    // breakpoint-kind, so falling through on missing metadata would let a
+    // pending non-breakpoint effect be resolved as an approval. Two
+    // independent checks must BOTH pass before the commit call:
+    //
+    // 1. tasks/<effectId>/task.json (the same file the dashboard parser
+    //    reads) must exist, be readable, and declare kind === "breakpoint".
+    //    Missing/unreadable/malformed metadata is a rejection, never a
+    //    fall-through.
+    const taskDef = await readTaskDefinition(runDir, effectId);
+    if (taskDef === null) {
+      return {
+        success: false,
+        error:
+          "task definition missing or unreadable — refusing to resolve (breakpoint answers only)",
+      };
     }
-    try {
-      await fs.access(taskDir);
-    } catch {
-      return { success: false, error: `Task directory not found: ${effectId}` };
+    if (taskDef.kind !== "breakpoint") {
+      return { success: false, error: "not a breakpoint effect" };
     }
 
-    // --- Write result.json (SDK-compatible format) ---
+    // 2. The authoritative journal-derived effect record — the same
+    //    EFFECT_REQUESTED record commitEffectResult will resolve — must be a
+    //    breakpoint: kind === "breakpoint" (with taskId === "__sdk.breakpoint"
+    //    accepted as corroboration when the record carries no kind). A task
+    //    file that disagrees with the journal never passes the guard.
+    const journalEvents = await parseJournalDir(path.join(runDir, "journal"));
+    const requestedRecord = journalEvents.find(
+      (e) =>
+        e.type === "EFFECT_REQUESTED" &&
+        (e.payload as Record<string, unknown>).effectId === effectId,
+    );
+    if (!requestedRecord) {
+      return {
+        success: false,
+        error: `no EFFECT_REQUESTED journal record for effect ${effectId} — refusing to resolve`,
+      };
+    }
+    const recordPayload = requestedRecord.payload as Record<string, unknown>;
+    const recordKind = recordPayload.kind;
+    const recordTaskId = recordPayload.taskId;
+    const journalSaysBreakpoint =
+      recordKind === "breakpoint" ||
+      (recordKind == null && recordTaskId === "__sdk.breakpoint");
+    if (!journalSaysBreakpoint) {
+      return {
+        success: false,
+        error: "not a breakpoint effect (journal EFFECT_REQUESTED record)",
+      };
+    }
+
     const now = new Date().toISOString();
-    const resultPayload = {
-      status: "ok",
-      value: {
-        answer: answer.trim(),
-        approvedAt: now,
-        approvedBy: "observer-dashboard",
-      },
-      startedAt: now,
-      finishedAt: now,
-    };
-    const resultPath = path.resolve(taskDir, "result.json");
-    await fs.writeFile(resultPath, JSON.stringify(resultPayload, null, 2), "utf-8");
+    const trimmed = answer.trim();
 
-    // --- Append EFFECT_RESOLVED journal entry ---
-    // This is the critical piece that was missing: without a journal entry,
-    // the SDK's state machine never knows the breakpoint was resolved and
-    // the run stays stuck in "Waiting" forever.
-    await appendJournalEntry(runDir, effectId, now);
+    try {
+      await commitEffectResult({
+        runDir,
+        effectId,
+        result: {
+          status: "ok",
+          value: {
+            // `approved` is the field the babysitter runtime reads to
+            // distinguish an approval from a rejection (D1).
+            approved: true,
+            // Canonical SDK BreakpointResult fields: process code reads
+            // result.response (and some flows read result.feedback).
+            response: trimmed,
+            feedback: trimmed,
+            // UI alias kept for existing observer surfaces that render the
+            // recorded answer.
+            answer: trimmed,
+            approvedAt: now,
+            approvedBy: "observer-dashboard",
+          },
+          startedAt: now,
+          finishedAt: now,
+        },
+      });
+    } catch (commitErr: unknown) {
+      const msg = commitErr instanceof Error ? commitErr.message : String(commitErr);
+      // AC-62: the SDK rejects a second commit for an already-resolved effect.
+      // That is the double-answer flow, not a failure — but nothing was
+      // written either: the first recorded answer stands. Flag it so the UI
+      // can say so honestly instead of implying a change was recorded.
+      if (/already resolved/i.test(msg)) {
+        return { success: true, alreadyResolved: true };
+      }
+      // Every other SDK rejection (unknown effect, enforcement/policy,
+      // signed/protected breakpoint) is surfaced honestly to the UI.
+      return { success: false, error: msg };
+    }
 
     return { success: true };
   } catch (err: unknown) {

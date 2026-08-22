@@ -4,47 +4,71 @@ This file governs agent behavior when the babysitter-pi plugin is active in an o
 
 ---
 
-## 1. Session Start -- Auto-Initialization
+## 1. Session Binding
 
-Babysitter initializes automatically on every oh-my-pi session start. The session-binder extension:
+On OMP lifecycle events, the extension synchronizes the real session ID from
+`ExtensionContext` and restores any associated read-only projection. The
+transcript remains owned by OMP; no legacy proxied session-start hook is
+executed. Loading the extension alone does not initialize a session, create a
+run, or resume one. Binding failures are non-fatal and never create a
+session-less fallback run.
 
-1. Binds the current pi session to the babysitter state directory (`.a5c/`).
-2. Checks for an active run by inspecting `.a5c/runs/` for pending tasks.
-3. If an active run exists, resumes from the first pending effect.
-4. If no run exists, proceeds with normal session behavior until a babysitter command is issued.
-
-You do not need to initialize babysitter manually -- the plugin handles it.
+Create or resume a run only through the corresponding Babysitter command or
+skill.
 
 ---
 
 ## 2. Recognizing Babysitter Commands
 
-When the user types a message starting with `/babysitter:` or `/babysitter`, treat it as a **slash command** and dispatch accordingly:
+The extension registers the following slash-command mappings:
 
-| Command | Description |
-|---------|-------------|
-| `/babysitter:call` | Start an orchestration run |
-| `/babysitter:status` | Show current run status and pending effects |
-| `/babysitter:resume` | Resume an existing run from where it left off |
+| Commands | Forwarded skill |
+|----------|-----------------|
+| `/babysit`, `/babysitter` | `/skill:babysit` |
+| `/assimilate`, `/babysitter:assimilate` | `/skill:assimilate` |
+| `/call`, `/babysitter:call` | `/skill:call` |
+| `/cleanup`, `/babysitter:cleanup` | `/skill:cleanup` |
+| `/contrib`, `/babysitter:contrib` | `/skill:contrib` |
+| `/doctor`, `/babysitter:doctor` | `/skill:doctor` |
+| `/forever`, `/babysitter:forever` | `/skill:forever` |
+| `/help`, `/babysitter:help` | `/skill:help` |
+| `/observe`, `/babysitter:observe` | `/skill:observe` |
+| `/plan`, `/babysitter:plan` | `/skill:plan` |
+| `/plugins`, `/babysitter:plugins` | `/skill:plugins` |
+| `/project-install`, `/babysitter:project-install` | `/skill:project-install` |
+| `/resume`, `/babysitter:resume` | `/skill:resume` |
+| `/retrospect`, `/babysitter:retrospect` | `/skill:retrospect` |
+| `/user-install`, `/babysitter:user-install` | `/skill:user-install` |
+| `/yolo`, `/babysitter:yolo` | `/skill:yolo` |
 
-Aliases:
-- `/babysitter` (bare) = `/babysitter:call`
-
-Load the corresponding skill from `skills/babysitter/SKILL.md` for detailed execution instructions.
+Bare `/babysitter` is an alias for `/babysit`; it does not imply `/call`.
 
 ---
 
 ## 3. Babysitter Orchestration Protocol
 
-The core loop works as follows:
+Babysitter effects and oh-my-pi's native task/todo state are separate systems.
+Use native todos to track work in the current agent session. Resolve process
+effects only through the deterministic Babysitter driver.
 
-1. **Create a run** -- A process definition (JS file) is loaded and a run is created under `.a5c/runs/<RUN_ID>/`.
-2. **Iterate** -- The SDK replays resolved effects, then throws when it encounters an unresolved effect. The iteration returns a list of **pending effects** (tasks to execute).
-3. **Execute effects** -- You execute each pending effect using the appropriate tool/action.
-4. **Post results** -- Report the outcome back to babysitter via the SDK bridge.
-5. **Repeat** -- The loop-driver triggers the next iteration automatically. Do NOT loop independently.
+The core loop is:
 
-The plugin's loop-driver extension controls iteration flow. Complete one task, post the result, and the driver handles the rest.
+1. **Create or resume a run** through the selected Babysitter skill.
+2. **Drive it** by calling `babysitter_drive` with the absolute run directory.
+3. **Handle the returned state**:
+   - `completed`, `waiting`, or `operator_attention`: report it accurately.
+   - `interaction`: obtain the requested human/breakpoint interaction, then call
+     `babysitter_drive` again with the same run directory.
+   - `agent`: call oh-my-pi's native `task` tool exactly once with the returned
+     `task` payload. Do not rename the owner, change the model, edit the schema,
+     split the batch, or dispatch an additional task.
+4. The extension claims the native task call, persists its authoritative result,
+   posts the effect, and attaches the deterministic continuation to the task
+   result. Follow that continuation; invoke `babysitter_drive` again only when
+   the returned state requires it.
+
+Shell effects are executed and checkpointed inside `babysitter_drive`. Never
+re-run or post them manually.
 
 ---
 
@@ -54,52 +78,49 @@ When babysitter presents pending effects, identify the `kind` field and execute 
 
 | Kind | Action |
 |------|--------|
-| `agent` | Build a prompt from the agent definition and execute as a sub-agent task |
-| `skill` | Invoke the named skill with the provided parameters |
-| `shell` | Execute the shell command and capture stdout/stderr/exit code |
-| `breakpoint` | Pause execution and present the breakpoint message to the user for approval |
-| `sleep` | Wait until the specified timestamp (handled by the runtime) |
+| `agent` | Dispatch the driver's exact one-item native task payload |
+| `skill` | Dispatch the driver's exact one-item native task payload |
+| `shell` | Let `babysitter_drive` execute, checkpoint, and post it |
+| `breakpoint` | Present the interaction to the user, then drive again |
+| `sleep` | Return the interaction/waiting state reported by the driver |
 
 For PI-family generated-process guidance, treat `agent`, `skill`, `shell`, `breakpoint`, and `sleep` as the active effect kinds. Do not present `node` as a generated PI-family effect kind.
 
 ---
 
-## 5. Posting Results
+## 5. Posting Results And Ownership
 
-After executing an effect, hand the outcome back to the Babysitter plugin/runtime bridge so the run state, journal, and pending-effect cache stay consistent.
+The extension is the single writer for execution checkpoints, immutable output,
+`task:post`, and the next `run:iterate` call.
 
 Rules:
-- Use the plugin-owned Babysitter bridge/command flow rather than inventing an alternate posting path.
-- Complete one orchestration phase per harness turn, then let the loop-driver trigger the next phase.
-- Do not abort the entire run on a single task failure -- return the effect outcome and let the orchestrator decide the next step.
-- Keep low-level runtime mechanics in the command/extension implementation surface; this file is the behavioral contract for the active agent session.
+- Never invoke `task:post` or `run:iterate` for a driver-owned effect.
+- For an `agent` state, preserve the exact one-item native task payload. Its
+  stable owner, dispatch token, model selector (including reasoning suffix),
+  output schema, and strict schema mode are security and recovery boundaries.
+- The blocking `babysitter-task` agent yields its final structured value
+  normally. The authenticated blocking task result is the only completion path.
+- Do not treat a completed execution checkpoint as a resolved effect until the
+  Babysitter journal confirms `EFFECT_RESOLVED`.
+- An interrupted or lost blocking task result remains unresolved and follows
+  the explicit recovery policy; do not invent a second writer or bypass the
+  orchestrator.
 
 ---
 
-## 6. Task Interception Notice
+## 6. Native Todos
 
-During an active babysitter run, the plugin's task-interceptor extension **intercepts built-in task and todo tools**. This means:
+oh-my-pi's built-in todos remain native session planning state. They are not
+intercepted, redirected, or converted into Babysitter effects. Babysitter may
+project run progress alongside native todos when the host supports that API, but
+projection never mutates canonical todo state.
 
-- Any task/todo creation is routed through babysitter's effect system instead of the default pi task manager.
-- Do not attempt to use native task tools to track babysitter work -- they are redirected automatically.
-- This interception is only active while a run is in progress. Normal tool behavior resumes after the run completes.
-
----
-
-## 7. TUI Widgets
-
-The babysitter-pi plugin renders TUI widgets showing run progress:
-
-- **Status line** -- Current run ID, iteration count, and run state (running/waiting/completed/failed).
-- **Effect queue** -- List of pending and completed effects with their status.
-- **Progress indicator** -- Visual progress through the process definition.
-
-These widgets update automatically as effects are resolved. No agent action is required to drive them.
+Use native todos normally for agent work. Use `babysitter_drive` only for
+Babysitter process effects.
 
 ---
 
-## 8. Run Completion
-
+## 7. Run Completion
 When the orchestration run completes successfully, the SDK returns a completion proof. You MUST output it in the following format:
 
 ```
@@ -110,7 +131,7 @@ Where `PROOF_VALUE` is the exact proof string returned by the SDK. This signals 
 
 ---
 
-## 9. Directory Layout Reference
+## 8. Directory Layout Reference
 
 ```
 .a5c/
@@ -123,6 +144,9 @@ Where `PROOF_VALUE` is the exact proof string returned by the SDK. This signals 
       tasks/
         <EFFECT_ID>/
           task.json          # Task definition (created by orchestrator)
+          execution.json     # Durable driver checkpoint
+          agent-owner.json   # Exclusive native task owner (agent effects)
+          output.json        # Immutable driver output
           result.json        # Task result (created after posting)
       state/
         state.json           # Derived replay cache
