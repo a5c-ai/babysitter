@@ -187,14 +187,16 @@
   "changedFiles": [
     "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-08-23.yaml",
     "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-08-23.yaml",
+    "artifacts/agent-version-tracker/upstream-targets-and-latest.json",
     "artifacts/agent-version-tracker/summary.json"
   ],
   "summary": "Checked every upstream host agent target from the Atlas catalog external-repo descriptors plus adapter npm install commands, excluding all @a5c-ai/* babysitter plugin packages. Added 16 current upstream AgentVersion records and matching evidence records for 2026-08-23.",
   "verificationNotes": [
     "Parsed the 2026-08-23 AgentVersion and EvidenceSource YAML bundles successfully: 16 YAML documents each, with all 16 AgentVersion ids referenced by evidence.",
     "Parsed artifacts/agent-version-tracker/summary.json successfully.",
-    "npm run build:atlas exited 0 and regenerated the Atlas index/snapshot, but the Library Bridge report still listed pre-existing semantic edge target failures.",
-    "npm run verify:metadata failed on a pre-existing dirty .agents/plugins/marketplace.json metadata issue: babysitter version expected 6.0.2 but found undefined.",
+    "git diff --check passed.",
+    "npm run verify:metadata passed.",
+    "npm run build --workspace=@a5c-ai/atlas exited 0 and regenerated the Atlas index/snapshot; the Library Bridge report still listed pre-existing semantic edge target failures but does not fail the build.",
     "@pi-ai/sdk returned npm E404, so Pi was tracked from the authoritative earendil-works/pi GitHub release instead.",
     "Amp and Factory Droid had npm package metadata but no public build-specific changelog for the exact latest versions.",
     "OpenClaw v2026.6.34 was recorded as the newest published stable maintenance tag even though GitHub still marks v2026.7.1-2 as Latest.",
