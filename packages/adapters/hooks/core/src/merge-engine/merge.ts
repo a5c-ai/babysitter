@@ -359,7 +359,11 @@ export function mergeResults(
     }
 
     // --- continueSession (typed field) ---
-    if (r.continueSession === false) {
+    // A block decision means the session must not continue on its own: the
+    // SDK's stop handler emits a block decision and never sets
+    // continueSession explicitly, so without this mapping the merged result
+    // would keep the session going and Claude Code would never hold the turn.
+    if (r.continueSession === false || extractDecision(r) === 'block') {
       continueSession = false;
     }
 

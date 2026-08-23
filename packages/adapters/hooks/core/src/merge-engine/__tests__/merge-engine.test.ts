@@ -280,6 +280,18 @@ describe('mergeResults', () => {
       const merged = mergeResults([result(), result()]);
       expect(merged.continueSession).toBe(true);
     });
+
+    it('a block decision stops the session even without continueSession', () => {
+      // The SDK's stop handler emits { decision: 'block' } and never sets
+      // continueSession, so the merge must derive the stop from the decision.
+      const merged = mergeResults([
+        result({ decision: 'block', reason: 'hold the turn' }),
+        result({ decision: 'allow' }),
+      ]);
+      expect(merged.decision).toBe('block');
+      expect(merged.continueSession).toBe(false);
+      expect(merged.reason).toBe('hold the turn');
+    });
   });
 
   // -----------------------------------------------------------------------
