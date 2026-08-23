@@ -64,7 +64,10 @@ async function ensureSdkResolvable(workspaceDir: string): Promise<void> {
   try {
     await fs.mkdir(path.join(targetNodeModules, "@a5c-ai"), { recursive: true });
     const linkType = process.platform === "win32" ? "junction" : "dir";
-    await fs.symlink(sdkPkg, targetSdkDir, linkType);
+    // Link the SDK package with a target relative to the link's parent so the
+    // workspace stays portable: archives reject absolute link targets (Python's
+    // tarfile data filter raises AbsoluteLinkError and extraction stops).
+    await fs.symlink(path.relative(path.dirname(targetSdkDir), sdkPkg), targetSdkDir, linkType);
   } catch {
     // best effort
   }

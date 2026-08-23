@@ -273,8 +273,12 @@ export async function ensureProcessLocalSdkDependency(
 
   await fsImpl.mkdir(path.dirname(targetSdkDir), { recursive: true });
   try {
+    const sdkPkgDir = (options.resolveSdkPackageDir ?? defaultResolveSdkPackageDir)();
+    // Link the SDK package with a target relative to the link's parent so the
+    // workspace stays portable: archives reject absolute link targets (Python's
+    // tarfile data filter raises AbsoluteLinkError and extraction stops).
     await fsImpl.symlink(
-      (options.resolveSdkPackageDir ?? defaultResolveSdkPackageDir)(),
+      path.relative(path.dirname(targetSdkDir), sdkPkgDir),
       targetSdkDir,
       process.platform === "win32" ? "junction" : "dir",
     );
