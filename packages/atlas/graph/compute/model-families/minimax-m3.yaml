@@ -1,0 +1,11 @@
+nodeKind: ModelFamily
+id: model-family:minimax-m3
+attributes:
+  displayName: "MiniMax M3"
+  vendor: "MiniMax"
+  homepageUrl: "https://www.minimax.io/models/text/m3"
+edges:
+  realizes:
+    - target: layer:1-model
+  has_version:
+    - model:minimax-m3@current
