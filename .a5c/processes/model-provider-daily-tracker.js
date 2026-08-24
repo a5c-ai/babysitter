@@ -226,7 +226,13 @@ export async function process(inputs, ctx) {
     };
   }
 
-  const publish = await ctx.task(publishTask, { branchName, baseBranch });
+  const changedFiles = research?.changedFiles ?? [];
+  const publish = changedFiles.length > 0
+    ? await ctx.task(publishTask, { branchName, baseBranch })
+    : {
+        stdout: 'No graph/catalog changes from model-provider research; skipping branch, commit, and PR.',
+        skipped: true,
+      };
 
   return {
     success: true,
@@ -236,7 +242,7 @@ export async function process(inputs, ctx) {
       created: research?.issuesCreated ?? [],
       existing: research?.issuesExisting ?? [],
     },
-    changedFiles: research?.changedFiles ?? [],
+    changedFiles,
     summaryTable: research?.summaryTable ?? [],
     verification,
     review,
