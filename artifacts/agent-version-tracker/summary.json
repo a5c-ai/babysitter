@@ -65,7 +65,8 @@
     "All @a5c-ai/* babysitter plugin packages from the catalog externalRepo descriptors were excluded from npm latest checks.",
     "GitHub prereleases/nightlies were noted but not recorded as stable current AgentVersion entries unless npm latest or the existing graph pattern treated them as stable.",
     "@pi-ai/sdk returned npm 404; Pi was checked via earendil-works/pi GitHub releases.",
-    "OpenClaw stable 2026.7.1-2 was already present in the graph; prerelease 2026.8.1-beta.3 and non-latest 2026.6.34 were not recorded as current."
+    "OpenClaw stable 2026.7.1-2 was already present in the graph; prerelease 2026.8.1-beta.3 and non-latest 2026.6.34 were not recorded as current.",
+    "Atlas build exited 0. Its library bridge report still prints pre-existing non-fatal semantic-edge warnings unrelated to the dated agent-version records."
   ],
   "verificationNotes": [
     "npm run verify:metadata",

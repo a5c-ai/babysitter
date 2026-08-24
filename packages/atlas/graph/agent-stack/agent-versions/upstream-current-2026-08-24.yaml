@@ -42,7 +42,7 @@ attributes:
   releasedAt: "2026-08-22"
   upstreamReleaseTag: "1.1.19"
   releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.19"
-  cliCommand: "antigravity"
+  cliCommand: "agy"
   summary: "Antigravity CLI release fixing remote-control port allocation and adding renderer/logo environment controls."
   assimilationNotes:
     - "Latest official 1.1.x upstream release moved from recorded 1.1.11 to 1.1.19."
@@ -345,7 +345,7 @@ attributes:
     - "CLI polish includes fuzzy /model picker, Ctrl+P command palette, richer /status, hermes worktree list/prune, and opencode-free zero-auth provider."
     - "hermes update receipts and fleet --plan verification affect updater/install verification surfaces."
     - "Cron jobs gained persistent memory and per-job reasoning effort, affecting scheduler and reasoning-effort metadata."
-    - "Update remains hermes update; fresh install remains the official curl install script."
+    - "Update remains hermes update; fresh install remains the official curl install script; npm metadata remains available as hermes-agent."
   releaseHighlights:
     - "Bot Mode group-room threads and foldable conversation summaries."
     - "PDF/file attachments with drag and drop."
@@ -354,7 +354,8 @@ attributes:
     - "hermes worktree list/prune."
     - "Cron persistent memory and per-job reasoning effort."
   installMethods:
-    - install:pip
+    - install:npm
+    - install:curl
 edges:
   version_of:
     - agent:hermes
@@ -375,7 +376,7 @@ attributes:
   sourcePackage: "@oh-my-pi/pi-coding-agent"
   upstreamReleaseTag: "v18.0.4"
   releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v18.0.4"
-  cliCommand: "omp"
+  cliCommand: "pi"
   summary: "Oh-My-Pi release adding the fullscreen git TUI, extension dashboard overhaul, live markdown highlighting, and several provider/session fixes."
   assimilationNotes:
     - "Latest official stable release moved from recorded 17.2.12 to 18.0.4."
