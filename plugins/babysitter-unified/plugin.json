@@ -65,6 +65,10 @@
       "extensions/index.ts": "file:per-harness/{{targetDir}}/extensions-index.ts",
       "extensions/i18n.ts": "file:per-harness/{{targetDir}}/extensions-i18n.ts"
     },
+    "omp-driver": {
+      "extensions/driver.ts": "file:per-harness/omp/extensions-driver.ts",
+      "agents/babysitter-task.md": "file:per-harness/omp/agents/babysitter-task.md"
+    },
     "codex-branding": {
       "assets/icon.svg": "file:per-harness/{{targetDir}}/assets/icon.svg",
       "assets/logo.png": "file:per-harness/{{targetDir}}/assets/logo.png",
@@ -348,6 +352,7 @@
         "agents-file",
         "pi-extension",
         "pi-support-files",
+        "omp-driver",
         "readme"
       ]
     },
