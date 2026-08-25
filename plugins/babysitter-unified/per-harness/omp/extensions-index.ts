@@ -422,6 +422,96 @@ export default function activate(pi: ExtensionAPI): void {
     },
   });
 
+  const breakpointResponseParameters = pi.zod.object({
+    i: pi.zod.string().describe("Concise intent"),
+    runDir: pi.zod.string().describe("Absolute Babysitter run directory"),
+    effectId: pi.zod.string(),
+    invocationKey: pi.zod.string(),
+    approved: pi.zod.unknown(),
+  });
+  pi.registerTool<typeof breakpointResponseParameters>({
+    name: "babysitter_breakpoint_respond",
+    label: "Respond to Babysitter breakpoint",
+    description: "Durably record one explicit human approval or decline for the exact pending breakpoint, then continue deterministic execution.",
+    parameters: breakpointResponseParameters,
+    approval: "exec",
+    async execute(_toolCallId, params, signal, _onUpdate, ctx) {
+      return await enqueueDrive(async () => {
+        activeContext = ctx;
+        driver.setWorkspaceCwd(typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd());
+        const sessionId = typeof ctx?.sessionManager?.getSessionId === "function"
+          ? syncSessionEnvironment(ctx)
+          : ownedSessionId;
+        if (!sessionId) {
+          return {
+            content: [{ type: "text", text: "Authoritative OMP session binding is unavailable or invalid" }],
+            details: { handled: false },
+            isError: true,
+          };
+        }
+        const approved = params.approved;
+        if (typeof approved !== "boolean") {
+          return {
+            content: [{ type: "text", text: "Breakpoint response must provide approved as a boolean" }],
+            details: { handled: false },
+            isError: true,
+          };
+        }
+        try {
+          await assertOmpRunOwnership(params.runDir, sessionId);
+          const sessionStateResult = await pi.exec("babysitter", [
+            "session:state",
+            "--session-id",
+            sessionId,
+            "--json",
+          ], {
+            cwd: typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd(),
+            timeout: 30_000,
+            signal,
+          });
+          if (sessionStateResult.code !== 0) {
+            throw new Error("Failed to verify authoritative OMP session state");
+          }
+          await assertOmpLiveSessionOwnership(
+            JSON.parse(sessionStateResult.stdout),
+            params.runDir,
+          );
+          const operationId = projectionOwner?.operationId;
+          const response = await driver.withProgressOperation(
+            operationId,
+            () => driver.resolveBreakpointResponse({ ...params, approved }, signal),
+          );
+          if (!response.handled || response.reason) {
+            return {
+              content: [{
+                type: "text",
+                text: response.reason ?? "Breakpoint response was not handled",
+              }],
+              details: response,
+              isError: true,
+            };
+          }
+          const continuation = await driveContext.run(
+            ctx,
+            () => driver.drive(params.runDir, signal, operationId),
+          );
+          return {
+            content: [{ type: "text", text: JSON.stringify(continuation, null, 2) }],
+            details: { ...response, continuation },
+          };
+        } catch (error) {
+          return {
+            content: [{ type: "text", text: driverFailureDiagnostic(error) }],
+            details: { handled: false },
+            isError: true,
+          };
+        } finally {
+          await flushProjectionProgress(projectionOwner?.operationId);
+        }
+      });
+    },
+  });
+
   const driveParameters = pi.zod.object({
     i: pi.zod.string().describe("Concise intent"),
     runDir: pi.zod.string().describe("Absolute Babysitter run directory"),

@@ -58,7 +58,8 @@ The core loop is:
 3. **Handle the returned state**:
    - `completed`, `waiting`, or `operator_attention`: report it accurately.
    - `interaction`: obtain the requested human/breakpoint interaction, then call
-     `babysitter_drive` again with the same run directory.
+     `babysitter_breakpoint_respond` with the exact run directory, effect ID,
+     invocation key, and approved boolean. The response tool continues the run.
    - `agent`: call oh-my-pi's native `task` tool exactly once with the returned
      `task` payload. Do not rename the owner, change the model, edit the schema,
      split the batch, or dispatch an additional task.
@@ -81,7 +82,7 @@ When babysitter presents pending effects, identify the `kind` field and execute 
 | `agent` | Dispatch the driver's exact one-item native task payload |
 | `skill` | Dispatch the driver's exact one-item native task payload |
 | `shell` | Let `babysitter_drive` execute, checkpoint, and post it |
-| `breakpoint` | Present the interaction to the user, then drive again |
+| `breakpoint` | Present the interaction, then call `babysitter_breakpoint_respond` with the exact decision |
 | `sleep` | Return the interaction/waiting state reported by the driver |
 
 For PI-family generated-process guidance, treat `agent`, `skill`, `shell`, `breakpoint`, and `sleep` as the active effect kinds. Do not present `node` as a generated PI-family effect kind.

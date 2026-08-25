@@ -206,6 +206,7 @@ describe('composeBabysitSkillPrompt', () => {
     const output = composeBabysitSkillPrompt(createPromptContextFromCatalog('oh-my-pi'));
 
     expect(output).toContain('babysitter_drive');
+    expect(output).toContain('babysitter_breakpoint_respond');
     expect(output).toContain('exact one-item native `task` payload');
     expect(output).toContain('Never invoke `task:post` or `run:iterate` for a driver-owned effect');
     expect(output).toContain('Do not fall back to manual posting');
@@ -322,6 +323,7 @@ describe('composeOrchestrationPrompt', () => {
     const output = composeOrchestrationPrompt(createPromptContextFromCatalog('oh-my-pi'));
 
     expect(output).toContain('babysitter_drive');
+    expect(output).toContain('babysitter_breakpoint_respond');
     expect(output).toContain('Return the driver-provided `completionProof`');
     expect(output).toContain('Never fabricate, infer, or synthesize breakpoint approval');
     for (const forbidden of [

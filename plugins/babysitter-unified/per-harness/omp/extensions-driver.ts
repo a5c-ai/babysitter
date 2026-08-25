@@ -239,7 +239,7 @@ interface ExecutionCheckpoint {
   schemaVersion: string;
   effectId: string;
   invocationKey: string;
-  kind: "shell" | "agent";
+  kind: "shell" | "agent" | "breakpoint";
   state: "in_progress" | "completed";
   startedAt: string;
   finishedAt?: string;
@@ -318,6 +318,18 @@ export type DriverResult =
         }>;
       };
     };
+
+export interface BreakpointResponseInput {
+  runDir: string;
+  effectId: string;
+  invocationKey: string;
+  approved: boolean;
+}
+
+export interface BreakpointResponseResult {
+  handled: boolean;
+  reason?: string;
+}
 
 export interface AgentToolCallDecision {
   handled: boolean;
@@ -419,6 +431,125 @@ export class OmpDeterministicDriver {
 
   async drive(runDirInput: string, signal?: AbortSignal, operationId?: string): Promise<DriverResult> {
     return await this.withProgressOperation(operationId, () => this.driveScoped(runDirInput, signal));
+  }
+
+  async resolveBreakpointResponse(
+    input: BreakpointResponseInput,
+    signal?: AbortSignal,
+  ): Promise<BreakpointResponseResult> {
+    const runDir = path.resolve(input.runDir);
+    return await this.withEffectLock(runDir, input.effectId, async () => {
+      const task = await readJsonIfExists<JsonObject>(
+        effectArtifactPath(runDir, input.effectId, "task.json"),
+      );
+      if (
+        !task
+        || task.kind !== "breakpoint"
+        || task.effectId !== input.effectId
+        || task.invocationKey !== input.invocationKey
+      ) {
+        return {
+          handled: false,
+          reason: `No matching pending breakpoint exists for effect ${input.effectId}`,
+        };
+      }
+
+      await ensureEffectTaskDir(runDir, input.effectId);
+      const existing = await readCheckpoint(runDir, input.effectId);
+      const value = { approved: input.approved };
+      const isPending = async (): Promise<boolean> => {
+        const iteration = await this.runIteration(runDir, signal);
+        const pending = iteration.nextActions?.find((action) =>
+          action.kind === "breakpoint"
+          && action.effectId === input.effectId
+          && action.invocationKey === input.invocationKey
+        );
+        if (!pending) return false;
+        validateEffectIdentity(pending);
+        return true;
+      };
+      if (existing) {
+        if (existing.kind !== "breakpoint" || existing.invocationKey !== input.invocationKey) {
+          return {
+            handled: false,
+            reason: `Durable checkpoint identity conflicts with breakpoint ${input.effectId}`,
+          };
+        }
+        const recovered = await this.recoverCompletedOutput(runDir, existing, signal);
+        if (!recovered) {
+          return {
+            handled: false,
+            reason: `Breakpoint ${input.effectId} has an incomplete durable response`,
+          };
+        }
+        const output = JSON.parse(
+          (await readCheckpointOutputBytes(runDir, recovered)).toString("utf8"),
+        ) as JsonObject;
+        if (output.approved !== input.approved) {
+          return {
+            handled: false,
+            reason: `Breakpoint ${input.effectId} already has a conflicting durable response`,
+          };
+        }
+        if (await this.hasCommittedResult(runDir, recovered, signal)) {
+          return { handled: true };
+        }
+        if (!await isPending()) {
+          return {
+            handled: false,
+            reason: `No matching pending breakpoint exists for effect ${input.effectId}`,
+          };
+        }
+        await this.postCompletedCheckpoint(runDir, recovered, signal);
+        return { handled: true };
+      }
+
+      if (!await isPending()) {
+        return {
+          handled: false,
+          reason: `No matching pending breakpoint exists for effect ${input.effectId}`,
+        };
+      }
+
+      const startedAt = this.now().toISOString();
+      const checkpoint: ExecutionCheckpoint = {
+        schemaVersion: DRIVER_SCHEMA_VERSION,
+        effectId: input.effectId,
+        invocationKey: input.invocationKey,
+        kind: "breakpoint",
+        state: "in_progress",
+        startedAt,
+      };
+      await writeJsonExclusive(executionPath(runDir, input.effectId), checkpoint);
+      const outputPath = await resolveRunRelativeReal(
+        runDir,
+        taskRelativeRef(input.effectId, "output.json"),
+      );
+      await writeImmutableJson(outputPath, value);
+      const outputBytes = await fs.readFile(outputPath);
+      const completed: ExecutionCheckpoint = {
+        ...checkpoint,
+        state: "completed",
+        finishedAt: this.now().toISOString(),
+        outputRef: taskRelativeRef(input.effectId, "output.json"),
+        outputSha256: sha256(outputBytes),
+        resultStatus: "ok",
+      };
+      await writeJsonAtomic(executionPath(runDir, input.effectId), completed);
+      await this.postCompletedCheckpoint(runDir, completed, signal);
+      await this.emitProgress(
+        runDir,
+        "interaction",
+        "completed",
+        "Breakpoint response committed durably",
+        {
+          effectId: input.effectId,
+          invocationKey: input.invocationKey,
+          kind: "breakpoint",
+        },
+      );
+      return { handled: true };
+    });
   }
 
   private async driveScoped(runDirInput: string, signal?: AbortSignal): Promise<DriverResult> {

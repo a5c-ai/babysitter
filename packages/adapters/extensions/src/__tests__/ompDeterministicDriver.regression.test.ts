@@ -174,6 +174,149 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     }, runDir)).rejects.toThrow(/does not own/i);
   });
 
+  it('durably records one exact breakpoint response and rejects conflicting replay', async () => {
+    const runDir = await tempRun('omp-breakpoint-response-');
+    const effect = action('breakpoint');
+    await writeJson(path.join(runDir, 'tasks', effect.effectId, 'task.json'), {
+      schemaVersion: '2026.01.tasks-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'breakpoint',
+    });
+    let posts = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          return { code: 0, stdout: waiting(effect), stderr: '' };
+        }
+        if (args[0] === 'task:show') return await taskShowResult(runDir, effect);
+        if (args[0] === 'task:post') {
+          posts += 1;
+          const valueIndex = args.indexOf('--value');
+          const value = JSON.parse(await fs.readFile(args[valueIndex + 1], 'utf8'));
+          await recordCommittedResult(runDir, effect, value);
+          return { code: 0, stdout: '{}', stderr: '' };
+        }
+        throw new Error(`unexpected CLI call: ${args.join(' ')}`);
+      },
+    });
+    const input = {
+      runDir,
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      approved: true,
+    };
+
+    await expect(driver.resolveBreakpointResponse(input)).resolves.toEqual({ handled: true });
+    expect(posts).toBe(1);
+    expect(JSON.parse(
+      await fs.readFile(path.join(runDir, 'tasks', effect.effectId, 'output.json'), 'utf8'),
+    )).toEqual({ approved: true });
+    await expect(driver.resolveBreakpointResponse(input)).resolves.toEqual({ handled: true });
+    expect(posts).toBe(1);
+    await expect(driver.resolveBreakpointResponse({ ...input, approved: false })).resolves.toEqual({
+      handled: false,
+      reason: `Breakpoint ${effect.effectId} already has a conflicting durable response`,
+    });
+  });
+
+  it('rejects a breakpoint response after the effect is no longer pending', async () => {
+    const runDir = await tempRun('omp-stale-breakpoint-response-');
+    const effect = action('breakpoint');
+    await writeJson(path.join(runDir, 'tasks', effect.effectId, 'task.json'), {
+      schemaVersion: '2026.01.tasks-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'breakpoint',
+    });
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      runCli: async (args) => {
+        if (args[0] === 'run:iterate') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({ status: 'waiting', nextActions: [] }),
+            stderr: '',
+          };
+        }
+        throw new Error(`unexpected CLI call: ${args.join(' ')}`);
+      },
+    });
+
+    await expect(driver.resolveBreakpointResponse({
+      runDir,
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      approved: true,
+    })).resolves.toEqual({
+      handled: false,
+      reason: `No matching pending breakpoint exists for effect ${effect.effectId}`,
+    });
+    await expect(
+      fs.access(path.join(runDir, 'tasks', effect.effectId, 'output.json')),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('does not post a recovered breakpoint checkpoint after the effect becomes stale', async () => {
+    const runDir = await tempRun('omp-stale-recovered-breakpoint-');
+    const effect = action('breakpoint');
+    const taskDir = path.join(runDir, 'tasks', effect.effectId);
+    await writeJson(path.join(taskDir, 'task.json'), {
+      schemaVersion: '2026.01.tasks-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'breakpoint',
+    });
+    const outputBytes = Buffer.from(JSON.stringify({ approved: true }, null, 2) + '\n');
+    await fs.writeFile(path.join(taskDir, 'output.json'), outputBytes);
+    await writeJson(path.join(taskDir, 'execution.json'), {
+      schemaVersion: '2026.07.omp-driver-v1',
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      kind: 'breakpoint',
+      state: 'completed',
+      startedAt: '2026-08-25T00:00:00.000Z',
+      finishedAt: '2026-08-25T00:00:01.000Z',
+      outputRef: `tasks/${effect.effectId}/output.json`,
+      outputSha256: createHash('sha256').update(outputBytes).digest('hex'),
+      resultStatus: 'ok',
+    });
+    let posts = 0;
+    const driver = new OmpDeterministicDriver({
+      cwd: runDir,
+      runCli: async (args) => {
+        if (args[0] === 'task:show') return await taskShowResult(runDir, effect);
+        if (args[0] === 'run:iterate') {
+          return {
+            code: 0,
+            stdout: JSON.stringify({ status: 'waiting', nextActions: [] }),
+            stderr: '',
+          };
+        }
+        if (args[0] === 'task:post') {
+          posts += 1;
+          return { code: 0, stdout: '{}', stderr: '' };
+        }
+        throw new Error(`unexpected CLI call: ${args.join(' ')}`);
+      },
+    });
+
+    await expect(driver.resolveBreakpointResponse({
+      runDir,
+      effectId: effect.effectId,
+      invocationKey: effect.invocationKey,
+      approved: true,
+    })).resolves.toEqual({
+      handled: false,
+      reason: `No matching pending breakpoint exists for effect ${effect.effectId}`,
+    });
+    expect(posts).toBe(0);
+    await expect(fs.access(path.join(taskDir, 'result.json'))).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+  });
+
   it('ships corrected generated instructions with the driver and blocking bridge agent', async () => {
     const output = await tempRun('omp-driver-package-');
     const result = compile({ source: UNIFIED_PLUGIN_DIR, target: 'oh-my-pi', output });
@@ -182,6 +325,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
     const generatedDriver = await fs.readFile(path.join(result.outputDir, 'extensions', 'driver.ts'), 'utf8');
     expect(generatedDriver).toContain('class OmpDeterministicDriver');
     const generatedIndex = await fs.readFile(path.join(result.outputDir, 'extensions', 'index.ts'), 'utf8');
+    expect(generatedIndex).toContain('babysitter_breakpoint_respond');
     for (const generatedSource of [generatedDriver, generatedIndex]) {
       expect(generatedSource).not.toContain('babysitter-proxied-session-start');
       expect(generatedSource).not.toContain('babysitter_agent_complete');
@@ -519,6 +663,7 @@ describe('OMP deterministic driver regressions (#1578, #1579)', () => {
       ...documentedCommandNames.map((name) => `babysitter:${name}`),
     ].sort());
     expect(tools.has('babysitter_agent_cancel')).toBe(true);
+    expect(tools.has('babysitter_breakpoint_respond')).toBe(true);
     expect(tools.has('babysitter_agent_complete')).toBe(false);
     expect(commands.has('babysitter:status')).toBe(false);
     const commandContext = {
