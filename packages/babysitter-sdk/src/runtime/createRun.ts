@@ -81,6 +81,9 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     if (metadata.harness) {
       eventPayload.harness = metadata.harness;
     }
+    if (metadata.sessionBinding) {
+      eventPayload.sessionBinding = metadata.sessionBinding;
+    }
     if (metadata.nested) {
       eventPayload.nested = metadata.nested;
     }
@@ -139,6 +142,16 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
 function validateRunId(runId: string) {
   if (typeof runId !== "string" || runId.trim() === "") {
     throw new Error("runId must be a non-empty string");
+  }
+  if (
+    runId === "."
+    || runId === ".."
+    || path.isAbsolute(runId)
+    || runId.includes("/")
+    || runId.includes("\\")
+    || runId.includes("\0")
+  ) {
+    throw new Error("runId must be a single path segment");
   }
 }
 

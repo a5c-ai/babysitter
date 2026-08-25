@@ -33,6 +33,7 @@ import type { HarnessAdapter } from "../types";
 interface AdapterCase {
   harness: string;
   envVarName?: string;  // harness-native env var (not AGENT_SESSION_ID)
+  authoritativeNativeEnv?: boolean;
   adapter: () => HarnessAdapter;
 }
 
@@ -41,7 +42,12 @@ const CASES: AdapterCase[] = [
   { harness: "gemini-cli", envVarName: "GEMINI_SESSION_ID", adapter: createGeminiCliAdapter },
   { harness: "github-copilot", envVarName: "COPILOT_SESSION_ID", adapter: createGithubCopilotAdapter },
   { harness: "pi", envVarName: "PI_SESSION_ID", adapter: createPiAdapter },
-  { harness: "oh-my-pi", envVarName: "OMP_SESSION_ID", adapter: createOhMyPiAdapter },
+  {
+    harness: "oh-my-pi",
+    envVarName: "OMP_SESSION_ID",
+    authoritativeNativeEnv: true,
+    adapter: createOhMyPiAdapter,
+  },
   { harness: "custom", envVarName: undefined, adapter: createCustomAdapter },
   { harness: "cursor", envVarName: undefined, adapter: createCursorAdapter },
 ];
@@ -111,7 +117,7 @@ describe("adapter session-id resolution precedence", () => {
           process.env.AGENT_SESSION_ID = "ENV-A";
         }
         const adapter = c.adapter();
-        expect(adapter.resolveSessionId?.({})).toBe("MARKER-A");
+        expect(adapter.resolveSessionId?.({})).toBe(c.authoritativeNativeEnv ? "NATIVE-A" : "MARKER-A");
       });
 
       if (c.envVarName) {
@@ -120,7 +126,7 @@ describe("adapter session-id resolution precedence", () => {
           seedMarker(c.harness, process.pid, "MARKER-B");
           process.env.AGENT_SESSION_ID = "FALLBACK-B";
           const adapter = c.adapter();
-          expect(adapter.resolveSessionId?.({})).toBe("MARKER-B");
+          expect(adapter.resolveSessionId?.({})).toBe(c.authoritativeNativeEnv ? undefined : "MARKER-B");
         });
 
         it("Case C: no marker, harness-native env var wins over stale AGENT_SESSION_ID", () => {
@@ -135,7 +141,7 @@ describe("adapter session-id resolution precedence", () => {
           __setAncestorResolverForTests(() => ({ pid: process.pid }));
           seedMarker(c.harness, process.pid, "MARKER-D");
           const adapter = c.adapter();
-          expect(adapter.resolveSessionId?.({})).toBe("MARKER-D");
+          expect(adapter.resolveSessionId?.({})).toBe(c.authoritativeNativeEnv ? undefined : "MARKER-D");
         });
 
         it("Case E: BABYSITTER_TRUST_ENV_SESSION=1 restores legacy env-var-first", () => {
@@ -147,7 +153,7 @@ describe("adapter session-id resolution precedence", () => {
           const adapter = c.adapter();
           // In legacy order, AGENT_SESSION_ID takes precedence over
           // harness-native env.
-          expect(adapter.resolveSessionId?.({})).toBe("TRUSTED-ENV");
+          expect(adapter.resolveSessionId?.({})).toBe(c.authoritativeNativeEnv ? "NATIVE-C" : "TRUSTED-ENV");
         });
       } else {
         it("Case B (no native env var): pid marker beats AGENT_SESSION_ID", () => {

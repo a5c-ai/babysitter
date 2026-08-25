@@ -59,7 +59,7 @@ export async function bindSession(
   if (await sessionFileExists(filePath)) {
     try {
       const existing = await readSessionFile(filePath);
-      if (existing.state.runId && existing.state.runId !== runId) {
+      if (existing.state.active && existing.state.runId && existing.state.runId !== runId) {
         if (autoReleaseStale) {
           const oldRunId = existing.state.runId;
           let isTerminal = false;
@@ -121,9 +121,16 @@ export async function bindSession(
           };
         }
       } else {
+        const runIds = [...existing.state.runIds];
+        if (existing.state.runId && !runIds.includes(existing.state.runId)) {
+          runIds.push(existing.state.runId);
+        }
+        if (!runIds.includes(runId)) {
+          runIds.push(runId);
+        }
         await updateSessionState(
           filePath,
-          { runId, runDir: resolvedRunDir, active: true },
+          { runId, runDir: resolvedRunDir, runIds, active: true },
           { state: existing.state, prompt: existing.prompt },
         );
         if (verbose) {

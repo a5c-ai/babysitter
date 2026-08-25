@@ -58,7 +58,7 @@ describe("runs config resolution", () => {
   it("uses repo scope when BABYSITTER_RUNS_SCOPE=repo", () => {
     process.env.BABYSITTER_RUNS_SCOPE = "repo";
 
-    expect(resolveRunsDir()).toBe(path.join(repoDir, ".a5c", "runs"));
+    expect(resolveRunsDir()).toBe(path.join(process.cwd(), ".a5c", "runs"));
   });
 
   it("rebases relative overrides under the configured global root by default", () => {
@@ -68,7 +68,7 @@ describe("runs config resolution", () => {
   it("includes the legacy repo-local runs root in readable directories", () => {
     expect(getReadableRunsDirs()).toEqual([
       path.join(globalStateDir, "runs"),
-      path.join(repoDir, ".a5c", "runs"),
+      path.join(process.cwd(), ".a5c", "runs"),
     ]);
   });
 
