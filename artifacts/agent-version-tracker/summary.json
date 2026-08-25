@@ -15,7 +15,7 @@
     { "agent": "openclaw", "displayName": "OpenClaw", "latestVersion": "2026.7.1-2", "previousRecordedVersion": "2026.7.1-2", "source": "github:openclaw/openclaw", "issue": "https://github.com/a5c-ai/babysitter/issues/1616", "graphUpdated": false },
     { "agent": "opencode", "displayName": "OpenCode", "latestVersion": "1.18.23", "previousRecordedVersion": "1.18.16", "source": "npm:opencode-ai", "issue": "https://github.com/a5c-ai/babysitter/issues/1901", "graphUpdated": true },
     { "agent": "pi", "displayName": "Pi", "latestVersion": "0.84.3", "previousRecordedVersion": "0.84.1", "source": "github:earendil-works/pi", "issue": "https://github.com/a5c-ai/babysitter/issues/1902", "graphUpdated": true },
-    { "agent": "qwen", "displayName": "Qwen Code", "latestVersion": "0.22.0", "previousRecordedVersion": "0.21.8", "source": "npm:@qwen-code/qwen-code", "issue": "https://github.com/a5c-ai/babysitter/issues/1882", "graphUpdated": true },
+    { "agent": "qwen", "displayName": "Qwen Code", "latestVersion": "0.22.0", "previousRecordedVersion": "0.21.8", "source": "npm:@qwen-code/qwen-code", "issue": "https://github.com/a5c-ai/babysitter/issues/1888", "graphUpdated": true },
     { "agent": "pi-sdk", "displayName": "Pi SDK adapter package hint", "latestVersion": null, "previousRecordedVersion": null, "source": "npm:@pi-ai/sdk", "issue": null, "graphUpdated": false, "notes": "@pi-ai/sdk returned npm E404; no upstream version could be recorded from npm." }
   ],
   "newVersions": [
@@ -52,7 +52,7 @@
     "https://github.com/a5c-ai/babysitter/issues/1871",
     "https://github.com/a5c-ai/babysitter/issues/1892",
     "https://github.com/a5c-ai/babysitter/issues/1616",
-    "https://github.com/a5c-ai/babysitter/issues/1882"
+    "https://github.com/a5c-ai/babysitter/issues/1888"
   ],
   "changedFiles": [
     "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-08-25.yaml",
