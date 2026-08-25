@@ -17,8 +17,16 @@
  *         task.json
  *         result.json
  *
+ * The generated run set is fully DETERMINISTIC (seeded PRNG, fixed clock):
+ * every invocation on every machine produces byte-identical run dirs and
+ * manifest, so specs may pin generated run/effect IDs. Generated dirs are NOT
+ * committed — they are (re)created at test time by Playwright's globalSetup
+ * (see e2e/global-setup.ts). Hand-authored fixtures (01KTEST*) ARE committed
+ * and are never touched by generation; the manifest merges both sets.
+ *
  * Usage:
- *   npx tsx e2e/fixtures/generate-fixtures.ts
+ *   npx tsx e2e/fixtures/generate-fixtures.ts        # force a full regeneration
+ *   import { generateFixtures } from "./generate-fixtures";  // programmatic (idempotent)
  */
 
 import { promises as fs } from "fs";
@@ -33,22 +41,22 @@ const RUN_COUNT = 50;
 const RUNS_DIR = path.join(__dirname, "runs");
 
 const PROJECT_NAMES = [
-  "podcast-intel",
-  "hockey-7-shifts",
+  "demo-project",
+  "sample-project",
   "sales-pipeline",
   "content-scheduler",
 ];
 
 const PROCESS_IDS: Record<string, string[]> = {
-  "podcast-intel": [
-    "podcast-intel/transcribe",
-    "podcast-intel/summarize",
-    "podcast-intel/publish",
+  "demo-project": [
+    "demo-project/transcribe",
+    "demo-project/summarize",
+    "demo-project/publish",
   ],
-  "hockey-7-shifts": [
-    "hockey/schedule-sync",
-    "hockey/roster-update",
-    "hockey/stats-ingest",
+  "sample-project": [
+    "sample/schedule-sync",
+    "sample/roster-update",
+    "sample/stats-ingest",
   ],
   "sales-pipeline": [
     "sales/lead-scoring",
@@ -164,11 +172,12 @@ function encodeTime(ts: number, len: number): string {
   return result;
 }
 
+// NOTE: the "random" tail is drawn from the seeded PRNG below (not crypto)
+// so ULIDs are reproducible across invocations and machines.
 function encodeRandom(len: number): string {
-  const bytes = crypto.randomBytes(len);
   let result = "";
   for (let i = 0; i < len; i++) {
-    result += ENCODING[bytes[i] % 32];
+    result += ENCODING[Math.floor(seededRandom() * 32) % 32];
   }
   return result;
 }
@@ -181,7 +190,8 @@ function generateUlid(ts: number): string {
 // Deterministic random helpers (seeded via simple LCG for reproducibility)
 // ---------------------------------------------------------------------------
 
-let seed = 42;
+const INITIAL_SEED = 42;
+let seed = INITIAL_SEED;
 
 function seededRandom(): number {
   seed = (seed * 1664525 + 1013904223) & 0x7fffffff;
@@ -204,6 +214,17 @@ function weightedPick(): string {
     if (r <= 0) return kind;
   }
   return "node";
+}
+
+/** Deterministic hex string (replaces crypto.randomBytes for reproducibility). */
+function seededHex(byteLen: number): string {
+  let out = "";
+  for (let i = 0; i < byteLen; i++) {
+    out += Math.floor(seededRandom() * 256)
+      .toString(16)
+      .padStart(2, "0");
+  }
+  return out;
 }
 
 function sha256(data: string): string {
@@ -390,7 +411,7 @@ async function writeRunDir(run: GeneratedRun): Promise<void> {
     processPath: `../../processes/${run.processId.replace("/", "-")}.js`,
     layoutVersion: "2026.01-storage-preview",
     createdAt: toISO(run.createdAt),
-    completionSecret: crypto.randomBytes(16).toString("hex"),
+    completionSecret: seededHex(16),
   };
   await fs.writeFile(path.join(runDir, "run.json"), JSON.stringify(runJson, null, 2) + "\n");
 
@@ -537,13 +558,13 @@ async function writeJournalEvent(
 
 function generateRunInputs(run: GeneratedRun): Record<string, unknown> {
   const templates: Record<string, () => Record<string, unknown>> = {
-    "podcast-intel": () => ({
+    "demo-project": () => ({
       feedUrl: `https://feeds.example.com/${pick(["tech-talks", "startup-stories", "dev-diaries"])}/rss`,
       maxEpisodes: randInt(5, 50),
       language: pick(["en", "es", "fr"]),
       outputFormat: pick(["markdown", "html", "json"]),
     }),
-    "hockey-7-shifts": () => ({
+    "sample-project": () => ({
       teamId: `team-${randInt(100, 999)}`,
       season: "2025-2026",
       syncMode: pick(["full", "incremental", "delta"]),
@@ -770,27 +791,161 @@ function generateTaskResult(task: GeneratedTask, _run: GeneratedRun): Record<str
 }
 
 // ---------------------------------------------------------------------------
+// Hand-authored fixtures (committed 01KTEST* dirs)
+// ---------------------------------------------------------------------------
+
+/** Committed, hand-authored fixture dirs — generation must NEVER touch these. */
+const HAND_AUTHORED_PREFIX = "01KTEST";
+
+const MANIFEST_PATH = path.join(RUNS_DIR, "_manifest.json");
+const REGISTRY_PATH = path.join(__dirname, ".observer-test.json");
+
+interface ManifestEntry {
+  runId: string;
+  processId: string;
+  projectName: string;
+  status: "completed" | "failed" | "waiting" | "pending";
+  taskCount: number;
+  createdAt: string;
+}
+
+interface JournalEvent {
+  type?: string;
+  data?: { effectId?: string; kind?: string };
+}
+
+/** Read a run's journal events in sequence order. */
+async function readJournal(runDirPath: string): Promise<JournalEvent[]> {
+  const journalDir = path.join(runDirPath, "journal");
+  let files: string[];
+  try {
+    files = (await fs.readdir(journalDir)).filter((f) => f.endsWith(".json")).sort();
+  } catch {
+    return [];
+  }
+  const events: JournalEvent[] = [];
+  for (const file of files) {
+    events.push(JSON.parse(await fs.readFile(path.join(journalDir, file), "utf-8")));
+  }
+  return events;
+}
+
+/**
+ * Derive a manifest entry (and pending-breakpoint flag) for a hand-authored
+ * run dir from its committed run.json + journal — no data is invented.
+ */
+async function deriveAuthoredEntry(
+  dirName: string
+): Promise<{ entry: ManifestEntry; hasPendingBreakpoint: boolean }> {
+  const runDirPath = path.join(RUNS_DIR, dirName);
+  const runJson = JSON.parse(await fs.readFile(path.join(runDirPath, "run.json"), "utf-8"));
+  const events = await readJournal(runDirPath);
+
+  const requested = events.filter((e) => e.type === "EFFECT_REQUESTED");
+  const resolvedIds = new Set(
+    events.filter((e) => e.type === "EFFECT_RESOLVED").map((e) => e.data?.effectId)
+  );
+  const unresolved = requested.filter((e) => !resolvedIds.has(e.data?.effectId));
+
+  let status: ManifestEntry["status"];
+  if (events.some((e) => e.type === "RUN_COMPLETED")) status = "completed";
+  else if (events.some((e) => e.type === "RUN_FAILED")) status = "failed";
+  else if (requested.length === 0) status = "pending";
+  else status = "waiting";
+
+  return {
+    entry: {
+      runId: runJson.runId,
+      processId: runJson.processId,
+      projectName: runJson.projectName,
+      status,
+      taskCount: requested.length,
+      createdAt: runJson.createdAt,
+    },
+    hasPendingBreakpoint: unresolved.some((e) => e.data?.kind === "breakpoint"),
+  };
+}
+
+/** Projects hidden from the dashboard grid per the test registry. */
+async function readHiddenProjects(): Promise<Set<string>> {
+  try {
+    const registry = JSON.parse(await fs.readFile(REGISTRY_PATH, "utf-8"));
+    return new Set<string>(registry.hiddenProjects || []);
+  } catch {
+    return new Set();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
-async function main(): Promise<void> {
-  console.log(`Generating ${RUN_COUNT} fixture runs in ${RUNS_DIR}...`);
+export interface GenerateResult {
+  skipped: boolean;
+  generatedCount: number;
+  manifestRunCount: number;
+}
 
-  // Clean existing fixtures
-  try {
-    await fs.rm(RUNS_DIR, { recursive: true, force: true });
-  } catch {
-    // Directory doesn't exist yet
-  }
+/**
+ * (Re)create the generated fixture runs + merged manifest.
+ *
+ * - Idempotent: with `force: false`, generation is skipped when a manifest
+ *   exists and every run it lists is present on disk.
+ * - Hand-authored `01KTEST*` dirs are never deleted or rewritten; their
+ *   manifest entries are derived from their committed run.json + journal.
+ * - Manifest aggregates follow the dashboard rules the specs assert on:
+ *   statusCounts/projectCounts/totalTasks cover GRID-visible runs only
+ *   (registry-hidden projects excluded); runCount additionally counts a
+ *   hidden project's needs-you (unresolved breakpoint) runs, which surface
+ *   on the alarm even when the project is hidden from the grid.
+ */
+export async function generateFixtures(
+  options: { force?: boolean } = {}
+): Promise<GenerateResult> {
+  const force = options.force ?? false;
   await fs.mkdir(RUNS_DIR, { recursive: true });
 
+  // Fast path: fixtures already present and consistent — nothing to do.
+  if (!force) {
+    try {
+      const manifest = JSON.parse(await fs.readFile(MANIFEST_PATH, "utf-8"));
+      const entries: ManifestEntry[] = manifest.runs || [];
+      const checks = await Promise.all(
+        entries.map((r) =>
+          fs
+            .access(path.join(RUNS_DIR, r.runId, "run.json"))
+            .then(() => true)
+            .catch(() => false)
+        )
+      );
+      if (entries.length > 0 && checks.every(Boolean)) {
+        return { skipped: true, generatedCount: 0, manifestRunCount: manifest.runCount };
+      }
+    } catch {
+      // Missing/unreadable manifest -> regenerate below.
+    }
+  }
+
+  console.log(`Generating ${RUN_COUNT} fixture runs in ${RUNS_DIR}...`);
+
+  // Reset the PRNG so every invocation yields the identical canonical set.
+  seed = INITIAL_SEED;
+
+  // Clean ONLY previously generated content. Hand-authored 01KTEST* dirs are
+  // committed and must survive regeneration.
+  const existing = await fs.readdir(RUNS_DIR, { withFileTypes: true });
+  for (const dirent of existing) {
+    if (dirent.name.startsWith(HAND_AUTHORED_PREFIX)) continue;
+    await fs.rm(path.join(RUNS_DIR, dirent.name), { recursive: true, force: true });
+  }
+
   const runs: GeneratedRun[] = [];
-  let totalTasks = 0;
+  let generatedTasks = 0;
 
   for (let i = 0; i < RUN_COUNT; i++) {
     const run = generateRun(i);
     runs.push(run);
-    totalTasks += run.tasks.length;
+    generatedTasks += run.tasks.length;
   }
 
   // Sort by createdAt ascending so directory listing looks natural
@@ -801,61 +956,79 @@ async function main(): Promise<void> {
     await writeRunDir(run);
   }
 
-  // Print summary
-  const statusCounts = runs.reduce(
-    (acc, r) => {
-      acc[r.status] = (acc[r.status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
-
-  const projectCounts = runs.reduce(
-    (acc, r) => {
-      acc[r.projectName] = (acc[r.projectName] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
-
-  const heavyRuns = runs.filter((r) => r.tasks.length >= 20).length;
-  const taskCounts = runs.map((r) => r.tasks.length);
-  const minTasks = Math.min(...taskCounts);
-  const maxTasks = Math.max(...taskCounts);
-  const avgTasks = (totalTasks / runs.length).toFixed(1);
-
-  console.log(`\nGeneration complete!`);
-  console.log(`  Runs: ${runs.length}`);
-  console.log(`  Total tasks: ${totalTasks}`);
-  console.log(`  Tasks per run: min=${minTasks}, max=${maxTasks}, avg=${avgTasks}`);
-  console.log(`  Heavy runs (20+ tasks): ${heavyRuns}`);
-  console.log(`  Status distribution: ${JSON.stringify(statusCounts)}`);
-  console.log(`  Project distribution: ${JSON.stringify(projectCounts)}`);
-
-  // Write manifest for test consumption
-  const manifest = {
-    generatedAt: new Date().toISOString(),
-    runCount: runs.length,
-    totalTasks,
-    statusCounts,
-    projectCounts,
-    runs: runs.map((r) => ({
+  // Manifest entries: generated runs + derived hand-authored runs.
+  const generatedEntries = runs.map((r) => ({
+    entry: {
       runId: r.runId,
       processId: r.processId,
       projectName: r.projectName,
       status: r.status,
       taskCount: r.tasks.length,
       createdAt: toISO(r.createdAt),
-    })),
-  };
-  await fs.writeFile(
-    path.join(RUNS_DIR, "_manifest.json"),
-    JSON.stringify(manifest, null, 2) + "\n"
+    } satisfies ManifestEntry,
+    hasPendingBreakpoint: r.tasks.some(
+      (t) => t.status === "requested" && t.kind === "breakpoint"
+    ),
+  }));
+
+  const authoredDirs = existing
+    .filter((d) => d.isDirectory() && d.name.startsWith(HAND_AUTHORED_PREFIX))
+    .map((d) => d.name)
+    .sort();
+  const authoredEntries = [];
+  for (const dirName of authoredDirs) {
+    authoredEntries.push(await deriveAuthoredEntry(dirName));
+  }
+
+  const allEntries = [...generatedEntries, ...authoredEntries];
+  const hiddenProjects = await readHiddenProjects();
+  const gridEntries = allEntries.filter((e) => !hiddenProjects.has(e.entry.projectName));
+  const hiddenNeedsYou = allEntries.filter(
+    (e) => hiddenProjects.has(e.entry.projectName) && e.hasPendingBreakpoint
   );
-  console.log(`  Manifest written to ${path.join(RUNS_DIR, "_manifest.json")}`);
+
+  const statusCounts: Record<string, number> = {};
+  const projectCounts: Record<string, number> = {};
+  let totalTasks = 0;
+  for (const { entry } of gridEntries) {
+    statusCounts[entry.status] = (statusCounts[entry.status] || 0) + 1;
+    projectCounts[entry.projectName] = (projectCounts[entry.projectName] || 0) + 1;
+    totalTasks += entry.taskCount;
+  }
+
+  const manifest = {
+    generatedAt: new Date().toISOString(),
+    // Dashboard-surfaced total: grid-visible runs PLUS hidden needs-you runs
+    // (the alarm surface still shows those) — kanban headerSum asserts this.
+    runCount: gridEntries.length + hiddenNeedsYou.length,
+    totalTasks,
+    statusCounts,
+    projectCounts,
+    runs: allEntries.map((e) => e.entry),
+  };
+  await fs.writeFile(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + "\n");
+
+  console.log(`\nGeneration complete!`);
+  console.log(`  Generated runs: ${runs.length} (${generatedTasks} tasks)`);
+  console.log(`  Hand-authored runs (untouched): ${authoredDirs.length}`);
+  console.log(`  Manifest runCount: ${manifest.runCount}`);
+  console.log(`  Status distribution (grid): ${JSON.stringify(statusCounts)}`);
+  console.log(`  Project distribution (grid): ${JSON.stringify(projectCounts)}`);
+  console.log(`  Manifest written to ${MANIFEST_PATH}`);
+
+  return {
+    skipped: false,
+    generatedCount: runs.length,
+    manifestRunCount: manifest.runCount,
+  };
 }
 
-main().catch((err) => {
-  console.error("Fixture generation failed:", err);
-  process.exit(1);
-});
+// CLI entrypoint: `npx tsx e2e/fixtures/generate-fixtures.ts` forces a full
+// regeneration. Programmatic callers (playwright globalSetup) import
+// generateFixtures() instead, which is idempotent.
+if (require.main === module) {
+  generateFixtures({ force: true }).catch((err) => {
+    console.error("Fixture generation failed:", err);
+    process.exit(1);
+  });
+}

@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTPENDINGBPFIXTURE0",
+  "request": "test/pending-breakpoint",
+  "processId": "test/pending-breakpoint",
+  "projectName": "test-breakpoint-project",
+  "entrypoint": {
+    "importPath": "../../processes/test-pending-breakpoint.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/test-pending-breakpoint.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-02-17T10:00:00.000Z",
+  "completionSecret": "testfixturependingbreakpoint1234"
+}

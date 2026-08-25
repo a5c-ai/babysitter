@@ -47,7 +47,7 @@ export function AppFooter() {
         </div>
         <div className="flex items-center gap-4">
           <a
-            href="https://github.com/a5c-ai/babysitter/tree/main/packages/observer-dashboard#readme"
+            href="https://github.com/YoavMayer/babysitter-observer-dashboard#readme"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 hover:text-foreground-secondary transition-colors"

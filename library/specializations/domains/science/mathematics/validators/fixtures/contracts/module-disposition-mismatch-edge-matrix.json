@@ -1,0 +1,184 @@
+{
+    "rows":  [
+                 {
+                     "id":  "EDGE-CUBE-ORIGIN",
+                     "domain":  "proof-object",
+                     "expected":  "F(0) and every origin limit are explicit",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-CUBE-FACES",
+                     "domain":  "proof-object",
+                     "expected":  "paths remain in the cube, including zero/one faces",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-ZERO-INCREMENT",
+                     "domain":  "proof-object",
+                     "expected":  "zero affine increments preserve direction without division",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-IMPROPER-ENDPOINT",
+                     "domain":  "proof-object",
+                     "expected":  "truncate, bound, and justify the limit at zero",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-EMPTY-GROUND",
+                     "domain":  "reduction",
+                     "expected":  "state behavior when V is empty",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-SINGLETON-WITNESS",
+                     "domain":  "reduction",
+                     "expected":  "contraction permits empty remainder for singleton witness",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-NONEMPTY-DOMAIN",
+                     "domain":  "reduction",
+                     "expected":  "empty-set false positives are excluded soundly and completely",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-RATIONAL-ENCODING",
+                     "domain":  "reduction",
+                     "expected":  "binary numerator/denominator and exact scaling are bounded",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-THEOREM-TARGET",
+                     "domain":  "document",
+                     "expected":  "numeric references target numbered compatible declarations",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-ALL-ZERO-OBJECTIVE",
+                     "domain":  "reduction",
+                     "expected":  "state the decision and optimization result when the objective is identically zero",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-ZERO-NEGATIVE-THRESHOLD",
+                     "domain":  "reduction",
+                     "expected":  "state zero and negative rational threshold behavior wherever the predicate permits it",
+                     "disposition":  "covered",
+                     "reason":  "fixture coverage",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 },
+                 {
+                     "id":  "EDGE-GRAPH-LOOP-PARALLEL",
+                     "domain":  "graphical-specialization",
+                     "expected":  "state loop and parallel-element conventions when a graphical specialization is used, otherwise give a reasoned not-applicable disposition",
+                     "disposition":  "covered",
+                     "reason":  "incorrectly covered",
+                     "obligationIds":  [
+                                           "OB-NONEMPTY-ENFORCEMENT"
+                                       ],
+                     "evidence":  [
+                                      {
+                                          "path":  "proof.tex"
+                                      }
+                                  ]
+                 }
+             ]
+}

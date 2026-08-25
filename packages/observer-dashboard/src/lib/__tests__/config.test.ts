@@ -123,7 +123,7 @@ describe('config', () => {
 
       const config = await getConfig();
 
-      expect(config.sources).toHaveLength(3);
+      expect(config.sources.filter((s) => s.label !== 'home')).toHaveLength(3);
       expect(config.sources[0].path).toBe('/dir/a');
       expect(config.sources[1].path).toBe('/dir/b');
       expect(config.sources[2].path).toBe('/dir/c');
@@ -136,7 +136,7 @@ describe('config', () => {
 
       const config = await getConfig();
 
-      expect(config.sources).toHaveLength(2);
+      expect(config.sources.filter((s) => s.label !== 'home')).toHaveLength(2);
     });
 
     it('reads sources from registry file', async () => {
@@ -150,7 +150,7 @@ describe('config', () => {
 
       const config = await getConfig();
 
-      expect(config.sources).toHaveLength(1);
+      expect(config.sources.filter((s) => s.label !== 'home')).toHaveLength(1);
       expect(config.sources[0].path).toBe('/registered/path');
       expect(config.sources[0].depth).toBe(3);
       expect(config.sources[0].label).toBe('registry');
@@ -255,18 +255,23 @@ describe('config', () => {
       expect(config1).toBe(config2); // same object reference
     });
 
-    it('registry sources take priority over env defaults', async () => {
+    it('explicit --watch-dir / env merges with registry sources (QA F3)', async () => {
+      // An explicit OBSERVER_WATCH_DIR (CLI --watch-dir) is listed first but
+      // must NOT drop the persisted registry sources — see config-loader.
       mockReadFile.mockResolvedValue(
         JSON.stringify({
           sources: [{ path: '/registry/path', depth: 1 }],
         }),
       );
       process.env.OBSERVER_WATCH_DIR = '/env/path';
+      invalidateConfigCache();
 
       const config = await getConfig();
 
-      expect(config.sources).toHaveLength(1);
-      expect(config.sources[0].path).toBe('/registry/path');
+      const nonHome = config.sources.filter((s) => s.label !== 'home');
+      expect(nonHome).toHaveLength(2);
+      expect(nonHome[0].path).toBe('/env/path');
+      expect(nonHome[1].path).toBe('/registry/path');
     });
 
     it('falls back to defaults when registry has empty sources array', async () => {
@@ -373,6 +378,11 @@ describe('config', () => {
   // discoverAllRunDirs
   // -----------------------------------------------------------------------
   describe('discoverAllRunDirs', () => {
+    // Discovery now requires run.json/journal; make mocked run dirs look real.
+    beforeEach(() => {
+      mockAccess.mockResolvedValue(undefined);
+    });
+
     it('returns empty array when source directory does not exist', async () => {
       // Config with a non-existent source
       mockReadFile.mockResolvedValue(
@@ -504,6 +514,12 @@ describe('config', () => {
   // findRunDir
   // -----------------------------------------------------------------------
   describe('findRunDir', () => {
+    // Discovery now requires a run to have run.json/journal; make the mocked run
+    // dirs look real (isRunDir is the only consumer of fs.access).
+    beforeEach(() => {
+      mockAccess.mockResolvedValue(undefined);
+    });
+
     it('returns null when no matching runId is found', async () => {
       mockReadFile.mockResolvedValue(
         JSON.stringify({

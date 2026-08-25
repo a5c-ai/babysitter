@@ -201,6 +201,33 @@ describe('composeBabysitSkillPrompt', () => {
     const output = composeBabysitSkillPrompt(createPromptContextFromCatalog('pi'));
     expect(output).not.toContain('Non-hook-driven continuation');
   });
+
+  it('uses the deterministic OMP driver without advertising the legacy manual posting loop', () => {
+    const output = composeBabysitSkillPrompt(createPromptContextFromCatalog('oh-my-pi'));
+
+    expect(output).toContain('babysitter_drive');
+    expect(output).toContain('babysitter_breakpoint_respond');
+    expect(output).toContain('exact one-item native `task` payload');
+    expect(output).toContain('Never invoke `task:post` or `run:iterate` for a driver-owned effect');
+    expect(output).toContain('Do not fall back to manual posting');
+    expect(output).toContain('Never fabricate, infer, or synthesize breakpoint approval');
+    expect(output).toContain('Shell task definitions are trusted process code');
+    expect(output).toContain('`interpreter: "bash"`');
+    expect(output).toContain('authoritative `OMP_SESSION_ID`');
+    expect(output).toContain('Return the driver-provided `completionProof`');
+    expect(output).not.toContain('PID-scoped session marker');
+    expect(output).not.toContain('`AGENT_SESSION_ID` env var');
+    expect(output).not.toContain('Use the SDK CLI to drive the orchestration loop');
+    expect(output).not.toContain('**Post results** - commit results back through `task:post`');
+    for (const forbidden of [
+      'Call `run:iterate`, perform each effect, post results, and repeat',
+      '$CLI run:iterate <runId>',
+      'The orchestrating agent must execute the command',
+      'When the run is completed, the CLI will emit a `completionProof`',
+    ]) {
+      expect(output).not.toContain(forbidden);
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -292,6 +319,23 @@ describe('composeProcessCreatePrompt', () => {
 // 4. composeOrchestrationPrompt
 // ---------------------------------------------------------------------------
 describe('composeOrchestrationPrompt', () => {
+  it('keeps OMP orchestration driver-owned without affirmative manual-loop instructions', () => {
+    const output = composeOrchestrationPrompt(createPromptContextFromCatalog('oh-my-pi'));
+
+    expect(output).toContain('babysitter_drive');
+    expect(output).toContain('babysitter_breakpoint_respond');
+    expect(output).toContain('Return the driver-provided `completionProof`');
+    expect(output).toContain('Never fabricate, infer, or synthesize breakpoint approval');
+    for (const forbidden of [
+      'Call `run:iterate`, perform each effect, post results, and repeat',
+      '$CLI run:iterate <runId>',
+      'The orchestrating agent must execute the command',
+      'When the run is completed, the CLI will emit a `completionProof`',
+    ]) {
+      expect(output).not.toContain(forbidden);
+    }
+  });
+
   it('contains run:create section', () => {
     const output = composeOrchestrationPrompt(createPromptContextFromCatalog('claude-code'));
     expect(output).toContain('### 2. Create run and bind session');
@@ -445,10 +489,60 @@ describe('interactive vs non-interactive', () => {
     expect(output).toContain('no AskUserQuestion tool');
   });
 
-  it('PI context uses its own interactiveToolName', () => {
+  // Was 'PI context uses its own interactiveToolName', asserting it contained
+  // 'AskUserQuestion'. Pi does not expose such a tool: its only occurrence of
+  // that string is a hardcoded list commented "Claude Code 2.x tool names",
+  // used for Anthropic API mapping, and pi-coding-agent's own dist/cli.js has
+  // none. The old assertion passed while encoding the premise this fixes.
+  it('PI context does not name the Claude Code question tool', () => {
     const ctx = createPromptContextFromCatalog('pi');
     const output = composeBabysitSkillPrompt(ctx);
-    expect(output).toContain('AskUserQuestion');
+    expect(output).not.toContain('AskUserQuestion');
+  });
+
+  // Regression: issue #1758. Codex has no agent-callable question tool, so
+  // naming one let agents read "no AskUserQuestion tool" as "I am
+  // non-interactive" and auto-approve breakpoints.
+  it('codex context never names the Claude Code question tool', () => {
+    const ctx = createPromptContextFromCatalog('codex');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).not.toContain('AskUserQuestion');
+  });
+
+  it('codex context renders the non-interactive header without a tool clause', () => {
+    const ctx = createPromptContextFromCatalog('codex');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).toContain('Non-interactive mode (running with -p flag)');
+  });
+
+  // Regression: issue #1758, second defect. breakpoint-handling.md interpolated
+  // interactiveToolName raw, so harnesses that leave it empty rendered
+  // "if the  itself throws an error" with a doubled space and dangling article.
+  // Verified against each installed CLI: none exposes an agent-callable
+  // question tool. openclaw / antigravity-cli / omp are deliberately absent —
+  // not installed locally, so not verified and not changed.
+  it.each(['codex', 'cursor', 'copilot-cli', 'gemini-cli', 'pi'])(
+    '%s never names the Claude Code question tool',
+    (harness) => {
+      const output = composeBabysitSkillPrompt(createPromptContextFromCatalog(harness));
+      expect(output).not.toContain('AskUserQuestion');
+    },
+  );
+
+  it('harnesses without a named question tool render a well-formed error clause', () => {
+    for (const harness of ['codex', 'cursor', 'copilot-cli', 'gemini-cli', 'pi', 'opencode', 'genty'] as const) {
+      const output = composeBabysitSkillPrompt(createPromptContextFromCatalog(harness));
+      expect(output, `${harness} should not render an empty tool name`)
+        .not.toContain('if the  itself throws an error');
+      expect(output, `${harness} should fall back to a generic noun`)
+        .toContain('if the question tool itself throws an error');
+    }
+  });
+
+  it('claude-code error clause still names its actual tool', () => {
+    const ctx = createPromptContextFromCatalog('claude-code');
+    const output = composeBabysitSkillPrompt(ctx);
+    expect(output).toContain('if the AskUserQuestion tool itself throws an error');
   });
 
   it('interactive=undefined shows both interactive and non-interactive sections', () => {

@@ -11,7 +11,7 @@ function coreAgentUsage(commandName: string): string {
   ${commandName} run:recover-process-error <runDir> [--patch-effect <effectId>:<jsonPath>=<json>] [--json] [--dry-run]
   ${commandName} run:halt <runDir> [--reason <text>] [--final-status completed|failed] [--json] [--dry-run]
   ${commandName} run:iterate <runDir> [--json] [--verbose] [--iteration <n>]
-  ${commandName} task:post <runDir> <effectId> --status <ok|error> [--json] [--dry-run] [--value <file>] [--value-inline <json>] [--error <file>] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
+  ${commandName} task:post <runDir> <effectId> --status <ok|error> [--json] [--dry-run] [--value <file> [--value-sha256 <hex>]] [--value-inline <json>] [--error <file> [--error-sha256 <hex>]] [--stdout-ref <ref>] [--stderr-ref <ref>] [--stdout-file <file>] [--stderr-file <file>] [--started-at <iso8601>] [--finished-at <iso8601>] [--metadata <file>] [--invocation-key <key>]
   ${commandName} task:list <runDir> [--pending] [--kind <kind>] [--json]
   ${commandName} task:show <runDir> <effectId> [--json]
   ${commandName} skill:discover [--run-id <id>] [--cache-ttl <seconds>] [--include-remote] [--summary-only] [--process-path <path>] [--json]

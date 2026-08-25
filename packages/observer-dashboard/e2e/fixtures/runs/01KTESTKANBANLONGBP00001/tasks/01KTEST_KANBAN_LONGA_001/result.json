@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KTEST_KANBAN_LONGA_001",
+  "taskId": "prepare-deploy-plan",
+  "invocationKey": "kanban/long-breakpoint:S000001:prepare-deploy-plan",
+  "status": "ok",
+  "startedAt": "2026-01-25T09:00:02.500Z",
+  "finishedAt": "2026-01-25T09:00:04.500Z",
+  "result": {
+    "summary": "Deploy plan drafted",
+    "sections": 2
+  },
+  "value": {
+    "summary": "Deploy plan drafted",
+    "sections": 2
+  }
+}

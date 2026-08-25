@@ -13,6 +13,10 @@ export interface RunMetadata extends JsonRecord {
   processId: string;
   sdkVersion?: string;
   harness?: string;
+  sessionBinding?: {
+    harness: string;
+    sessionId: string;
+  };
   nested?: {
     parentRunId: string;
     parentEffectId?: string;

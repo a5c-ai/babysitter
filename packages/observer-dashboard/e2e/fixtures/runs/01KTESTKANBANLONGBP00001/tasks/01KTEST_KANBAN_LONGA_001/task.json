@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_LONGA_001",
+  "taskId": "prepare-deploy-plan",
+  "invocationKey": "kanban/long-breakpoint:S000001:prepare-deploy-plan",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Prepare staging deploy plan",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_LONGA_001/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_LONGA_001/result.json"
+  },
+  "agent": {
+    "name": "prepare-deploy-plan",
+    "prompt": {
+      "role": "analyst",
+      "task": "Prepare staging deploy plan",
+      "instructions": [
+        "Do the step",
+        "Return JSON"
+      ]
+    }
+  }
+}

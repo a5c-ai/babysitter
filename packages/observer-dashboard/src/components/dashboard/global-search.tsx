@@ -298,7 +298,10 @@ export function GlobalSearch() {
                           {run.projectName}
                         </span>
                       )}
-                      <span className="font-mono text-xs text-info">
+                      {/* Full run id on hover (title) — no nested copy button
+                          here: the row is a listbox option whose click
+                          navigates; copying lives on the run pages/cards. */}
+                      <span className="font-mono text-xs text-info" title={run.runId}>
                         {formatShortId(run.runId, 8)}
                       </span>
                     </div>

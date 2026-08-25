@@ -69,12 +69,20 @@ attributes:
   promptCapabilities:
     - hooks
     - stop-hook
-    - ask-user-question
+    # 'ask-user-question' removed: Codex exposes no such tool (see
+    # interactiveToolName below). No template gates on this capability today,
+    # so this changes no rendered output — it stops the declaration from being
+    # a false premise for anything that gates on it later.
     - task-tool
     - breakpoint-routing
   loopControlTerm: stop-hook
   hookDriven: true
-  interactiveToolName: "AskUserQuestion tool"
+  # Codex has no agent-callable question tool. Its only structured-input
+  # mechanism is MCP elicitation, which an MCP server invokes rather than the
+  # model, so interactive asks are plain-text turn endings. Naming a tool the
+  # harness lacks made agents read "no AskUserQuestion tool" as "I am
+  # non-interactive" and auto-approve breakpoints. See issue #1758.
+  interactiveToolName: ""
   sessionEnvVarsDescription: "PID-scoped session marker (authoritative); CODEX_THREAD_ID/CODEX_SESSION_ID and AGENT_SESSION_ID are fallbacks"
   hasIntentFidelityChecks: true
   hasNonNegotiables: true

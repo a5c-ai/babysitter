@@ -1,6 +1,6 @@
 {
   "name": "babysitter",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "license": "MIT",
   "private": true,
   "workspaces": [
@@ -53,6 +53,7 @@
     "guard:packages": "node ./scripts/guard-package-integrity.cjs",
     "check:library-syntax": "node ./scripts/validate-library-js-syntax.cjs",
     "verify:metadata": "node ./scripts/check-package-metadata.cjs",
+    "verify:omp-extension-types": "tsc -p plugins/babysitter-unified/per-harness/omp/tsconfig.json",
     "validate:processes": "node ./scripts/validate-process.mjs",
     "verify:library-metadata": "node packages/atlas/scripts/verify-library-metadata.mjs",
     "test:atlas-catalog-contracts": "npm exec --yes --package=vitest -- vitest run --config vitest.config.ts \"packages/atlas/src/catalog/catalog.test.ts\" \"packages/atlas/src/catalog/discovery.contract.test.ts\" \"packages/atlas/src/catalog/sdk.contract.test.ts\" \"packages/atlas/src/catalog/discovery.packaged.test.ts\" \"packages/atlas/src/catalog/export.contract.test.ts\" \"packages/atlas/src/catalog/consumer-imports.contract.test.ts\" \"packages/atlas/src/catalog/workspace-metadata.contract.test.ts\" \"packages/atlas/src/catalog/final-removal.contract.test.ts\" \"packages/babysitter-sdk/src/harness/adapterFallbackMetadata.contract.test.ts\" \"packages/adapters/hooks/core/src/discovery/__tests__/detector.contract.test.ts\" \"packages/adapters/core/tests/host-detection.contract.test.ts\" \"packages/adapters/core/tests/invocation.contract.test.ts\" \"packages/adapters/extensions/src/__tests__/targets.contract.test.ts\"",
@@ -137,15 +138,18 @@
     "@docusaurus/core": "3.10.1",
     "@docusaurus/preset-classic": "3.10.1",
     "@mdx-js/react": "^3.0.0",
+    "@oh-my-pi/pi-coding-agent": "16.5.2",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "4.1.6",
+    "bun": "1.3.14",
     "markdownlint-cli2": "0.22.1",
     "prism-react-renderer": "^2.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom-v6": "npm:react-router-dom@^6.30.2",
     "vitest": "4.1.6",
-    "webpackbar": "file:third_party/webpackbar"
+    "webpackbar": "file:third_party/webpackbar",
+    "zod": "^4.4.3"
   },
   "overrides": {
     "webpackbar": "file:third_party/webpackbar",

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-26T10:00:02.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_APPROVE_1",
+    "invocationKey": "kanban/approve-flow:S000001:approve-kanban-flow",
+    "invocationHash": "hash-approve-kanban-flow",
+    "stepId": "S000001",
+    "taskId": "approve-kanban-flow",
+    "kind": "breakpoint",
+    "label": "Approve the kanban approve-flow fixture step?",
+    "taskDefRef": "tasks/01KTEST_KANBAN_APPROVE_1/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0002-2"
+}
