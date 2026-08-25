@@ -67,6 +67,9 @@ describe('pipeline-owned live stack scenario execution', () => {
 
     expect(result.status).toBe('failed');
     expect(result.failure).toContain('missing live-model credential env');
-    expect(result.commands.length).toBe(8);
+    // The isolated source's seven-command count dropped a still-generated setup command.
+    // Defend the actual complete plan instead of preserving that stale local-version assertion.
+    expect(result.commands).toHaveLength(8);
+    expect(result.commands.every((command) => command.command.length > 0)).toBe(true);
   });
 });
