@@ -131,7 +131,7 @@ const verifyTask = defineTask('agent-version-tracker.verify', (args, taskCtx) =>
     command: [
       'set -euo pipefail',
       'git diff --check',
-      'npm run verify:metadata || printf "\\nverify:metadata failed on unrelated local Babysitter plugin marketplace metadata; continuing with Atlas build gate.\\n"',
+      'npm run verify:metadata',
       'npm run build --workspace=@a5c-ai/atlas',
       'printf "\\n--- summary artifact ---\\n"',
       'test -f artifacts/agent-version-tracker/summary.json && cat artifacts/agent-version-tracker/summary.json || true',
@@ -223,7 +223,7 @@ const publishTask = defineTask('agent-version-tracker.publish', (args, taskCtx) 
       'if ! git diff --cached --quiet; then GIT_AUTHOR_NAME="a5c automation" GIT_AUTHOR_EMAIL="actions@users.noreply.github.com" GIT_COMMITTER_NAME="a5c automation" GIT_COMMITTER_EMAIL="actions@users.noreply.github.com" git commit -m "chore(graph): track upstream agent versions"; fi',
       'git push -u origin "$branch"',
       'pr_url="$(gh pr list --head "$branch" --json url --jq \'.[0].url // empty\' 2>/dev/null || true)"',
-      'if [ -z "$pr_url" ]; then pr_url="$(gh pr create --base "$base" --head "$branch" --title "Track upstream agent CLI versions" --body "$(printf \'Updates Atlas AgentVersion records from the daily upstream host agent release check.\\n\\nArtifacts:\\n- artifacts/agent-version-tracker/upstream-targets-and-latest.json\\n- artifacts/agent-version-tracker/summary.json\\n\\nVerification:\\n- npm run build --workspace=@a5c-ai/atlas\\n- git diff --check\\n\\nNote: npm run verify:metadata currently fails on unrelated local Babysitter plugin marketplace metadata.\\n\')")"; fi',
+      'if [ -z "$pr_url" ]; then pr_url="$(gh pr create --base "$base" --head "$branch" --title "Track upstream agent CLI versions" --body "$(printf \'Updates Atlas AgentVersion records from the daily upstream host agent release check.\\n\\nArtifacts:\\n- artifacts/agent-version-tracker/upstream-targets-and-latest.json\\n- artifacts/agent-version-tracker/summary.json\\n\\nVerification:\\n- npm run verify:metadata\\n- npm run build --workspace=@a5c-ai/atlas\\n\')")"; fi',
       'printf "%s\\n" "$pr_url"',
     ].join('\n'),
     expectedExitCode: 0,
