@@ -15,10 +15,10 @@ on:
         type: string
         default: ''
       os:
-        description: 'Runner OS (ubuntu-latest-l, macos-latest, windows-latest).'
+        description: 'Runner OS (ubuntu-latest, macos-latest, windows-latest).'
         required: false
         type: string
-        default: 'ubuntu-latest-l'
+        default: 'ubuntu-latest'
       matrix:
         description: 'JSON array of test combinations. Each entry: {agent, model, mode, install, live}. Empty = use push defaults.'
         required: false
@@ -41,7 +41,7 @@ concurrency:
 jobs:
   build_all:
     name: Build All
-    runs-on: ${{ inputs.os || 'ubuntu-latest-l' }}
+    runs-on: ${{ inputs.os || 'ubuntu-latest' }}
     permissions:
       contents: read
     defaults:
@@ -140,7 +140,7 @@ jobs:
         id: matrix
         env:
           DISPATCH_MATRIX: ${{ inputs.matrix }}
-          LIVE_STACK_OS: ${{ inputs.os || 'ubuntu-latest-l' }}
+          LIVE_STACK_OS: ${{ inputs.os || 'ubuntu-latest' }}
         run: |
           set -euo pipefail
 
@@ -316,7 +316,7 @@ jobs:
   live_stack_vanilla_ni:
     needs: [build_all, setup]
     name: "Live Stack (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    runs-on: ${{ inputs.os || 'ubuntu-latest' }}
     permissions:
       contents: read
       actions: read
@@ -537,7 +537,7 @@ jobs:
   live_stack_vanilla_interactive:
     needs: [build_all, setup]
     name: "Live Stack (${{ inputs.os || 'ubuntu' }}, vanilla, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    runs-on: ${{ inputs.os || 'ubuntu-latest' }}
     permissions:
       contents: read
       actions: read
@@ -552,7 +552,7 @@ jobs:
   live_stack_bp_interactive:
     needs: [build_all, setup]
     name: "Live Stack (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    runs-on: ${{ inputs.os || 'ubuntu-latest' }}
     permissions:
       contents: read
       actions: read
@@ -567,7 +567,7 @@ jobs:
   live_stack_bp_bridged:
     needs: [build_all, setup]
     name: "Live Stack (${{ inputs.os || 'ubuntu' }}, bp/${{ matrix.scenario.process_mode || 'predefined' }}, ${{ matrix.scenario.agent }}/${{ matrix.scenario.model }}, ${{ matrix.interaction_mode.id }})"
-    runs-on: ${{ inputs.os || 'ubuntu-latest-m' }}
+    runs-on: ${{ inputs.os || 'ubuntu-latest' }}
     permissions:
       contents: read
       actions: read
@@ -648,7 +648,7 @@ jobs:
           echo "# Live Stack Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Commit:** \`${{ github.sha }}\` on \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "**OS:** \`${{ inputs.os || 'ubuntu-latest-l' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**OS:** \`${{ inputs.os || 'ubuntu-latest' }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "**Run:** [#${RUN_ID}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${RUN_ID})" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
