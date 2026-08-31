@@ -36,7 +36,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────
   comprehensive-qa:
     name: Comprehensive QA
-    runs-on: ubuntu-latest-l
+    runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
         id: a5c-token
@@ -86,7 +86,7 @@ jobs:
             - modes: ni, bridged-interactive, interactive, bridged-hooks
             - install: vanilla, bp
             - process_mode: predefined, create, resume
-            - os (dispatch separately): ubuntu-latest-l, macos-latest, windows-latest
+            - os (dispatch separately): ubuntu-latest, macos-latest, windows-latest
 
             STEP 3 — DISPATCH LIVE-STACK:
             For each OS needed, dispatch separately:
@@ -118,7 +118,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────
   triage-sweep:
     name: Triage Sweep
-    runs-on: ubuntu-latest-l
+    runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
         id: a5c-token
@@ -167,7 +167,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────
   changelog-update:
     name: Changelog & Wiki Update
-    runs-on: ubuntu-latest-l
+    runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
         id: a5c-token
@@ -238,7 +238,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────────
   pr-review-sweep:
     name: PR Review Sweep
-    runs-on: ubuntu-latest-l
+    runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
         id: a5c-token

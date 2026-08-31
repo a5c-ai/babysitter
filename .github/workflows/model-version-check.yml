@@ -32,7 +32,7 @@ concurrency:
 jobs:
   check-versions:
     name: Check Model Versions
-    runs-on: ubuntu-latest-l
+    runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
         id: a5c-token

@@ -41,7 +41,7 @@ jobs:
       (github.event_name == 'workflow_dispatch') ||
       (github.event_name == 'issues' && github.event.action == 'opened') ||
       startsWith(github.event.comment.body, '/triage')
-    runs-on: ubuntu-latest-l
+    runs-on: ubuntu-latest
     steps:
       - name: Generate a5c GitHub App token
         id: a5c-token
