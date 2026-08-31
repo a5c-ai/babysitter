@@ -1,0 +1,76 @@
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-v3-2-release
+attributes:
+  displayName: "DeepSeek - DeepSeek-V3.2 release"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://www.deepseek.com/en/news/deepseek-v3-2/
+  sourcePathOrUrl: https://www.deepseek.com/en/news/deepseek-v3-2/
+  locator: "DeepSeek-V3.2 release announcement"
+  capturedAt: "2026-08-31T09:48:04Z"
+  observedAt: "2026-08-31T09:48:04Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-31T09:48:04Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-v3-2-api-release
+attributes:
+  displayName: "DeepSeek API Docs - DeepSeek-V3.2 release"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/news/news251201/
+  sourcePathOrUrl: https://api-docs.deepseek.com/news/news251201/
+  locator: "2025-12-01 DeepSeek-V3.2 release note"
+  capturedAt: "2026-08-31T09:48:04Z"
+  observedAt: "2026-08-31T09:48:04Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-31T09:48:04Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-v3-2-bedrock
+attributes:
+  displayName: "Amazon Bedrock - DeepSeek V3.2 model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-deepseek-deepseek-v3-2.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-deepseek-deepseek-v3-2.html
+  locator: "Bedrock model card"
+  capturedAt: "2026-08-31T09:48:04Z"
+  observedAt: "2026-08-31T09:48:04Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-31T09:48:04Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:hf-model-card-deepseek-v3-2
+attributes:
+  displayName: "Hugging Face - deepseek-ai/DeepSeek-V3.2 model card"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://huggingface.co/deepseek-ai/DeepSeek-V3.2
+  sourcePathOrUrl: https://huggingface.co/deepseek-ai/DeepSeek-V3.2
+  locator: "model card"
+  capturedAt: "2026-08-31T09:48:04Z"
+  observedAt: "2026-08-31T09:48:04Z"
+  observedBy: a5c-ai-team
+  freshnessWindowDays: 90
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-31T09:48:04Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
