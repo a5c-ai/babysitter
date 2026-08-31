@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T07:02:23.039Z",
+  "generatedAt": "2026-08-31T07:01:27.033Z",
   "targets": [
     {
       "id": "antigravity",
@@ -81,20 +81,12 @@
   ],
   "installPackages": [
     {
-      "packageName": "openai",
-      "sourceLine": "packages/adapters/codecs/src/codex-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g openai' },"
+      "packageName": "@openai/codex",
+      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @openai/codex' },"
     },
     {
-      "packageName": "@ampcode/cli",
-      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:        command: 'npm install -g @ampcode/cli',"
-    },
-    {
-      "packageName": "@ampcode/cli",
-      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:          command: 'npm install -g @ampcode/cli',"
-    },
-    {
-      "packageName": "@qwen-code/qwen-code",
-      "sourceLine": "packages/adapters/codecs/src/qwen-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @qwen-code/qwen-code' },"
+      "packageName": "@openai/codex",
+      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:          command: 'npm install -g @openai/codex',"
     },
     {
       "packageName": "@factory/cli",
@@ -105,66 +97,74 @@
       "sourceLine": "packages/adapters/codecs/src/droid-adapter.ts:        { step: 2, description: 'Install Droid CLI', command: 'npm install -g @factory/cli' },"
     },
     {
+      "packageName": "@pi-ai/sdk",
+      "sourceLine": "packages/adapters/codecs/src/pi-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @pi-ai/sdk' },"
+    },
+    {
       "packageName": "opencode-ai",
       "sourceLine": "packages/adapters/codecs/src/opencode-http-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g opencode-ai' },"
     },
     {
-      "packageName": "@pi-ai/sdk",
-      "sourceLine": "packages/adapters/codecs/src/pi-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @pi-ai/sdk' },"
+      "packageName": "@ampcode/cli",
+      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:        command: 'npm install -g @ampcode/cli',"
+    },
+    {
+      "packageName": "@ampcode/cli",
+      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:          command: 'npm install -g @ampcode/cli',"
+    },
+    {
+      "packageName": "@anthropic-ai/claude-code",
+      "sourceLine": "packages/adapters/codecs/src/claude-remote-control-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-code' },"
+    },
+    {
+      "packageName": "@qwen-code/qwen-code",
+      "sourceLine": "packages/adapters/codecs/src/qwen-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @qwen-code/qwen-code' },"
     },
     {
       "packageName": "@anthropic-ai/claude-agent-sdk",
       "sourceLine": "packages/adapters/codecs/src/claude-agent-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-agent-sdk' },"
     },
     {
-      "packageName": "@openai/codex",
-      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @openai/codex' },"
-    },
-    {
-      "packageName": "@openai/codex",
-      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:          command: 'npm install -g @openai/codex',"
-    },
-    {
-      "packageName": "@anthropic-ai/claude-code",
-      "sourceLine": "packages/adapters/codecs/src/claude-remote-control-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-code' },"
+      "packageName": "openai",
+      "sourceLine": "packages/adapters/codecs/src/codex-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g openai' },"
     }
   ],
   "npmLatest": [
     {
       "packageName": "@ampcode/cli",
-      "latestVersion": "0.0.1786320433-geeee54"
+      "latestVersion": "0.0.1788148853-g38a2d7"
     },
     {
       "packageName": "@anthropic-ai/claude-agent-sdk",
-      "latestVersion": "0.3.226"
+      "latestVersion": "0.3.251"
     },
     {
       "packageName": "@anthropic-ai/claude-code",
-      "latestVersion": "2.1.226"
+      "latestVersion": "2.1.251"
     },
     {
       "packageName": "@factory/cli",
-      "latestVersion": "0.191.1"
+      "latestVersion": "0.208.2"
     },
     {
       "packageName": "@openai/codex",
-      "latestVersion": "0.147.0"
+      "latestVersion": "0.151.0"
     },
     {
       "packageName": "@pi-ai/sdk",
-      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-08-10T07_02_21_544Z-debug-0.log\n"
+      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-08-31T07_01_24_944Z-debug-0.log\n"
     },
     {
       "packageName": "@qwen-code/qwen-code",
-      "latestVersion": "0.21.8"
+      "latestVersion": "0.22.3"
     },
     {
       "packageName": "openai",
-      "latestVersion": "7.4.0"
+      "latestVersion": "7.8.0"
     },
     {
       "packageName": "opencode-ai",
-      "latestVersion": "1.18.16"
+      "latestVersion": "1.18.25"
     }
   ]
 }
