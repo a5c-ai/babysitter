@@ -36,6 +36,7 @@ import type { PluginCommandArgs } from "../commands/plugin";
 import { handleSkillDiscover, handleSkillFetchRemote } from "../commands/skill";
 import {
   handleRunCreate,
+  handleRunCreateConvergent,
   handleRunEvents,
   handleRunIterate,
   handleRunAssignProcess,
@@ -64,6 +65,8 @@ async function executeRunTaskCommand(parsed: ParsedArgs): Promise<number | undef
   switch (parsed.command) {
     case "run:create":
       return await handleRunCreate(parsed);
+    case "run:create-convergent":
+      return await handleRunCreateConvergent(parsed);
     case "run:assign-process":
       return await handleRunAssignProcess(parsed);
     case "run:rebuild-state":

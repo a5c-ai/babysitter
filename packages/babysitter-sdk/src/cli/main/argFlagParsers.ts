@@ -144,6 +144,22 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     parsed.inputsPath = expectFlagValue(args, index + 1, "--inputs");
     return index + 1;
   },
+  "--canonical-input-sha256": (parsed, args, index) => {
+    parsed.canonicalInputSha256 = expectFlagValue(args, index + 1, "--canonical-input-sha256");
+    return index + 1;
+  },
+  "--process-snapshot-sha256": (parsed, args, index) => {
+    parsed.processSnapshotHash = expectFlagValue(args, index + 1, "--process-snapshot-sha256");
+    return index + 1;
+  },
+  "--expected-run-json-sha256": (parsed, args, index) => {
+    parsed.expectedRunJsonSha256 = expectFlagValue(args, index + 1, "--expected-run-json-sha256");
+    return index + 1;
+  },
+  "--replacement-session-id": (parsed, args, index) => {
+    parsed.replacementSessionId = expectFlagValue(args, index + 1, "--replacement-session-id");
+    return index + 1;
+  },
   "--run-id": (parsed, args, index) => {
     const runId = expectFlagValue(args, index + 1, "--run-id");
     parsed.runIdOverride = runId;

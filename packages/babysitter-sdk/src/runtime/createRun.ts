@@ -4,7 +4,7 @@ import { createRunDir } from "../storage/createRunDir";
 import { appendEvent } from "../storage/journal";
 import { acquireRunLock, releaseRunLock } from "../storage/lock";
 import { INPUTS_FILE, getRunDir } from "../storage/paths";
-import { RunEntrypointMetadata } from "../storage/types";
+import { RunEntrypointMetadata, type JournalEvent } from "../storage/types";
 import { nextUlid } from "../storage/ulids";
 import type { CreateRunOptions, CreateRunResult } from "./types";
 import { callRuntimeHook } from "./hooks/runtime";
@@ -14,6 +14,24 @@ import { resolveProjectRootForRun, resolveRunsDir } from "../config";
 import { hashProcessCodeFile } from "./processCodeHash";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
+  const result = await initializeRun(options);
+  let lockAcquired = false;
+  try {
+    await acquireRunLock(result.runDir, options.lockOwner ?? "runtime:createRun");
+    lockAcquired = true;
+    await appendRunCreatedEvent({ result, options });
+  } finally {
+    if (lockAcquired) {
+      await releaseRunLock(result.runDir);
+    }
+  }
+
+  await invokeRunStartHook({ result, options });
+
+  return result;
+}
+
+export async function initializeRun(options: CreateRunOptions): Promise<CreateRunResult> {
   const runId = options.runId ?? nextUlid();
   validateRunId(runId);
   const runsDir = path.resolve(options.runsDir ?? resolveRunsDir());
@@ -69,71 +87,77 @@ export async function createRun(options: CreateRunOptions): Promise<CreateRunRes
     outputSchema: options.outputSchema,
   });
 
-  let lockAcquired = false;
-  try {
-    await acquireRunLock(runDir, options.lockOwner ?? "runtime:createRun");
-    lockAcquired = true;
-    const eventPayload: Record<string, unknown> = {
-      runId,
-      processId: metadata.processId,
-      entrypoint: metadata.entrypoint,
-    };
-    if (metadata.harness) {
-      eventPayload.harness = metadata.harness;
-    }
-    if (metadata.nested) {
-      eventPayload.nested = metadata.nested;
-    }
-    if (metadata.processRevision) {
-      eventPayload.processRevision = metadata.processRevision;
-    }
-    if (metadata.processCodeHash) {
-      eventPayload.processCodeHash = metadata.processCodeHash;
-    }
-    if (options.inputs !== undefined) {
-      eventPayload.inputsRef = INPUTS_FILE;
-    }
-    if (options.prompt !== undefined) {
-      eventPayload.prompt = options.prompt;
-    }
-    await appendEvent({
-      runDir,
-      eventType: "RUN_CREATED",
-      event: eventPayload,
-    });
-  } finally {
-    if (lockAcquired) {
-      await releaseRunLock(runDir);
-    }
-  }
-
-  // Call on-run-start hook
-  const entryString = metadata.entrypoint.exportName
-    ? `${metadata.entrypoint.importPath}#${metadata.entrypoint.exportName}`
-    : metadata.entrypoint.importPath;
-
-  const projectRoot = resolveProjectRootForRun(runDir, metadata.entrypoint?.importPath);
-  if (!options.nested?.skipRunStartHook) {
-    await callRuntimeHook(
-      "on-run-start",
-      {
-        runId,
-        processId: metadata.processId,
-        entry: entryString,
-        inputs: options.inputs,
-      },
-      {
-        cwd: projectRoot,
-        logger: options.logger,
-      }
-    );
-  }
-
   return {
     runId,
     runDir,
     metadata,
   };
+}
+
+export type AppendRunCreatedEventArgs = {
+  readonly result: CreateRunResult;
+  readonly options: CreateRunOptions;
+  readonly sessionId?: string;
+};
+
+export async function appendRunCreatedEvent(args: AppendRunCreatedEventArgs): Promise<JournalEvent> {
+  const { result, options, sessionId } = args;
+  const eventPayload: Record<string, unknown> = {
+    runId: result.runId,
+    processId: result.metadata.processId,
+    entrypoint: result.metadata.entrypoint,
+  };
+  if (result.metadata.harness) eventPayload.harness = result.metadata.harness;
+  if (result.metadata.nested) eventPayload.nested = result.metadata.nested;
+  if (result.metadata.processRevision) eventPayload.processRevision = result.metadata.processRevision;
+  if (result.metadata.processCodeHash) eventPayload.processCodeHash = result.metadata.processCodeHash;
+  if (options.inputs !== undefined) eventPayload.inputsRef = INPUTS_FILE;
+  if (options.prompt !== undefined) eventPayload.prompt = options.prompt;
+  if (sessionId !== undefined) eventPayload.sessionId = sessionId;
+  const appended = await appendEvent({
+    runDir: result.runDir,
+    eventType: "RUN_CREATED",
+    event: eventPayload,
+  });
+  return {
+    ...appended,
+    data: eventPayload,
+    type: "RUN_CREATED",
+  };
+}
+
+export type InvokeRunStartHookArgs = {
+  readonly result: CreateRunResult;
+  readonly options: CreateRunOptions;
+};
+
+export async function invokeRunStartHook(args: InvokeRunStartHookArgs): Promise<Awaited<ReturnType<typeof callRuntimeHook>>> {
+  const { result, options } = args;
+  const entryString = result.metadata.entrypoint.exportName
+    ? `${result.metadata.entrypoint.importPath}#${result.metadata.entrypoint.exportName}`
+    : result.metadata.entrypoint.importPath;
+  const projectRoot = resolveProjectRootForRun(result.runDir, result.metadata.entrypoint.importPath);
+  if (options.nested?.skipRunStartHook) {
+    return {
+      hookType: "on-run-start",
+      success: true,
+      output: null,
+      executedHooks: [],
+    };
+  }
+  return await callRuntimeHook(
+    "on-run-start",
+    {
+      runId: result.runId,
+      processId: result.metadata.processId,
+      entry: entryString,
+      inputs: options.inputs,
+    },
+    {
+      cwd: projectRoot,
+      logger: options.logger,
+    },
+  );
 }
 
 function validateRunId(runId: string) {
