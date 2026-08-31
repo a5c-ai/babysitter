@@ -1,0 +1,97 @@
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-2-current-release
+attributes:
+  subjectId: model:deepseek-v3-2@current
+  attribute: releaseDate
+  value: '2025-12-01'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3-2@current releaseDate is 2025-12-01.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v3-2-release
+    - evidence:deepseek-v3-2-api-release
+  claimedAt: '2026-08-31T09:48:04Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for DeepSeek-V3.2 release tracking.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v3-2-release
+    - evidence:deepseek-v3-2-api-release
+  about_subject:
+    - model:deepseek-v3-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-2-current-contextwindowtokens
+attributes:
+  subjectId: model:deepseek-v3-2@current
+  attribute: contextWindowTokens
+  value: '163840'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3-2@current contextWindowTokens is 163840.
+  confidence: low
+  provenanceKind: observation
+  evidenceStrength: weak
+  status: accepted
+  evidenceSourceIds:
+    - evidence:hf-model-card-deepseek-v3-2
+  claimedAt: '2026-08-31T09:48:04Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Context value should be revisited with first-party API documentation when available.
+edges:
+  backed_by_evidence:
+    - evidence:hf-model-card-deepseek-v3-2
+  about_subject:
+    - model:deepseek-v3-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-2-current-tool-thinking
+attributes:
+  subjectId: model:deepseek-v3-2@current
+  attribute: supportsThinking
+  value: 'true'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3-2@current supports thinking in tool use.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v3-2-release
+  claimedAt: '2026-08-31T09:48:04Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: DeepSeek announcement describes Thinking in Tool-Use for V3.2.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v3-2-release
+  about_subject:
+    - model:deepseek-v3-2@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v3-2-current-bedrock-availability
+attributes:
+  subjectId: model:deepseek-v3-2@current
+  attribute: served_by
+  value: provider:bedrock
+  subjectKind: ModelVersion
+  statement: model:deepseek-v3-2@current is available through Amazon Bedrock.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v3-2-bedrock
+  claimedAt: '2026-08-31T09:48:04Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Bedrock model card evidence for cross-provider availability.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v3-2-bedrock
+  about_subject:
+    - model:deepseek-v3-2@current
