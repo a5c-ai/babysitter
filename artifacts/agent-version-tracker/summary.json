@@ -63,6 +63,7 @@
   "notes": [
     "Catalog externalPackageName entries under @a5c-ai/* were excluded as babysitter plugin packages.",
     "Adapter install command package @pi-ai/sdk returned npm E404 and was not modeled as a new upstream version.",
-    "No standalone npm package was found for Cursor; the official Cursor changelog is used as the upstream signal."
+    "No standalone npm package was found for Cursor; the official Cursor changelog is used as the upstream signal.",
+    "Duplicate issues #2015 through #2025 were created after canonical issues #2004 through #2014 already existed; the duplicate issues were closed with comments pointing to the canonical issues."
   ]
 }
