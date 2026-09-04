@@ -1,0 +1,435 @@
+# Evidence captured during the 2026-09-04 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1788494452-g6dc077-2026-09-04
+attributes:
+  displayName: "Amp CLI 0.0.1788494452-g6dc077 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1788494452-g6dc077"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1788494452-g6dc077"
+  locator: "npm @ampcode/cli v0.0.1788494452-g6dc077"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-04T04:14:40Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli latest version
+    0.0.1788494452-g6dc077. No public build-specific changelog, CLI flag,
+    transport/API, model, package-name, install-method, or migration change
+    was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1788494452-g6dc077
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-25-2026-09-04
+attributes:
+  displayName: "Antigravity CLI 1.1.25 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.25"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.25"
+  locator: "google-antigravity/antigravity-cli release 1.1.25"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T02:30:18Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.25 release notes document a workspace-grouped
+    /resume picker, Gemini 3.8 Flash catalog support, default ambient
+    inheritance for Markdown custom agents, MCP OAuth long-code handling,
+    Windows skill path matching, relative custom-agent path resolution,
+    duplicate permission grant cleanup, /boost and runtime fixes, and Remote
+    Control reverse-tunnel hardening.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-25
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-260-2026-09-04
+attributes:
+  displayName: "Claude Code v2.1.260 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.260"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.260"
+  locator: "anthropics/claude-code release v2.1.260"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T23:48:12Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Claude Code 2.1.260 release notes document a fullscreen /diff
+    panel, prompt-cache miss cause reporting, /reload-plugins in headless
+    sessions, /advisor text forms, OIDC and desktop-policy gateway support,
+    permission/sandbox hardening, Bedrock certificate handling, model/cache
+    fixes, Remote Control fixes, terminal rendering fixes, and long-running
+    background command behavior changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-260
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-260-2026-09-04
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.260 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.260"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.260"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.260"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T23:48:13Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.260 release notes document
+    user_message_uuid on thinking_tokens, remote-session latency breakdown
+    fields, disableAutoMode managed setting fixes, rewindFiles failure
+    semantics, structured-output retry error detail, repeated rate_limit_event
+    emission, and parity with Claude Code v2.1.260.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-260
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-153-2-2026-09-04
+attributes:
+  displayName: "Codex CLI rust-v0.153.2 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.153.2"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.153.2"
+  locator: "openai/codex release rust-v0.153.2"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T23:53:12Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Codex CLI rust-v0.153.2 release notes document a display-text-only
+    correction for the GPT-6-Astra Fast tier description. The release notes
+    state this does not change how requests run.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.153.2
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:openai-node-7-10-0-2026-09-04
+attributes:
+  displayName: "OpenAI Node SDK v7.10.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/openai-node/releases/tag/v7.10.0"
+  sourcePathOrUrl: "https://github.com/openai/openai-node/releases/tag/v7.10.0"
+  locator: "openai/openai-node release v7.10.0"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T19:50:45Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official OpenAI Node SDK 7.10.0 release notes document gpt-6-astra and
+    related API features plus canonical SDK security model documentation.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex-sdk:7-10-0
+    - agent:codex-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-82-2026-09-04
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.82 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.82"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.82"
+  locator: "github/copilot-cli release v1.0.82"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-08-29T23:39:31Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official GitHub Copilot CLI 1.0.82 release notes document a fix for
+    messages typed while /worktree or /move prepares a worktree, restoration
+    of Ctrl+E expansion for plan approval cards, and specific authentication
+    failure diagnostics such as 401 Bad credentials.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-82
+    - agent:copilot-cli
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-changelog-2026-09-02-2026-09-04
+attributes:
+  displayName: "Cursor self-hosted machines changelog"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/self-hosted-machines"
+  sourcePathOrUrl: "https://cursor.com/changelog/self-hosted-machines"
+  locator: "Cursor changelog self-hosted-machines"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-02T00:00:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Cursor's self-hosted machines changelog entry documents self-hosted
+    execution for cloud agents, team pools, hibernation and reconnect behavior,
+    supported sandbox integrations, and Linux/Mac computer-use support.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:changelog-2026-09-02
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-212-0-2026-09-04
+attributes:
+  displayName: "Factory Droid CLI 0.212.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.212.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.212.0"
+  locator: "npm @factory/cli v0.212.0"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-04T01:16:28Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    npm metadata reports @factory/cli latest version 0.212.0, identifies it as
+    Factory Droid CLI, and points repository metadata at Factory-AI/factory
+    apps/cli. No public 0.212.0-specific changelog, CLI flag, transport/API,
+    model, package-name, install-method, or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-212-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:gemini-cli-0-58-0-2026-09-04
+attributes:
+  displayName: "Gemini CLI v0.58.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.58.0"
+  sourcePathOrUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.58.0"
+  locator: "google-gemini/gemini-cli release v0.58.0"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-01T20:51:17Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Gemini CLI 0.58.0 release notes document symlink evaluation fixes
+    in ignore path handling, macOS Seatbelt isolation of Docker/container
+    runtime sockets and binaries, A2A stale cancellation cleanup, top-level
+    write-policy safety checkers, and history rollback/retry nudge changes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:gemini:0-58-0
+    - agent:gemini-cli
+---
+nodeKind: EvidenceSource
+id: evidence:hermes-agent-0-21-0-2026-09-04
+attributes:
+  displayName: "Hermes Agent v2026.8.31 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.31"
+  sourcePathOrUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.31"
+  locator: "NousResearch/hermes-agent release v2026.8.31"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-08-31T00:00:00Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Hermes Agent 0.21.0 / v2026.8.31 release research documents Bot Mode,
+    hermes peer bot-to-bot messaging, cron memory and continuity, live
+    delegate_task orchestration, MCP command-center flows, and protected
+    instruction-file approvals.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:hermes:0-21-0
+    - agent:hermes
+---
+nodeKind: EvidenceSource
+id: evidence:omp-18-1-9-2026-09-04
+attributes:
+  displayName: "Oh-My-Pi v18.1.9 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v18.1.9"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v18.1.9"
+  locator: "can1357/oh-my-pi release v18.1.9"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-04T06:53:08Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Oh-My-Pi 18.1.9 release notes document breaking
+    browser/computer automation API changes, replacement of inspect_image and
+    /vision with read image selectors, native OAuth callback recovery,
+    Kitty/Sixel image extraction, /switch, worktree.cleanSource, terminal and
+    memory fixes, and provider continuation fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:18-1-9
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:openclaw-2026-9-1-2026-09-04
+attributes:
+  displayName: "OpenClaw 2026.9.1 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.9.1"
+  sourcePathOrUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.9.1"
+  locator: "openclaw/openclaw release v2026.9.1"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T18:31:33Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official OpenClaw 2026.9.1 release notes document Mermaid diagrams in
+    chat, quick-start install and dashboard flow, personal skill libraries,
+    rollback-safe updates, Gateway resilience, durable Codex MCP approvals,
+    chat-delivered approval requests, config-set compare/dry-run flags, model
+    setup improvements, and published npm verification.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:openclaw:2026-9-1
+    - agent:openclaw
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-18-27-2026-09-04
+attributes:
+  displayName: "OpenCode v1.18.27 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.27"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.27"
+  locator: "anomalyco/opencode release v1.18.27"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-02T21:41:01Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official OpenCode 1.18.27 release notes document five-minute defaults for
+    provider header and streamed chunk timeouts, false as a stream timeout
+    opt-out, Anthropic thinking.blockBinding opt-out support, Claude 5.1+
+    scoping for thinking block binding, and handled SSE reader cancellation.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-18-27
+    - agent:opencode
+---
+nodeKind: EvidenceSource
+id: evidence:pi-0-84-4-2026-09-04
+attributes:
+  displayName: "Pi v0.84.4 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/earendil-works/pi/releases/tag/v0.84.4"
+  sourcePathOrUrl: "https://github.com/earendil-works/pi/releases/tag/v0.84.4"
+  locator: "earendil-works/pi release v0.84.4"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-08-28T22:08:23Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Pi 0.84.4 release notes document terminal capability overrides,
+    extension ui_prompt_start/ui_prompt_end events, public
+    detectSupportedImageMimeTypeFromFile export, RPC clear_queue, fullscreen
+    copy controls, DeepSeek V4 Flash Vision support, and provider/replay fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:0-84-4
+    - agent:pi
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-23-0-2026-09-04
+attributes:
+  displayName: "Qwen Code v0.23.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.23.0"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.23.0"
+  locator: "QwenLM/qwen-code release v0.23.0"
+  capturedAt: "2026-09-04T07:25:00Z"
+  observedAt: "2026-09-03T11:03:15Z"
+  observedBy: codex-babysitter-yolo
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-09-04T07:25:00Z"
+  notes: |
+    Official Qwen Code 0.23.0 release notes document branch state hints,
+    review emit-workflow, scoped workspace memory tasks, Local Control QR
+    pairing, daemon workflow controls, model.goalTokenBudget, output styles,
+    workspace session metadata, and extensive daemon/Web Shell/OpenTUI fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-23-0
+    - agent:qwen
