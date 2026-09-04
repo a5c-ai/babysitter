@@ -27,32 +27,31 @@ edges:
     - agent:amp
 ---
 nodeKind: EvidenceSource
-id: evidence:antigravity-1-1-25-2026-09-04
+id: evidence:antigravity-1-1-26-2026-09-04
 attributes:
-  displayName: "Antigravity CLI 1.1.25 release notes"
+  displayName: "Antigravity CLI 1.1.26 release notes"
   kindLabel: release-notes
   trustLevel: trust-level:official-web
-  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.25"
-  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.25"
-  locator: "google-antigravity/antigravity-cli release 1.1.25"
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.26"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.26"
+  locator: "google-antigravity/antigravity-cli release 1.1.26"
   capturedAt: "2026-09-04T07:25:00Z"
-  observedAt: "2026-09-03T02:30:18Z"
+  observedAt: "2026-09-04T03:28:48Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
   reviewedAt: "2026-09-04T07:25:00Z"
   notes: |
-    Official Antigravity CLI 1.1.25 release notes document a workspace-grouped
-    /resume picker, Gemini 3.8 Flash catalog support, default ambient
-    inheritance for Markdown custom agents, MCP OAuth long-code handling,
-    Windows skill path matching, relative custom-agent path resolution,
-    duplicate permission grant cleanup, /boost and runtime fixes, and Remote
-    Control reverse-tunnel hardening.
+    Official Antigravity CLI 1.1.26 release notes document Ctrl+D/Ctrl+U
+    artifact-viewer scrolling, pickerGrouping for /resume, Mermaid ASCII
+    rendering improvements, faster /logout, model picker default effort changes,
+    always-proceed subagent approval fixes, orphaned worktree cleanup, SQLite
+    WAL checkpointing, and customization-discovery logging fixes.
 edges:
   has_trust_level:
     - trust-level:official-web
   references:
-    - agentVersion:antigravity:1-1-25
+    - agentVersion:antigravity:1-1-26
     - agent:antigravity-cli
 ---
 nodeKind: EvidenceSource
@@ -164,30 +163,32 @@ edges:
     - agent:codex-sdk
 ---
 nodeKind: EvidenceSource
-id: evidence:copilot-cli-1-0-82-2026-09-04
+id: evidence:copilot-cli-1-0-83-5-2026-09-04
 attributes:
-  displayName: "GitHub Copilot CLI v1.0.82 release notes"
+  displayName: "GitHub Copilot CLI v1.0.83-5 release notes"
   kindLabel: release-notes
   trustLevel: trust-level:official-web
-  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.82"
-  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.82"
-  locator: "github/copilot-cli release v1.0.82"
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.83-5"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.83-5"
+  locator: "github/copilot-cli release v1.0.83-5"
   capturedAt: "2026-09-04T07:25:00Z"
-  observedAt: "2026-08-29T23:39:31Z"
+  observedAt: "2026-09-04T03:01:51Z"
   observedBy: codex-babysitter-yolo
   freshnessWindowDays: 45
   reviewOwner: "@a5c-ai/catalog"
   reviewedAt: "2026-09-04T07:25:00Z"
   notes: |
-    Official GitHub Copilot CLI 1.0.82 release notes document a fix for
-    messages typed while /worktree or /move prepares a worktree, restoration
-    of Ctrl+E expansion for plan approval cards, and specific authentication
-    failure diagnostics such as 401 Bad credentials.
+    Official GitHub Copilot CLI 1.0.83-5 release notes document Windows 11
+    taskbar live session hover cards, sandboxed command localhost blocking on
+    macOS/Linux unless Allow local network is enabled, Linux sandbox binary
+    requirements, session-lock freeze handling, Kerberos proxy reconnect,
+    repository-account auth for sandboxed gh commands, and MCP tool availability
+    after MCP server restarts.
 edges:
   has_trust_level:
     - trust-level:official-web
   references:
-    - agentVersion:copilot:1-0-82
+    - agentVersion:copilot:1-0-83-5
     - agent:copilot-cli
 ---
 nodeKind: EvidenceSource
