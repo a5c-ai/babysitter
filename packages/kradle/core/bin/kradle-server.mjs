@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 import { createKradleHttpServer } from '../src/http-server.js';
 import {
-  createKradleApiController,
-  createKubernetesResourceGateway,
   createGiteaService,
   reconcileRepositories,
+  listResource,
 } from '../src/index.js';
 
 const portArg = process.argv.find((arg) => arg.startsWith('--port='));
@@ -24,11 +23,12 @@ server.listen(port, () => {
 // failed pass logs and retries on the next tick; it never crashes the server.
 const reconcileIntervalMs = Number(process.env.KRADLE_REPO_RECONCILE_INTERVAL_MS || 0);
 if (reconcileIntervalMs > 0) {
-  const controller = createKradleApiController({ resourceGateway: createKubernetesResourceGateway() });
   const giteaService = createGiteaService();
   const runPass = async () => {
     try {
-      const list = await controller.listResource('Repository');
+      // Cluster-wide: Repository CRDs live in per-org namespaces (kradle-org-<org>),
+      // not the controllers' own namespace, so list across all namespaces.
+      const list = await listResource('Repository', { allNamespaces: true });
       const repositories = Array.isArray(list) ? list : (list?.items || []);
       const summary = await reconcileRepositories(repositories, { giteaService, logger: console });
       if (summary.created || summary.failed) {

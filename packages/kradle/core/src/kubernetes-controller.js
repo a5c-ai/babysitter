@@ -545,7 +545,7 @@ export async function listResource(kindOrPlural, options = {}) {
   const namespace = options.namespace || process.env.KRADLE_NAMESPACE || 'kradle-system';
   const definition = findResourceDefinition(kindOrPlural);
   const resourceNamespace = definition.namespace || namespace;
-  const args = ['get', apiResourceName(definition), ...namespaceArgs(definition, resourceNamespace), '-o', 'json', '--ignore-not-found'];
+  const args = ['get', apiResourceName(definition), ...namespaceArgs(definition, resourceNamespace, options.allNamespaces), '-o', 'json', '--ignore-not-found'];
   const result = runKubectl(args, {
     kubectl: options.kubectl || process.env.KRADLE_KUBECTL || 'kubectl',
     timeoutMs: Number(options.timeoutMs || process.env.KRADLE_KUBECTL_TIMEOUT_MS || 3_000),
@@ -920,8 +920,9 @@ function commandFailure(result) {
   return `${result.command}: ${detail || `exit ${result.status ?? 'unknown'}`}`;
 }
 
-function namespaceArgs(definition, namespace) {
-  return definition.namespaced === false ? [] : ['-n', namespace];
+export function namespaceArgs(definition, namespace, allNamespaces = false) {
+  if (definition.namespaced === false) return [];
+  return allNamespaces ? ['--all-namespaces'] : ['-n', namespace];
 }
 
 function commandString(args) {
