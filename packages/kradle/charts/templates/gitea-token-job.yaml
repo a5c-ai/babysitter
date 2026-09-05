@@ -1,5 +1,5 @@
 {{- $t := .Values.gitea.token | default dict -}}
-{{- if and .Values.gitea.enabled $t.autoProvision (not $t.existingSecret) -}}
+{{- if and .Values.gitea.enabled $t.autoProvision -}}
 {{- $saName := printf "%s-gitea-token-provisioner" (include "kradle.fullname" .) -}}
 {{- $secretName := include "kradle.giteaTokenSecretName" . -}}
 {{- $secretKey := default "token" $t.key -}}
@@ -38,6 +38,12 @@ rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["get", "create", "patch", "update"]
+  # Restart the token CONSUMERS after minting so they pick up the fresh token
+  # (env secretKeyRef is resolved at pod start; the hook runs post-upgrade, after
+  # the pods have already started with the stale value). Never restarts gitea.
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -106,6 +112,8 @@ spec:
               value: {{ .Release.Namespace | quote }}
             - name: TOKEN_NAME
               value: "kradle-agent"
+            - name: FULLNAME
+              value: {{ include "kradle.fullname" . | quote }}
           command:
             - /bin/sh
             - -c
@@ -130,4 +138,11 @@ spec:
                 --from-literal="$SECRET_KEY=$TOK" \
                 --dry-run=client -o yaml | kubectl apply -f -
               echo "provisioned secret $SECRET_NAME (key $SECRET_KEY)"
+              # Restart the token consumers so they pick up the fresh token.
+              # NEVER restart "$FULLNAME-gitea" — that would wipe its emptyDir DB
+              # and orphan the token we just minted (infinite loop).
+              for d in web api controllers webhook-worker; do
+                kubectl rollout restart "deployment/$FULLNAME-$d" -n "$NAMESPACE" 2>/dev/null \
+                  && echo "restarted $FULLNAME-$d" || echo "skip $FULLNAME-$d (absent)"
+              done
 {{- end -}}

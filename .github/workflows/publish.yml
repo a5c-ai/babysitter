@@ -1818,13 +1818,29 @@ jobs:
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Create ACR pull secret
+        env:
+          # Pull-only ACR scope-map token (registry token 'aks-pull', scope map
+          # '_repositories_pull'). Deliberately NOT `az acr login --expose-token`: that mints an
+          # ACR refresh token valid for ~3 hours, and baking it into a long-lived Secret means the
+          # namespace can only pull for 3 hours after a deploy. Any container recreation after
+          # that (node recycle, kubelet restart — imagePullPolicy is Always) fails with 401 and
+          # the workload sits in ImagePullBackOff until the NEXT deploy happens to re-mint it.
+          # That took atlas.a5c.ai down for 31 days when main went a month without a push.
+          ACR_PULL_USERNAME: aks-pull
+          ACR_PULL_PASSWORD: ${{ secrets.AZURE_ACR_PULL_PASSWORD }}
         run: |
           kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
-          ACR_TOKEN=$(az acr login --name "$ACR_NAME" --expose-token --output tsv --query accessToken)
+          if [ -z "$ACR_PULL_PASSWORD" ]; then
+            echo "::error::secrets.AZURE_ACR_PULL_PASSWORD is not set — refusing to fall back to a" \
+                 "3-hour 'az acr login --expose-token' credential, which silently expires and" \
+                 "strands the namespace in ImagePullBackOff. Generate it with:" \
+                 "az acr token credential generate -r \$ACR_NAME -n aks-pull --password1 --expiration-in-days 365"
+            exit 1
+          fi
           kubectl -n "$KUBE_NAMESPACE" create secret docker-registry acr-pull \
             --docker-server="${ACR_NAME}.azurecr.io" \
-            --docker-username=00000000-0000-0000-0000-000000000000 \
-            --docker-password="$ACR_TOKEN" \
+            --docker-username="$ACR_PULL_USERNAME" \
+            --docker-password="$ACR_PULL_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Create Atlas auth secret
@@ -2326,13 +2342,29 @@ jobs:
           echo "JITSI_AGENT_SIDECAR_IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
       - name: Create ACR pull secret
+        env:
+          # Pull-only ACR scope-map token (registry token 'aks-pull', scope map
+          # '_repositories_pull'). Deliberately NOT `az acr login --expose-token`: that mints an
+          # ACR refresh token valid for ~3 hours, and baking it into a long-lived Secret means the
+          # namespace can only pull for 3 hours after a deploy. Any container recreation after
+          # that (node recycle, kubelet restart — imagePullPolicy is Always) fails with 401 and
+          # the workload sits in ImagePullBackOff until the NEXT deploy happens to re-mint it.
+          # That took atlas.a5c.ai down for 31 days when main went a month without a push.
+          ACR_PULL_USERNAME: aks-pull
+          ACR_PULL_PASSWORD: ${{ secrets.AZURE_ACR_PULL_PASSWORD }}
         run: |
           kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
-          ACR_TOKEN=$(az acr login --name "$ACR_NAME" --expose-token --output tsv --query accessToken)
+          if [ -z "$ACR_PULL_PASSWORD" ]; then
+            echo "::error::secrets.AZURE_ACR_PULL_PASSWORD is not set — refusing to fall back to a" \
+                 "3-hour 'az acr login --expose-token' credential, which silently expires and" \
+                 "strands the namespace in ImagePullBackOff. Generate it with:" \
+                 "az acr token credential generate -r \$ACR_NAME -n aks-pull --password1 --expiration-in-days 365"
+            exit 1
+          fi
           kubectl -n "$KUBE_NAMESPACE" create secret docker-registry acr-pull \
             --docker-server="${ACR_NAME}.azurecr.io" \
-            --docker-username=00000000-0000-0000-0000-000000000000 \
-            --docker-password="$ACR_TOKEN" \
+            --docker-username="$ACR_PULL_USERNAME" \
+            --docker-password="$ACR_PULL_PASSWORD" \
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Clean up legacy kradle release and pre-Helm resources
@@ -2469,6 +2501,8 @@ jobs:
             --set gitea.enabled=true \
             --set gitea.persistence.type=emptyDir \
             --set gitea.token.existingSecret=kradle-gitea-agent-token \
+            --set gitea.token.autoProvision=true \
+            --set controllers.repoReconcileIntervalMs=300000 \
             --set gitea.bootstrap.sandboxRepo=agent-sandbox \
             --set gitea.ingress.enabled=true \
             --set gitea.ingress.className=nginx \
