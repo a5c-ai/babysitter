@@ -145,7 +145,7 @@ assistant:
     existingSecret: kradle-assistant
     key: kradle-assistant-api-key
 gitea:
-  httpUrl: http://kradle-gitea-http.kradle-system.svc.cluster.local:3000/kradle
+  httpUrl: http://kradle-gitea-http.kradle-system.svc.cluster.local:3000
   token:
     existingSecret: kradle-gitea-token
     key: token

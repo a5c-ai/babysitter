@@ -72,7 +72,7 @@ spec:
             - name: KRADLE_KYVERNO_DISCOVER_EXISTING
               value: {{ $kyverno.discoverExisting | default true | quote }}
             - name: KRADLE_GITEA_HTTP_URL
-              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
             {{- if .Values.gitea.enabled }}
@@ -261,7 +261,7 @@ spec:
             - name: KRADLE_KYVERNO_DISCOVER_EXISTING
               value: {{ $kyverno.discoverExisting | default true | quote }}
             - name: KRADLE_GITEA_HTTP_URL
-              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
             {{- if .Values.gitea.enabled }}
@@ -490,7 +490,7 @@ spec:
             - name: KRADLE_CONTROLLER_URL
               value: {{ printf "http://%s-api.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.api.service.port | int) | quote }}
             - name: KRADLE_GITEA_HTTP_URL
-              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
             {{- if .Values.gitea.enabled }}
@@ -686,7 +686,7 @@ spec:
             - name: KRADLE_NAMESPACE
               value: {{ .Release.Namespace | quote }}
             - name: KRADLE_GITEA_HTTP_URL
-              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v/kradle" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
+              value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.httpUrl | quote }}
             - name: KRADLE_GIT_BASE_URL
               value: {{ default (printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int)) .Values.gitea.baseUrl | quote }}
             {{- if .Values.gitea.enabled }}

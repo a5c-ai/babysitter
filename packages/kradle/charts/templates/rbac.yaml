@@ -6,7 +6,7 @@ kind: ClusterRole
 
 metadata:
 
-  name: {{ include "kradle.fullname" . }}
+  name: {{ include "kradle.fullname" . }}-{{ .Release.Namespace }}
 
 rules:
 
@@ -91,7 +91,7 @@ kind: ClusterRoleBinding
 
 metadata:
 
-  name: {{ include "kradle.fullname" . }}
+  name: {{ include "kradle.fullname" . }}-{{ .Release.Namespace }}
 
 roleRef:
 
@@ -99,7 +99,7 @@ roleRef:
 
   kind: ClusterRole
 
-  name: {{ include "kradle.fullname" . }}
+  name: {{ include "kradle.fullname" . }}-{{ .Release.Namespace }}
 
 subjects:
 
