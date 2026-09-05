@@ -21,6 +21,10 @@ export const GET = withAuth(async function GET(request, { params }) {
 
   const service = getGiteaService();
 
+  // Resolve the outcome to a { source, message } pair so raw + JSON stay consistent.
+  let source = 'not-configured';
+  let message = 'Git backend not configured. Set KRADLE_GITEA_HTTP_URL.';
+
   if (service) {
     try {
       // Use getBlob for raw text; getFileContent for metadata + decoded content
@@ -53,17 +57,17 @@ export const GET = withAuth(async function GET(request, { params }) {
           });
         }
       }
-      // null from service — file not found in Gitea, fall through
+      // Configured + reachable, but the file/ref does not exist in Gitea.
+      source = 'not-found';
+      message = `File "${filePath}" not found in ${org}/${name} at ${branch}.`;
     } catch (err) {
-      // Gitea unreachable or errored — fall through
+      source = 'unavailable';
+      message = `Git backend unavailable: ${err.message}`;
     }
   }
 
-  // Gitea not configured or unavailable — return not-configured response
-  const notConfiguredMsg = 'Git backend not configured. Set KRADLE_GITEA_HTTP_URL.';
-
   if (raw) {
-    return new Response(notConfiguredMsg, {
+    return new Response(message, {
       status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
@@ -82,7 +86,7 @@ export const GET = withAuth(async function GET(request, { params }) {
     repo: name,
     org,
     branch,
-    source: 'not-configured',
-    message: notConfiguredMsg,
+    source,
+    message,
   });
 });

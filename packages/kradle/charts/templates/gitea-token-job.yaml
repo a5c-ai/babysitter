@@ -1,0 +1,133 @@
+{{- $t := .Values.gitea.token | default dict -}}
+{{- if and .Values.gitea.enabled $t.autoProvision (not $t.existingSecret) -}}
+{{- $saName := printf "%s-gitea-token-provisioner" (include "kradle.fullname" .) -}}
+{{- $secretName := include "kradle.giteaTokenSecretName" . -}}
+{{- $secretKey := default "token" $t.key -}}
+{{- $giteaUrl := printf "http://%s-gitea-http.%s.svc.cluster.local:%v" (include "kradle.fullname" .) .Release.Namespace (.Values.gitea.service.httpPort | int) -}}
+# Post-install/upgrade hook that mints a Gitea agent token from the admin creds
+# and writes it to the token secret. Runs on every deploy so the token self-heals
+# when Gitea's emptyDir DB (and thus its users/tokens) resets. Idempotent: the
+# named token is deleted-then-recreated and the secret is applied.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $saName }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+{{- with .Values.global.imagePullSecrets }}
+imagePullSecrets:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $saName }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+rules:
+  # Scoped to exactly the token secret this job manages.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $saName }}
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $saName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $saName }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kradle.fullname" . }}-gitea-token-provision
+  labels:
+    {{- include "kradle.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "kradle.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ $saName }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: provision
+          image: {{ include "kradle.controllerImage" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: GITEA_URL
+              value: {{ $giteaUrl | quote }}
+            - name: GITEA_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: username
+            - name: GITEA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "kradle.fullname" . }}-gitea-admin
+                  key: password
+            - name: SECRET_NAME
+              value: {{ $secretName | quote }}
+            - name: SECRET_KEY
+              value: {{ $secretKey | quote }}
+            - name: NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: TOKEN_NAME
+              value: "kradle-agent"
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -eu
+              echo "waiting for gitea at $GITEA_URL ..."
+              for i in $(seq 1 60); do
+                curl -sf "$GITEA_URL/api/v1/version" >/dev/null 2>&1 && break
+                sleep 2
+              done
+              AUTH="$GITEA_ADMIN_USER:$GITEA_ADMIN_PASSWORD"
+              # Idempotent: drop any prior token of this name, then mint a fresh one.
+              curl -s -o /dev/null -X DELETE -u "$AUTH" \
+                "$GITEA_URL/api/v1/users/$GITEA_ADMIN_USER/tokens/$TOKEN_NAME" || true
+              TOK=$(curl -s -X POST -u "$AUTH" -H 'Content-Type: application/json' \
+                -d "{\"name\":\"$TOKEN_NAME\",\"scopes\":[\"write:repository\",\"write:organization\",\"write:user\",\"write:issue\",\"write:misc\",\"read:package\"]}" \
+                "$GITEA_URL/api/v1/users/$GITEA_ADMIN_USER/tokens" \
+                | sed -n 's/.*"sha1":"\([^"]*\)".*/\1/p')
+              if [ -z "$TOK" ]; then echo "ERROR: failed to mint gitea token"; exit 1; fi
+              kubectl create secret generic "$SECRET_NAME" \
+                --namespace "$NAMESPACE" \
+                --from-literal="$SECRET_KEY=$TOK" \
+                --dry-run=client -o yaml | kubectl apply -f -
+              echo "provisioned secret $SECRET_NAME (key $SECRET_KEY)"
+{{- end -}}

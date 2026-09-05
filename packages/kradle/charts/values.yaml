@@ -406,6 +406,12 @@ gitea:
   token:
     existingSecret: ""
     key: token
+    # When true (and no existingSecret is set), a post-install/post-upgrade hook
+    # Job mints a Gitea token from the admin creds and writes it to
+    # <fullname>-gitea-agent-token. This self-heals the token whenever Gitea's
+    # (emptyDir) DB resets on redeploy — the failure mode where a hand-applied
+    # token secret is left pointing at a user that no longer exists.
+    autoProvision: false
   # On-start self-provisioning (postStart). The admin user is always created
   # (the image does not auto-create it from GITEA_ADMIN_*). sandboxRepo, when
   # set, also ensures a demo repo + seed under .Values.admin.org — used by the

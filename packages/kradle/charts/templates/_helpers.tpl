@@ -41,6 +41,21 @@ Call as: include "kradle.orgNamespaceActive" "kradle-org-foo"
 {{- end -}}
 {{- end -}}
 
+{{/*
+Effective secret name holding the Gitea agent token (KRADLE_GITEA_TOKEN).
+Prefers an explicitly-provided existingSecret; otherwise, when autoProvision is
+enabled, the name of the secret the gitea-token hook Job creates. Empty string
+means "no token secret" so callers can skip injecting KRADLE_GITEA_TOKEN.
+*/}}
+{{- define "kradle.giteaTokenSecretName" -}}
+{{- $t := .Values.gitea.token | default dict -}}
+{{- if $t.existingSecret -}}
+{{- $t.existingSecret -}}
+{{- else if $t.autoProvision -}}
+{{- printf "%s-gitea-agent-token" (include "kradle.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "kradle.labels" -}}
 app.kubernetes.io/name: {{ include "kradle.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}

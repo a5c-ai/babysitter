@@ -20,35 +20,41 @@ export const GET = withAuth(async function GET(request, { params }) {
 
   const service = getGiteaService();
 
-  if (service) {
-    try {
-      const entries = await service.listTree(org, name, branch, currentPath);
-      if (entries !== null) {
-        return Response.json({
-          tree: entries,
-          repo: name,
-          org,
-          branch,
-          path: currentPath,
-          totalItems: entries.length,
-          source: 'gitea',
-        });
-      }
-      // listTree returned null — repo/path not found in Gitea, fall through
-    } catch (err) {
-      console.warn('[kradle] Gitea tree request failed:', err.message);
-    }
+  // Env is genuinely unset — the only case that KRADLE_GITEA_HTTP_URL fixes.
+  if (!service) {
+    return Response.json({
+      tree: [], repo: name, org, branch, path: currentPath, totalItems: 0,
+      source: 'not-configured',
+      message: 'Git backend not configured. Set KRADLE_GITEA_HTTP_URL.',
+    });
   }
 
-  // Gitea not configured or unavailable — return empty tree with explanation
-  return Response.json({
-    tree: [],
-    repo: name,
-    org,
-    branch,
-    path: currentPath,
-    totalItems: 0,
-    source: 'not-configured',
-    message: 'Git backend not configured. Set KRADLE_GITEA_HTTP_URL.',
-  });
+  try {
+    const entries = await service.listTree(org, name, branch, currentPath);
+    if (entries !== null) {
+      return Response.json({
+        tree: entries,
+        repo: name,
+        org,
+        branch,
+        path: currentPath,
+        totalItems: entries.length,
+        source: 'gitea',
+      });
+    }
+    // Gitea is configured and reachable, but the repo/path/ref does not exist.
+    return Response.json({
+      tree: [], repo: name, org, branch, path: currentPath, totalItems: 0,
+      source: 'not-found',
+      message: `Repository "${org}/${name}" has no Git backing at ${branch}${currentPath ? '/' + currentPath : ''}.`,
+    });
+  } catch (err) {
+    // Gitea is configured but unreachable/errored.
+    console.warn('[kradle] Gitea tree request failed:', err.message);
+    return Response.json({
+      tree: [], repo: name, org, branch, path: currentPath, totalItems: 0,
+      source: 'unavailable',
+      message: `Git backend unavailable: ${err.message}`,
+    });
+  }
 });

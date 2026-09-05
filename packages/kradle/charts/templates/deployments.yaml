@@ -6,6 +6,7 @@
 {{- $assistantAnthropic := $assistant.anthropic | default dict -}}
 {{- $assistantKradle := $assistant.kradleAssistant | default dict -}}
 {{- $giteaToken := .Values.gitea.token | default dict -}}
+{{- $giteaTokenSecret := include "kradle.giteaTokenSecretName" . -}}
 {{- $agentMux := .Values.agentMux | default dict -}}
 {{- $nats := .Values.externalDependencies.nats | default dict -}}
 {{- $natsEvents := $nats.eventTransport | default dict -}}
@@ -92,11 +93,11 @@ spec:
                   key: password
                   optional: true
             {{- end }}
-            {{- if $giteaToken.existingSecret }}
+            {{- if $giteaTokenSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ $giteaToken.existingSecret | quote }}
+                  name: {{ $giteaTokenSecret | quote }}
                   key: {{ default "token" $giteaToken.key | quote }}
                   optional: true
             {{- end }}
@@ -281,11 +282,11 @@ spec:
                   key: password
                   optional: true
             {{- end }}
-            {{- if $giteaToken.existingSecret }}
+            {{- if $giteaTokenSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ $giteaToken.existingSecret | quote }}
+                  name: {{ $giteaTokenSecret | quote }}
                   key: {{ default "token" $giteaToken.key | quote }}
                   optional: true
             {{- end }}
@@ -510,11 +511,11 @@ spec:
                   key: password
                   optional: true
             {{- end }}
-            {{- if $giteaToken.existingSecret }}
+            {{- if $giteaTokenSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ $giteaToken.existingSecret | quote }}
+                  name: {{ $giteaTokenSecret | quote }}
                   key: {{ default "token" $giteaToken.key | quote }}
                   optional: true
             {{- end }}
@@ -706,11 +707,11 @@ spec:
                   key: password
                   optional: true
             {{- end }}
-            {{- if $giteaToken.existingSecret }}
+            {{- if $giteaTokenSecret }}
             - name: KRADLE_GITEA_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: {{ $giteaToken.existingSecret | quote }}
+                  name: {{ $giteaTokenSecret | quote }}
                   key: {{ default "token" $giteaToken.key | quote }}
                   optional: true
             {{- end }}

@@ -118,6 +118,17 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
   const language = detectLanguage(selectedFile);
   const editorExtensions = useMemo(() => [languageExtension(language), repoCodeTheme, EditorView.lineWrapping].flat(), [language]);
 
+  // States where there is no browsable tree, each with a distinct cause.
+  const unavailableSource = tree && ['not-configured', 'not-found', 'unavailable'].includes(tree.source) ? tree.source : null;
+  const unavailableTitle =
+    unavailableSource === 'not-configured' ? 'Repository browser requires Gitea'
+    : unavailableSource === 'not-found' ? 'Repository not available'
+    : unavailableSource === 'unavailable' ? 'Git backend unavailable'
+    : '';
+  const unavailableBody =
+    tree?.message
+    || (unavailableSource === 'not-configured' ? 'Set KRADLE_GITEA_HTTP_URL to enable.' : 'This repository has no Git backing yet.');
+
   return (
     <div
       style={{
@@ -186,7 +197,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
             <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--danger)' }}>
               Error: {treeError}
             </p>
-          ) : tree?.source === 'not-configured' ? (
+          ) : unavailableSource ? (
             <div
               role="alert"
               style={{
@@ -199,8 +210,8 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                 color: 'var(--warning)',
               }}
             >
-              <strong style={{ display: 'block', marginBottom: '0.25rem' }}>Repository browser requires Gitea</strong>
-              <span>Set <code style={{ background: 'var(--surface)', padding: '0.0625rem 0.25rem', borderRadius: '0.125rem', fontSize: '0.6875rem' }}>KRADLE_GITEA_HTTP_URL</code> to enable.</span>
+              <strong style={{ display: 'block', marginBottom: '0.25rem' }}>{unavailableTitle}</strong>
+              <span>{unavailableBody}</span>
             </div>
           ) : !tree || tree.length === 0 ? (
             <p style={{ padding: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -221,7 +232,7 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
 
       {/* Main: file viewer */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        {tree?.source === 'not-configured' ? (
+        {unavailableSource ? (
           <div
             style={{
               flex: 1,
@@ -245,14 +256,8 @@ export function RepoCodeBrowser({ org, repo, defaultBranch = 'main' }) {
                 textAlign: 'center',
               }}
             >
-              <p style={{ margin: '0 0 0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>Repository browser not available</p>
-              <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.5 }}>
-                Repository browser requires Gitea. Set{' '}
-                <code style={{ background: 'var(--surface)', padding: '0.125rem 0.375rem', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem' }}>
-                  KRADLE_GITEA_HTTP_URL
-                </code>{' '}
-                to enable.
-              </p>
+              <p style={{ margin: '0 0 0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>{unavailableTitle}</p>
+              <p style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.5 }}>{unavailableBody}</p>
             </div>
           </div>
         ) : !selectedFile ? (
