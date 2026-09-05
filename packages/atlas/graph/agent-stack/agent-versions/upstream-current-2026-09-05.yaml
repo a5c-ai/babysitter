@@ -352,6 +352,50 @@ edges:
     - evidence:gemini-cli-0-58-0-2026-09-05
 ---
 nodeKind: AgentVersion
+id: agentVersion:hermes:0-21-0
+attributes:
+  agentId: "hermes"
+  agentProductId: agent:hermes
+  displayName: "Hermes Agent 0.21.0 / v2026.8.31"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.21.0"
+  currentVersion: "0.21.0"
+  releasedAt: "2026-08-31"
+  sourcePackage: "hermes-agent"
+  upstreamReleaseTag: "v2026.8.31"
+  releaseNotesUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.31"
+  cliCommand: "hermes"
+  summary: "Hermes Agent Pantheon release adding bundled Bot Mode, bot-to-bot DMs, remembered cron jobs, live subagent steering, an MCP command center, richer CLI/TUI controls, browser-driving desktop integration, provider/model catalog expansion, and security hardening."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 0.20.0 / v2026.8.3 to 0.21.0 / v2026.8.31."
+    - "Bundled default-on Bot Mode adds named agent profiles, deterministic avatar faces, shared rosters, group chats, @mentions, and room names/pictures, affecting multi-agent identity and chat metadata."
+    - "New hermes peer command supports bot-to-bot DMs across profiles and gateways, with replies landing in canonical Bot Chat conversations."
+    - "Cron jobs now load/update persistent memory, support continuity=true, maintain durable notepad scratchpads, skip LLM calls in monitor mode when unchanged, and can deliver output into canonical Bot Chat."
+    - "delegate_task gained list/steer/stop live orchestration, optional JSON-schema output validation, per-delegation cost reporting, and raised default iteration/concurrency limits."
+    - "MCP management moved into a desktop command center with paste/import, background health checks, cost/usage overlays, and hermes:// install links."
+    - "CLI/TUI changed with Ctrl+P command palette, fuzzy /model picker, richer /status, live status-bar metrics, global emergency stop, session pin/unpin, and hermes approval-check."
+    - "Security hardening requires approval for protected instruction-file writes and expands secret redaction plus Windows destructive-command approval coverage."
+    - "Install/update remains hermes update or pip install -U hermes-agent."
+  releaseHighlights:
+    - "Bundled Bot Mode with multi-agent rooms and @mentions."
+    - "hermes peer bot-to-bot messaging."
+    - "Cron memory, continuity, durable notepads, and monitor-mode skips."
+    - "Live delegate_task list/steer/stop plus schema validation and cost reporting."
+    - "Desktop MCP command center and hermes:// install links."
+    - "CLI command palette, fuzzy model picker, richer status, and approval-check."
+    - "Desktop browser control."
+    - "Provider/model catalog expansion and model_overrides."
+    - "Protected instruction-file write approvals and redaction hardening."
+  installMethods:
+    - install:pip
+edges:
+  version_of:
+    - agent:hermes
+  sourced_from:
+    - evidence:hermes-agent-0-21-0-2026-09-05
+---
+nodeKind: AgentVersion
 id: agentVersion:omp:18-1-10
 attributes:
   agentId: "omp"
@@ -460,6 +504,45 @@ edges:
     - agent:opencode
   sourced_from:
     - evidence:opencode-1-18-29-2026-09-05
+---
+nodeKind: AgentVersion
+id: agentVersion:pi:0-85-0
+attributes:
+  agentId: "pi"
+  agentProductId: agent:pi
+  displayName: "Pi 0.85.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.85.0"
+  currentVersion: "0.85.0"
+  releasedAt: "2026-09-04"
+  sourcePackage: "@earendil-works/pi-coding-agent"
+  upstreamReleaseTag: "v0.85.0"
+  releaseNotesUrl: "https://github.com/earendil-works/pi/releases/tag/v0.85.0"
+  cliCommand: "pi"
+  summary: "Pi release adding persistent Claude thinking effort, fullscreen transcript jump/working controls, restorable in-memory SDK sessions, inherited OpenAI-compatible model settings, and transport/session/tooling fixes."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 0.84.1 to 0.85.0."
+    - "Persistent Claude thinking effort preserves per-turn effort and recovers from signed-thinking mismatches, affecting Anthropic transport/model metadata."
+    - "SessionManager.inMemory() can restore externally managed session entries, affecting SDK session lifecycle metadata."
+    - "Inherited OpenAI-compatible vllmPriority and supportsMaxOutputTokens settings affect provider/model configuration metadata."
+    - "Fullscreen transcript controls add jump-to-latest behavior and embedded working indicator, affecting TUI keybinding and transcript state metadata."
+    - "Fixes include OpenAI Codex SSE terminal event parsing without trailing blank lines, GitHub Copilot Claude Fable reasoning-level requests, proxy CONNECT handling for plain-HTTP providers, and ctx.cwd handling for shell/file tools."
+    - "@pi-ai/sdk from adapter install references returned npm 404; no package-name migration was confirmed. Existing Pi release evidence remains tied to @earendil-works/pi-coding-agent."
+  releaseHighlights:
+    - "Persistent Claude thinking effort."
+    - "SessionManager.inMemory() restoration."
+    - "vllmPriority and supportsMaxOutputTokens model settings."
+    - "Fullscreen transcript jump-to-latest and embedded working indicator."
+    - "OpenAI Codex SSE terminal-event parsing fix."
+    - "Tool ctx.cwd handling fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:pi
+  sourced_from:
+    - evidence:pi-0-85-0-2026-09-05
 ---
 nodeKind: AgentVersion
 id: agentVersion:qwen:0-23-0
