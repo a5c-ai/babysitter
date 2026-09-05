@@ -61,6 +61,18 @@ export function createGiteaService(options = {}) {
     baseUrl: root,
 
     /**
+     * Fetch a repository's metadata, or null when it does not exist.
+     * Uses GET /api/v1/repos/{owner}/{repo}
+     *
+     * @param {string} org
+     * @param {string} repo
+     * @returns {Promise<object|null>}
+     */
+    async getRepository(org, repo) {
+      return rawRequest(`/repos/${encodeURIComponent(org)}/${encodeURIComponent(repo)}`);
+    },
+
+    /**
      * List tree entries for a repository path at a given ref.
      * Uses GET /api/v1/repos/{owner}/{repo}/contents/{path}?ref={ref}
      *

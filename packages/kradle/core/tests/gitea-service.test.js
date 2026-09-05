@@ -251,3 +251,26 @@ test('listTree encodes subdirectory path in the API URL', async () => {
   assert.ok(capturedUrls[0].includes('src'), 'URL contains path segment src');
   assert.ok(capturedUrls[0].includes('components'), 'URL contains path segment components');
 });
+
+// ---------------------------------------------------------------------------
+// getRepository — existence check used by the reconciler
+// ---------------------------------------------------------------------------
+
+test('getRepository returns the repo object and calls GET /repos/{org}/{name}', async () => {
+  const capturedUrls = [];
+  const fetchImpl = async (url) => {
+    capturedUrls.push(url);
+    return { ok: true, status: 200, json: async () => ({ id: 7, name: 'repo', full_name: 'org/repo' }), text: async () => '' };
+  };
+  const service = createGiteaService({ giteaUrl: 'http://localhost:3000', fetchImpl });
+  const repo = await service.getRepository('org', 'repo');
+  assert.equal(repo.id, 7);
+  assert.ok(capturedUrls[0].includes('/api/v1/repos/org/repo'), 'hits the repos endpoint');
+});
+
+test('getRepository returns null when the repo does not exist (404)', async () => {
+  const fetchImpl = async () => ({ ok: false, status: 404, json: async () => null, text: async () => '' });
+  const service = createGiteaService({ giteaUrl: 'http://localhost:3000', fetchImpl });
+  const repo = await service.getRepository('org', 'missing');
+  assert.equal(repo, null);
+});

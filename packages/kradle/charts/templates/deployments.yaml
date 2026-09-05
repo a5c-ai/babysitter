@@ -239,6 +239,12 @@ spec:
           env:
             - name: PORT
               value: "3080"
+            {{- if gt (int (.Values.controllers.repoReconcileIntervalMs | default 0)) 0 }}
+            # Self-heal loop: ensure every Repository CRD has a backing Gitea repo.
+            # Set on the controllers container only, so a single runner reconciles.
+            - name: KRADLE_REPO_RECONCILE_INTERVAL_MS
+              value: {{ .Values.controllers.repoReconcileIntervalMs | quote }}
+            {{- end }}
             - name: KRADLE_NAMESPACE
               value: {{ .Release.Namespace | quote }}
             - name: KRADLE_ORG

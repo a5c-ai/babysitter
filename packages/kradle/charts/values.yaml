@@ -66,6 +66,12 @@ controllers:
 
   resources: {}
 
+  # >0 enables a periodic loop in the controllers pod that ensures every
+  # Repository CRD has a backing Gitea repo (self-heals kubectl-applied or
+  # pre-existing CRDs, and repos lost to a Gitea DB reset). 0 disables it.
+  # Suggested when enabling: 300000 (5m).
+  repoReconcileIntervalMs: 0
+
 
 
 

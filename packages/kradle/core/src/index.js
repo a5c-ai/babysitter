@@ -31,6 +31,7 @@ export * from './agent-context-bundles.js';
 export * from './adapters-client.js';
 export * from './agent-dispatch-controller.js';
 export * from './agent-run-status-reconciler.js';
+export * from './repository-reconciler.js';
 export * from './jitsi-meeting-controller.js';
 export * from './jitsi-sync-controller.js';
 export * from './jitsi-agent-bridge.js';
