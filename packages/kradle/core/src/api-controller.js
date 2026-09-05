@@ -14,6 +14,7 @@ import { createWebhookController } from './external/webhook-controller.js';
 import { createWriteController } from './external/write-controller.js';
 import { createConflictController } from './external/conflict-controller.js';
 import { createModelRouteController } from './model-route-controller.js';
+import { createGiteaService } from './gitea-service.js';
 
 export const KRADLE_API_CONTROLLER_BOUNDARY = {
   role: 'kradle-api-controller',
@@ -27,6 +28,9 @@ export function createKradleApiController(options = {}) {
   const resourceGateway = options.resourceGateway || createKubernetesResourceGateway(options);
   const namespace = options.namespace || resourceGateway.namespace || process.env.KRADLE_NAMESPACE || 'kradle-system';
   const onAuditEvent = typeof options.onAuditEvent === 'function' ? options.onAuditEvent : null;
+  // Data-plane git forge. Explicit null disables provisioning; undefined falls
+  // back to env-configured (createGiteaService() returns null when unconfigured).
+  const giteaService = options.giteaService !== undefined ? options.giteaService : createGiteaService();
 
   function emitAuditEvent(resource, operation) {
     if (!onAuditEvent) return;
@@ -216,6 +220,30 @@ export function createKradleApiController(options = {}) {
       return existing;
     },
     async createRepository(input) {
+      // Data-plane-first: ensure the backing Gitea repo before writing the CRD so
+      // a genuine forge failure aborts cleanly (no orphan CRD). An already-exists
+      // response is idempotent success; when no forge is configured we skip.
+      const org = input.organizationRef || input.spec?.organizationRef || input.metadata?.labels?.['kradle.a5c.ai/org'] || '';
+      const repoName = input.name || input.metadata?.name;
+      const visibility = input.visibility || input.spec?.visibility || 'internal';
+      let gitea = { provisioned: false, reason: 'not-configured' };
+      if (giteaService) {
+        const isPrivate = visibility !== 'public';
+        try {
+          await giteaService.createRepository(org, repoName, {
+            private: isPrivate,
+            defaultBranch: input.defaultBranch || input.spec?.defaultBranch || 'main',
+            description: input.description || input.spec?.description || '',
+          });
+          gitea = { provisioned: true, owner: org, name: repoName };
+        } catch (err) {
+          if (/\b(409|422)\b/.test(err.message) || /exist/i.test(err.message)) {
+            gitea = { provisioned: true, owner: org, name: repoName, alreadyExisted: true };
+          } else {
+            throw err;
+          }
+        }
+      }
       const created = await resourceGateway.createRepository(input);
       const repository = created?.resource || created;
       emitAuditEvent(
@@ -226,7 +254,8 @@ export function createKradleApiController(options = {}) {
         operation: created?.operation || 'create-repository',
         command: created?.command || 'kubectl apply -f -',
         repository: repositoryForgeSummary(repository, namespace),
-        resource: repository
+        resource: repository,
+        gitea
       };
     },
     async createOrganization(input) {
