@@ -1,0 +1,97 @@
+---
+nodeKind: Claim
+id: claim:model-version-mistral-large-3-current-model-id-issue-1640
+attributes:
+  subjectId: model:mistral-large-3@current
+  attribute: providerModelIds
+  value: mistral-large-3
+  subjectKind: ModelVersion
+  statement: model:mistral-large-3@current tracks Mistral Large 3.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1640.
+edges:
+  backed_by_evidence:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  about_subject:
+    - model:mistral-large-3@current
+---
+nodeKind: Claim
+id: claim:model-version-mistral-large-3-current-kind-issue-1640
+attributes:
+  subjectId: model:mistral-large-3@current
+  attribute: kind
+  value: multimodal
+  subjectKind: ModelVersion
+  statement: model:mistral-large-3@current is a general-purpose multimodal model.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1640.
+edges:
+  backed_by_evidence:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  about_subject:
+    - model:mistral-large-3@current
+---
+nodeKind: Claim
+id: claim:model-version-mistral-large-3-current-architecture-issue-1640
+attributes:
+  subjectId: model:mistral-large-3@current
+  attribute: architecture
+  value: mixture-of-experts; 41B active parameters; 675B total parameters
+  subjectKind: ModelVersion
+  statement: model:mistral-large-3@current is documented as a granular Mixture-of-Experts model with 41B active parameters and 675B total parameters.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1640.
+edges:
+  backed_by_evidence:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  about_subject:
+    - model:mistral-large-3@current
+---
+nodeKind: Claim
+id: claim:model-version-mistral-large-3-current-served-by-mistral-issue-1640
+attributes:
+  subjectId: model:mistral-large-3@current
+  attribute: served_by
+  value: provider:mistral
+  subjectKind: ModelVersion
+  statement: model:mistral-large-3@current is served by Mistral API channels.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1640; provider:mistral may need a provider product node.
+edges:
+  backed_by_evidence:
+    - evidence:mistral-models-overview-large-3-issue-1640
+  about_subject:
+    - model:mistral-large-3@current
+    - provider:mistral

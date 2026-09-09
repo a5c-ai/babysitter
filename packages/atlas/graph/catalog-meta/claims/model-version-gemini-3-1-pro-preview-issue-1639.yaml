@@ -1,0 +1,120 @@
+---
+nodeKind: Claim
+id: claim:model-version-gemini-3-1-pro-preview-current-model-code-issue-1639
+attributes:
+  subjectId: model:gemini-3-1-pro-preview@current
+  attribute: modelCode
+  value: gemini-3.1-pro-preview
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-pro-preview@current maps to Gemini API model code gemini-3.1-pro-preview.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1639.
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  about_subject:
+    - model:gemini-3-1-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-3-1-pro-preview-current-contextwindowtokens-issue-1639
+attributes:
+  subjectId: model:gemini-3-1-pro-preview@current
+  attribute: contextWindowTokens
+  value: "1048576"
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-pro-preview@current contextWindowTokens is 1048576.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1639.
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  about_subject:
+    - model:gemini-3-1-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-3-1-pro-preview-current-maxoutputtokens-issue-1639
+attributes:
+  subjectId: model:gemini-3-1-pro-preview@current
+  attribute: maxOutputTokens
+  value: "65536"
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-pro-preview@current maxOutputTokens is 65536.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1639.
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  about_subject:
+    - model:gemini-3-1-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-3-1-pro-preview-current-modalities-issue-1639
+attributes:
+  subjectId: model:gemini-3-1-pro-preview@current
+  attribute: modalities
+  value: text, image, video, audio, pdf
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-pro-preview@current accepts text, image, video, audio, and PDF inputs and produces text output.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1639.
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  about_subject:
+    - model:gemini-3-1-pro-preview@current
+---
+nodeKind: Claim
+id: claim:model-version-gemini-3-1-pro-preview-current-capabilities-issue-1639
+attributes:
+  subjectId: model:gemini-3-1-pro-preview@current
+  attribute: capabilities
+  value: caching, code_execution, function_calling, structured_output, long_context
+  subjectKind: ModelVersion
+  statement: model:gemini-3-1-pro-preview@current supports caching, code execution, function calling, structured output, and long context features.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  claimedAt: "2026-08-05T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding from issue #1639.
+edges:
+  backed_by_evidence:
+    - evidence:google-gemini-3-1-pro-preview-model-doc-issue-1639
+  about_subject:
+    - model:gemini-3-1-pro-preview@current
