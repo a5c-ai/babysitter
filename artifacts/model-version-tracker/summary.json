@@ -1,0 +1,152 @@
+{
+  "checkedProviders": [
+    "Anthropic",
+    "OpenAI",
+    "Google Gemini",
+    "xAI",
+    "Meta",
+    "DeepSeek",
+    "Mistral",
+    "Alibaba Qwen",
+    "Amazon Nova",
+    "Cohere",
+    "Together AI",
+    "Fireworks AI",
+    "Groq"
+  ],
+  "findings": [
+    {
+      "provider": "Anthropic",
+      "model": "Claude Opus/Sonnet/Fable/Mythos/Haiku",
+      "latestVersion": "Opus 5 issue-backed; Sonnet 5/Fable 5/Mythos 5/Haiku 4.5 graph-backed",
+      "inGraph": "partial",
+      "status": "Existing graph and issues cover the findings; no duplicate issue created."
+    },
+    {
+      "provider": "OpenAI",
+      "model": "GPT/o-series",
+      "latestVersion": "GPT-5.6 Sol/Terra/Luna candidate",
+      "inGraph": "issue-backed",
+      "status": "Existing issue #1622 covers follow-up."
+    },
+    {
+      "provider": "Google Gemini",
+      "model": "Gemini Pro/Flash/image/live",
+      "latestVersion": "Gemini 3.1 and Gemini 3.6 candidates",
+      "inGraph": "partial",
+      "status": "Graph includes Gemini 3.1 records; issues #1623, #1626, and #1639 cover newer updates."
+    },
+    {
+      "provider": "xAI",
+      "model": "Grok",
+      "latestVersion": "grok-voice-think-fast-2.0",
+      "inGraph": true,
+      "status": "Created issue #1681 and added issue-scoped graph records."
+    },
+    {
+      "provider": "Meta",
+      "model": "Llama",
+      "latestVersion": "Llama 4 Scout/Maverick",
+      "inGraph": true,
+      "status": "Graph records already present; no new official 2026 Llama release requiring issue creation found."
+    },
+    {
+      "provider": "DeepSeek",
+      "model": "DeepSeek-V4",
+      "latestVersion": "DeepSeek-V4-Flash-0731 candidate",
+      "inGraph": "issue-backed",
+      "status": "Graph includes V4 Flash/Pro; issue #1638 covers 0731 update."
+    },
+    {
+      "provider": "Mistral",
+      "model": "Mistral Large/Small/Codestral/Pixtral",
+      "latestVersion": "Mistral Large 3 / Small 4 candidates",
+      "inGraph": "partial",
+      "status": "Graph includes Mistral Large 3; issues #1625 and #1640 cover follow-up."
+    },
+    {
+      "provider": "Alibaba Qwen",
+      "model": "Qwen",
+      "latestVersion": "Qwen3.8-Max / qwen3.8-max-preview candidate",
+      "inGraph": "issue-backed",
+      "status": "Existing issue #1627 covers follow-up."
+    },
+    {
+      "provider": "Amazon Nova",
+      "model": "Nova",
+      "latestVersion": "Nova 2 family / Nova Premier lifecycle",
+      "inGraph": "partial",
+      "status": "Graph includes Nova 2 Lite/Sonic/Omni and issue-scoped Pro Preview; issue #1655 covers Premier lifecycle/EOL."
+    },
+    {
+      "provider": "Cohere",
+      "model": "Command/Embed/Transcribe",
+      "latestVersion": "Command A+ 05-2026, Embed v4.0, Transcribe 03-2026",
+      "inGraph": true,
+      "status": "Graph includes Command A+ and Embed v4.0; issue #1641 covers Transcribe 03-2026."
+    },
+    {
+      "provider": "Together AI",
+      "model": "Serverless catalog",
+      "latestVersion": "2026-08 refresh / Thinking Machines Inkling",
+      "inGraph": "issue-backed",
+      "status": "Issues #1642 and #1656 cover follow-up."
+    },
+    {
+      "provider": "Fireworks AI",
+      "model": "Serverless catalog",
+      "latestVersion": "2026-08 refresh",
+      "inGraph": "issue-backed",
+      "status": "Issue #1658 covers follow-up."
+    },
+    {
+      "provider": "Groq",
+      "model": "Hosted inference catalog",
+      "latestVersion": "August 2026 refresh/deprecations",
+      "inGraph": "issue-backed",
+      "status": "Issues #1643 and #1657 cover follow-up."
+    }
+  ],
+  "issuesCreated": [
+    {
+      "number": 1681,
+      "title": "Track xAI Grok Voice Think Fast 2.0",
+      "url": "https://github.com/a5c-ai/babysitter/issues/1681"
+    }
+  ],
+  "issuesExisting": [
+    1621,
+    1622,
+    1623,
+    1624,
+    1625,
+    1626,
+    1627,
+    1638,
+    1639,
+    1640,
+    1641,
+    1642,
+    1643,
+    1655,
+    1656,
+    1657,
+    1658
+  ],
+  "changedFiles": [
+    "packages/atlas/graph/compute/models/grok-voice-think-fast-2-0-issue-1681.yaml",
+    "packages/atlas/graph/compute/model-families/grok-voice-issue-1681.yaml",
+    "packages/atlas/graph/compute/providers/xai-voice-issue-1681.yaml",
+    "packages/atlas/graph/compute/model-transport-protocols/xai-realtime-voice-issue-1681.yaml",
+    "packages/atlas/graph/catalog-meta/evidence-sources/xai-grok-voice-think-fast-2-issue-1681.yaml",
+    "packages/atlas/graph/catalog-meta/claims/model-version-grok-voice-think-fast-2-issue-1681.yaml"
+  ],
+  "graphChangesNeeded": true,
+  "graphChangesApplied": true,
+  "summaryTable": "| Provider | Model | Latest Version | In Graph? | Status |\\n|----------|-------|---------------|-----------|--------|\\n| Anthropic | Claude Opus / Sonnet / Fable / Mythos / Haiku | Claude Opus 5 open issue; Sonnet 5, Fable 5, Mythos 5, Haiku 4.5 already represented | Partial | Existing graph covers Sonnet/Fable/Mythos/Haiku records; open issue #1621 covers Opus 5 follow-up. No new issue created. |\\n| OpenAI | GPT / o-series / GPT-4o | GPT-5.6 Sol/Terra/Luna candidate | Issue-backed | Existing open duplicate issue #1622 covers GPT-5.6. No new graph edit in this run. |\\n| Google Gemini | Gemini Pro / Flash / image/live variants | Gemini 3.1 and Gemini 3.6 candidates | Partial | Graph includes Gemini 3.1 records and image/live variants; issues #1623, #1626, #1639 cover newer Gemini follow-up. |\\n| xAI | Grok | Grok 4.5 / 4.20 family plus grok-voice-think-fast-2.0 | Updated | Existing graph covers Grok 4.3/4.5; issue #1624 covers Grok 4.20 variants. Created #1681 and added graph records for grok-voice-think-fast-2.0. |\\n| Meta | Llama | Llama 4 Scout / Maverick | Yes | Graph includes Llama 4 family and Scout/Maverick records. No new official 2026 Llama release requiring a new issue found. |\\n| DeepSeek | DeepSeek-V4 / R1 / Coder | DeepSeek-V4-Flash-0731 candidate | Issue-backed | Graph includes DeepSeek V4 Flash/Pro records; open issue #1638 covers the newer V4 Flash 0731 update. |\\n| Mistral | Mistral Large / Small / Codestral / Pixtral | Mistral Large 3 / Small 4 candidates | Partial | Graph includes Mistral Large 3; issues #1625/#1640 cover Small 4/Large 3 follow-up. |\\n| Alibaba Qwen | Qwen / Qwen Coder | Qwen3.8-Max / qwen3.8-max-preview candidate | Issue-backed | Existing issue #1627 covers Qwen3.8-Max and preview. No duplicate created. |\\n| Amazon Nova | Nova Pro / Lite / Sonic / Omni / Premier | Nova 2 family and Premier lifecycle | Partial | Graph includes Nova 2 Lite/Sonic/Omni and issue-scoped Nova 2 Pro Preview; issue #1655 covers Nova Premier lifecycle/EOL. |\\n| Cohere | Command / Embed / Transcribe | Command A+ 05-2026, Embed v4.0, Transcribe 03-2026 | Yes | Graph includes Command A+ and Embed v4.0 with evidence; issue #1641 covers Transcribe 03-2026. |\\n| Together AI | Serverless catalog | Thinking Machines Inkling / 2026-08 refresh | Issue-backed | Existing issues #1642 and #1656 cover serverless catalog refresh and Inkling. |\\n| Fireworks AI | Serverless catalog | 2026-08 refresh | Issue-backed | Existing issue #1658 covers Fireworks serverless model catalog refresh. |\\n| Groq | Hosted inference catalog | August 2026 model refresh/deprecations | Issue-backed | Existing issues #1643 and #1657 cover catalog refresh and deprecations. |",
+  "notes": [
+    "OpenAI model facts were checked against official OpenAI model/deprecation sources per project policy.",
+    "xAI official model catalog exposes grok-voice-think-fast-2.0 as a realtime audio model with alias grok-voice-latest.",
+    "verify:metadata currently fails on unrelated pre-existing .agents/plugins/marketplace.json metadata and was not caused by the new model graph records."
+  ]
+}

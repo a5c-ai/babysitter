@@ -1,0 +1,127 @@
+nodeKind: Claim
+id: claim:model-version-grok-voice-think-fast-2-current-model-id
+attributes:
+  subjectId: model:grok-voice-think-fast-2-0@current
+  attribute: providerModelIds
+  value: grok-voice-think-fast-2.0; grok-voice-latest
+  subjectKind: ModelVersion
+  statement: model:grok-voice-think-fast-2-0@current maps to xAI model ID grok-voice-think-fast-2.0 and alias grok-voice-latest.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  claimedAt: "2026-08-07T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1681 Grok Voice Think Fast 2.0 model identity.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  about_subject:
+    - model:grok-voice-think-fast-2-0@current
+---
+nodeKind: Claim
+id: claim:model-version-grok-voice-think-fast-2-current-modalities
+attributes:
+  subjectId: model:grok-voice-think-fast-2-0@current
+  attribute: modalities
+  value: text, audio; bidirectional realtime
+  subjectKind: ModelVersion
+  statement: model:grok-voice-think-fast-2-0@current supports TEXT and AUDIO inputs and TEXT and AUDIO outputs through xAI's REALTIME endpoint.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  claimedAt: "2026-08-07T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1681 realtime voice modalities.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  about_subject:
+    - model:grok-voice-think-fast-2-0@current
+---
+nodeKind: Claim
+id: claim:model-version-grok-voice-think-fast-2-current-regions
+attributes:
+  subjectId: model:grok-voice-think-fast-2-0@current
+  attribute: regions
+  value: us-east-1; eu-west-1
+  subjectKind: ModelVersion
+  statement: xAI's public model catalog lists grok-voice-think-fast-2.0 in us-east-1 and eu-west-1 clusters.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+  claimedAt: "2026-08-07T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1681 regional availability.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+  about_subject:
+    - model:grok-voice-think-fast-2-0@current
+---
+nodeKind: Claim
+id: claim:model-version-grok-voice-think-fast-2-current-pricing-fields
+attributes:
+  subjectId: model:grok-voice-think-fast-2-0@current
+  attribute: pricing
+  value: realtimeAudioTokenPrice=266667; realtimeTextInputPrice=40000000; pstnMinutePrice=100000000; realtimeAudioSecondPrice=13333333
+  subjectKind: ModelVersion
+  statement: xAI's public model catalog exposes realtime pricing fields for grok-voice-think-fast-2.0; Atlas keeps costPerMTokInput and costPerMTokOutput at zero until realtime audio pricing units are modeled separately.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  claimedAt: "2026-08-07T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1681 raw realtime pricing fields.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  about_subject:
+    - model:grok-voice-think-fast-2-0@current
+---
+nodeKind: Claim
+id: claim:model-version-grok-voice-think-fast-2-current-transport
+attributes:
+  subjectId: model:grok-voice-think-fast-2-0@current
+  attribute: speaks
+  value: model-transport:xai-realtime-voice
+  subjectKind: ModelVersion
+  statement: model:grok-voice-think-fast-2-0@current is modeled on a dedicated xAI realtime voice transport, not on chat-completions, because the xAI model catalog lists it under audioModels with REALTIME endpoint basis CONCURRENCY.
+  confidence: medium
+  provenanceKind: observation
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  claimedAt: "2026-08-07T00:00:00Z"
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Transport-adapter proxy support remains unconfirmed until a realtime voice adapter is validated.
+edges:
+  backed_by_evidence:
+    - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
+    - evidence:xai-grok-voice-think-fast-2-issue-1681
+  about_subject:
+    - model:grok-voice-think-fast-2-0@current

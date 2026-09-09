@@ -1,0 +1,58 @@
+nodeKind: ModelVersion
+id: model:grok-voice-think-fast-2-0@current
+attributes:
+  displayName: "Grok Voice Think Fast 2.0"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  providerModelIds:
+    - grok-voice-think-fast-2.0
+    - grok-voice-latest
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:grok-voice
+  versionRange: ">=2.0.0 <3.0.0"
+  kind: audio
+  contextWindowTokens: 0
+  modalities:
+    - audio
+    - text
+  modalityDirections:
+    - kind: audio
+      direction: bidirectional
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: null
+  lifecycleStatus: current
+  lifecycleStatusChangedAt: "2026-08-07"
+  modelCardUrl: https://docs.x.ai/docs/models
+  supportsFineTuning: false
+  regions:
+    - us-east-1
+    - eu-west-1
+  notes: |
+    xAI's public model catalog lists grok-voice-think-fast-2.0 under
+    audioModels with TEXT/AUDIO input, TEXT/AUDIO output, REALTIME endpoint,
+    and alias grok-voice-latest. It is modeled as a realtime bidirectional
+    voice model rather than a text long-context chat model, so
+    contextWindowTokens is a non-applicable placeholder. xAI exposes raw
+    realtime pricing fields in the catalog payload; numeric costPerMTok fields
+    are not normalized here because realtime audio pricing units need separate
+    graph attributes.
+edges:
+  belongs_to_family:
+    - target: model-family:grok-voice
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:grok-voice
+  served_by:
+    - provider:xai
+  speaks:
+    - model-transport:xai-realtime-voice
+  supports:
+    - target: capability:streaming
+      level: full
+      evidenceSourceIds:
+        - evidence:xai-grok-voice-think-fast-2-docs-issue-1681
