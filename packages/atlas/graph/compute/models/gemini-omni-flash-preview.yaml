@@ -1,0 +1,60 @@
+# Issue #1827 -- Track Gemini Omni Flash Preview.
+nodeKind: ModelVersion
+id: model:gemini-omni-flash-preview@current
+attributes:
+  displayName: "Gemini Omni Flash Preview"
+  supportsExtendedThinking: false
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:gemini-omni
+  kind: video
+  contextWindowTokens: 1048576
+  modalities:
+    - text
+    - image
+    - audio
+    - video
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: audio
+      direction: input
+    - kind: video
+      direction: input
+    - kind: video
+      direction: output
+  releaseDate: "2026-06-30"
+  lifecycleStatus: preview
+  lifecycleStatusChangedAt: "2026-06-30"
+  modelCardUrl: https://ai.google.dev/gemini-api/docs/models/gemini-omni-flash
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    Gemini Omni Flash Preview is Google's conversational video generation and
+    editing model exposed through Gemini API Omni/Interactions documentation.
+    Google Cloud's Gemini Enterprise Agent Platform page lists a lower
+    Agent Platform-specific max input token limit than the Google AI Developers
+    model page; retain both values as evidence claims rather than collapsing
+    them until graph schema supports per-surface limits.
+edges:
+  belongs_to_family:
+    - target: model-family:gemini-omni
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:gemini-omni
+  served_by:
+    - provider:google
+  speaks:
+    - model-transport:gemini-generate-content
+  supports:
+    - target: capability:vision-input
+      level: full
+      evidenceSourceIds:
+        - evidence:google-gemini-omni-flash-issue-1827
+    - target: capability:streaming
+      level: partial
+      evidenceSourceIds:
+        - evidence:google-gemini-omni-flash-issue-1827
