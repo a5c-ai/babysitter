@@ -12,7 +12,7 @@
 #
 # JWT: authMode=jwt with the SAME shared HS256 secret the controller signs with
 # (KRADLE_JITSI_JWT_SECRET) and prosody validates with (JWT_APP_SECRET) — see
-# publish.yml deploy_kradle. appId/issuer=kradle, audience=jitsi match the chart
+# the deploy pipeline's kradle Helm values. appId/issuer=kradle, audience=jitsi match the chart
 # (values.yaml jitsi.prosody.auth.jwt) and the controller signer
 # (jitsi-meeting-controller.js signJwt). Replace <SHARED_JITSI_JWT_SECRET> with the
 # deployed value (kubectl -n kradle-staging get secret kradle-kradle-jitsi-jwt

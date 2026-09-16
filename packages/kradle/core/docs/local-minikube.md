@@ -52,4 +52,4 @@ The script defaults to profile `kradle`, namespace `kradle-system`, release `kra
 
 ## Release boundary
 
-The chart is production-shaped and validates Kradle install contracts against the executable Kubernetes package model, including Argo CD Application and Gitea backend surfaces. The repository includes a production-shaped controller image build, ingress values for the Next.js app, registry pull-secret support, and GitHub publishing lanes for GHCR images, chart artifacts, generated dist/example bundles, and AKS branch deployments.
+The chart is production-shaped and validates Kradle install contracts against the executable Kubernetes package model, including Argo CD Application and Gitea backend surfaces. The repository includes a production-shaped controller image build, ingress values for the Next.js app, registry pull-secret support, and GitHub publishing lanes for GHCR images, chart artifacts, and generated dist/example bundles (branch deployments to the hosted environments run from a private deployment repository).

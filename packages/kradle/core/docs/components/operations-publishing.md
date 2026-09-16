@@ -77,5 +77,5 @@ The repository now includes a verified Kubernetes package lifecycle:
 - `npm run e2e` validates the chart and minikube command plan without requiring a live cluster.
 - `npm run package:check` validates chart structure and npm pack contents.
 
-This is a production-shaped package contract for the executable Kubernetes-native model. Controller image build/publish, chart packaging, npm package validation, generated dist/example artifacts, UI build artifacts, and AKS Helm deployments for develop/staging/main are wired through `.github/workflows/publish.yml` with safe PR/branch/tag gates. Live-cluster conformance now runs through the branch deployment lane for `kradle-develop.a5c.ai`, `kradle-staging.a5c.ai`, and `kradle.a5c.ai`.
+This is a production-shaped package contract for the executable Kubernetes-native model. Controller image build/publish, chart packaging, npm package validation, generated dist/example artifacts, and UI build artifacts are wired through `.github/workflows/publish.yml` with safe PR/branch/tag gates. Helm deployment of develop/staging/main to the hosted environments, and the Live-cluster conformance that runs against them, are handled from a private deployment repository rather than from this workflow.
 

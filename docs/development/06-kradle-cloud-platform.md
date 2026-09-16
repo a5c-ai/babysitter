@@ -32,6 +32,6 @@ The Kradle web UI provides:
 
 ## Deployment
 
-Kradle deploys to AKS (Azure Kubernetes Service) via the atlas-driven deployment pipeline.
+Kradle is deployed to Kubernetes from a private deployment repository that mirrors this codebase. This public repository's `publish.yml` publishes the npm packages and the GitHub Pages docs site only; it carries no cluster deploy jobs and no cluster or cloud-provider credentials.
 
 See the [kradle package](../../packages/kradle/) for implementation details.

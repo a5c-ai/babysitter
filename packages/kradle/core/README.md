@@ -16,7 +16,7 @@ This repository is the executable MVP runtime and handoff package for the specs 
 - Integrated component catalog and lifecycle snapshot for all implementation areas.
 - Next.js console under `apps/web` backed by the executable Kradle runtime model.
 - Production-shaped controller container using `bin/kradle-server.mjs`, `/healthz`, and the same runtime API covered by tests.
-- GitHub Actions publishing for validated package artifacts, dist/chart/example bundles, GHCR controller images, tagged Helm chart OCI pushes, and AKS Helm deployments for develop/staging/main.
+- GitHub Actions publishing for validated package artifacts, dist/chart/example bundles, GHCR controller images, and tagged Helm chart OCI pushes. Cluster deployment runs from a private deployment repository, not from this workflow.
 
 ## Quick start
 
@@ -42,7 +42,7 @@ npm run setup:minikube -- --dry-run
 - Product home: `https://a5c.ai/kradle`
 - Helm-style package: `charts/kradle`
 - Controller image: `Dockerfile` builds `ghcr.io/${{ github.repository }}/kradle-controller`
-- Publishing workflow: `.github/workflows/publish.yml` (develop -> `kradle-develop.a5c.ai`, staging -> `kradle-staging.a5c.ai`, main -> `kradle.a5c.ai`)
+- Publishing workflow: `.github/workflows/publish.yml` (validate, GHCR image, Helm chart artifacts; no cluster deployment)
 - Minikube setup: `scripts/setup-minikube.mjs`
 - Demo resources: `examples/minikube-demo.yaml`
 - Generated handoff summary: `dist/kradle-summary.json`
@@ -176,7 +176,7 @@ Start with `docs/README.md`, then read:
 
 ## Release boundary
 
-The current package is ready as a verified Kubernetes-native runtime contract, chart package, local minikube handoff, controller image build, and implementation artifact. The chart validates the Kubernetes install contract locally through e2e/package gates, the Dockerfile packages the runnable controller API and Next.js web app, and the publishing workflow safely pushes images/charts from non-PR contexts while deploying branch commits to the existing AKS cluster at `kradle-develop.a5c.ai`, `kradle-staging.a5c.ai`, and `kradle.a5c.ai`.
+The current package is ready as a verified Kubernetes-native runtime contract, chart package, local minikube handoff, controller image build, and implementation artifact. The chart validates the Kubernetes install contract locally through e2e/package gates, the Dockerfile packages the runnable controller API and Next.js web app, and the publishing workflow safely pushes images/charts from non-PR contexts. Deployment of branch commits to the hosted environments is handled from a private deployment repository.
 
 ## QA automation
 
