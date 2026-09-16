@@ -502,21 +502,15 @@ test('GitHub workflow publishes deployable image and chart artifacts with safe g
   assert.ok(chart.includes("if: startsWith(github.ref, 'refs/tags/v')"));
   assert.ok(chart.includes('helm push dist/charts/*.tgz'));
 
-  const deploy = workflowJobBlock(workflow, 'deploy-kradle');
-  assert.ok(deploy.includes('Deploy Kradle To AKS'));
-  assert.ok(deploy.includes("github.ref == 'refs/heads/develop'"));
-  assert.ok(deploy.includes("github.ref == 'refs/heads/staging'"));
-  assert.ok(deploy.includes("github.ref == 'refs/heads/main'"));
-  assert.ok(deploy.includes('environment:') && deploy.includes('kradle-production') && deploy.includes('https://kradle.a5c.ai'));
-  assert.ok(deploy.includes('AZURE_ACR_NAME') && deploy.includes('KUBE_CONFIG'));
-  assert.ok(deploy.includes('KRADLE_GITHUB_CLIENT_ID') && deploy.includes('KRADLE_GITHUB_CLIENT_SECRET'));
-  assert.ok(deploy.includes('kradle-develop.a5c.ai') && deploy.includes('kradle-staging.a5c.ai') && deploy.includes('kradle.a5c.ai'));
-  assert.ok(deploy.includes('docker build -f Dockerfile') && deploy.includes('docker push'));
-  assert.ok(deploy.includes('create secret docker-registry acr-pull'));
-  assert.ok(deploy.includes('helm upgrade --install'));
-  assert.ok(deploy.includes('--values /tmp/kradle-deploy-values.yaml'));
-  assert.ok(deploy.includes('--wait'));
-  assert.ok(deploy.includes('rollout status deployment/"${HELM_RELEASE}-kradle-web"'));
+  // Cluster deployment runs from a private deployment repository; the vendored
+  // workflow must publish artifacts only and carry no cluster credentials.
+  assert.doesNotMatch(workflow, /^  deploy-kradle:/m, 'no deploy-kradle job');
+  assert.doesNotMatch(workflow, /Deploy Kradle To AKS/);
+  assert.doesNotMatch(workflow, /AZURE_|KUBE_CONFIG|ACR_TOKEN|azurecr\.io|acr-pull/);
+  assert.doesNotMatch(workflow, /helm upgrade --install/);
+  assert.doesNotMatch(workflow, /kubectl/);
+  assert.doesNotMatch(workflow, /kradle(-develop|-staging)?\.a5c\.ai/);
+  assert.doesNotMatch(workflow, /environment:/);
   assert.doesNotMatch(workflow, /publish-npm:/);
   assert.doesNotMatch(workflow, /npm publish/);
   assert.doesNotMatch(workflow, /PUBLISH_NPM/);
