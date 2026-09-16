@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-01T11:00:01.000Z",
+  "data": {
+    "runId": "01KTESTKANBANTASKDEF0008",
+    "processId": "kanban/taskdef-gate",
+    "entrypoint": {
+      "importPath": "../../processes/kanban-taskdef-gate.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "e2e-kanban-fixture-0008-1"
+}

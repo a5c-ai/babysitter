@@ -56,9 +56,11 @@ interface TaskDetailPanelProps {
   onTabChange?: (tab: string) => void;
   runDuration?: number;
   allTasks?: import("@/types").TaskEffect[];
+  /** UX-R2 §13.4: run driver liveness, threaded to the breakpoint panel. */
+  runDriver?: "live" | "orphaned" | "none" | "scheduled";
 }
 
-export function TaskDetailPanel({ runId, effectId, activeTab, onTabChange, runDuration, allTasks }: TaskDetailPanelProps) {
+export function TaskDetailPanel({ runId, effectId, activeTab, onTabChange, runDuration, allTasks, runDriver }: TaskDetailPanelProps) {
   const { task, loading } = useTaskDetail(runId, effectId);
 
   if (!effectId) {
@@ -101,6 +103,7 @@ export function TaskDetailPanel({ runId, effectId, activeTab, onTabChange, runDu
             <BreakpointPanel
               task={task}
               runId={runId}
+              runDriver={runDriver}
             />
           </TabsContent>
         )}

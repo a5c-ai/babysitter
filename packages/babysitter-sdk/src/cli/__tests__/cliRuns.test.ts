@@ -18,6 +18,9 @@ import {
   getSessionMarkerPath,
 } from "../../utils/sessionMarker";
 import * as runSupportModule from "../main/runSupport";
+import { resetAdapter } from "../../harness/registry";
+import { getSessionFilePath, readSessionFile, writeSessionFile } from "../../session";
+import { normalizeSessionStateDir } from "../../config";
 
 const realReadRunMetadata = readRunMetadata;
 
@@ -37,6 +40,11 @@ describe("babysitter run:create CLI", () => {
     "CODEX_THREAD_ID",
     "CODEX_SESSION_ID",
     "CODEX_PLUGIN_ROOT",
+    "PI_SESSION_ID",
+    "PI_PLUGIN_ROOT",
+    "OMP_SESSION_ID",
+    "BABYSITTER_SESSION_ID",
+    "OMP_PLUGIN_ROOT",
   ] as const;
   let savedSessionEnv: Record<(typeof sessionEnvKeys)[number], string | undefined>;
 
@@ -46,6 +54,7 @@ describe("babysitter run:create CLI", () => {
     errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     savedSessionEnv = {
       AGENT_SESSION_ID: process.env.AGENT_SESSION_ID,
+      AGENT_ENABLE_SESSION_PID_MARKERS: process.env.AGENT_ENABLE_SESSION_PID_MARKERS,
       AGENT_TRUST_ENV_SESSION: process.env.AGENT_TRUST_ENV_SESSION,
       BABYSITTER_ENABLE_SESSION_PID_MARKERS: process.env.BABYSITTER_ENABLE_SESSION_PID_MARKERS,
       BABYSITTER_GLOBAL_STATE_DIR: process.env.BABYSITTER_GLOBAL_STATE_DIR,
@@ -54,10 +63,16 @@ describe("babysitter run:create CLI", () => {
       CODEX_THREAD_ID: process.env.CODEX_THREAD_ID,
       CODEX_SESSION_ID: process.env.CODEX_SESSION_ID,
       CODEX_PLUGIN_ROOT: process.env.CODEX_PLUGIN_ROOT,
+      PI_SESSION_ID: process.env.PI_SESSION_ID,
+      PI_PLUGIN_ROOT: process.env.PI_PLUGIN_ROOT,
+      OMP_SESSION_ID: process.env.OMP_SESSION_ID,
+      BABYSITTER_SESSION_ID: process.env.BABYSITTER_SESSION_ID,
+      OMP_PLUGIN_ROOT: process.env.OMP_PLUGIN_ROOT,
     };
     for (const key of sessionEnvKeys) {
       delete process.env[key];
     }
+    resetAdapter();
   });
 
   afterEach(async () => {
@@ -72,6 +87,7 @@ describe("babysitter run:create CLI", () => {
     }
     __resetCacheForTests();
     __setAncestorResolverForTests(undefined);
+    resetAdapter();
     vi.restoreAllMocks();
     await fs.rm(runsRoot, { recursive: true, force: true });
   });
@@ -147,6 +163,271 @@ describe("babysitter run:create CLI", () => {
       runDir,
       entry: `${metadata.entrypoint.importPath}#${metadata.entrypoint.exportName}`,
     });
+  });
+
+  it("fails before creating an OMP run when authoritative session binding is missing", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-unbound.mjs", `export async function process() { return true; }\n`);
+    const cli = createBabysitterCli();
+
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/omp-unbound",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "oh-my-pi",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(1);
+    const entries = await fs.readdir(runsRoot, { withFileTypes: true });
+    expect(entries.filter((entry) => entry.isDirectory() && /^[0-9A-Za-z]{26}$/.test(entry.name))).toHaveLength(0);
+  });
+
+  it("fails before creating an OMP run when ambient session bindings disagree", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-conflict.mjs", `export async function process() { return true; }\n`);
+    process.env.OMP_SESSION_ID = "omp-session";
+    process.env.BABYSITTER_SESSION_ID = "different-session";
+    const cli = createBabysitterCli();
+
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/omp-conflict",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "oh-my-pi",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(1);
+    const entries = await fs.readdir(runsRoot, { withFileTypes: true });
+    expect(entries.filter((entry) => entry.isDirectory() && /^[0-9A-Za-z]{26}$/.test(entry.name))).toHaveLength(0);
+  });
+
+  it("creates and binds an OMP run when authoritative ambient session binding is valid", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-bound.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = path.join(runsRoot, "global-state");
+    process.env.OMP_SESSION_ID = "omp-session";
+    process.env.BABYSITTER_SESSION_ID = "omp-session";
+    process.env.AGENT_SESSION_ID = "stale-agent-session";
+    process.env.OMP_PLUGIN_ROOT = runsRoot;
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    const cli = createBabysitterCli();
+
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--state-dir",
+      globalStateRoot,
+      "--process-id",
+      "ci/omp-bound",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "oh-my-pi",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.session).toMatchObject({ harness: "oh-my-pi", sessionId: "omp-session" });
+    const runDir = await expectSingleRunDir();
+    expect(await readRunMetadata(runDir)).toMatchObject({
+      harness: "oh-my-pi",
+      sessionBinding: { harness: "oh-my-pi", sessionId: "omp-session" },
+    });
+  });
+
+  it("fails before creating an OMP run when the session already owns another active run", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-collision.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = path.join(runsRoot, "collision-global-state");
+    const now = "2026-08-21T00:00:00.000Z";
+    process.env.OMP_SESSION_ID = "omp-session";
+    process.env.BABYSITTER_SESSION_ID = "omp-session";
+    process.env.OMP_PLUGIN_ROOT = runsRoot;
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    const stateDir = normalizeSessionStateDir(globalStateRoot);
+    await writeSessionFile(getSessionFilePath(stateDir, "omp-session"), {
+      active: true,
+      iteration: 1,
+      maxIterations: 65_000,
+      runId: "existing-active-run",
+      runIds: ["existing-active-run"],
+      startedAt: now,
+      lastIterationAt: now,
+      iterationTimes: [],
+    }, "existing active run");
+
+    const exitCode = await createBabysitterCli().run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--state-dir",
+      globalStateRoot,
+      "--process-id",
+      "ci/omp-collision",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "oh-my-pi",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(1);
+    const entries = await fs.readdir(runsRoot, { withFileTypes: true });
+    expect(entries.filter((entry) => entry.isDirectory() && /^[0-9A-Za-z]{26}$/.test(entry.name))).toHaveLength(0);
+  });
+
+  it("reuses an inactive OMP session while retaining its historical run", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-inactive.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = path.join(runsRoot, "inactive-global-state");
+    const now = "2026-08-21T00:00:00.000Z";
+    process.env.OMP_SESSION_ID = "omp-session";
+    process.env.BABYSITTER_SESSION_ID = "omp-session";
+    process.env.OMP_PLUGIN_ROOT = runsRoot;
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    const stateFile = getSessionFilePath(normalizeSessionStateDir(globalStateRoot), "omp-session");
+    await writeSessionFile(stateFile, {
+      active: false,
+      iteration: 3,
+      maxIterations: 65_000,
+      runId: "completed-old-run",
+      runIds: ["completed-old-run"],
+      startedAt: now,
+      lastIterationAt: now,
+      iterationTimes: [],
+    }, "inactive historical run");
+
+    const exitCode = await createBabysitterCli().run([
+      "run:create", "--runs-dir", runsRoot, "--state-dir", globalStateRoot,
+      "--process-id", "ci/omp-inactive", "--entry", `${entryFile}#process`,
+      "--harness", "oh-my-pi", "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const runDir = await expectSingleRunDir();
+    const state = await readSessionFile(stateFile);
+    expect(state.state).toMatchObject({ active: true, runId: path.basename(runDir) });
+    expect(state.state.runIds).toContain("completed-old-run");
+  });
+
+  it("serializes concurrent OMP creators so exactly one run is created and bound", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-concurrent.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = path.join(runsRoot, "concurrent-global-state");
+    process.env.OMP_SESSION_ID = "omp-session";
+    process.env.BABYSITTER_SESSION_ID = "omp-session";
+    process.env.OMP_PLUGIN_ROOT = runsRoot;
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    const args = [
+      "run:create", "--runs-dir", runsRoot, "--state-dir", globalStateRoot,
+      "--process-id", "ci/omp-concurrent", "--entry", `${entryFile}#process`,
+      "--harness", "oh-my-pi", "--json",
+    ];
+
+    const results = await Promise.all([
+      createBabysitterCli().run(args),
+      createBabysitterCli().run(args),
+    ]);
+
+    expect(results.sort()).toEqual([0, 1]);
+    const entries = await fs.readdir(runsRoot, { withFileTypes: true });
+    const runIds = entries.filter((entry) => entry.isDirectory() && /^[0-9A-Za-z]{26}$/.test(entry.name)).map((entry) => entry.name);
+    expect(runIds).toHaveLength(1);
+    const state = await readSessionFile(getSessionFilePath(normalizeSessionStateDir(globalStateRoot), "omp-session"));
+    expect(state.state.runId).toBe(runIds[0]);
+  });
+
+  it("prefers authoritative OMP binding over stale generic session state when OMP is auto-detected", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-auto.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = path.join(runsRoot, "global-state-auto");
+    process.env.OMP_SESSION_ID = "authoritative-omp-session";
+    process.env.BABYSITTER_SESSION_ID = "authoritative-omp-session";
+    process.env.AGENT_SESSION_ID = "stale-agent-session";
+    process.env.OMP_PLUGIN_ROOT = runsRoot;
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    const cli = createBabysitterCli();
+
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--state-dir",
+      globalStateRoot,
+      "--process-id",
+      "ci/omp-auto",
+      "--entry",
+      `${entryFile}#process`,
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.session).toMatchObject({ harness: "oh-my-pi", sessionId: "authoritative-omp-session" });
+    const runDir = await expectSingleRunDir();
+    expect((await readRunMetadata(runDir)).harness).toBe("oh-my-pi");
+  });
+
+  it("does not misdetect a Pi session as OMP from the shared Babysitter session binding", async () => {
+    const entryFile = await writeEntrypoint("processes/pi-auto.mjs", `export async function process() { return true; }\n`);
+    const globalStateRoot = path.join(runsRoot, "pi-global-state");
+    process.env.PI_SESSION_ID = "pi-session";
+    process.env.BABYSITTER_SESSION_ID = "pi-session";
+    process.env.PI_PLUGIN_ROOT = runsRoot;
+    process.env.AGENT_SESSION_ID = "stale-agent-session";
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+    const cli = createBabysitterCli();
+
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--state-dir",
+      globalStateRoot,
+      "--process-id",
+      "ci/pi-auto",
+      "--entry",
+      `${entryFile}#process`,
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    const payload = readLastJsonLine(logSpy);
+    expect(payload.session).toMatchObject({ harness: "pi", sessionId: "pi-session" });
+    const runDir = await expectSingleRunDir();
+    expect(await readRunMetadata(runDir)).toMatchObject({
+      harness: "pi",
+      sessionBinding: { harness: "pi", sessionId: "pi-session" },
+    });
+  });
+
+  it("fails before creating a run when OMP_PLUGIN_ROOT is the only OMP context signal", async () => {
+    const entryFile = await writeEntrypoint("processes/omp-plugin-root-unbound.mjs", `export async function process() { return true; }\n`);
+    process.env.OMP_PLUGIN_ROOT = runsRoot;
+    process.env.AGENT_SESSION_ID = "stale-agent-session";
+    const cli = createBabysitterCli();
+
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/omp-plugin-root-unbound",
+      "--entry",
+      `${entryFile}#process`,
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(1);
+    const entries = await fs.readdir(runsRoot, { withFileTypes: true });
+    expect(entries.filter((entry) => entry.isDirectory() && /^[0-9A-Za-z]{26}$/.test(entry.name))).toHaveLength(0);
   });
 
   it("binds claude-code runs to the current marker-backed session instead of leaked AGENT_SESSION_ID", async () => {
@@ -512,7 +793,7 @@ describe("babysitter run:create CLI", () => {
     ).resolves.toBeUndefined();
 
     await expect(fs.realpath(path.join(entryDir, "node_modules", "@a5c-ai", "babysitter-sdk"))).resolves.toBe(
-      fallbackSdkDir,
+      await fs.realpath(fallbackSdkDir),
     );
 
     const loaded = await import(`${pathToFileURL(entryFile).href}?marker=fallback`);
@@ -553,7 +834,9 @@ describe("babysitter run:create CLI", () => {
 
     const loaded = await import(`${pathToFileURL(entryFile).href}?marker=local`);
     expect(loaded.sdkMarker).toBe("local");
-    await expect(fs.realpath(localSdkDir)).resolves.toBe(localSdkDir);
+    await expect(fs.realpath(localSdkDir)).resolves.toBe(
+      path.join(await fs.realpath(projectRoot), "node_modules", "@a5c-ai", "babysitter-sdk"),
+    );
   });
 
   it("persists --harness in run.json and stamps it on journal events", async () => {

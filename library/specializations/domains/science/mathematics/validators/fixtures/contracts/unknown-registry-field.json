@@ -1,0 +1,68 @@
+{
+    "contractVersion":  "1.0.0",
+    "profileId":  "submodular-optimization",
+    "profileVersion":  "1.0.0",
+    "artifactSha256":  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "profileCoverageRequired":  true,
+    "semanticDetailsRequired":  true,
+    "obligations":  [
+
+                    ],
+    "hypotheses":  [
+                       {
+                           "id":  "H-X",
+                           "required":  true,
+                           "status":  "open",
+                           "evidence":  [
+
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "unknown":  true
+                       }
+                   ],
+    "useSites":  [
+
+                 ],
+    "boundaries":  [
+
+                   ],
+    "randomDistributions":  [
+
+                            ],
+    "convergenceChecks":  [
+
+                          ],
+    "exactArithmetic":  [
+
+                        ],
+    "theoremReferences":  [
+
+                          ],
+    "unknownTopLevel":  true,
+    "applicableModules":  [
+                              {
+                                  "applicable":  true,
+                                  "id":  "multilinear-extension",
+                                  "rationale":  "fixture exercises multilinear extension"
+                              },
+                              {
+                                  "applicable":  true,
+                                  "id":  "matroid-maximization",
+                                  "rationale":  "fixture exercises matroid maximization"
+                              },
+                              {
+                                  "applicable":  true,
+                                  "id":  "density-reduction",
+                                  "rationale":  "fixture exercises density reduction"
+                              },
+                              {
+                                  "applicable":  false,
+                                  "id":  "graphical-specialization",
+                                  "rationale":  "fixture is not a graphical specialization"
+                              }
+                          ]
+}

@@ -1335,6 +1335,7 @@ These commands operate on pending/resolved **effects** (tasks).
     "tasks": [
       {
         "effectId": "...",
+        "invocationKey": "<processId>:<stepId>:<taskId>",
         "taskId": "...",
         "stepId": "...",
         "status": "requested|resolved_ok|resolved_error",

@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-01-31T10:00:01.000Z",
+  "data": {
+    "runId": "01KTESTKANBANNOQUEST0007",
+    "processId": "kanban/no-question",
+    "entrypoint": {
+      "importPath": "../../processes/kanban-no-question.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "e2e-kanban-fixture-0007-1"
+}

@@ -46,16 +46,27 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
-  it('applies default variant classes', () => {
+  // UX-R3 §14.2 (owner gate 2026-07-06 ruling, option a): the default variant
+  // is the primary CTA and carries the ACTION hue as a filled surface (magenta
+  // is brand-only now) — supersedes the old bg-primary assertion.
+  it('applies default (action) variant classes', () => {
     render(<Button>Default</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('bg-primary');
+    expect(btn.className).toContain('bg-action');
+    expect(btn.className).toContain('text-action-foreground');
+    expect(btn.className).not.toContain('bg-primary');
   });
 
-  it('applies neon variant classes', () => {
+  // UX-R3 §14.3: the neon variant renders the neutral answer-option button —
+  // foreground ink on a background-secondary fill, no brand/action/status ink
+  // (supersedes the old border-primary assertion).
+  it('applies neon (neutral option) variant classes', () => {
     render(<Button variant="neon">Neon</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toContain('border-primary');
+    expect(btn.className).toContain('bg-background-secondary');
+    expect(btn.className).toContain('text-foreground');
+    expect(btn.className).not.toContain('border-primary');
+    expect(btn.className).not.toContain('text-primary');
   });
 
   it('applies outline variant classes', () => {

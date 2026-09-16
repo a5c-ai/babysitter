@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { resilientFetch } from "@/lib/fetcher";
+import { HIDE_AFFORDANCE_MICROCOPY } from "@/lib/utils";
 import { useTheme } from "@/components/shared/theme-provider";
 
 interface WatchSource {
@@ -401,8 +402,13 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                             Project Visibility
                           </span>
                         </div>
-                        <p className="text-xs text-foreground-muted mb-2">
-                          Hidden projects will not appear on the dashboard.
+                        {/* §15.1 AC-87: the ONE hide-affordance explanatory
+                            line (model A) — same verbatim copy as the grid. */}
+                        <p
+                          data-testid="hide-affordance-microcopy"
+                          className="text-xs text-foreground-muted mb-2"
+                        >
+                          {HIDE_AFFORDANCE_MICROCOPY}
                         </p>
                         <div className="space-y-1">
                           {allProjectNames.map((name) => {

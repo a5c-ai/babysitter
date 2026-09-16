@@ -1,0 +1,12 @@
+{
+  "type": "EFFECT_RESOLVED",
+  "recordedAt": "2026-02-17T10:00:05.000Z",
+  "data": {
+    "effectId": "01KTEST_AGENT_EFFECT_001",
+    "status": "ok",
+    "resultRef": "tasks/01KTEST_AGENT_EFFECT_001/result.json",
+    "startedAt": "2026-02-17T10:00:01.500Z",
+    "finishedAt": "2026-02-17T10:00:04.500Z"
+  },
+  "checksum": "i9j0k1l2"
+}

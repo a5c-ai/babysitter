@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANNOQUEST0007",
+  "request": "kanban/no-question",
+  "processId": "kanban/no-question",
+  "projectName": "kanban-board-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-no-question.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-no-question.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-31T10:00:00.000Z",
+  "completionSecret": "e2ekanbanfixture00070000"
+}

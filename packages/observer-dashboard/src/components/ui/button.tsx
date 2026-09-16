@@ -3,15 +3,22 @@ import { cn } from "@/lib/cn";
 import { Slot } from "@radix-ui/react-slot";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium italic tracking-[0.04em] transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 font-serif",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "border-primary/60 bg-primary text-primary-foreground shadow-sm hover:bg-[var(--primary-hover)] hover:shadow-md",
-        neon: "border-primary/40 bg-primary-muted text-primary hover:border-primary/60 hover:bg-primary-muted/80 hover:shadow-glow-primary",
-        outline: "border-border-hover bg-transparent text-foreground hover:bg-card hover:border-primary/30 hover:shadow-sm",
-        ghost: "border-transparent bg-transparent text-foreground-secondary hover:bg-muted hover:text-foreground",
-        destructive: "border-destructive/60 bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-glow-error",
+        // UX-R3 §14.2 (owner gate 2026-07-06, option a): the primary CTA (the
+        // answer submit) carries the ACTION hue as a FILLED surface with a
+        // white/near-white label — never magenta. --action is fill-only.
+        default: "bg-action text-action-foreground hover:bg-action-hover hover:scale-[1.02] active:scale-[0.98] shadow-sm",
+        // UX-R3 §14.3: answer OPTION buttons are NEUTRAL, equal-weight — no
+        // brand/action/status ink steering the choice. Foreground ink on a
+        // background-secondary fill; hover only nudges the border to
+        // --action-border (a non-text tint, ≠ resolved --action).
+        neon: "bg-background-secondary border border-border text-foreground hover:bg-background-tertiary hover:border-[var(--action-border)] hover:scale-[1.02] active:scale-[0.98]",
+        outline: "border border-border-hover bg-transparent hover:bg-muted hover:border-primary/30 hover:scale-[1.02]",
+        ghost: "hover:bg-muted hover:text-foreground hover:border-primary/10",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-glow-error hover:scale-[1.02] active:scale-[0.98]",
       },
       size: {
         default: "h-9 px-4 py-2",

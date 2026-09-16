@@ -24,6 +24,18 @@ afterEach(async () => {
 });
 
 describe("createRun", () => {
+  test("rejects a run id that escapes the configured runs root before mutation", async () => {
+    const escaped = path.join(path.dirname(tmpRoot), "escaped-run");
+
+    await expect(createRun({
+      runsDir: tmpRoot,
+      runId: "../escaped-run",
+      request: "escape-attempt",
+    })).rejects.toThrow(/runId must be a single path segment/i);
+
+    await expect(fs.access(escaped)).rejects.toThrow();
+  });
+
   test("generates a run id, persists metadata, and appends RUN_CREATED", async () => {
     vi.spyOn(ulids, "nextUlid").mockReturnValue("01HZWTESTRUNID");
     const entryFile = path.join(tmpRoot, "processes", "pipeline.mjs");

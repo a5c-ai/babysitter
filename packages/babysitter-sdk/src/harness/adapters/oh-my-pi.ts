@@ -27,6 +27,7 @@ function buildConfig(): AdapterConfig {
     loopControlTerm: "skill-driven",
     hookDriven: false,
     noHookSupport: true,
+    autoReleaseStale: true,
     missingSessionIdHint: "oh-my-pi should provide OMP_SESSION_ID when the Babysitter package is active.",
   });
 }
@@ -34,6 +35,13 @@ function buildConfig(): AdapterConfig {
 class OhMyPiAdapter extends BaseHarnessAdapter {
   constructor() {
     super(buildConfig());
+  }
+
+  override resolveSessionId(_parsed: { sessionId?: string }): string | undefined {
+    const sessionId = process.env.OMP_SESSION_ID;
+    return sessionId && /^[A-Za-z0-9._:-]{1,256}$/.test(sessionId)
+      ? sessionId
+      : undefined;
   }
 }
 

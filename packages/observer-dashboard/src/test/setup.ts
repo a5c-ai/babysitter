@@ -75,15 +75,16 @@ vi.mock('lucide-react', () => {
 
   // All icon names used across the codebase
   const iconNames = [
-    'Activity', 'AlertCircle', 'AlertTriangle', 'ArrowLeft', 'ArrowRight',
-    'ArrowUpDown', 'Bell', 'Bot',
+    'Activity', 'AlarmClock', 'AlertCircle', 'AlertTriangle', 'ArrowLeft', 'ArrowRight',
+    'ArrowUpDown', 'Bell', 'BellRing', 'Bot',
     'CalendarDays', 'Check', 'CheckCircle2', 'ChevronDown', 'ChevronLeft',
     'ChevronRight', 'ChevronUp', 'Circle', 'Clock', 'Code', 'Cog', 'Copy',
     'ExternalLink', 'Eye', 'EyeOff', 'FileJson', 'FileText', 'FolderOpen',
     'GitBranch', 'Github',
     'Hand', 'Hash', 'HelpCircle', 'History', 'Inbox', 'Info', 'Layers',
-    'Loader2', 'Moon', 'Palette',
-    'Pause', 'Percent', 'Pin', 'Plus', 'Puzzle', 'RefreshCw', 'Search', 'Settings',
+    'LayoutGrid', 'List', 'Loader2', 'Moon', 'MoonStar', 'Palette',
+    'Pause', 'PauseCircle', 'Percent', 'Pin', 'Plus', 'Puzzle', 'RefreshCw',
+    'Search', 'Settings',
     'Sun', 'Tag', 'Terminal', 'Timer', 'Trash2', 'Wifi', 'WifiOff',
     'X', 'XCircle',
   ];
@@ -98,17 +99,8 @@ vi.mock('lucide-react', () => {
 // Extend vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
-// Clean up after each test.
-// We also re-apply the raf/caf polyfills BEFORE cleanup because some tests
-// (e.g. use-animated-number) call vi.restoreAllMocks() which removes stubs
-// including cancelAnimationFrame. React's passive-effect cleanup still needs it.
+// Clean up after each test
 afterEach(() => {
-  if (typeof globalThis.cancelAnimationFrame !== 'function') {
-    globalThis.cancelAnimationFrame = (id: number) => clearTimeout(id);
-  }
-  if (typeof globalThis.requestAnimationFrame !== 'function') {
-    globalThis.requestAnimationFrame = (cb: FrameRequestCallback) => setTimeout(cb, 0) as unknown as number;
-  }
   cleanup();
 });
 
@@ -177,24 +169,3 @@ Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
   value: MockResizeObserver,
 });
-
-// Polyfill requestAnimationFrame/cancelAnimationFrame for jsdom
-// Some jsdom versions do not expose these globals — ensure they exist on both
-// window and globalThis so component cleanup callbacks can find them.
-const _raf = (cb: FrameRequestCallback) => setTimeout(cb, 0) as unknown as number;
-const _caf = (id: number) => clearTimeout(id);
-
-if (typeof globalThis.requestAnimationFrame === 'undefined') {
-  globalThis.requestAnimationFrame = _raf;
-}
-if (typeof globalThis.cancelAnimationFrame === 'undefined') {
-  globalThis.cancelAnimationFrame = _caf;
-}
-if (typeof window !== 'undefined') {
-  if (typeof window.requestAnimationFrame === 'undefined') {
-    window.requestAnimationFrame = _raf;
-  }
-  if (typeof window.cancelAnimationFrame === 'undefined') {
-    window.cancelAnimationFrame = _caf;
-  }
-}

@@ -16,7 +16,8 @@ describe('SessionPill', () => {
   });
 
   it('renders the truncated session ID', () => {
-    render(<SessionPill sessionId="abcdef123456" />);
+    // Session ids are UUIDs in practice — opaque machine ids tail-truncate.
+    render(<SessionPill sessionId="550e8400-e29b-41d4-a716-446655443456" />);
     // formatShortId with chars=4 produces "...3456"
     expect(screen.getByText('...3456')).toBeInTheDocument();
   });
@@ -39,15 +40,15 @@ describe('SessionPill', () => {
   it('copies session ID to clipboard on click', async () => {
     const user = userEvent.setup();
     const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText');
-    render(<SessionPill sessionId="session-xyz-12345" />);
+    render(<SessionPill sessionId="550e8400-e29b-41d4-a716-446655442345" />);
     const pill = screen.getByText('...2345');
     await user.click(pill);
-    expect(writeTextSpy).toHaveBeenCalledWith('session-xyz-12345');
+    expect(writeTextSpy).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655442345');
   });
 
   it('shows "Copied!" feedback after click', async () => {
     const user = userEvent.setup();
-    render(<SessionPill sessionId="session-xyz-12345" />);
+    render(<SessionPill sessionId="550e8400-e29b-41d4-a716-446655442345" />);
     const pill = screen.getByText('...2345');
     await user.click(pill);
     expect(screen.getByText('Copied!')).toBeInTheDocument();

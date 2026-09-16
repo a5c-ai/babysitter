@@ -150,7 +150,34 @@ export async function readSessionFile(filePath: string): Promise<SessionFile> {
   }
 
   const { frontmatter, body } = parseYamlFrontmatter(content);
+  if (frontmatter.active !== 'true' && frontmatter.active !== 'false') {
+    throw new SessionError(
+      `Invalid active value: ${frontmatter.active ?? '<missing>'}`,
+      SessionErrorCode.INVALID_STATE_VALUE,
+      { field: 'active', value: frontmatter.active },
+    );
+  }
+  for (const [field, value] of [
+    ['iteration', frontmatter.iteration],
+    ['max_iterations', frontmatter.max_iterations],
+  ] as const) {
+    if (!value || !/^\d+$/.test(value)) {
+      throw new SessionError(
+        `Invalid ${field} value: ${value ?? '<missing>'}`,
+        SessionErrorCode.INVALID_STATE_VALUE,
+        { field, value },
+      );
+    }
+  }
+  if (frontmatter.run_id === undefined) {
+    throw new SessionError(
+      'Missing run_id value',
+      SessionErrorCode.INVALID_STATE_VALUE,
+      { field: 'run_id' },
+    );
+  }
   const state = parseSessionState(frontmatter);
+  validateSessionState(state);
 
   return {
     state,

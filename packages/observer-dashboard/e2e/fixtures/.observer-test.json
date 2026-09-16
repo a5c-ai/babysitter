@@ -1,5 +1,6 @@
 {
   "sources": [],
   "pollInterval": 2000,
-  "theme": "dark"
+  "theme": "dark",
+  "hiddenProjects": ["kanban-hidden-project"]
 }

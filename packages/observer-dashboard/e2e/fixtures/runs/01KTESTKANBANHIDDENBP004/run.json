@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANHIDDENBP004",
+  "request": "kanban/hidden-breakpoint",
+  "processId": "kanban/hidden-breakpoint",
+  "projectName": "kanban-hidden-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-hidden-breakpoint.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-hidden-breakpoint.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-28T12:00:00.000Z",
+  "completionSecret": "e2ekanbanfixturep0040000"
+}

@@ -67,6 +67,6 @@ describe('pipeline-owned live stack scenario execution', () => {
 
     expect(result.status).toBe('failed');
     expect(result.failure).toContain('missing live-model credential env');
-    expect(result.commands.length).toBe(8);
+    expect(result.commands.length).toBe(7);
   });
 });

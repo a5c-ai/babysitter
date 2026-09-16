@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adversarial-grade.schema.json",
+  "title": "Adversarial proof grade",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["roundId", "artifactSha256", "lens", "categoryScores", "totalScore", "deductions", "findings", "blockingIssues", "perfectScoreDefensible", "materialDisagreements", "gateManifest", "edgeBinding"],
+  "properties": {
+    "roundId": {"type": "string", "pattern": "^round-[1-4]$"},
+    "artifactSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "lens": {"enum": ["dependency-use-site", "reconstruction-counterexample", "boundary-exact-complexity", "ambiguity-theorem-reference"]},
+    "categoryScores": {
+      "type": "object", "additionalProperties": false,
+      "required": ["coreMathematicalValidity", "lemmaUseSiteClosure", "domainEdgeCompleteness", "exactReductionComplexity", "expositionAmbiguity", "deterministicArtifactSemantics"],
+      "properties": {
+        "coreMathematicalValidity": {"type": "integer", "minimum": 0, "maximum": 35},
+        "lemmaUseSiteClosure": {"type": "integer", "minimum": 0, "maximum": 15},
+        "domainEdgeCompleteness": {"type": "integer", "minimum": 0, "maximum": 20},
+        "exactReductionComplexity": {"type": "integer", "minimum": 0, "maximum": 15},
+        "expositionAmbiguity": {"type": "integer", "minimum": 0, "maximum": 5},
+        "deterministicArtifactSemantics": {"type": "integer", "minimum": 0, "maximum": 10}
+      }
+    },
+    "totalScore": {"type": "integer", "minimum": 0, "maximum": 100},
+    "deductions": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["findingId", "points"], "properties": {"findingId": {"type": "string", "minLength": 1}, "points": {"type": "integer", "minimum": 1}}}},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/gradeFinding"}},
+    "blockingIssues": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "perfectScoreDefensible": {"type": "boolean"},
+    "materialDisagreements": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "gateManifest": {"type": "object", "additionalProperties": false, "required": ["gateResults"], "properties": {"gateResults": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["gateId", "required", "status"], "properties": {"gateId": {"type": "string", "minLength": 1}, "required": {"type": "boolean"}, "status": {"enum": ["pass", "fail", "unavailable", "not-required"]}}}}}},
+    "edgeBinding": {"$ref": "#/$defs/edgeBinding"}
+  },
+  "$defs": {
+    "gradeFinding": {"type": "object", "additionalProperties": false, "required": ["id", "obligationIds", "category", "severity", "location", "failureScenario", "deduction", "repair"], "properties": {"id": {"type": "string", "minLength": 1}, "obligationIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}, "category": {"enum": ["coreMathematicalValidity", "lemmaUseSiteClosure", "domainEdgeCompleteness", "exactReductionComplexity", "expositionAmbiguity", "deterministicArtifactSemantics"]}, "severity": {"enum": ["blocker", "major", "minor"]}, "location": {"type": "object", "additionalProperties": false, "required": ["path", "locator"], "properties": {"path": {"type": "string", "minLength": 1}, "locator": {"type": "string", "minLength": 1}}}, "failureScenario": {"type": "string", "minLength": 1}, "deduction": {"type": "integer", "minimum": 1}, "repair": {"type": "string", "minLength": 1}}},
+    "edgeBinding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["edgeSha256", "profileId", "profileVersion", "strictness", "openRows"],
+      "properties": {
+        "edgeSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "profileId": {"type": "string", "minLength": 1},
+        "profileVersion": {"type": "string", "minLength": 1},
+        "strictness": {"enum": ["review", "publication"]},
+        "openRows": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

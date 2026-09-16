@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-25T09:00:02.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_LONGA_001",
+    "invocationKey": "kanban/long-breakpoint:S000001:prepare-deploy-plan",
+    "invocationHash": "hash-prepare-deploy-plan",
+    "stepId": "S000001",
+    "taskId": "prepare-deploy-plan",
+    "kind": "agent",
+    "label": "Prepare staging deploy plan",
+    "taskDefRef": "tasks/01KTEST_KANBAN_LONGA_001/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0001-2"
+}

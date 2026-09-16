@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-17T10:00:06.000Z",
+  "data": {
+    "effectId": "01KTEST_BP_EFFECT_001",
+    "invocationKey": "test/pending-breakpoint:S000002:approve-deployment",
+    "invocationHash": "def456",
+    "stepId": "S000002",
+    "taskId": "approve-deployment",
+    "kind": "breakpoint",
+    "label": "Approve deployment to staging?",
+    "taskDefRef": "tasks/01KTEST_BP_EFFECT_001/task.json"
+  },
+  "checksum": "m3n4o5p6"
+}

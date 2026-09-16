@@ -1,49 +1,145 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
-// Create hoisted mock functions
-const { mockAccess, mockWriteFile, mockMkdir, mockReaddir, mockFindRunDir } = vi.hoisted(() => ({
-  mockAccess: vi.fn(),
-  mockWriteFile: vi.fn(),
-  mockMkdir: vi.fn(),
-  mockReaddir: vi.fn(),
+// Only the run lookup is mocked — everything else (SDK commit path, journal,
+// result serialization) runs for real against a temp run fixture on disk.
+const { mockFindRunDir } = vi.hoisted(() => ({
   mockFindRunDir: vi.fn(),
 }));
 
-// Mock path-resolver
 vi.mock("@/lib/path-resolver", () => ({
   findRunDir: mockFindRunDir,
 }));
 
-// Mock fs with a complete replacement that includes default export
-vi.mock("fs", () => {
-  return {
-    default: {
-      promises: {
-        access: mockAccess,
-        writeFile: mockWriteFile,
-        mkdir: mockMkdir,
-        readdir: mockReaddir,
-      },
-    },
-    promises: {
-      access: mockAccess,
-      writeFile: mockWriteFile,
-      mkdir: mockMkdir,
-      readdir: mockReaddir,
-    },
-  };
-});
-
+import { appendEvent, writeTaskDefinition } from "@a5c-ai/babysitter-sdk";
 import { approveBreakpoint } from "../approve-breakpoint";
 
 const defaultSource = { path: "/projects", depth: 2, label: "test" };
 
+const EFFECT_ID = "eff-001";
+const INVOCATION_KEY = "__sdk.breakpoint.test-breakpoint";
+
+const tempRunDirs: string[] = [];
+
+/**
+ * Create a real run fixture the way the SDK lays one out: a journal with
+ * RUN_CREATED + EFFECT_REQUESTED (written through the SDK's own appendEvent,
+ * so sequence numbers and checksums are canonical) and a task.json for the
+ * breakpoint effect. `kind` is parameterizable so the breakpoint-only guard
+ * can be exercised against a pending non-breakpoint (e.g. shell) effect.
+ */
+async function createRunFixture(
+  effectId: string = EFFECT_ID,
+  kind: string = "breakpoint",
+  opts: {
+    /**
+     * Controls tasks/<effectId>/task.json (journal EFFECT_REQUESTED always
+     * uses `kind`):
+     * - "same" (default): task.json kind matches the journal kind
+     * - "missing": no task.json at all (round 4 blocker fixture)
+     * - "corrupt": task.json exists but is not valid JSON
+     * - any other string: task.json declares THAT kind (journal mismatch)
+     */
+    taskJson?: string;
+  } = {},
+): Promise<string> {
+  const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
+  tempRunDirs.push(runDir);
+
+  const taskId = kind === "breakpoint" ? "__sdk.breakpoint" : `__sdk.${kind}`;
+  await appendEvent({
+    runDir,
+    eventType: "RUN_CREATED",
+    event: { runId: path.basename(runDir) },
+  });
+  await appendEvent({
+    runDir,
+    eventType: "EFFECT_REQUESTED",
+    event: {
+      effectId,
+      invocationKey: INVOCATION_KEY,
+      stepId: "step-1",
+      taskId,
+      kind,
+      taskDefRef: `tasks/${effectId}/task.json`,
+    },
+  });
+
+  const taskJsonMode = opts.taskJson ?? "same";
+  if (taskJsonMode === "missing") {
+    return runDir; // deliberately NO tasks/<effectId>/task.json
+  }
+  if (taskJsonMode === "corrupt") {
+    await fs.mkdir(path.join(runDir, "tasks", effectId), { recursive: true });
+    await fs.writeFile(
+      path.join(runDir, "tasks", effectId, "task.json"),
+      "{ this is not JSON",
+      "utf-8",
+    );
+    return runDir;
+  }
+  const taskJsonKind = taskJsonMode === "same" ? kind : taskJsonMode;
+  await writeTaskDefinition(runDir, effectId, {
+    effectId,
+    taskId,
+    invocationKey: INVOCATION_KEY,
+    kind: taskJsonKind,
+    title: `test ${taskJsonKind}`,
+    ...(taskJsonKind === "breakpoint"
+      ? { metadata: { breakpointId: "test.breakpoint" } }
+      : {}),
+  });
+
+  return runDir;
+}
+
+/** Assert the guard fired BEFORE the commit path: nothing was written. */
+async function expectNothingWritten(runDir: string, effectId: string = EFFECT_ID) {
+  await expect(
+    fs.access(path.join(runDir, "tasks", effectId, "result.json")),
+  ).rejects.toThrow();
+  const entries = await listJournalEntries(runDir);
+  expect(entries.filter((e) => e.type === "EFFECT_RESOLVED")).toHaveLength(0);
+}
+
+function pointFindRunDirAt(runDir: string) {
+  mockFindRunDir.mockResolvedValue({
+    runDir,
+    source: defaultSource,
+    projectName: "app",
+    projectPath: "/projects/app",
+  });
+}
+
+async function readResultJson(runDir: string, effectId: string = EFFECT_ID) {
+  const raw = await fs.readFile(
+    path.join(runDir, "tasks", effectId, "result.json"),
+    "utf-8",
+  );
+  return JSON.parse(raw);
+}
+
+async function listJournalEntries(runDir: string) {
+  const files = (await fs.readdir(path.join(runDir, "journal"))).sort();
+  const entries = [];
+  for (const f of files) {
+    const raw = await fs.readFile(path.join(runDir, "journal", f), "utf-8");
+    entries.push({ file: f, ...JSON.parse(raw) });
+  }
+  return entries;
+}
+
 describe("approveBreakpoint", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: journal dir has some existing entries
-    mockMkdir.mockResolvedValue(undefined);
-    mockReaddir.mockResolvedValue(["000001.01ABC.json", "000002.01DEF.json"]);
+  });
+
+  afterEach(async () => {
+    await Promise.all(
+      tempRunDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })),
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -87,7 +183,7 @@ describe("approveBreakpoint", () => {
   });
 
   // -------------------------------------------------------------------------
-  // Run/task resolution
+  // Run/effect resolution
   // -------------------------------------------------------------------------
 
   it("returns error when run is not found", async () => {
@@ -98,149 +194,223 @@ describe("approveBreakpoint", () => {
     expect(result.error).toContain("Run not found");
   });
 
-  it("returns error when task directory does not exist", async () => {
-    mockFindRunDir.mockResolvedValue({
-      runDir: "/projects/app/.a5c/runs/run-001",
-      source: defaultSource,
-      projectName: "app",
-      projectPath: "/projects/app",
+  it("rejects (fail closed) when the effect was never requested — guard fires before the SDK", async () => {
+    const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
+    tempRunDirs.push(runDir);
+    await appendEvent({
+      runDir,
+      eventType: "RUN_CREATED",
+      event: { runId: path.basename(runDir) },
     });
-    mockAccess.mockRejectedValueOnce(new Error("ENOENT"));
+    pointFindRunDirAt(runDir);
 
-    const result = await approveBreakpoint("run-001", "eff-001", "yes");
+    // Round 4: an unknown effect has no task.json, so the fail-closed
+    // metadata guard rejects it before commitEffectResult is ever reached
+    // (the SDK would also reject it — this is defense in depth).
+    const result = await approveBreakpoint("run-001", "eff-unknown", "yes");
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Task directory not found");
+    expect(result.error).toContain("task definition missing or unreadable");
+    await expectNothingWritten(runDir, "eff-unknown");
   });
 
   // -------------------------------------------------------------------------
-  // Success path
+  // Breakpoint-only guard (review round 3, blocker)
   // -------------------------------------------------------------------------
 
-  it("writes result.json and journal entry on success", async () => {
-    const runDir = "/projects/app/.a5c/runs/run-001";
-    mockFindRunDir.mockResolvedValue({
-      runDir,
-      source: defaultSource,
-      projectName: "app",
-      projectPath: "/projects/app",
-    });
-    mockAccess.mockResolvedValue(undefined);
-    mockWriteFile.mockResolvedValue(undefined);
+  it("rejects a pending shell-kind effect: no result.json is created and no EFFECT_RESOLVED is appended", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "shell");
+    pointFindRunDirAt(runDir);
 
-    const result = await approveBreakpoint("run-001", "eff-001", "Deploy approved");
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("not a breakpoint effect");
+
+    // The guard fired BEFORE the commit path: nothing was written.
+    await expect(
+      fs.access(path.join(runDir, "tasks", EFFECT_ID, "result.json")),
+    ).rejects.toThrow();
+    const entries = await listJournalEntries(runDir);
+    expect(entries.filter((e) => e.type === "EFFECT_RESOLVED")).toHaveLength(0);
+  });
+
+  it("rejects a pending agent-kind effect the same way (breakpoints only)", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "agent");
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result).toEqual({ success: false, error: "not a breakpoint effect" });
+  });
+
+  // -------------------------------------------------------------------------
+  // Fail-closed guard (review round 4, blocker): missing/corrupt task.json
+  // and journal/task-file kind disagreement must never fall through to the
+  // SDK commit path (commitEffectResult does not enforce breakpoint-kind).
+  // -------------------------------------------------------------------------
+
+  it("FAILS CLOSED on a requested shell effect with MISSING task.json: rejects, no result.json, no EFFECT_RESOLVED", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "shell", { taskJson: "missing" });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("task definition missing or unreadable");
+    await expectNothingWritten(runDir);
+  });
+
+  it("FAILS CLOSED on a requested shell effect with CORRUPT task.json: rejects, nothing written", async () => {
+    const runDir = await createRunFixture(EFFECT_ID, "shell", { taskJson: "corrupt" });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("task definition missing or unreadable");
+    await expectNothingWritten(runDir);
+  });
+
+  it("rejects when task.json claims breakpoint but the journal EFFECT_REQUESTED record says shell (kind mismatch): nothing written", async () => {
+    // Journal (authoritative, what commitEffectResult resolves) says shell;
+    // a forged/stale task.json claims breakpoint. The journal check must win.
+    const runDir = await createRunFixture(EFFECT_ID, "shell", { taskJson: "breakpoint" });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("journal EFFECT_REQUESTED record");
+    await expectNothingWritten(runDir);
+  });
+
+  it("FAILS CLOSED on a breakpoint-kind task.json whose effect has NO EFFECT_REQUESTED journal record", async () => {
+    // task.json alone must not be sufficient: without the authoritative
+    // journal record the action refuses before the SDK commit.
+    const runDir = await fs.mkdtemp(path.join(os.tmpdir(), "observer-approve-bp-"));
+    tempRunDirs.push(runDir);
+    await appendEvent({
+      runDir,
+      eventType: "RUN_CREATED",
+      event: { runId: path.basename(runDir) },
+    });
+    await writeTaskDefinition(runDir, EFFECT_ID, {
+      effectId: EFFECT_ID,
+      taskId: "__sdk.breakpoint",
+      invocationKey: INVOCATION_KEY,
+      kind: "breakpoint",
+      title: "test breakpoint",
+      metadata: { breakpointId: "test.breakpoint" },
+    });
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("no EFFECT_REQUESTED journal record");
+    const entries = await listJournalEntries(runDir);
+    expect(entries.filter((e) => e.type === "EFFECT_RESOLVED")).toHaveLength(0);
+  });
+
+  // -------------------------------------------------------------------------
+  // Success path — SDK commit path writes the canonical artifacts
+  // -------------------------------------------------------------------------
+
+  it("commits through the SDK: result.json carries approved + canonical response", async () => {
+    const runDir = await createRunFixture();
+    pointFindRunDirAt(runDir);
+
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "Deploy approved");
     expect(result.success).toBe(true);
 
-    // Should write 2 files: result.json + journal entry
-    expect(mockWriteFile).toHaveBeenCalledTimes(2);
-
-    // First write: result.json
-    const [resultPath, resultContent] = mockWriteFile.mock.calls[0];
-    expect(resultPath).toContain("eff-001");
-    expect(resultPath).toContain("result.json");
-
-    const parsed = JSON.parse(resultContent as string);
-    expect(parsed.status).toBe("ok");
-    expect(parsed.value.answer).toBe("Deploy approved");
-    expect(parsed.value.approvedBy).toBe("observer-dashboard");
-    expect(parsed.value.approvedAt).toBeDefined();
-    expect(parsed.startedAt).toBeDefined();
-    expect(parsed.finishedAt).toBeDefined();
-
-    // Second write: journal entry
-    const [journalPath, journalContent] = mockWriteFile.mock.calls[1];
-    expect(journalPath).toContain("journal");
-    expect(journalPath).toMatch(/000003\./); // next seq after 000001, 000002
-
-    const journalParsed = JSON.parse(journalContent as string);
-    expect(journalParsed.type).toBe("EFFECT_RESOLVED");
-    expect(journalParsed.data.effectId).toBe("eff-001");
-    expect(journalParsed.data.status).toBe("ok");
-    expect(journalParsed.data.resultRef).toBe("tasks/eff-001/result.json");
-    expect(journalParsed.checksum).toBeDefined();
-    expect(typeof journalParsed.checksum).toBe("string");
-    expect(journalParsed.checksum.length).toBe(64); // SHA-256 hex
+    const stored = await readResultJson(runDir);
+    expect(stored.status).toBe("ok");
+    // Canonical BreakpointResult field — process code reads result.response.
+    expect(stored.value.response).toBe("Deploy approved");
+    expect(stored.value.feedback).toBe("Deploy approved");
+    // D1: the runtime reads `approved` to tell an approval from a rejection.
+    expect(stored.value.approved).toBe(true);
+    // UI alias preserved for existing observer surfaces.
+    expect(stored.value.answer).toBe("Deploy approved");
+    expect(stored.value.approvedBy).toBe("observer-dashboard");
+    expect(stored.value.approvedAt).toBeDefined();
+    // The SDK serializer mirrors the value under `result` as well.
+    expect(stored.result).toEqual(stored.value);
+    expect(stored.startedAt).toBeDefined();
+    expect(stored.finishedAt).toBeDefined();
+    // SDK-written result carries the SDK schema/version markers — proof this
+    // went through the supported commit path, not a hand-rolled write.
+    expect(stored.schemaVersion).toBeDefined();
+    expect(stored.effectId).toBe(EFFECT_ID);
+    expect(stored.invocationKey).toBe(INVOCATION_KEY);
   });
 
-  it("journal checksum is valid SHA-256 of payload without checksum", async () => {
-    const runDir = "/projects/app/.a5c/runs/run-001";
-    mockFindRunDir.mockResolvedValue({
-      runDir,
-      source: defaultSource,
-      projectName: "app",
-      projectPath: "/projects/app",
-    });
-    mockAccess.mockResolvedValue(undefined);
-    mockWriteFile.mockResolvedValue(undefined);
+  it("appends exactly one canonical EFFECT_RESOLVED journal entry", async () => {
+    const runDir = await createRunFixture();
+    pointFindRunDirAt(runDir);
 
-    await approveBreakpoint("run-001", "eff-001", "yes");
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "yes");
+    expect(result.success).toBe(true);
 
-    const [, journalContent] = mockWriteFile.mock.calls[1];
-    const journalParsed = JSON.parse(journalContent as string);
-
-    // Recompute checksum: SHA-256 of JSON.stringify(payloadWithoutChecksum, null, 2) + "\n"
-    const { checksum: _checksum, ...payloadWithoutChecksum } = journalParsed;
-    const crypto = await import("crypto");
-    const expected = crypto.default
-      .createHash("sha256")
-      .update(JSON.stringify(payloadWithoutChecksum, null, 2) + "\n")
-      .digest("hex");
-    expect(journalParsed.checksum).toBe(expected);
-  });
-
-  it("uses seq 1 when journal dir is empty", async () => {
-    const runDir = "/projects/app/.a5c/runs/run-001";
-    mockFindRunDir.mockResolvedValue({
-      runDir,
-      source: defaultSource,
-      projectName: "app",
-      projectPath: "/projects/app",
-    });
-    mockAccess.mockResolvedValue(undefined);
-    mockWriteFile.mockResolvedValue(undefined);
-    mockReaddir.mockResolvedValue([]); // empty journal
-
-    await approveBreakpoint("run-001", "eff-001", "yes");
-
-    const [journalPath] = mockWriteFile.mock.calls[1];
-    expect(journalPath).toMatch(/000001\./);
+    const entries = await listJournalEntries(runDir);
+    const resolved = entries.filter((e) => e.type === "EFFECT_RESOLVED");
+    expect(resolved).toHaveLength(1);
+    expect(resolved[0].data.effectId).toBe(EFFECT_ID);
+    expect(resolved[0].data.status).toBe("ok");
+    expect(resolved[0].data.resultRef).toBe(`tasks/${EFFECT_ID}/result.json`);
+    // Breakpoint enrichment from task.json metadata (SDK behavior).
+    expect(resolved[0].data.breakpointId).toBe("test.breakpoint");
+    // SDK journal format: checksum + contiguous sequence after the fixture's
+    // RUN_CREATED (000001) + EFFECT_REQUESTED (000002).
+    expect(typeof resolved[0].checksum).toBe("string");
+    expect(resolved[0].checksum.length).toBe(64);
+    expect(resolved[0].file).toMatch(/^000003\./);
   });
 
   it("trims whitespace from the answer", async () => {
-    const runDir = "/projects/app/.a5c/runs/run-001";
-    mockFindRunDir.mockResolvedValue({
-      runDir,
-      source: defaultSource,
-      projectName: "app",
-      projectPath: "/projects/app",
-    });
-    mockAccess.mockResolvedValue(undefined);
-    mockWriteFile.mockResolvedValue(undefined);
+    const runDir = await createRunFixture();
+    pointFindRunDirAt(runDir);
 
-    const result = await approveBreakpoint("run-001", "eff-001", "  yes  ");
+    const result = await approveBreakpoint("run-001", EFFECT_ID, "  yes  ");
     expect(result.success).toBe(true);
 
-    const [, content] = mockWriteFile.mock.calls[0];
-    const parsed = JSON.parse(content as string);
-    expect(parsed.value.answer).toBe("yes");
+    const stored = await readResultJson(runDir);
+    expect(stored.value.response).toBe("yes");
+    expect(stored.value.answer).toBe("yes");
   });
 
   // -------------------------------------------------------------------------
-  // Write failure
+  // UX-R3 §14.5 — double-answer guard (AC-62)
   // -------------------------------------------------------------------------
 
-  it("returns error when file write fails", async () => {
-    const runDir = "/projects/app/.a5c/runs/run-001";
-    mockFindRunDir.mockResolvedValue({
-      runDir,
-      source: defaultSource,
-      projectName: "app",
-      projectPath: "/projects/app",
-    });
-    mockAccess.mockResolvedValue(undefined);
-    mockWriteFile.mockRejectedValue(new Error("EACCES: permission denied"));
+  it("AC-62: a second submit surfaces the already-recorded flow and does NOT append a duplicate EFFECT_RESOLVED entry", async () => {
+    const runDir = await createRunFixture();
+    pointFindRunDirAt(runDir);
 
-    const result = await approveBreakpoint("run-001", "eff-001", "yes");
-    expect(result.success).toBe(false);
-    expect(result.error).toContain("EACCES");
+    const first = await approveBreakpoint("run-001", EFFECT_ID, "first");
+    expect(first.success).toBe(true);
+    expect(first.alreadyResolved).toBeUndefined();
+
+    const second = await approveBreakpoint("run-001", EFFECT_ID, "second");
+    // The SDK refuses the second commit for an already-resolved effect; the
+    // action surfaces that as the first-answer-stands flow — not an error,
+    // but flagged so the UI never implies a change was recorded.
+    expect(second.success).toBe(true);
+    expect(second.alreadyResolved).toBe(true);
+    expect(second.error).toBeUndefined();
+
+    const entries = await listJournalEntries(runDir);
+    const resolved = entries.filter((e) => e.type === "EFFECT_RESOLVED");
+    expect(resolved).toHaveLength(1);
+
+    // The first recorded answer stands — the SDK path never mutates a
+    // resolved effect's result.
+    const stored = await readResultJson(runDir);
+    expect(stored.value.response).toBe("first");
   });
+
+  // NOTE on signed/protected-breakpoint policy: the pinned SDK's
+  // commitEffectResult has no dedicated signed/protected-breakpoint gate
+  // beyond the generic runtime `task.completed` hook, so this release's
+  // safety case is breakpoint-kind-only enforcement in the ACTION (fail
+  // closed on metadata + journal record, covered above). Simulating a
+  // hook-policy denial would require installing a real hooks-adapter
+  // configuration in the fixture, which is out of scope at this layer; the
+  // "SDK rejection is surfaced, never a silent success" contract is covered
+  // by the AC-62 already-resolved test above (commitEffectResult throws →
+  // the action returns honestly).
 });

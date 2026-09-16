@@ -22,8 +22,10 @@ export interface ParsedArgs {
   effectId?: string;
   taskStatus?: "ok" | "error";
   valuePath?: string;
+  valueSha256?: string;
   valueInline?: string;
   errorPath?: string;
+  errorSha256?: string;
   stdoutRef?: string;
   stderrRef?: string;
   stdoutFile?: string;

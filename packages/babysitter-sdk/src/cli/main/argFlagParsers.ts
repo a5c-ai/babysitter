@@ -92,12 +92,20 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     parsed.valuePath = expectFlagValue(args, index + 1, "--value");
     return index + 1;
   },
+  "--value-sha256": (parsed, args, index) => {
+    parsed.valueSha256 = expectFlagValue(args, index + 1, "--value-sha256");
+    return index + 1;
+  },
   "--value-inline": (parsed, args, index) => {
     parsed.valueInline = expectFlagValue(args, index + 1, "--value-inline");
     return index + 1;
   },
   "--error": (parsed, args, index) => {
     parsed.errorPath = expectFlagValue(args, index + 1, "--error");
+    return index + 1;
+  },
+  "--error-sha256": (parsed, args, index) => {
+    parsed.errorSha256 = expectFlagValue(args, index + 1, "--error-sha256");
     return index + 1;
   },
   "--stdout-ref": (parsed, args, index) => {

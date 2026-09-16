@@ -739,8 +739,10 @@ For shell tasks with a top-level `outputSchema`, successful `--status ok` values
 babysitter task:post <runId> <effectId> \
   --status <ok|error> \
   [--value <file>] \
+  [--value-sha256 <hex>] \
   [--value-inline <json>] \
   [--error <file>] \
+  [--error-sha256 <hex>] \
   [--stdout-ref <ref>] \
   [--stderr-ref <ref>] \
   [--stdout-file <file>] \
@@ -759,8 +761,10 @@ babysitter task:post <runId> <effectId> \
 |--------|----------|-------------|
 | `--status <ok\|error>` | Yes | Task completion status |
 | `--value <file>` | No | Path to result value JSON (for status=ok) |
+| `--value-sha256 <hex>` | No | Expected SHA-256 for `--value` file bytes; requires a lowercase 64-character digest and fails before commit on mismatch |
 | `--value-inline <json>` | No | Inline JSON result value (for status=ok, cannot be combined with `--value`) |
 | `--error <file>` | No | Path to error payload JSON (for status=error) |
+| `--error-sha256 <hex>` | No | Expected SHA-256 for structured `--error` file bytes; requires a lowercase 64-character digest and fails before commit on mismatch |
 | `--stdout-ref <ref>` | No | Reference to stdout file |
 | `--stderr-ref <ref>` | No | Reference to stderr file |
 | `--stdout-file <file>` | No | Path to stdout file to copy |
@@ -792,7 +796,8 @@ babysitter task:post <runId> <effectId> \
 1. **Do NOT write `result.json` directly** - The SDK owns this file
 2. Provide your result value either as a separate file (for example `output.json`) or inline JSON
 3. Pass the value via `--value <file>` or `--value-inline '<json>'`
-4. The CLI will create the proper `result.json` with metadata
+4. To bind a file cryptographically, pair `--value` with `--value-sha256` or `--error` with `--error-sha256`. The CLI reads that file once, verifies the exact bytes, then parses and commits only those bytes.
+5. The CLI will create the proper `result.json` with metadata
 
 #### Examples
 

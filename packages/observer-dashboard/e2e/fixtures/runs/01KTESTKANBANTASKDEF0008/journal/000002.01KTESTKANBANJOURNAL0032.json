@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-02-01T11:00:02.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_TASKDEF_1",
+    "invocationKey": "kanban/taskdef-gate:release-accept.default.e2efixture08.0:release-accept",
+    "invocationHash": "hash-taskdef-gate-breakpoint",
+    "stepId": "release-accept.default.e2efixture08.0",
+    "taskId": "release-accept",
+    "kind": "breakpoint",
+    "label": "breakpoint",
+    "taskDefRef": "tasks/01KTEST_KANBAN_TASKDEF_1/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0008-2"
+}

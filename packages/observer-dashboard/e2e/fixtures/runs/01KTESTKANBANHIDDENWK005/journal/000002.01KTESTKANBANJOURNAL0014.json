@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-29T13:00:02.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_HIDWK_001",
+    "invocationKey": "kanban/hidden-working:S000001:long-hidden-task",
+    "invocationHash": "hash-long-hidden-task",
+    "stepId": "S000001",
+    "taskId": "long-hidden-task",
+    "kind": "agent",
+    "label": "Long-running hidden task",
+    "taskDefRef": "tasks/01KTEST_KANBAN_HIDWK_001/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-k005-2"
+}

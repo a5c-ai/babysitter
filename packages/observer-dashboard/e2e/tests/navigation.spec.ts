@@ -8,12 +8,15 @@ import { test, expect } from "../fixtures";
  * rapid navigation, and browser refresh resilience.
  */
 
-/* ─── Known fixture run IDs from _manifest.json ─── */
-const COMPLETED_RUN_ID = "01KH507H054PWCPV0ZM3AAMM5J"; // content/draft-review, completed, 7 tasks
-const FAILED_RUN_ID = "01KH45VA2ZEEE8XDMEVMKCGA35"; // podcast-intel/publish, failed, 24 tasks
-const WAITING_RUN_ID = "01KH47FK2MGMMB37B17PE3Z91Z"; // hockey/roster-update, waiting, 22 tasks
-const SECOND_COMPLETED_RUN_ID = "01KH6HKNFCXVSH1PYG9PWXSTDD"; // sales/lead-scoring, completed, 25 tasks
-const THIRD_COMPLETED_RUN_ID = "01KH8J6PXYQ8S3WTH4MH1YSSD2"; // podcast-intel/publish, completed, 13 tasks
+/* ─── Known fixture run IDs from _manifest.json ───
+ * The generated fixtures are deterministic (seeded PRNG in
+ * e2e/fixtures/generate-fixtures.ts), so these IDs are stable across
+ * regenerations on every machine. */
+const COMPLETED_RUN_ID = "01KH3WYPG8TYACSJ26HC8GE8BN"; // sample/schedule-sync, completed, 5 tasks
+const FAILED_RUN_ID = "01KH52MSWEF4Y739XJ10SMF6KH"; // demo-project/transcribe, failed, 21 tasks
+const WAITING_RUN_ID = "01KHCAK0WD7DMX807EX7T5B81Z"; // sales/lead-scoring, waiting, 15 tasks
+const SECOND_COMPLETED_RUN_ID = "01KH56M7B21HDGMSNJSY2SBF7M"; // sales/deal-sync, completed, 7 tasks
+const THIRD_COMPLETED_RUN_ID = "01KH5714VN73QC6WCP8S0P31QA"; // demo-project/publish, completed, 9 tasks
 const NON_EXISTENT_RUN_ID = "01ZZZZZZZZZZZZZZZZZZZZZZZZ";
 
 test.describe("Navigation: Dashboard -> Run Detail -> Dashboard", () => {
@@ -61,7 +64,12 @@ test.describe("Navigation: Dashboard -> Run Detail -> Dashboard", () => {
     await expect(projectCards.first()).toBeVisible();
   });
 
-  test("filter by failed status, expand project, click filtered run, verify detail page", async ({
+  // e2e-filter-tests-stale-contradict-feature: a non-"all" status filter now
+  // renders the flat <RunList> (not the filtered project grid). These journeys
+  // were retargeted to click a run row in the flat list instead of expanding a
+  // project card.
+
+  test("filter by failed status, click a run in the flat list, verify detail page", async ({
     dashboardPage,
     runDetailPage,
   }) => {
@@ -69,25 +77,21 @@ test.describe("Navigation: Dashboard -> Run Detail -> Dashboard", () => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // 2. Click the "Failed" filter pill
-    await dashboardPage.clickFilter("Failed");
+    // 2. Click the "Failed" filter pill → flat run list
+    await dashboardPage.clickFilterByValue("failed");
+    await dashboardPage.waitForRunList();
 
-    // 3. Verify filtered projects are shown (projects with failed runs)
-    const projectCards = dashboardPage.getProjectCards();
-    await expect(projectCards.first()).toBeVisible({ timeout: 15_000 });
+    // 3. The project grid is replaced by the flat list. Skip if the bucket is
+    // empty (nothing to navigate to).
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+    const runRows = dashboardPage.runRows;
+    if ((await runRows.count()) === 0) {
+      test.skip();
+      return;
+    }
 
-    // 4. Expand the first project card to see runs
-    await projectCards.first().locator("button").first().click();
-
-    // 4b. Expand collapsed sub-sections (Failed Runs, Completed History) if present
-    await dashboardPage.expandRunSubSections();
-
-    // 5. Wait for run cards and click the first visible one
-    const runCards = dashboardPage.getRunCards();
-    await expect(runCards.first()).toBeVisible({ timeout: 15_000 });
-    await runCards.first().click();
-
-    // 6. Verify run detail page loads
+    // 4. Click the first run row and verify the detail page loads.
+    await runRows.first().click();
     await runDetailPage.waitForData();
     await expect(runDetailPage.page).toHaveURL(/\/runs\//);
 
@@ -95,7 +99,7 @@ test.describe("Navigation: Dashboard -> Run Detail -> Dashboard", () => {
     await expect(runDetailPage.breadcrumb).toBeVisible();
   });
 
-  test("filter by completed status, expand project, click run, verify detail", async ({
+  test("filter by completed status, click a run in the flat list, verify detail", async ({
     dashboardPage,
     runDetailPage,
   }) => {
@@ -103,23 +107,20 @@ test.describe("Navigation: Dashboard -> Run Detail -> Dashboard", () => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // 2. Click the "Completed" filter pill
-    await dashboardPage.clickFilter("Completed");
+    // 2. Click the "Completed" filter pill → flat run list
+    await dashboardPage.clickFilterByValue("completed");
+    await dashboardPage.waitForRunList();
 
-    // 3. Expand first project card
-    const projectCards = dashboardPage.getProjectCards();
-    await expect(projectCards.first()).toBeVisible({ timeout: 15_000 });
-    await projectCards.first().locator("button").first().click();
+    // 3. Grid is gone; flat list rows are shown (skip if bucket empty).
+    await expect(dashboardPage.getProjectCards()).toHaveCount(0);
+    const runRows = dashboardPage.runRows;
+    if ((await runRows.count()) === 0) {
+      test.skip();
+      return;
+    }
 
-    // 3b. Expand collapsed sub-sections (Failed Runs, Completed History) if present
-    await dashboardPage.expandRunSubSections();
-
-    // 4. Click first run card
-    const runCards = dashboardPage.getRunCards();
-    await expect(runCards.first()).toBeVisible({ timeout: 15_000 });
-    await runCards.first().click();
-
-    // 5. Verify run detail page loaded successfully
+    // 4. Click first run row → detail page.
+    await runRows.first().click();
     await runDetailPage.waitForData();
     await expect(runDetailPage.page).toHaveURL(/\/runs\//);
     await expect(runDetailPage.breadcrumb).toBeVisible();

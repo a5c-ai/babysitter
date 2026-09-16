@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANHIDDENWK005",
+  "request": "kanban/hidden-working",
+  "processId": "kanban/hidden-working",
+  "projectName": "kanban-hidden-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-hidden-working.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-hidden-working.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-29T13:00:00.000Z",
+  "completionSecret": "e2ekanbanfixturek0050000"
+}

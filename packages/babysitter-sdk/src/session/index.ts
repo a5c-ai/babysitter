@@ -55,6 +55,15 @@ export {
   extractPromiseTag,
   parseTranscriptLastAssistantMessage,
 } from './transcript';
+
+export {
+  acquireSessionReservation,
+  releaseSessionReservation,
+} from './reservation';
+export type {
+  SessionReservation,
+  SessionReservationOptions,
+} from './reservation';
 export type {
   SessionWhoamiArgs,
   SessionWhoamiResult,

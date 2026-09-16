@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-01-29T13:00:01.000Z",
+  "data": {
+    "runId": "01KTESTKANBANHIDDENWK005",
+    "processId": "kanban/hidden-working",
+    "entrypoint": {
+      "importPath": "../../processes/kanban-hidden-working.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "e2e-kanban-fixture-k005-1"
+}

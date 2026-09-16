@@ -41,7 +41,8 @@ function verifySdkPackIncludesCli() {
     "--workspace=@a5c-ai/babysitter-sdk",
   ]);
   const packs = JSON.parse(result.stdout);
-  const files = new Set((packs[0]?.files ?? []).map((entry) => entry.path));
+  const packEntries = Array.isArray(packs) ? packs : Object.values(packs);
+  const files = new Set((packEntries[0]?.files ?? []).map((entry) => entry.path));
   for (const required of ["dist/cli/main.js", "dist/cli/mcpServeEntry.js", "README.md"]) {
     if (!files.has(required)) {
       fail(`SDK dry-run package is missing ${required}`);

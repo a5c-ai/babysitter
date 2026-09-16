@@ -28,6 +28,8 @@ interface NpmPackEntry {
   files: Array<{ path: string }>;
 }
 
+type NpmPackOutput = NpmPackEntry[] | Record<string, NpmPackEntry>;
+
 describe('pi target ships agent_end wiring + proxied hook scripts (#948)', () => {
   const tempDirs: string[] = [];
 
@@ -89,8 +91,9 @@ describe('pi target ships agent_end wiring + proxied hook scripts (#948)', () =>
         cwd: result.outputDir,
         encoding: 'utf-8',
       });
-      const packed = JSON.parse(packOutput) as NpmPackEntry[];
-      const packedPaths = packed.flatMap((entry) =>
+      const packed = JSON.parse(packOutput) as NpmPackOutput;
+      const entries = Array.isArray(packed) ? packed : Object.values(packed);
+      const packedPaths = entries.flatMap((entry) =>
         entry.files.map((f) => f.path),
       );
       expect(packedPaths).toContain('hooks/babysitter-proxied-stop.js');
