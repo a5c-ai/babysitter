@@ -1,0 +1,6 @@
+# actionlint configuration: the org's larger hosted runners are not in actionlint's
+# built-in label list.
+self-hosted-runner:
+  labels:
+    - ubuntu-latest-l
+    - ubuntu-latest-m
