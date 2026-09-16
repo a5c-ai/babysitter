@@ -1,0 +1,28 @@
+[
+  {
+    "accessTier": "TransactionOptimized",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DCCAAD3EE3799B\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Storage/storageAccounts/stpersonoids362519582270/fileServices/default/shares/5106e8be-76cb-441b-984f-44ac8d1e9da6-code",
+    "lastModifiedTime": "2024-09-01T17:41:01.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "5106e8be-76cb-441b-984f-44ac8d1e9da6-code",
+    "resourceGroup": "personoids_sponsorship",
+    "shareQuota": 102400,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  },
+  {
+    "accessTier": "TransactionOptimized",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DCBC3CE9ED12BB\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Storage/storageAccounts/stpersonoids362519582270/fileServices/default/shares/e55a939b-bead-40b6-af6d-4f75afbc9b20-code",
+    "lastModifiedTime": "2024-08-14T08:41:38.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "e55a939b-bead-40b6-af6d-4f75afbc9b20-code",
+    "resourceGroup": "personoids_sponsorship",
+    "shareQuota": 102400,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  }
+]

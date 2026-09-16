@@ -1,0 +1,20 @@
+[
+  {
+    "buildId": "default",
+    "createdTimeUtc": "2026-05-27T15:14:34.900992+00:00",
+    "databaseConnections": [],
+    "hostname": "yellow-grass-00f15eb0f.7.azurestaticapps.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-website-rg/providers/Microsoft.Web/staticSites/a5c-proxy-894866/builds/default",
+    "kind": null,
+    "lastUpdatedOn": "2026-05-27T15:15:55.577835+00:00",
+    "linkedBackends": [],
+    "location": "East US 2",
+    "name": "default",
+    "pullRequestTitle": null,
+    "resourceGroup": "a5c-website-rg",
+    "sourceBranch": null,
+    "status": "Ready",
+    "type": "Microsoft.Web/staticSitesbuilds",
+    "userProvidedFunctionApps": null
+  }
+]

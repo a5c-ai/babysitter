@@ -1,0 +1,20 @@
+[
+  {
+    "etag": "ce5d4706-234e-4a01-9f63-426f1ec8f3d3",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com",
+    "location": "global",
+    "maxNumberOfRecordSets": 10000,
+    "name": "i.personoids.com",
+    "nameServers": [
+      "ns1-07.azure-dns.com.",
+      "ns2-07.azure-dns.net.",
+      "ns3-07.azure-dns.org.",
+      "ns4-07.azure-dns.info."
+    ],
+    "numberOfRecordSets": 17,
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "tags": {},
+    "type": "Microsoft.Network/dnszones",
+    "zoneType": "Public"
+  }
+]

@@ -1,0 +1,1871 @@
+[
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": null,
+    "etag": "\"4\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_E8s_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/virtualMachines/a5c-dev-vm",
+    "identity": null,
+    "licenseType": null,
+    "location": "eastus2",
+    "macAddresses": "60-45-BD-85-E9-0E",
+    "managedBy": null,
+    "name": "a5c-dev-vm",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/networkInterfaces/a5c-dev-vmVMNic",
+          "primary": null,
+          "resourceGroup": "a5c-dev-rg"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "a5cdev",
+      "allowExtensionOperations": true,
+      "computerName": "a5c-dev-vm",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": null,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDBTyLSkLGkzaLyZAUN8EUmbsFZ3CEGznvjayJI3zcFEXZs85kb3f91NRcEWctnI7jNxxJ3Nk1yRyI3hAUgHxo/mKopuUx5Dv6KxtaHfvpizE2gOOtYyjhUaBnj5s2DSLOUAXQ3HGJsCA8vVhx5hjbKdkoonG14bysigFuMtr6hivj9qQcYGqVzu6fwfltNK9ARDUyrArkBffwnmb5cEdX1qidmBX9EN996Lwxm0QX9B5DCxwi0O90fFFGvNbKSHVhlACRc7kxi9uFRVbQsTooN2EYIPMIsY38atwASdetWyzskz/x8rhaNwgt3X7pjXHdQVJPlLql4/06K5wnPN9im+4OrvPFA8i39g8J7Ui/DuH9eJqPEtbcjbUQFrd/liz+hnP8qdtKmxpr9jloLJ3Ydj4sqzJmpBUzSeG3Pzftsvox6dMRF5jWv4HiHI09sd9SqSDK4jptkGj1NBWGZg9v0N6RTaIquOv0UpPivb0JrSEGLESYiMRO5NGwMHZ7Auxa9gTut5hQLEDA4Mp587yGPgiPf4I/K3fFoxRqJvGD/mamNP4/LTPaueasmZ8AYAB4QinXLRD6X/cI5+NdsJNwXJeBIjJVgDetSLpivaA0VHPmX+kZz3S1WMXB/2tKdDKKlO/IF8WooUmF7RUvZSYi2pJqYLEnF/Bj9vutswXXkLw== tmusk@talm-desktop2\n",
+              "path": "/home/a5cdev/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.0.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "20.110.38.197",
+    "resourceGroup": "A5C-DEV-RG",
+    "resources": null,
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202601300",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "latest"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Detach",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Compute/disks/a5c-dev-vm_OsDisk_1_cc25ac13e9b04615bb7bc312ecac96c8",
+          "resourceGroup": "a5c-dev-rg",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "a5c-dev-vm_OsDisk_1_cc25ac13e9b04615bb7bc312ecac96c8",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {},
+    "timeCreated": "2026-02-21T19:33:31.844995+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "d7752a06-aca4-4854-9e82-7efd1d9b2d59",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": null,
+    "etag": "\"4\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_E8s_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/virtualMachines/a5c-dev-vm-2",
+    "identity": null,
+    "licenseType": null,
+    "location": "eastus2",
+    "macAddresses": "7C-1E-52-CA-02-37",
+    "managedBy": null,
+    "name": "a5c-dev-vm-2",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkInterfaces/a5c-dev-vm-2VMNic",
+          "primary": null,
+          "resourceGroup": "A5C-DEV-RG"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "azureuser",
+      "allowExtensionOperations": true,
+      "computerName": "a5c-dev-vm-2",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": null,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDA5LSIbsI6McwmJo5cN+RbOg2BTX/n/g0p4ZbhbHiMzh81zwqRm9UYtrvAmfv8gflVscHY9EDOi2BUqePsUazXv+eaxs+myOYD3ql85ZlIDpoO2XBZ6hyUGFzts62aLrLSgDDLtxq25/UabTEwiZAj8WA5srsUfZjXL9H3tTtS7NXzN7wxmtkSZc/I+hO5FlL7VDvAQJsh8nBOk3+zwuZDrkePS9bkSgnnvkTRzWpHqq7R4ASjt/4GrbMK9iX3wuQ3umeqaVBx+Js/egyOEN6ffQ716GTSvH6cuBMFCHCvJKhfYLMoydyZDJ9qnnup+sVHeFCPkG8g4r0+yWTgklWwMhpCjAxkbFIe/4FoiuQ9JzvCcPoeTsIhXTAJ8Du4gNmkh9ieka7km42tfZBtda5MHd2maASE8v8rpbH15FKc7dNgGXLWIP3qE4B3S4AyafLvNqXbt/fp537hcJBzk+HjPxPXUhlJFJxojVoe0eGEtNLAwT68OdVjzxA/KusyTMD1Y2WuoF1bCw2ke92vrDLWNB7Ng88rYUB5BqzTskfjv4FaYufagWnSkoKzy7hEkeie8VkNqBNj9JWt0SGQvr3Tak6SGzwYKaKVr5gxatIaahXR5UGj/WhUlu0eJJDTknYmURhaqUDKABFw3UDotI0BTHkxXrgYAwy5fbVoMZStdQ== benihakak@Benis-MacBook-Pro-2.local\n",
+              "path": "/home/azureuser/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.0.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "20.94.74.76",
+    "resourceGroup": "A5C-DEV-RG",
+    "resources": null,
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "22.04.202601310",
+        "id": null,
+        "offer": "0001-com-ubuntu-server-jammy",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "22_04-lts-gen2",
+        "version": "latest"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Detach",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/disks/a5c-dev-vm-2_OsDisk_1_b289f1270aae4f858d1b343d437f12d5",
+          "resourceGroup": "A5C-DEV-RG",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "a5c-dev-vm-2_OsDisk_1_b289f1270aae4f858d1b343d437f12d5",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {},
+    "timeCreated": "2026-02-26T12:49:03.622175+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "22cbbe70-6127-435b-a8f8-67d4bd858611",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": null,
+    "etag": "\"9\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4s_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-MANTIS-ODOO-VALIDATION-EASTUS2/providers/Microsoft.Compute/virtualMachines/vm-odoo-validation",
+    "identity": {
+      "principalId": "b4eeaf19-9c35-4122-b500-a624bd1c4845",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "eastus2",
+    "macAddresses": "7C-1E-52-DC-CB-71",
+    "managedBy": null,
+    "name": "vm-odoo-validation",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Network/networkInterfaces/vm-odoo-validationVMNic",
+          "primary": null,
+          "resourceGroup": "rg-mantis-odoo-validation-eastus2"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "azureuser",
+      "allowExtensionOperations": true,
+      "computerName": "vm-odoo-validation",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": null,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDBTyLSkLGkzaLyZAUN8EUmbsFZ3CEGznvjayJI3zcFEXZs85kb3f91NRcEWctnI7jNxxJ3Nk1yRyI3hAUgHxo/mKopuUx5Dv6KxtaHfvpizE2gOOtYyjhUaBnj5s2DSLOUAXQ3HGJsCA8vVhx5hjbKdkoonG14bysigFuMtr6hivj9qQcYGqVzu6fwfltNK9ARDUyrArkBffwnmb5cEdX1qidmBX9EN996Lwxm0QX9B5DCxwi0O90fFFGvNbKSHVhlACRc7kxi9uFRVbQsTooN2EYIPMIsY38atwASdetWyzskz/x8rhaNwgt3X7pjXHdQVJPlLql4/06K5wnPN9im+4OrvPFA8i39g8J7Ui/DuH9eJqPEtbcjbUQFrd/liz+hnP8qdtKmxpr9jloLJ3Ydj4sqzJmpBUzSeG3Pzftsvox6dMRF5jWv4HiHI09sd9SqSDK4jptkGj1NBWGZg9v0N6RTaIquOv0UpPivb0JrSEGLESYiMRO5NGwMHZ7Auxa9gTut5hQLEDA4Mp587yGPgiPf4I/K3fFoxRqJvGD/mamNP4/LTPaueasmZ8AYAB4QinXLRD6X/cI5+NdsJNwXJeBIjJVgDetSLpivaA0VHPmX+kZz3S1WMXB/2tKdDKKlO/IF8WooUmF7RUvZSYi2pJqYLEnF/Bj9vutswXXkLw== tmusk@talm-desktop2\n",
+              "path": "/home/azureuser/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.0.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "",
+    "resourceGroup": "RG-MANTIS-ODOO-VALIDATION-EASTUS2",
+    "resources": null,
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202606060",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "latest"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Detach",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-MANTIS-ODOO-VALIDATION-EASTUS2/providers/Microsoft.Compute/disks/vm-odoo-validation_OsDisk_1_32e949e117d04ddba88a72760a36525a",
+          "resourceGroup": "RG-MANTIS-ODOO-VALIDATION-EASTUS2",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "vm-odoo-validation_OsDisk_1_32e949e117d04ddba88a72760a36525a",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "auto-delete-after": "2026-07-16",
+      "managed-by": "codex",
+      "purpose": "defensive-research",
+      "workload": "odoo-validation"
+    },
+    "timeCreated": "2026-07-12T21:18:35.833184+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "271784f9-a79c-407f-9fba-f8fef2d3aff2",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": null,
+    "etag": "\"4\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_E4s_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-UBUNTU-SSH-20260806/providers/Microsoft.Compute/virtualMachines/ubuntu-large-02",
+    "identity": null,
+    "licenseType": null,
+    "location": "eastus2",
+    "macAddresses": "7C-1E-52-BE-D1-CD",
+    "managedBy": null,
+    "name": "ubuntu-large-02",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/networkInterfaces/ubuntu-large-02VMNic",
+          "primary": null,
+          "resourceGroup": "rg-ubuntu-ssh-20260806"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "azureuser",
+      "allowExtensionOperations": true,
+      "computerName": "ubuntu-large-02",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": null,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMXGupnBbhGJX2BzXkgWrGO6TRVwDpBDV8nZF3o5sCqB bensadeh@MacBook-Pro-sl-Ben-Sadeh.local\n",
+              "path": "/home/azureuser/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.0.0.6",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "20.110.105.86",
+    "resourceGroup": "RG-UBUNTU-SSH-20260806",
+    "resources": null,
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": null,
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608070",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "latest"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Detach",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Compute/disks/ubuntu-large-02_OsDisk_1_97a1876ad0f84c83aa13499b095ca9de",
+          "resourceGroup": "rg-ubuntu-ssh-20260806",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "ubuntu-large-02_OsDisk_1_97a1876ad0f84c83aa13499b095ca9de",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {},
+    "timeCreated": "2026-08-08T12:23:28.675688+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "b1881799-cb22-43cc-8db9-9af3a16dedf8",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-0/providers/Microsoft.Compute/virtualMachines/tb-fleet-0",
+    "identity": {
+      "principalId": "1de37254-e80c-4497-9d80-bc975581bf74",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "60-45-BD-AA-58-98",
+    "managedBy": null,
+    "name": "tb-fleet-0",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/networkInterfaces/tb-fleet-0-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-0"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-0",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "4.166.96.109",
+    "resourceGroup": "RG-TB-FLEET-0",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "62c2cb1f2eec037a6224bddc66ab49502defc8fa8ddf82d0cf",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-0/providers/Microsoft.Compute/virtualMachines/tb-fleet-0/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-0",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Compute/disks/tb-fleet-0-os",
+          "resourceGroup": "rg-tb-fleet-0",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-0-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T07:18:15.537923+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "bee51e99-96b6-42e9-92cb-c85fabafc567",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-1/providers/Microsoft.Compute/virtualMachines/tb-fleet-1",
+    "identity": {
+      "principalId": "0348e37a-a12a-461b-9f3d-0aa5c534d640",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "7C-1E-52-3F-B8-8C",
+    "managedBy": null,
+    "name": "tb-fleet-1",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/networkInterfaces/tb-fleet-1-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-1"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-1",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "4.166.169.82",
+    "resourceGroup": "RG-TB-FLEET-1",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "f3679538b8f2d23ddbf62076506af5d601ec721f3d4cdcb3cf",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-1/providers/Microsoft.Compute/virtualMachines/tb-fleet-1/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-1",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Compute/disks/tb-fleet-1-os",
+          "resourceGroup": "rg-tb-fleet-1",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-1-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T10:05:12.857353+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "1e46fe0a-1409-429d-9d49-cbba5ff5b879",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-2/providers/Microsoft.Compute/virtualMachines/tb-fleet-2",
+    "identity": {
+      "principalId": "606dcdac-a588-47cc-8375-80edf2b9fa6d",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "7C-ED-8D-B3-5A-E6",
+    "managedBy": null,
+    "name": "tb-fleet-2",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/networkInterfaces/tb-fleet-2-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-2"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-2",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "172.160.103.190",
+    "resourceGroup": "RG-TB-FLEET-2",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "70e2ad1f2880d80986093a3db8dfbf0bbc252c5603548fe143",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-2/providers/Microsoft.Compute/virtualMachines/tb-fleet-2/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-2",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Compute/disks/tb-fleet-2-os",
+          "resourceGroup": "rg-tb-fleet-2",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-2-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T10:05:19.719174+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "23942ad8-299d-48ba-831a-8a249b2edb44",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-4/providers/Microsoft.Compute/virtualMachines/tb-fleet-4",
+    "identity": {
+      "principalId": "c3212469-57a5-41e9-817b-42ccee8e1224",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "7C-1E-52-13-72-0C",
+    "managedBy": null,
+    "name": "tb-fleet-4",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/networkInterfaces/tb-fleet-4-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-4"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-4",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "172.160.55.157",
+    "resourceGroup": "RG-TB-FLEET-4",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "80f7d782e17c96dce7d3e488c64cb3ac1e78ce3198cc293162",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-4/providers/Microsoft.Compute/virtualMachines/tb-fleet-4/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-4",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Compute/disks/tb-fleet-4-os",
+          "resourceGroup": "rg-tb-fleet-4",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-4-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T10:05:34.267023+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "c876ccf1-a2d3-494c-ac7f-83fc8fe9b8c6",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-5/providers/Microsoft.Compute/virtualMachines/tb-fleet-5",
+    "identity": {
+      "principalId": "293b44b7-f859-4e49-ade3-ecfa79842f8d",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "7C-ED-8D-B3-D3-80",
+    "managedBy": null,
+    "name": "tb-fleet-5",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/networkInterfaces/tb-fleet-5-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-5"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-5",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "172.160.103.193",
+    "resourceGroup": "RG-TB-FLEET-5",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "768b110970ef2d508ab2f83c12b533dc0483801b2b5a7be464",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-5/providers/Microsoft.Compute/virtualMachines/tb-fleet-5/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-5",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Compute/disks/tb-fleet-5-os",
+          "resourceGroup": "rg-tb-fleet-5",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-5-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T10:05:22.681814+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "ddefac03-f513-4748-8b40-ce3a2fdce450",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-6/providers/Microsoft.Compute/virtualMachines/tb-fleet-6",
+    "identity": {
+      "principalId": "d2044d8b-24b0-4273-b57d-1b76d11c26ab",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "70-A8-A5-52-E2-35",
+    "managedBy": null,
+    "name": "tb-fleet-6",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/networkInterfaces/tb-fleet-6-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-6"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-6",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "4.166.122.134",
+    "resourceGroup": "RG-TB-FLEET-6",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "4d8e5e9b5ef2a0c8425c1b3d97f3cc993532f619d4cbf40956",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-6/providers/Microsoft.Compute/virtualMachines/tb-fleet-6/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-6",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Compute/disks/tb-fleet-6-os",
+          "resourceGroup": "rg-tb-fleet-6",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-6-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T09:47:25.029654+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "85aaea17-b288-4d41-86eb-8ddaa167f4aa",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-7/providers/Microsoft.Compute/virtualMachines/tb-fleet-7",
+    "identity": {
+      "principalId": "6af8982c-10a0-4abc-a9fe-59cbbee4dfe5",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "7C-ED-8D-AD-E0-B2",
+    "managedBy": null,
+    "name": "tb-fleet-7",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/networkInterfaces/tb-fleet-7-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-7"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-7",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "4.166.138.3",
+    "resourceGroup": "RG-TB-FLEET-7",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "2b9f20618bd6e6fa9af2ef0a24ca77b2e162225ab9dad377ce",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-7/providers/Microsoft.Compute/virtualMachines/tb-fleet-7/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-7",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Compute/disks/tb-fleet-7-os",
+          "resourceGroup": "rg-tb-fleet-7",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-7-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T10:05:21.085816+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "c4adc192-83a6-4fdc-b821-38022bd2ef91",
+    "zones": null
+  },
+  {
+    "additionalCapabilities": null,
+    "applicationProfile": null,
+    "availabilitySet": null,
+    "billingProfile": null,
+    "capacityReservation": null,
+    "diagnosticsProfile": {
+      "bootDiagnostics": {
+        "enabled": true,
+        "storageUri": null
+      }
+    },
+    "etag": "\"5\"",
+    "evictionPolicy": null,
+    "extendedLocation": null,
+    "extensionsTimeBudget": null,
+    "fqdns": "",
+    "hardwareProfile": {
+      "vmSize": "Standard_D4ads_v5",
+      "vmSizeProperties": null
+    },
+    "host": null,
+    "hostGroup": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-8/providers/Microsoft.Compute/virtualMachines/tb-fleet-8",
+    "identity": {
+      "principalId": "b5a8b075-5120-42e4-b710-3a3b105d6141",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "licenseType": null,
+    "location": "swedencentral",
+    "macAddresses": "7C-ED-8D-AE-2B-AE",
+    "managedBy": null,
+    "name": "tb-fleet-8",
+    "networkProfile": {
+      "networkApiVersion": null,
+      "networkInterfaceConfigurations": null,
+      "networkInterfaces": [
+        {
+          "deleteOption": "Delete",
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/networkInterfaces/tb-fleet-8-nic",
+          "primary": true,
+          "resourceGroup": "rg-tb-fleet-8"
+        }
+      ]
+    },
+    "osProfile": {
+      "adminPassword": null,
+      "adminUsername": "bench",
+      "allowExtensionOperations": true,
+      "computerName": "tb-fleet-8",
+      "customData": null,
+      "linuxConfiguration": {
+        "disablePasswordAuthentication": true,
+        "enableVmAgentPlatformUpdates": true,
+        "patchSettings": {
+          "assessmentMode": "ImageDefault",
+          "automaticByPlatformSettings": null,
+          "patchMode": "ImageDefault"
+        },
+        "provisionVmAgent": true,
+        "ssh": {
+          "publicKeys": [
+            {
+              "keyData": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAKg/PzgZKjD/BT9uUUFUf2LWgHgxcTwsp3RBlt7yIVv ",
+              "path": "/home/bench/.ssh/authorized_keys"
+            }
+          ]
+        }
+      },
+      "requireGuestProvisionSignal": true,
+      "secrets": [],
+      "windowsConfiguration": null
+    },
+    "plan": null,
+    "platformFaultDomain": null,
+    "powerState": "VM deallocated",
+    "priority": null,
+    "privateIps": "10.20.0.4",
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroup": null,
+    "publicIps": "4.166.93.232",
+    "resourceGroup": "RG-TB-FLEET-8",
+    "resources": [
+      {
+        "autoUpgradeMinorVersion": false,
+        "enableAutomaticUpgrade": false,
+        "forceUpdateTag": "87b71537bf7fd179557fa1c23860133e739e121974fcb45d71",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-8/providers/Microsoft.Compute/virtualMachines/tb-fleet-8/extensions/terminal-bench-bootstrap",
+        "instanceView": null,
+        "location": "swedencentral",
+        "name": "terminal-bench-bootstrap",
+        "protectedSettings": null,
+        "protectedSettingsFromKeyVault": null,
+        "provisionAfterExtensions": null,
+        "provisioningState": "Succeeded",
+        "publisher": "Microsoft.Azure.Extensions",
+        "resourceGroup": "RG-TB-FLEET-8",
+        "settings": null,
+        "suppressFailures": null,
+        "tags": {
+          "lifecycle": "persistent-manual",
+          "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+          "workload": "terminal-bench"
+        },
+        "type": "Microsoft.Compute/virtualMachines/extensions",
+        "typeHandlerVersion": "2.1",
+        "typePropertiesType": "CustomScript"
+      }
+    ],
+    "scheduledEventsPolicy": null,
+    "scheduledEventsProfile": null,
+    "securityProfile": {
+      "encryptionAtHost": null,
+      "encryptionIdentity": null,
+      "proxyAgentSettings": null,
+      "securityType": "TrustedLaunch",
+      "uefiSettings": {
+        "secureBootEnabled": true,
+        "vTpmEnabled": true
+      }
+    },
+    "storageProfile": {
+      "dataDisks": [],
+      "diskControllerType": "SCSI",
+      "imageReference": {
+        "communityGalleryImageId": null,
+        "exactVersion": "24.04.202608020",
+        "id": null,
+        "offer": "ubuntu-24_04-lts",
+        "publisher": "Canonical",
+        "sharedGalleryImageId": null,
+        "sku": "server",
+        "version": "24.04.202608020"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "deleteOption": "Delete",
+        "diffDiskSettings": null,
+        "diskSizeGb": null,
+        "encryptionSettings": null,
+        "image": null,
+        "managedDisk": {
+          "diskEncryptionSet": null,
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Compute/disks/tb-fleet-8-os",
+          "resourceGroup": "rg-tb-fleet-8",
+          "securityProfile": null,
+          "storageAccountType": null
+        },
+        "name": "tb-fleet-8-os",
+        "osType": "Linux",
+        "vhd": null,
+        "writeAcceleratorEnabled": null
+      }
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "timeCreated": "2026-08-11T10:15:55.826142+00:00",
+    "type": "Microsoft.Compute/virtualMachines",
+    "userData": null,
+    "virtualMachineScaleSet": null,
+    "vmId": "67b46eec-9134-42eb-9998-308bff445e7d",
+    "zones": null
+  }
+]

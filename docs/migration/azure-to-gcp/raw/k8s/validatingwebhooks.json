@@ -1,0 +1,1060 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:14Z",
+        "generation": 1,
+        "labels": {
+          "admissions.enforcer/disabled": "true",
+          "kubernetes.azure.com/controlPlaneWebhook": "Reconcile"
+        },
+        "name": "aks-node-validating-webhook",
+        "resourceVersion": "133792560",
+        "uid": "5c0eb746-9c0c-4611-9f2f-965ae64149ff"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1beta1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUU2VENDQXRHZ0F3SUJBZ0lSQVBRcllWWURYczZtTXg2RFEyRzZxWXN3RFFZSktvWklodmNOQVFFTEJRQXcKRFRFTE1Ba0dBMVVFQXhNQ1kyRXdJQmNOTWpVd056TXdNRGt3TURFM1doZ1BNakExTlRBM016QXdPVEV3TVRkYQpNQTB4Q3pBSkJnTlZCQU1UQW1OaE1JSUNJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBZzhBTUlJQ0NnS0NBZ0VBCnJyaVE1bWE3MEEyQllLYXVyYk5yM1IvVlRpY3dJc1BiK3VkSkFobkduNFB4YjV5UndHNWlXZ0l1b2toK3VvVXkKd3JQYmdKNWtTQU1naWl2Ujh0aFo0UnNObkRxdy9WS2N4c1hrdFBTWFM4bEVjOStzQXBmNFNlaURQMDNFVWdEUApVdHNHcUhqS3dKelYxZy9ZNkh3cm1hOXlKUkhLMEt4dW9saS9SYVJiQlFlTEc4Y0VVcEE3U2t3cW5ZUTVxOHUvCk5RNzhmKyswSXp3UXA0RXJIOXZIRmQ0Z245L0R4K1FDWHJqbE4rMzVlRnFTL1NNcU51eDZmdVhPM3RSUDQ2WjkKQUQ0bVQxd0Z4OVRRQ2RBNzNhQVV5cTNuV3gxSU9qdUZwTUNibng0clJNZzhHTG5uamhwTmRKejRzOVlsVVNuQQpYTTNxN0hoVXlBN0pGQXJxeUxMbnJ2WS9WMDEwUmppZi82N1Qxb0l2UjRNRi9Qek8zOWpCbzQ1MGxydEVubnFHCk5xVCtaSS9Rdk5rWHhNbEpWbjIzdDkrWjVmZEt0UDFJOFdUOUlJakp6eWtrTkkxdWJEZXArSUlZOUJQeXRZd2gKMGtaZWp5dW5LQXZMeTc0MDhTYllFZ1ZtQ0VMdUFPY1lYc0FXb0FIbXlrODRZMEJpSFA1SE54aitEcGVpd0swaQpnSG9iZFkxQzlIYzVac2FZcHBvTVNkck5DcDJVL0xqaS94M2I2NGpKWWVwL2huRWtDRjc5OWo5ZXB3NHpZYUpwCk9rZDhCK1Fld1MvM01PQ3U5bjJrb2RVM1dBUWdJRllwWVdCTVFzRnFub0JGZHhONGpNcWtWUDQ3czZ3eXFSVmEKcXN0NGdUcHJDNTVGRDFocUdoamRySE9DNWVhS3BCVTl2OVNtSERVaGh3TUNBd0VBQWFOQ01FQXdEZ1lEVlIwUApBUUgvQkFRREFnS2tNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdIUVlEVlIwT0JCWUVGS0NJMmVuSk11ZGd0Q3NJCm1GY2Rhd3kxQ0hXZE1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQ0FRQWFrSUVZNUJndDFkWmxVaWZHeU9nUy9LVWUKTW5lRXdiZ08rby9hYlUwc09IeXVNL0ZjdXh2UTdhS25rclprN3cxVWo0WkErbHpndTNCY1lpUEdJUGpkSFRTOQpvS1NpUHIwelQ0bnBnRE5pVWdBZXFsYk12YWNGUUo0MFNLY0praGRKNjJqdE0yWHJKTk9FZkVxWG0zOWFsQ3o3CjVrRm5hdkpoT1daUEwwTmd5ZW5CVmExM2EwS3kyd3RISnAxUGlkMzg3aUdTak5RRmt1SDhuUUFXNnNleTBVZGUKZ1pveDRCQk9hblB4bmdjSWZTbS9zZG9mek14SkFWbzNDMTJlU1J0WDhaUkxLMDN1d2U4emFVWUZ4VnVsaHhjMAozVW04MVQwa0JlWmZoNzdMZlFGUE1oQlEzZU9KTVMyMExFVlUvWThRM29NYjY0c0pJUk82VUNSelh1RUQyQXZWCjI1WEZwdU05SlV2NW91STlnbDFrQjdnV0JUeUxlQnhTbVYzWVdFSldnZ1NVWURFMlY0S2J0OFNBa2VPV014NjEKVS9iNE1wUHFMZEJBeUh5SVp0cXIzRXFJcWFtdVBkakZtcVYrc3pQNkxCSXVTNjRmQXlqVkxQbmtTOE84SEgvTgo4K3dXeTk4VEdqNk9lcGxTdHo1K3g0RU1QSnBScHNwM2ZPaGhHd2xSS043YkhjWUFHMkNkTWtZZEZxUEFid0QvCndYYkVnNU9SWFdrbmRFYk9FZDhWdWdvQWhmd29Oc09vcWlCRmhZU1hCWEI1ZkR0M1JjUTRJMm5WOVVtTjZZZjgKZDN6K2txdkNsYzcwR3hnYnZMeS9VY3FNUWNLSGFtbEo2a3p5Ri9sTFZhdi91cmI2RjVmaWNUU0tpKzJaWFk0NQpFWU1UeGxuU013MU1JRS9rckE9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==",
+            "url": "https://ccp-webhook.6889e147bca62d000117c884.svc.cluster.local.:8443/validate-nodes"
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "aks-node-validating-webhook.azmk8s.io",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                ""
+              ],
+              "apiVersions": [
+                "v1"
+              ],
+              "operations": [
+                "UPDATE"
+              ],
+              "resources": [
+                "nodes"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "NoneOnDryRun",
+          "timeoutSeconds": 5
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:53Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "admissions.enforcer/disabled": "true"
+        },
+        "name": "azure-policy-validating-webhook-configuration",
+        "resourceVersion": "715",
+        "uid": "a34960bc-1d14-4adc-9cd0-f760d8021d50"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1",
+            "v1beta1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZBRENDQXVpZ0F3SUJBZ0lRRWpTdlM3WENOSFFxN1dkbUJ5a0xqakFOQmdrcWhraUc5dzBCQVFzRkFEQVoKTVJjd0ZRWURWUVFERXc1aGVuVnlaWEJ2YkdsamVTMWpZVEFnRncweU5UQTNNekF3T1RBd01UZGFHQTh5TURVMQpNRGN6TURBNU1UQXhOMW93R1RFWE1CVUdBMVVFQXhNT1lYcDFjbVZ3YjJ4cFkza3RZMkV3Z2dJaU1BMEdDU3FHClNJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURQVHBBMGViQ0NoQ0ppaGVXMWF5N1Z4MEFpOHNkanRTelQKOWJLazk2Sm45aFpyT0xmN2I3UVFVcDFFZE5BK1c2Yi9sSkszTGxGaWJjU2NHOVNTbEVnd0s2UUdPMERsNFJSNAo2S1N3dThpeGdJeFprc0UzcXNPQ2tLTnY1eEszUXFtUDFXZWx0ZHpsdHFtaHBud083NjFyZWUzZXNreUZLVVZTCmR0Z3ZjdGo1aE9SdVB5TmF6RG9DZFg4NnZVck5QZnV5eHNSd2FFNnloMDU0d1RBdlNHVGtaQ0NNbEFNZEhtaisKclVqMFAyNjczV2k1YTJQZWw2bFVYNCtQQW9WQzJnb0dYU3RmZ3hhY0hQbjkycUVzTlRvL2tXWnVYZEZjaFJBNwp2VXlPaDdSKzdYRDRKT1Y1ZGhPNWN5VE5lS0Q3TkZHdzBZUWNWbzFKOWs1SkVYWm9LZjNaYXlIb0RUai9xOURQCkNaamJBZ3I3a2NvR2N0NG81RW0yTXVUWHFFWTJ6QlhRTTgybDdZWDFQSXRMMm1IWUVLcUFINWdNMlVNL3kvbWcKTXpNKzRBQzVJRjdzVmEvTWt4MGdqc2sySWpOWTVXYWJzRExESnprSXlsVlhnaThQOTI4bkRKdGNVZ0ozQm96Swo5N01KUmtOUzVDVGRNS0xyaUpwNjBOaW4rVnBsQ3VLdkNMSXhQalBCdWhEVktKbjBTNnloRkRlL3oxNkpIbmtCCngvbS9Yd2xNSmtOdlV4T05BL0RUVGlmOVZzSXFNbVZKUHhvSTYvdUErZFlESEhiR3JlemE1a0dCdFpIT3QvY04KRUJnL1QwMUlJYU0wclNWWEllVTZreWxYcGVtQzErNkV6NGlSM0xPQXFGemN1Qnk3MFR6RGR5T3NvQ1lSYU1BSQpJUnpadFdmYXR3SURBUUFCbzBJd1FEQU9CZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCCi96QWRCZ05WSFE0RUZnUVVZb0R2MXoyRzhjSk9UdnpwamxzNkhrTzZsRjR3RFFZSktvWklodmNOQVFFTEJRQUQKZ2dJQkFFQWloTGRiOGx1eE1aVHpzcG5xS3Bpazh6WUZtQ2FPRXJwb1pPR3BDaWladk9aY0xha0wwakdDdlR2LwowN1RtNGV0dGFFNGM0UzExT2g2SWt2aDRlejdHWXhtS2tiVG9OUXNiN3QxWGZZbDR6U3B5a2RTRFdGdzRObjNmCllQbXo5TFFKQ1JUR1FhWlkrajBLWXRPaEUwN3dqVzhORnJURE0wdEdza3o1OUxGQ240eEk2VEZMTzl6YlFnTDMKRjA3aVVZcmZzT3gyZ2xQRmx5MjNXeTE0aEsvWnBmeXRxL0xoanJWbVg1bnZjdmF1RzVEZ0VCbjR1T09OSEdIbAp5eGdWQVBsclIyRnFFVzlYWE9GWm9GZUgrd3RVUDZKY0paYjhvdWxyVHptb3RoMXBNTkZXemQ5RGh1V2h3a3FJCmVVVXRTYUZKeVJTcDFGR2NFRmdjNEdZY0JQdDdXc1ZaUi9aNmtVTWRGWnBPcUwyU3ZOekRJakpWS29aUnlpQm8KekJxdzZyQnEyalBFbWRvZ2xZNGt1RllmTGpJbWZ1b0NPN2Z0REZCM2hWUEF3c1VyanZtcUlXQUpZOXdPcTFmSgpmc01GOGVVQWZ1RkJNaTR0d0NaMXVQQS8rWEwrdkFoaEFkOXF2bHprRlBhdm1WakZxNFpCUDNMZzdKdGo3ZncwCk92QzlmMlZ1MFZZMnZrRkJ2NHhhWUIyRldXOTVrTFplMmF1Q3Q0eXFZcnNhMGZ5NG1yRytXUDlPZGNXRGxkN3kKaUZMRVBOUnphZW5VbVdpQ1gzd2taVm9NeG1BK2dseXliTEZyUk53Y3NiUXhYeVpFVW1NejRZWk9oa2FPbndqcApYb3JsWWRPVEM4U0tGdFNmOEFOTWdKRHQ4NWpYN2M1Q3hrTisreXdiSUo0a2RaMkwKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+            "service": {
+              "name": "azure-policy-webhook-service",
+              "namespace": "kube-system",
+              "path": "/validategatekeeperresources",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Ignore",
+          "matchPolicy": "Equivalent",
+          "name": "byovalidation.policy.azure.com",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "templates.gatekeeper.sh",
+                "constraints.gatekeeper.sh"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "*"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "config.gatekeeper.sh"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE",
+                "DELETE"
+              ],
+              "resources": [
+                "*"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "mutations.gatekeeper.sh"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "*"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "syncset.gatekeeper.sh"
+              ],
+              "apiVersions": [
+                "v1alpha1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "*"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 5
+        },
+        {
+          "admissionReviewVersions": [
+            "v1",
+            "v1beta1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZBRENDQXVpZ0F3SUJBZ0lRRWpTdlM3WENOSFFxN1dkbUJ5a0xqakFOQmdrcWhraUc5dzBCQVFzRkFEQVoKTVJjd0ZRWURWUVFERXc1aGVuVnlaWEJ2YkdsamVTMWpZVEFnRncweU5UQTNNekF3T1RBd01UZGFHQTh5TURVMQpNRGN6TURBNU1UQXhOMW93R1RFWE1CVUdBMVVFQXhNT1lYcDFjbVZ3YjJ4cFkza3RZMkV3Z2dJaU1BMEdDU3FHClNJYjNEUUVCQVFVQUE0SUNEd0F3Z2dJS0FvSUNBUURQVHBBMGViQ0NoQ0ppaGVXMWF5N1Z4MEFpOHNkanRTelQKOWJLazk2Sm45aFpyT0xmN2I3UVFVcDFFZE5BK1c2Yi9sSkszTGxGaWJjU2NHOVNTbEVnd0s2UUdPMERsNFJSNAo2S1N3dThpeGdJeFprc0UzcXNPQ2tLTnY1eEszUXFtUDFXZWx0ZHpsdHFtaHBud083NjFyZWUzZXNreUZLVVZTCmR0Z3ZjdGo1aE9SdVB5TmF6RG9DZFg4NnZVck5QZnV5eHNSd2FFNnloMDU0d1RBdlNHVGtaQ0NNbEFNZEhtaisKclVqMFAyNjczV2k1YTJQZWw2bFVYNCtQQW9WQzJnb0dYU3RmZ3hhY0hQbjkycUVzTlRvL2tXWnVYZEZjaFJBNwp2VXlPaDdSKzdYRDRKT1Y1ZGhPNWN5VE5lS0Q3TkZHdzBZUWNWbzFKOWs1SkVYWm9LZjNaYXlIb0RUai9xOURQCkNaamJBZ3I3a2NvR2N0NG81RW0yTXVUWHFFWTJ6QlhRTTgybDdZWDFQSXRMMm1IWUVLcUFINWdNMlVNL3kvbWcKTXpNKzRBQzVJRjdzVmEvTWt4MGdqc2sySWpOWTVXYWJzRExESnprSXlsVlhnaThQOTI4bkRKdGNVZ0ozQm96Swo5N01KUmtOUzVDVGRNS0xyaUpwNjBOaW4rVnBsQ3VLdkNMSXhQalBCdWhEVktKbjBTNnloRkRlL3oxNkpIbmtCCngvbS9Yd2xNSmtOdlV4T05BL0RUVGlmOVZzSXFNbVZKUHhvSTYvdUErZFlESEhiR3JlemE1a0dCdFpIT3QvY04KRUJnL1QwMUlJYU0wclNWWEllVTZreWxYcGVtQzErNkV6NGlSM0xPQXFGemN1Qnk3MFR6RGR5T3NvQ1lSYU1BSQpJUnpadFdmYXR3SURBUUFCbzBJd1FEQU9CZ05WSFE4QkFmOEVCQU1DQXFRd0R3WURWUjBUQVFIL0JBVXdBd0VCCi96QWRCZ05WSFE0RUZnUVVZb0R2MXoyRzhjSk9UdnpwamxzNkhrTzZsRjR3RFFZSktvWklodmNOQVFFTEJRQUQKZ2dJQkFFQWloTGRiOGx1eE1aVHpzcG5xS3Bpazh6WUZtQ2FPRXJwb1pPR3BDaWladk9aY0xha0wwakdDdlR2LwowN1RtNGV0dGFFNGM0UzExT2g2SWt2aDRlejdHWXhtS2tiVG9OUXNiN3QxWGZZbDR6U3B5a2RTRFdGdzRObjNmCllQbXo5TFFKQ1JUR1FhWlkrajBLWXRPaEUwN3dqVzhORnJURE0wdEdza3o1OUxGQ240eEk2VEZMTzl6YlFnTDMKRjA3aVVZcmZzT3gyZ2xQRmx5MjNXeTE0aEsvWnBmeXRxL0xoanJWbVg1bnZjdmF1RzVEZ0VCbjR1T09OSEdIbAp5eGdWQVBsclIyRnFFVzlYWE9GWm9GZUgrd3RVUDZKY0paYjhvdWxyVHptb3RoMXBNTkZXemQ5RGh1V2h3a3FJCmVVVXRTYUZKeVJTcDFGR2NFRmdjNEdZY0JQdDdXc1ZaUi9aNmtVTWRGWnBPcUwyU3ZOekRJakpWS29aUnlpQm8KekJxdzZyQnEyalBFbWRvZ2xZNGt1RllmTGpJbWZ1b0NPN2Z0REZCM2hWUEF3c1VyanZtcUlXQUpZOXdPcTFmSgpmc01GOGVVQWZ1RkJNaTR0d0NaMXVQQS8rWEwrdkFoaEFkOXF2bHprRlBhdm1WakZxNFpCUDNMZzdKdGo3ZncwCk92QzlmMlZ1MFZZMnZrRkJ2NHhhWUIyRldXOTVrTFplMmF1Q3Q0eXFZcnNhMGZ5NG1yRytXUDlPZGNXRGxkN3kKaUZMRVBOUnphZW5VbVdpQ1gzd2taVm9NeG1BK2dseXliTEZyUk53Y3NiUXhYeVpFVW1NejRZWk9oa2FPbndqcApYb3JsWWRPVEM4U0tGdFNmOEFOTWdKRHQ4NWpYN2M1Q3hrTisreXdiSUo0a2RaMkwKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+            "service": {
+              "name": "azure-policy-webhook-service",
+              "namespace": "kube-system",
+              "path": "/validatepolicyresources",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Ignore",
+          "matchPolicy": "Equivalent",
+          "name": "validatepolicyresources.policy.azure.com",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "azurepolicy.azure.com"
+              ],
+              "apiVersions": [
+                "v1alpha1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "syncpolicies"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 5
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/inject-ca-from-secret": "cert-manager/cert-manager-webhook-ca",
+          "meta.helm.sh/release-name": "cert-manager",
+          "meta.helm.sh/release-namespace": "cert-manager"
+        },
+        "creationTimestamp": "2025-08-03T20:52:37Z",
+        "generation": 4,
+        "labels": {
+          "app": "webhook",
+          "app.kubernetes.io/component": "webhook",
+          "app.kubernetes.io/instance": "cert-manager",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "webhook",
+          "app.kubernetes.io/version": "v1.15.3",
+          "helm.sh/chart": "cert-manager-v1.15.3"
+        },
+        "name": "cert-manager-webhook",
+        "resourceVersion": "113842185",
+        "uid": "fd303bbc-e9c4-476a-9497-e45ea1dd081c"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJ3RENDQVVlZ0F3SUJBZ0lRZDNhTHAzbVI2SStldW5BWWhHaEFWakFLQmdncWhrak9QUVFEQXpBaU1TQXcKSGdZRFZRUURFeGRqWlhKMExXMWhibUZuWlhJdGQyVmlhRzl2YXkxallUQWVGdzB5TmpBME1ESXlNVFUzTkRSYQpGdzB5TnpBME1ESXlNVFUzTkRSYU1DSXhJREFlQmdOVkJBTVRGMk5sY25RdGJXRnVZV2RsY2kxM1pXSm9iMjlyCkxXTmhNSFl3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0lEWWdBRWxBaldCSVZ0dTZ3dW5NQUJEZGZ5cTIyYys5N00KUm05SG1tTzg2NmNlT0dkYmhnYWxDbk9EZFpKYWh4YjVoakNwcFZ6Qnl2S2tPSDhreG0rcHFTeENMdmp0VG5PbQpHV1NGTjBCRE4zSkNVSDV1T055enpDRGkrbmpkKzNCeTJJM3NvMEl3UURBT0JnTlZIUThCQWY4RUJBTUNBcVF3CkR3WURWUjBUQVFIL0JBVXdBd0VCL3pBZEJnTlZIUTRFRmdRVXBaTDg3UGswN1NOU2I4dk80QUc2eER5TVFENHcKQ2dZSUtvWkl6ajBFQXdNRFp3QXdaQUl3QXlpVVJlQkxTVlNRQzZHTDFnMzMrV05FeWxwTEp3TGhEYS9YekhTRgpONFFEYjl4UGRjSitQeHhvOE1QbzFBOThBakI0bkFKd3F0SmpLMXJkVHFjczhoUm40TUg2aUNaQmJwK0pmaCtYCk4xSDlsK1UydWo4dGRpNXJTMFowWDEvUW82VT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+            "service": {
+              "name": "cert-manager-webhook",
+              "namespace": "cert-manager",
+              "path": "/validate",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "webhook.cert-manager.io",
+          "namespaceSelector": {
+            "matchExpressions": [
+              {
+                "key": "cert-manager.io/disable-validation",
+                "operator": "NotIn",
+                "values": [
+                  "true"
+                ]
+              },
+              {
+                "key": "kubernetes.azure.com/managedby",
+                "operator": "NotIn",
+                "values": [
+                  "aks"
+                ]
+              },
+              {
+                "key": "control-plane",
+                "operator": "NotIn",
+                "values": [
+                  "true"
+                ]
+              }
+            ]
+          },
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "cert-manager.io",
+                "acme.cert-manager.io"
+              ],
+              "apiVersions": [
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "*/*"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 30
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:54Z",
+        "generation": 4,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "admissions.enforcer/disabled": "true",
+          "gatekeeper.sh/system": "yes"
+        },
+        "name": "gatekeeper-validating-webhook-configuration",
+        "resourceVersion": "25133090",
+        "uid": "586de148-00e6-41dc-93c0-d6381e0c33c9"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1",
+            "v1beta1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUUvakNDQXVhZ0F3SUJBZ0lRR2JCU0xtNGxIWFl6QlZ1dmtManhMREFOQmdrcWhraUc5dzBCQVFzRkFEQVkKTVJZd0ZBWURWUVFERXcxbllYUmxhMlZsY0dWeUxXTmhNQ0FYRFRJMU1EY3pNREE1TURBeE4xb1lEekl3TlRVdwpOek13TURreE1ERTNXakFZTVJZd0ZBWURWUVFERXcxbllYUmxhMlZsY0dWeUxXTmhNSUlDSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUE2WlN3cHhuaWFvdzBCL0UzZDRPVk51aDVOalA1OExhUHFwTHYKUTM5ajljc2tSY3B1S1hPck5OOWdUR2NZTEJoa1U1ZTBwZ3dsUzdOTnJ1KzZvNFh1a3JjTFJUK1Ftd1I5QUpjcQp2UlIxcmNxZkhCYTlEdkhtVDlZdVZoTmpDZEtLK211K2VkM2pRZnBHUE1YTmh5WkNtV2JVRDVpK3o4U0NnRTlXCnF5MFpibWxHVG1RVDhFWDVHUWdZeW9DNEhKVDRZLzl6cWg3UjdjcEZycThYbndtRDl4dlhzWXcvOU0xU3hYTU8Kbm5BbG5sK1hIOWVJUGs0NnE3UzUwem1RWWl0dlEyd2Q2bGVnZHU2VWVTd2lXZkdocUtPckxrZTh0M0ZkdXZidQoxQUtYY21QTXpVVTRIOWVIUXU3VTJIZEx6SnJ6eXpBOHpjYzJ3WjZxV2NxL3ZjaTZVZmpUaFJQV0VQc2RPRUh5CnVWalhJS1h1b2RSWTl5WWpOSDBDcGxaY0UvTWIzSUtMcEE5WWEyNGsvbGNXM0ttMTdqTWlQd0JkQ3hqQkJyaW4KYzBqS0l0UFFwQmlpVDhTM1NmRmtqMmFOckF3N2ZnYUhnTHpnUVg4RUkwSWdvUFhTQVl4SXl6eHdvdXE3aWdTeApWcmJncFZYQWVMbUhwUkV4dWFnYXJhNm1rWXlwNlczaStMM3ljUlZsc1V5aVZ2VEVNZW9sYk5jbnhBRS9TRjFyCmI1RXZZaHZDcXZVK2ZBZFd2am1EUmNUNlkwL2FUanJIcWliLzkvbWRqYmx6QWFQVnZyZ0NwOUtBUU5lMkZkRDEKNnBYYVhxK1ZITHNoV0VOK0gvenN2Q2V4djB3RnJjTmpDTkFuL2Z5K2hUOVBxQWpDSEhVOFdUbS9XWHlXMkN4eQphaDlVUHNzQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCL3dRRk1BTUJBZjh3CkhRWURWUjBPQkJZRUZDcnlSbE1tblpRSStrZ0ZJQnVuUUNCMSt1MjlNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUMKQVFEWS9tdzNqTzlUakhBWlBaUzhQWEJTTFhDYktqbzJuTTg1VGI4WXljZ3hjNFNrYmh0c1VoYjVyaFlhRGxuTAo0eHhXbnRxNTlJNjFkbWUzRzdnMW1tSisxWWp5VUJ3RHdTY1pubmJNN0tUMTBzUTEzcTEzVVd5VWR6aFNaZDJzCjd3clhWdDJPblRoQVZZRUxtZmMwSTJqeWVFSHU3QTFpemFXVEpEK0IrT1JLb2s1MVk1RFB4RFBaVlJpaEZiQ24KRDdHajRvbXd3T01sZWhBc3pwd0NUQkhoaHBwc1FrRmI0RWp1S3NIOHpTTWRaV3ZCRWdkcVR4K2djN0hzRkloMgphQi96OTZOY21NNEd5Uy9XanNFdk52SjVTeFNjRGp3dDBrRHJvakdrY2pDQXpLRk1WMkp6elNLTGVyS3h2c1NOCnFCc2Mya1phbXhQVEVYOU9NdWEvbjNzWmFzRTRPcTBDYjFWK1dka2hRaWV6QzVaUGw5QkJmeVRsdVFxQlgyYmcKSTc5UFpOT2V2TzBiZkZGMG1KekhkUkdYZUZQU1k2cXd3SHlDS2x4SG9uVDBtby9ISjZ5S3VGWkVDWWdROHFSLwpWMXhadVhLT0FqVjBqV0dUNlNXTmF0Zmo5dEdhcVdoZDJZdEdXdlFGK3M2NVdPUFczMkJPSWFoYnJZSm9vMGZKCnY4K3p0MDZRZ25FNHNFcjFtQXZGaG9nbUhsZ3M3N1MzN1FFYzgxdlYxRnUxeEx5Z1lBUVZYWXBoOXFMRkZYVVcKZGg0R2V4MlVBeUM2ODEyN3NPZEZLa3pONXdCdEVXeTZRRmZKTlk3dTFHYmVpeEd1OTNhY0pDY3VoTGxITnk1aQpTNS9sZGJ5RkszN3N0VElTMk50dnVkVDUxemhBak1MU2c3THgyQkNEamNUYkd3PT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+            "service": {
+              "name": "gatekeeper-webhook-service",
+              "namespace": "gatekeeper-system",
+              "path": "/v1/admit",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Ignore",
+          "matchPolicy": "Exact",
+          "name": "validation.gatekeeper.sh",
+          "namespaceSelector": {
+            "matchExpressions": [
+              {
+                "key": "kubernetes.io/metadata.name",
+                "operator": "NotIn",
+                "values": [
+                  "kube-system",
+                  "gatekeeper-system"
+                ]
+              }
+            ]
+          },
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "*"
+              ],
+              "apiVersions": [
+                "*"
+              ],
+              "operations": [
+                "CREATE",
+                "CONNECT",
+                "UPDATE"
+              ],
+              "resources": [
+                "*",
+                "pods/ephemeralcontainers",
+                "pods/exec",
+                "pods/log",
+                "pods/eviction",
+                "pods/portforward",
+                "pods/proxy",
+                "pods/attach",
+                "pods/binding",
+                "pods/resize",
+                "deployments/scale",
+                "replicasets/scale",
+                "statefulsets/scale",
+                "replicationcontrollers/scale",
+                "services/proxy",
+                "nodes/proxy",
+                "services/status"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 5
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "ingress-nginx",
+          "meta.helm.sh/release-namespace": "ingress-nginx"
+        },
+        "creationTimestamp": "2025-08-04T14:11:01Z",
+        "generation": 3,
+        "labels": {
+          "app.kubernetes.io/component": "admission-webhook",
+          "app.kubernetes.io/instance": "ingress-nginx",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "ingress-nginx",
+          "app.kubernetes.io/part-of": "ingress-nginx",
+          "app.kubernetes.io/version": "1.13.1",
+          "helm.sh/chart": "ingress-nginx-4.13.1"
+        },
+        "name": "ingress-nginx-admission",
+        "resourceVersion": "7186012",
+        "uid": "499d6b60-660b-48c8-a9a4-308e5cde18b1"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUJkVENDQVJ1Z0F3SUJBZ0lRY1BIbkQ2VVdoZEZRQ2gzL1F4U3pRVEFLQmdncWhrak9QUVFEQWpBUE1RMHcKQ3dZRFZRUUtFd1J1YVd3eE1DQVhEVEkxTURnd05ERTBNRFUxTlZvWUR6SXhNalV3TnpFeE1UUXdOVFUxV2pBUApNUTB3Q3dZRFZRUUtFd1J1YVd3eE1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVZQdG12NlVWCi9PWkpwNHMzVzM5MnFuWkhWQ1FIMkhiZVhzYzZMM28waHVzSENwdGUvcGVlajRUakZuNUN3clovYXhaVVk0ajEKOWN1R0poYUg1bExITUtOWE1GVXdEZ1lEVlIwUEFRSC9CQVFEQWdJRU1CTUdBMVVkSlFRTU1Bb0dDQ3NHQVFVRgpCd01CTUE4R0ExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRkcvSzdVdzQzUDhjUUt5dUpscTNLb3FjCnJRVjVNQW9HQ0NxR1NNNDlCQU1DQTBnQU1FVUNJRStnaEU0UG9oN1F5SDRheGc3cjZpTXRDbElSamorWEJpZS8KUmVoSmRJRWRBaUVBbzIzOXlFejlQNEhMU3FWV1VhUnZFaGFXYUVsemUvTlVoak4zazhrQXVVUT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
+            "service": {
+              "name": "ingress-nginx-controller-admission",
+              "namespace": "ingress-nginx",
+              "path": "/networking/v1/ingresses",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "validate.nginx.ingress.kubernetes.io",
+          "namespaceSelector": {
+            "matchExpressions": [
+              {
+                "key": "control-plane",
+                "operator": "NotIn",
+                "values": [
+                  "true"
+                ]
+              },
+              {
+                "key": "kubernetes.azure.com/managedby",
+                "operator": "NotIn",
+                "values": [
+                  "aks"
+                ]
+              }
+            ]
+          },
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "networking.k8s.io"
+              ],
+              "apiVersions": [
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "ingresses"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-18T16:53:55Z",
+        "generation": 1,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-cel-exception-validating-webhook-cfg",
+        "resourceVersion": "132942220",
+        "uid": "bf9439f0-5ba5-4f7d-8244-9caa83ffce13"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T0RFMU5UTTFOVm9YRFRJM01EVXhPREUyTlRNMU5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTWhBaWlsU3NsK05jZW1CQmpsa0kvR1FSM0ZFSWY2R09ydU1BV3NvajRxdllzZnEzK3VkSHRjbHlZQmEKYXppcjUveklCNmRqNjdFdFQ0eTg2bFJSSU15VlhOYTZzcVBaaGZpbE9FMGNURHhoQzJyMnBSdmhrSFZOVFRTMwpobnVhOWJLdEtZVGs4MExRNkk5UVRDTTN6M0J0ZzVtRTJ6czYvTWlmUkJIakNuYlJZVWh5eEQ0OUJvS002M3duCmpnakRsVlNUdzVxVWhlU2FIQjQvRXIrNGJGcUozSC9LWVF6RVhKZllwaE0xZkxEanVRUVJoaEhINDNZalpObEIKa09QYS8vZk5TR0V4T2sxMnVHN08yRGd0MnBmdW5JRWhiN1FmTXArRy90YzNldFU2UHljMDVlTDZzVEZTQytpUAoxajBXWFJmK2JWZGJWTlFVa2xTM0dMNUVsREVDQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRk9yZzhQWk56YWdaUDA1Z2tySkFyMCt0ekFYT01BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUEyNjQxLzd0QXBpejR6YzNWaXJqeVI2RFZ6THhZQ1JHZUY3VDdOU2E0cApLTk8ybW8rMFhydXh0NGhkcVQ1SXBiN0FERHNjT2ZTR3JLVmM4RVhRb203eHJuUW5kaDBZRkZUSmVvR0hWbTJICmw1UHM4am5xeUtUVzVBQ3NUVUZ3Z0tja2x6ZTRTVFNFdFhKbHp5Q2IxaWZmYmZxb2p6SG1naTArNUVURG03YVYKUUcrd3JmN21KVXFPbkExM1c1aDM2ZjNMdjNKL2pmdEgvWDZVYW96UGFaUVdXdEpmMXlERjY4MHVXbFY0cUt3NAppZ3NicnlJY0ZNU0Q1V1NXUEppTFFiWWt0MzlwSTZBN1hFZXY1R1ZLYlA3WStBQkdWL01lbWc4ZEsydW9JWEx4CjNoeUFuSnEyM0FDOXp0WVlCcysyUnkyYUgyVWg4ekRMdFlGeFZaY2pvREJpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-svc",
+              "namespace": "kyverno",
+              "path": "/celexception/validate",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "kyverno-svc.kyverno.svc",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1alpha1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "policyexceptions"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-19T04:38:35Z",
+        "generation": 1,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-cleanup-validating-webhook-cfg",
+        "resourceVersion": "133215420",
+        "uid": "724eaf78-0e94-4493-9740-9c6b3472203d"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T1RBek16Z3pOVm9YRFRJM01EVXhPVEEwTXpnek5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBUHhTT2NSMEY0SGJPdlZ0b2ZIajA1SzJBb2d4bXp4MW1VdUdSTFpwT1F5YzdyOEl0MGNjNGVmMkFWaGgKTXVIZTdZUFlESHYvU1AyV3VVVlVmODRLRkZ0UlRNTDdBem1RREg4U2VXd0xld01VZzdZQzduL1lFdmwrQ3ZKaQpvZXRuZUZ0NGhkaU1CcFlMb0JjdG8vOEFRaTRNWGpoU3V6cVR6U1NyL3BzTTNrSUsrcUZTNzR4MEVDSXo4ZlhMCjk3U2pDcjZzRGw1RlhscTdGRFF5RnN2NnN0NWxpV2FaL2YvTG9MTE5SdEFZTkMxSW4zR1FsMVhQOHhUUHYxbHMKN1kxVXBYdmtGT0lHTmtualZKUndSVzA4emYwK1ZXZld6RXZxbDJwWjVrTGxGcWVPNW56U0xXUGVHWmJlMFhpTApQVHpTdURDNFR0SGhaSEZ5UFRuVFcxRVNlK01DQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRkRkRU12V3RoUUluOUJWdklpSjRpU20xZ2xORE1BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUM3YVRuVFVKS2s2QTJ0TEZ2c1hDWkh2YWJlam5BVnduSUx4OUs4SFF0TAp2U1BwMjFCSm1NRjUwT3l2bi83SGFwMnBjd3FEdkZTWE92dFZQZ1M0TnYvZkRaRDFKamgwbTBZSm5TOUtXVlpYCmZaRm94QUxtbTNlcTF2akJtZTczQWVYZnZMRlNoVGVvYVkrNDRTcEljNUhJTHpVbFpqbXVpaDM0UEF3MzlZdEsKWjJCSmJIbFdMcDBvL2NRM0pxRXMwdE5HSFJSSU5EcWxwVmdRTEl0bmhmRDVvWk04SFVOUnlnbEppQ20zNDNKMgowYnIyWmtvMVVJUGVNNE9GZnVEcXpXR3FUNHo0OG91OHB2OXhNS2RDYk4xK3B6Y1IvMFVRdlVnTXNVNjlYNXpYCjNrWUNTaVBHd3hrN1FwQUJlOUZXSVlXQUFhUURIaEdxSlNRbmtJZDVhcWFLCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-cleanup-controller",
+              "namespace": "kyverno",
+              "path": "/validate",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "kyverno-cleanup-controller.kyverno.svc",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "kyverno.io"
+              ],
+              "apiVersions": [
+                "v2beta1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "cleanuppolicies/*",
+                "clustercleanuppolicies/*"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-18T16:53:55Z",
+        "generation": 1,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-exception-validating-webhook-cfg",
+        "resourceVersion": "132942218",
+        "uid": "a998d1d2-7ae1-4868-b212-2d4d35cdd535"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T0RFMU5UTTFOVm9YRFRJM01EVXhPREUyTlRNMU5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTWhBaWlsU3NsK05jZW1CQmpsa0kvR1FSM0ZFSWY2R09ydU1BV3NvajRxdllzZnEzK3VkSHRjbHlZQmEKYXppcjUveklCNmRqNjdFdFQ0eTg2bFJSSU15VlhOYTZzcVBaaGZpbE9FMGNURHhoQzJyMnBSdmhrSFZOVFRTMwpobnVhOWJLdEtZVGs4MExRNkk5UVRDTTN6M0J0ZzVtRTJ6czYvTWlmUkJIakNuYlJZVWh5eEQ0OUJvS002M3duCmpnakRsVlNUdzVxVWhlU2FIQjQvRXIrNGJGcUozSC9LWVF6RVhKZllwaE0xZkxEanVRUVJoaEhINDNZalpObEIKa09QYS8vZk5TR0V4T2sxMnVHN08yRGd0MnBmdW5JRWhiN1FmTXArRy90YzNldFU2UHljMDVlTDZzVEZTQytpUAoxajBXWFJmK2JWZGJWTlFVa2xTM0dMNUVsREVDQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRk9yZzhQWk56YWdaUDA1Z2tySkFyMCt0ekFYT01BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUEyNjQxLzd0QXBpejR6YzNWaXJqeVI2RFZ6THhZQ1JHZUY3VDdOU2E0cApLTk8ybW8rMFhydXh0NGhkcVQ1SXBiN0FERHNjT2ZTR3JLVmM4RVhRb203eHJuUW5kaDBZRkZUSmVvR0hWbTJICmw1UHM4am5xeUtUVzVBQ3NUVUZ3Z0tja2x6ZTRTVFNFdFhKbHp5Q2IxaWZmYmZxb2p6SG1naTArNUVURG03YVYKUUcrd3JmN21KVXFPbkExM1c1aDM2ZjNMdjNKL2pmdEgvWDZVYW96UGFaUVdXdEpmMXlERjY4MHVXbFY0cUt3NAppZ3NicnlJY0ZNU0Q1V1NXUEppTFFiWWt0MzlwSTZBN1hFZXY1R1ZLYlA3WStBQkdWL01lbWc4ZEsydW9JWEx4CjNoeUFuSnEyM0FDOXp0WVlCcysyUnkyYUgyVWg4ekRMdFlGeFZaY2pvREJpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-svc",
+              "namespace": "kyverno",
+              "path": "/exceptionvalidate",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "kyverno-svc.kyverno.svc",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "kyverno.io"
+              ],
+              "apiVersions": [
+                "v2alpha1",
+                "v2beta1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "policyexceptions"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-18T16:53:55Z",
+        "generation": 1,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-global-context-validating-webhook-cfg",
+        "resourceVersion": "132942216",
+        "uid": "9c665fb9-b071-4579-8449-118e9560433e"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T0RFMU5UTTFOVm9YRFRJM01EVXhPREUyTlRNMU5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTWhBaWlsU3NsK05jZW1CQmpsa0kvR1FSM0ZFSWY2R09ydU1BV3NvajRxdllzZnEzK3VkSHRjbHlZQmEKYXppcjUveklCNmRqNjdFdFQ0eTg2bFJSSU15VlhOYTZzcVBaaGZpbE9FMGNURHhoQzJyMnBSdmhrSFZOVFRTMwpobnVhOWJLdEtZVGs4MExRNkk5UVRDTTN6M0J0ZzVtRTJ6czYvTWlmUkJIakNuYlJZVWh5eEQ0OUJvS002M3duCmpnakRsVlNUdzVxVWhlU2FIQjQvRXIrNGJGcUozSC9LWVF6RVhKZllwaE0xZkxEanVRUVJoaEhINDNZalpObEIKa09QYS8vZk5TR0V4T2sxMnVHN08yRGd0MnBmdW5JRWhiN1FmTXArRy90YzNldFU2UHljMDVlTDZzVEZTQytpUAoxajBXWFJmK2JWZGJWTlFVa2xTM0dMNUVsREVDQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRk9yZzhQWk56YWdaUDA1Z2tySkFyMCt0ekFYT01BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUEyNjQxLzd0QXBpejR6YzNWaXJqeVI2RFZ6THhZQ1JHZUY3VDdOU2E0cApLTk8ybW8rMFhydXh0NGhkcVQ1SXBiN0FERHNjT2ZTR3JLVmM4RVhRb203eHJuUW5kaDBZRkZUSmVvR0hWbTJICmw1UHM4am5xeUtUVzVBQ3NUVUZ3Z0tja2x6ZTRTVFNFdFhKbHp5Q2IxaWZmYmZxb2p6SG1naTArNUVURG03YVYKUUcrd3JmN21KVXFPbkExM1c1aDM2ZjNMdjNKL2pmdEgvWDZVYW96UGFaUVdXdEpmMXlERjY4MHVXbFY0cUt3NAppZ3NicnlJY0ZNU0Q1V1NXUEppTFFiWWt0MzlwSTZBN1hFZXY1R1ZLYlA3WStBQkdWL01lbWc4ZEsydW9JWEx4CjNoeUFuSnEyM0FDOXp0WVlCcysyUnkyYUgyVWg4ekRMdFlGeFZaY2pvREJpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-svc",
+              "namespace": "kyverno",
+              "path": "/globalcontextvalidate",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "kyverno-svc.kyverno.svc",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "kyverno.io"
+              ],
+              "apiVersions": [
+                "v2alpha1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "globalcontextentries"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-18T16:53:55Z",
+        "generation": 1,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-policy-validating-webhook-cfg",
+        "resourceVersion": "132942217",
+        "uid": "e4052c53-ed68-4fc9-81e4-f209d99099da"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T0RFMU5UTTFOVm9YRFRJM01EVXhPREUyTlRNMU5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTWhBaWlsU3NsK05jZW1CQmpsa0kvR1FSM0ZFSWY2R09ydU1BV3NvajRxdllzZnEzK3VkSHRjbHlZQmEKYXppcjUveklCNmRqNjdFdFQ0eTg2bFJSSU15VlhOYTZzcVBaaGZpbE9FMGNURHhoQzJyMnBSdmhrSFZOVFRTMwpobnVhOWJLdEtZVGs4MExRNkk5UVRDTTN6M0J0ZzVtRTJ6czYvTWlmUkJIakNuYlJZVWh5eEQ0OUJvS002M3duCmpnakRsVlNUdzVxVWhlU2FIQjQvRXIrNGJGcUozSC9LWVF6RVhKZllwaE0xZkxEanVRUVJoaEhINDNZalpObEIKa09QYS8vZk5TR0V4T2sxMnVHN08yRGd0MnBmdW5JRWhiN1FmTXArRy90YzNldFU2UHljMDVlTDZzVEZTQytpUAoxajBXWFJmK2JWZGJWTlFVa2xTM0dMNUVsREVDQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRk9yZzhQWk56YWdaUDA1Z2tySkFyMCt0ekFYT01BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUEyNjQxLzd0QXBpejR6YzNWaXJqeVI2RFZ6THhZQ1JHZUY3VDdOU2E0cApLTk8ybW8rMFhydXh0NGhkcVQ1SXBiN0FERHNjT2ZTR3JLVmM4RVhRb203eHJuUW5kaDBZRkZUSmVvR0hWbTJICmw1UHM4am5xeUtUVzVBQ3NUVUZ3Z0tja2x6ZTRTVFNFdFhKbHp5Q2IxaWZmYmZxb2p6SG1naTArNUVURG03YVYKUUcrd3JmN21KVXFPbkExM1c1aDM2ZjNMdjNKL2pmdEgvWDZVYW96UGFaUVdXdEpmMXlERjY4MHVXbFY0cUt3NAppZ3NicnlJY0ZNU0Q1V1NXUEppTFFiWWt0MzlwSTZBN1hFZXY1R1ZLYlA3WStBQkdWL01lbWc4ZEsydW9JWEx4CjNoeUFuSnEyM0FDOXp0WVlCcysyUnkyYUgyVWg4ekRMdFlGeFZaY2pvREJpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-svc",
+              "namespace": "kyverno",
+              "path": "/policyvalidate",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "validate-policy.kyverno.svc",
+          "namespaceSelector": {},
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "kyverno.io"
+              ],
+              "apiVersions": [
+                "v1",
+                "v2beta1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "clusterpolicies",
+                "policies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "validatingpolicies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "namespacedvalidatingpolicies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "imagevalidatingpolicies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "namespacedimagevalidatingpolicies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "generatingpolicies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "namespacedgeneratingpolicies"
+              ],
+              "scope": "*"
+            },
+            {
+              "apiGroups": [
+                "policies.kyverno.io"
+              ],
+              "apiVersions": [
+                "v1alpha1",
+                "v1beta1",
+                "v1"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "deletingpolicies"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-18T16:53:55Z",
+        "generation": 2,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-resource-validating-webhook-cfg",
+        "resourceVersion": "191704844",
+        "uid": "5cc28d69-8218-4816-9268-4ec92c248ead"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T0RFMU5UTTFOVm9YRFRJM01EVXhPREUyTlRNMU5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTWhBaWlsU3NsK05jZW1CQmpsa0kvR1FSM0ZFSWY2R09ydU1BV3NvajRxdllzZnEzK3VkSHRjbHlZQmEKYXppcjUveklCNmRqNjdFdFQ0eTg2bFJSSU15VlhOYTZzcVBaaGZpbE9FMGNURHhoQzJyMnBSdmhrSFZOVFRTMwpobnVhOWJLdEtZVGs4MExRNkk5UVRDTTN6M0J0ZzVtRTJ6czYvTWlmUkJIakNuYlJZVWh5eEQ0OUJvS002M3duCmpnakRsVlNUdzVxVWhlU2FIQjQvRXIrNGJGcUozSC9LWVF6RVhKZllwaE0xZkxEanVRUVJoaEhINDNZalpObEIKa09QYS8vZk5TR0V4T2sxMnVHN08yRGd0MnBmdW5JRWhiN1FmTXArRy90YzNldFU2UHljMDVlTDZzVEZTQytpUAoxajBXWFJmK2JWZGJWTlFVa2xTM0dMNUVsREVDQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRk9yZzhQWk56YWdaUDA1Z2tySkFyMCt0ekFYT01BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUEyNjQxLzd0QXBpejR6YzNWaXJqeVI2RFZ6THhZQ1JHZUY3VDdOU2E0cApLTk8ybW8rMFhydXh0NGhkcVQ1SXBiN0FERHNjT2ZTR3JLVmM4RVhRb203eHJuUW5kaDBZRkZUSmVvR0hWbTJICmw1UHM4am5xeUtUVzVBQ3NUVUZ3Z0tja2x6ZTRTVFNFdFhKbHp5Q2IxaWZmYmZxb2p6SG1naTArNUVURG03YVYKUUcrd3JmN21KVXFPbkExM1c1aDM2ZjNMdjNKL2pmdEgvWDZVYW96UGFaUVdXdEpmMXlERjY4MHVXbFY0cUt3NAppZ3NicnlJY0ZNU0Q1V1NXUEppTFFiWWt0MzlwSTZBN1hFZXY1R1ZLYlA3WStBQkdWL01lbWc4ZEsydW9JWEx4CjNoeUFuSnEyM0FDOXp0WVlCcysyUnkyYUgyVWg4ekRMdFlGeFZaY2pvREJpCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-svc",
+              "namespace": "kyverno",
+              "path": "/validate/fail",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Fail",
+          "matchPolicy": "Equivalent",
+          "name": "validate.kyverno.svc-fail",
+          "namespaceSelector": {
+            "matchExpressions": [
+              {
+                "key": "kubernetes.io/metadata.name",
+                "operator": "NotIn",
+                "values": [
+                  "kube-system"
+                ]
+              },
+              {
+                "key": "kubernetes.io/metadata.name",
+                "operator": "NotIn",
+                "values": [
+                  "kyverno"
+                ]
+              }
+            ]
+          },
+          "objectSelector": {},
+          "rules": [
+            {
+              "apiGroups": [
+                "kradle.a5c.ai"
+              ],
+              "apiVersions": [
+                "v1alpha1"
+              ],
+              "operations": [
+                "CONNECT",
+                "CREATE",
+                "DELETE",
+                "UPDATE"
+              ],
+              "resources": [
+                "agentdispatchruns",
+                "agentprocesstemplates",
+                "agenttriggerrules"
+              ],
+              "scope": "Namespaced"
+            },
+            {
+              "apiGroups": [
+                "krate.a5c.ai"
+              ],
+              "apiVersions": [
+                "v1alpha1"
+              ],
+              "operations": [
+                "CONNECT",
+                "CREATE",
+                "DELETE",
+                "UPDATE"
+              ],
+              "resources": [
+                "agentdispatchruns",
+                "agenttriggerrules"
+              ],
+              "scope": "Namespaced"
+            }
+          ],
+          "sideEffects": "NoneOnDryRun",
+          "timeoutSeconds": 10
+        }
+      ]
+    },
+    {
+      "apiVersion": "admissionregistration.k8s.io/v1",
+      "kind": "ValidatingWebhookConfiguration",
+      "metadata": {
+        "annotations": {
+          "admissions.enforcer/disabled": "true"
+        },
+        "creationTimestamp": "2026-05-19T04:38:35Z",
+        "generation": 1,
+        "labels": {
+          "webhook.kyverno.io/managed-by": "kyverno"
+        },
+        "name": "kyverno-ttl-validating-webhook-cfg",
+        "resourceVersion": "133215421",
+        "uid": "f5556fc3-12ab-43f0-885e-738666bbd3ce"
+      },
+      "webhooks": [
+        {
+          "admissionReviewVersions": [
+            "v1"
+          ],
+          "clientConfig": {
+            "caBundle": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM3VENDQWRXZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFZTVJZd0ZBWURWUVFEREEwcUxtdDUKZG1WeWJtOHVjM1pqTUI0WERUSTJNRFV4T1RBek16Z3pOVm9YRFRJM01EVXhPVEEwTXpnek5Wb3dHREVXTUJRRwpBMVVFQXd3TktpNXJlWFpsY201dkxuTjJZekNDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBUHhTT2NSMEY0SGJPdlZ0b2ZIajA1SzJBb2d4bXp4MW1VdUdSTFpwT1F5YzdyOEl0MGNjNGVmMkFWaGgKTXVIZTdZUFlESHYvU1AyV3VVVlVmODRLRkZ0UlRNTDdBem1RREg4U2VXd0xld01VZzdZQzduL1lFdmwrQ3ZKaQpvZXRuZUZ0NGhkaU1CcFlMb0JjdG8vOEFRaTRNWGpoU3V6cVR6U1NyL3BzTTNrSUsrcUZTNzR4MEVDSXo4ZlhMCjk3U2pDcjZzRGw1RlhscTdGRFF5RnN2NnN0NWxpV2FaL2YvTG9MTE5SdEFZTkMxSW4zR1FsMVhQOHhUUHYxbHMKN1kxVXBYdmtGT0lHTmtualZKUndSVzA4emYwK1ZXZld6RXZxbDJwWjVrTGxGcWVPNW56U0xXUGVHWmJlMFhpTApQVHpTdURDNFR0SGhaSEZ5UFRuVFcxRVNlK01DQXdFQUFhTkNNRUF3RGdZRFZSMFBBUUgvQkFRREFnS2tNQThHCkExVWRFd0VCL3dRRk1BTUJBZjh3SFFZRFZSME9CQllFRkRkRU12V3RoUUluOUJWdklpSjRpU20xZ2xORE1BMEcKQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUM3YVRuVFVKS2s2QTJ0TEZ2c1hDWkh2YWJlam5BVnduSUx4OUs4SFF0TAp2U1BwMjFCSm1NRjUwT3l2bi83SGFwMnBjd3FEdkZTWE92dFZQZ1M0TnYvZkRaRDFKamgwbTBZSm5TOUtXVlpYCmZaRm94QUxtbTNlcTF2akJtZTczQWVYZnZMRlNoVGVvYVkrNDRTcEljNUhJTHpVbFpqbXVpaDM0UEF3MzlZdEsKWjJCSmJIbFdMcDBvL2NRM0pxRXMwdE5HSFJSSU5EcWxwVmdRTEl0bmhmRDVvWk04SFVOUnlnbEppQ20zNDNKMgowYnIyWmtvMVVJUGVNNE9GZnVEcXpXR3FUNHo0OG91OHB2OXhNS2RDYk4xK3B6Y1IvMFVRdlVnTXNVNjlYNXpYCjNrWUNTaVBHd3hrN1FwQUJlOUZXSVlXQUFhUURIaEdxSlNRbmtJZDVhcWFLCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K",
+            "service": {
+              "name": "kyverno-cleanup-controller",
+              "namespace": "kyverno",
+              "path": "/verifyttl",
+              "port": 443
+            }
+          },
+          "failurePolicy": "Ignore",
+          "matchPolicy": "Equivalent",
+          "name": "kyverno-cleanup-controller.kyverno.svc",
+          "namespaceSelector": {},
+          "objectSelector": {
+            "matchExpressions": [
+              {
+                "key": "cleanup.kyverno.io/ttl",
+                "operator": "Exists"
+              }
+            ]
+          },
+          "rules": [
+            {
+              "apiGroups": [
+                "*"
+              ],
+              "apiVersions": [
+                "*"
+              ],
+              "operations": [
+                "CREATE",
+                "UPDATE"
+              ],
+              "resources": [
+                "*"
+              ],
+              "scope": "*"
+            }
+          ],
+          "sideEffects": "None",
+          "timeoutSeconds": 10
+        }
+      ]
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

@@ -1,0 +1,61 @@
+[
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "location": "North Europe",
+    "name": "geekonomy-cae-mkb5l5",
+    "properties": {
+      "appLogsConfiguration": {
+        "destination": "log-analytics",
+        "logAnalyticsConfiguration": {
+          "customerId": "3213de54-0218-4913-99d2-40ddaaac1fb1",
+          "sharedKey": null
+        }
+      },
+      "customDomainConfiguration": {
+        "certificatePassword": null,
+        "certificateValue": null,
+        "customDomainVerificationId": "C2B425A984517990227CB472406DA5C25A496FB24B772AC0B6E3BC4597F59A3F",
+        "dnsSuffix": null,
+        "expirationDate": null,
+        "subjectName": null,
+        "thumbprint": null
+      },
+      "daprAIConnectionString": null,
+      "daprAIInstrumentationKey": null,
+      "daprConfiguration": {
+        "version": "1.16.4-msft.12"
+      },
+      "defaultDomain": "yellowwater-3ed650dd.northeurope.azurecontainerapps.io",
+      "eventStreamEndpoint": "https://northeurope.azurecontainerapps.dev/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/managedEnvironments/geekonomy-cae-mkb5l5/eventstream",
+      "infrastructureResourceGroup": null,
+      "kedaConfiguration": {
+        "version": "2.18.1"
+      },
+      "peerAuthentication": {
+        "mtls": {
+          "enabled": false
+        }
+      },
+      "peerTrafficConfiguration": {
+        "encryption": {
+          "enabled": false
+        }
+      },
+      "provisioningState": "Succeeded",
+      "staticIp": "68.219.61.236",
+      "vnetConfiguration": null,
+      "workloadProfiles": null,
+      "zoneRedundant": false
+    },
+    "resourceGroup": "geekonomy-prod",
+    "systemData": {
+      "createdAt": "2026-01-06T11:04:36.8326556",
+      "createdBy": "benihakak@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2026-01-07T09:57:07.7828772",
+      "lastModifiedBy": "benihakak@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "type": "Microsoft.App/managedEnvironments"
+  }
+]

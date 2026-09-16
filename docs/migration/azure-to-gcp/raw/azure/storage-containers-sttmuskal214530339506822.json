@@ -1,0 +1,94 @@
+[
+  {
+    "deleted": null,
+    "encryptionScope": {
+      "defaultEncryptionScope": "$account-encryption-key",
+      "preventEncryptionScopeOverride": false
+    },
+    "immutableStorageWithVersioningEnabled": false,
+    "metadata": null,
+    "name": "b2236fd8-d083-4283-a408-a4e4a5b6b381-azureml",
+    "properties": {
+      "etag": "\"0x8DE873CF661328A\"",
+      "hasImmutabilityPolicy": false,
+      "hasLegalHold": false,
+      "lastModified": "2026-03-21T11:28:23+00:00",
+      "lease": {
+        "duration": null,
+        "state": "available",
+        "status": "unlocked"
+      },
+      "publicAccess": null
+    },
+    "version": null
+  },
+  {
+    "deleted": null,
+    "encryptionScope": {
+      "defaultEncryptionScope": "$account-encryption-key",
+      "preventEncryptionScopeOverride": false
+    },
+    "immutableStorageWithVersioningEnabled": false,
+    "metadata": null,
+    "name": "b2236fd8-d083-4283-a408-a4e4a5b6b381-azureml-blobstore",
+    "properties": {
+      "etag": "\"0x8DE873CF63A4F51\"",
+      "hasImmutabilityPolicy": false,
+      "hasLegalHold": false,
+      "lastModified": "2026-03-21T11:28:23+00:00",
+      "lease": {
+        "duration": null,
+        "state": "available",
+        "status": "unlocked"
+      },
+      "publicAccess": null
+    },
+    "version": null
+  },
+  {
+    "deleted": null,
+    "encryptionScope": {
+      "defaultEncryptionScope": "$account-encryption-key",
+      "preventEncryptionScopeOverride": false
+    },
+    "immutableStorageWithVersioningEnabled": false,
+    "metadata": null,
+    "name": "insights-logs-auditevent",
+    "properties": {
+      "etag": "\"0x8DD48FB6E72CA79\"",
+      "hasImmutabilityPolicy": false,
+      "hasLegalHold": false,
+      "lastModified": "2025-02-09T11:18:08+00:00",
+      "lease": {
+        "duration": null,
+        "state": "available",
+        "status": "unlocked"
+      },
+      "publicAccess": null
+    },
+    "version": null
+  },
+  {
+    "deleted": null,
+    "encryptionScope": {
+      "defaultEncryptionScope": "$account-encryption-key",
+      "preventEncryptionScopeOverride": false
+    },
+    "immutableStorageWithVersioningEnabled": false,
+    "metadata": null,
+    "name": "insights-metrics-pt1m",
+    "properties": {
+      "etag": "\"0x8DD48F7EE70D4D2\"",
+      "hasImmutabilityPolicy": false,
+      "hasLegalHold": false,
+      "lastModified": "2025-02-09T10:53:05+00:00",
+      "lease": {
+        "duration": null,
+        "state": "available",
+        "status": "unlocked"
+      },
+      "publicAccess": null
+    },
+    "version": null
+  }
+]

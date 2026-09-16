@@ -1,0 +1,574 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-03-24T11:58:14Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "name": "aeq-data-pvc",
+        "namespace": "aeq",
+        "resourceVersion": "109982020",
+        "uid": "480a2dba-370a-43a5-a669-4c25c9a53972"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        },
+        "storageClassName": "managed-csi",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "phase": "Pending"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000006",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2025-09-02T16:40:17Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "name": "data-a5c-app-postgres-0",
+        "namespace": "app-staging",
+        "resourceVersion": "20630375",
+        "uid": "c3ee816e-2e39-456e-84d0-5d3adc7cfb94"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "10Gi"
+          }
+        },
+        "storageClassName": "default",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "10Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000006",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2025-09-06T07:44:38Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "name": "data-a5c-app-redis-0",
+        "namespace": "app-staging",
+        "resourceVersion": "22355744",
+        "uid": "1cd94e10-b93d-42ab-9528-be25a83b52a4"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        },
+        "storageClassName": "default",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "1Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000000",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2025-08-21T06:02:42Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "name": "data-a5c-app-postgres-0",
+        "namespace": "app",
+        "resourceVersion": "12973196",
+        "uid": "66704332-aa3f-41fb-abe3-21e070780cae"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "10Gi"
+          }
+        },
+        "storageClassName": "default",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-66704332-aa3f-41fb-abe3-21e070780cae"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "10Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000000",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2025-09-06T15:17:13Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "name": "data-a5c-app-redis-0",
+        "namespace": "app",
+        "resourceVersion": "22502823",
+        "uid": "0dde3922-ab45-4d1c-a1d3-17a944b48593"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Gi"
+          }
+        },
+        "storageClassName": "default",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "1Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes"
+        },
+        "creationTimestamp": "2026-05-14T14:53:13Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app": "atlas-postgres"
+        },
+        "name": "data-atlas-postgres-0",
+        "namespace": "atlas-staging",
+        "resourceVersion": "131202196",
+        "uid": "0ab92538-79c0-4625-ac8b-7f523ad1553a"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "8Gi"
+          }
+        },
+        "storageClassName": "atlas-postgres-static",
+        "volumeMode": "Filesystem",
+        "volumeName": "atlas-staging-atlas-postgres"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "8Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes"
+        },
+        "creationTimestamp": "2026-06-30T09:12:13Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app": "atlas-postgres"
+        },
+        "name": "data-atlas-postgres-0",
+        "namespace": "atlas",
+        "resourceVersion": "157706610",
+        "uid": "90e96212-e586-408a-a53a-bf47bb7dcd8b"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "8Gi"
+          }
+        },
+        "storageClassName": "atlas-postgres-static",
+        "volumeMode": "Filesystem",
+        "volumeName": "atlas-atlas-postgres"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "8Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes"
+        },
+        "creationTimestamp": "2026-06-09T07:15:35Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app": "content-studio-postgres"
+        },
+        "name": "data-content-studio-postgres-0",
+        "namespace": "content-studio",
+        "resourceVersion": "145451351",
+        "uid": "b9234fb2-5ffa-464b-8eaf-44a75419cd22"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "8Gi"
+          }
+        },
+        "storageClassName": "content-studio-postgres-static",
+        "volumeMode": "Filesystem",
+        "volumeName": "content-studio-postgres-pv"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "8Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000001",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2025-07-30T16:25:05Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/component": "database",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-database-pvc",
+        "namespace": "hub-development",
+        "resourceVersion": "119622",
+        "uid": "59ccf124-b094-45ef-8dd4-79f8bf381066"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "100Gi"
+          }
+        },
+        "storageClassName": "managed-premium",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-59ccf124-b094-45ef-8dd4-79f8bf381066"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "100Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000000",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2025-07-30T16:25:05Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/component": "cache",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-redis-pvc",
+        "namespace": "hub-development",
+        "resourceVersion": "119634",
+        "uid": "f9e96cba-e872-48b9-b555-448ee38acaea"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "10Gi"
+          }
+        },
+        "storageClassName": "managed-premium",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-f9e96cba-e872-48b9-b555-448ee38acaea"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "10Gi"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "pv.kubernetes.io/bind-completed": "yes",
+          "pv.kubernetes.io/bound-by-controller": "yes",
+          "volume.beta.kubernetes.io/storage-provisioner": "file.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000000",
+          "volume.kubernetes.io/storage-provisioner": "file.csi.azure.com"
+        },
+        "creationTimestamp": "2025-07-30T16:25:05Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/component": "storage",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-repositories-pvc",
+        "namespace": "hub-development",
+        "resourceVersion": "939983",
+        "uid": "7c8e1234-819a-44d7-8e77-0ab37e67bf86"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "1Ti"
+          }
+        },
+        "storageClassName": "azure-files",
+        "volumeMode": "Filesystem",
+        "volumeName": "pvc-7c8e1234-819a-44d7-8e77-0ab37e67bf86"
+      },
+      "status": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "1Ti"
+        },
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000000",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2026-06-25T21:19:26Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "prosody"
+        },
+        "name": "prosody-data-kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "155098248",
+        "uid": "41fc7e74-1ad9-4077-9469-71e8683f2ad7"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "3G"
+          }
+        },
+        "storageClassName": "default",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "phase": "Pending"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolumeClaim",
+      "metadata": {
+        "annotations": {
+          "volume.beta.kubernetes.io/storage-provisioner": "disk.csi.azure.com",
+          "volume.kubernetes.io/selected-node": "aks-default-28513622-vmss000000",
+          "volume.kubernetes.io/storage-provisioner": "disk.csi.azure.com"
+        },
+        "creationTimestamp": "2026-06-30T16:36:11Z",
+        "finalizers": [
+          "kubernetes.io/pvc-protection"
+        ],
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "prosody"
+        },
+        "name": "prosody-data-kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "157887401",
+        "uid": "66cc352e-c4d0-420e-b868-c77d8f6b9df2"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "3G"
+          }
+        },
+        "storageClassName": "default",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "phase": "Pending"
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

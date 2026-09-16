@@ -1,0 +1,28 @@
+a5c-app	tags=5	manifests=10	created=2025-08-19	lastPush=2026-08-27	newestTags=21bf6e7df269 ; 369bdcaf3dc0 ; 5ae274bf81de	sha40=0	sha12=5
+a5c-install	tags=5	manifests=10	created=2025-09-13	lastPush=2026-08-27	newestTags=20250913172226 ; 20250913164659 ; 20250913163713	sha40=0	sha12=0
+adapters-agent	tags=22	manifests=74	created=2026-06-05	lastPush=2026-09-05	newestTags=57b13a4c535633fef005e1660996cfdb3629fbbd|latest ;  ; 	sha40=21	sha12=0
+aeq-dashboard	tags=5	manifests=9	created=2026-03-15	lastPush=2026-08-27	newestTags=54a0641bf65378ba94214639e246ddd28e178250|latest ; 4f1f1b99bb898c1dacd62dd09f6161207c1b2e11 ; 6f2d6d033a5075568ac607c14daa37e9330901da	sha40=4	sha12=0
+aeq-mcp	tags=5	manifests=9	created=2026-03-26	lastPush=2026-08-27	newestTags=54a0641bf65378ba94214639e246ddd28e178250|latest ; 4f1f1b99bb898c1dacd62dd09f6161207c1b2e11 ; 6f2d6d033a5075568ac607c14daa37e9330901da	sha40=4	sha12=0
+aeq-server	tags=5	manifests=9	created=2026-03-15	lastPush=2026-08-27	newestTags=4f1f1b99bb898c1dacd62dd09f6161207c1b2e11|latest ; 6f2d6d033a5075568ac607c14daa37e9330901da ; f631cb8a86604cdc97ecf5aac3133e2582f972e9	sha40=4	sha12=0
+atlas-webui	tags=22	manifests=77	created=2026-05-06	lastPush=2026-09-05	newestTags=57b13a4c535633fef005e1660996cfdb3629fbbd ;  ; 	sha40=22	sha12=0
+babysitter-web	tags=5	manifests=17	created=2026-02-21	lastPush=2026-08-27	newestTags=staging-18addbf7df921ccc85a0e87c7ed270763760e68d|staging-latest ;  ; 	sha40=0	sha12=0
+babysitter-web-runner	tags=5	manifests=17	created=2026-02-21	lastPush=2026-08-27	newestTags=staging-18addbf7df921ccc85a0e87c7ed270763760e68d ;  ; staging-fa69826b0c6abedf3533b2994abd31d0f79c7990	sha40=0	sha12=0
+bmux-server	tags=2	manifests=1	created=2026-04-21	lastPush=2026-04-21	newestTags=	sha40=1	sha12=0
+budgets	tags=5	manifests=10	created=2025-09-04	lastPush=2026-08-27	newestTags=ddfc3ff3c199 ; b5ebf21906b9 ; 3222cbb5a929	sha40=0	sha12=5
+claude-web	tags=5	manifests=17	created=2026-02-06	lastPush=2026-08-27	newestTags=staging-0fe2b27a1072cfe11a26cf7450da3fce9ecf0a31|staging-latest ;  ; 	sha40=0	sha12=0
+claude-web-runner	tags=5	manifests=16	created=2026-02-06	lastPush=2026-08-27	newestTags=staging-0fe2b27a1072cfe11a26cf7450da3fce9ecf0a31 ;  ; staging-d73090b418eeeeaa402378ca7d254933dab25ac3	sha40=0	sha12=0
+content-studio	tags=5	manifests=20	created=2026-06-09	lastPush=2026-08-27	newestTags=589e29f73f93 ;  ; 	sha40=0	sha12=5
+hub/backend	tags=5	manifests=10	created=2025-07-31	lastPush=2026-08-27	newestTags=1b76672-dirty ; 70743a7-dirty ; 3de4c26-dirty	sha40=0	sha12=0
+hub/frontend	tags=5	manifests=10	created=2025-07-31	lastPush=2026-08-27	newestTags=1b76672-dirty ; 70743a7-dirty ; 3de4c26-dirty	sha40=0	sha12=0
+hub/github-runner	tags=5	manifests=10	created=2025-08-03	lastPush=2026-08-27	newestTags=1b76672-dirty ; 70743a7-dirty ; 3de4c26-dirty	sha40=0	sha12=0
+jitsi-agent-sidecar	tags=22	manifests=74	created=2026-06-25	lastPush=2026-09-05	newestTags=57b13a4c535633fef005e1660996cfdb3629fbbd|latest ;  ; 	sha40=21	sha12=0
+kradle-controller	tags=21	manifests=74	created=2026-06-03	lastPush=2026-09-05	newestTags=57b13a4c535633fef005e1660996cfdb3629fbbd ;  ; 	sha40=21	sha12=0
+kradle-web	tags=21	manifests=74	created=2026-06-03	lastPush=2026-09-05	newestTags=57b13a4c535633fef005e1660996cfdb3629fbbd ;  ; 	sha40=21	sha12=0
+krate-controller	tags=5	manifests=20	created=2026-05-12	lastPush=2026-08-27	newestTags=9d8c031b48759f4498f0479d8c53ab2fa93cfada ;  ; 	sha40=5	sha12=0
+krate-web	tags=5	manifests=20	created=2026-05-12	lastPush=2026-08-27	newestTags=9d8c031b48759f4498f0479d8c53ab2fa93cfada ;  ; 	sha40=5	sha12=0
+onboard	tags=5	manifests=10	created=2025-09-15	lastPush=2026-08-27	newestTags=39f36f15197f ; b08422a5d69e ; 65328ec83e6a	sha40=0	sha12=5
+tokens-dispenser	tags=5	manifests=10	created=2025-09-11	lastPush=2026-08-27	newestTags=e4ec79ed3e0f ; 415394fe57bd ; 68cde72edeec	sha40=0	sha12=5
+geekonomy/geekonomy-migrator	tags=10	lastPush=2026-01-12
+geekonomy/geekonomy-transcriber	tags=13	lastPush=2026-01-12
+geekonomy/geekonomy-web	tags=15	lastPush=2026-01-12
+geekonomy/geekonomy-worker	tags=13	lastPush=2026-01-12

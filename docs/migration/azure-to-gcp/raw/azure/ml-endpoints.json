@@ -1,0 +1,134 @@
+[
+  {
+    "changedTime": "2024-08-14T11:00:38.282096+00:00",
+    "createdTime": "2024-08-14T10:50:13.831943+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal-0301/serverlessEndpoints/Phi-3-medium-128k-instruct-mdbjo",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tal-0301/Phi-3-medium-128k-instruct-mdbjo",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Consumption",
+      "size": null,
+      "tier": null
+    },
+    "systemData": {
+      "createdAt": "2024-08-14T10:50:13.9903218Z",
+      "createdBy": "tal@personoids.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2024-08-14T10:50:13.9903218Z",
+      "lastModifiedBy": "tal@personoids.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": null,
+    "type": "Microsoft.MachineLearningServices/workspaces/serverlessEndpoints"
+  },
+  {
+    "changedTime": "2024-09-01T17:34:03.203484+00:00",
+    "createdTime": "2024-09-01T17:23:44.020216+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal-0653/serverlessEndpoints/Phi-3-5-mini-instruct-azxsa",
+    "identity": null,
+    "kind": null,
+    "location": "eastus",
+    "managedBy": null,
+    "name": "tal-0653/Phi-3-5-mini-instruct-azxsa",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Consumption",
+      "size": null,
+      "tier": null
+    },
+    "systemData": {
+      "createdAt": "2024-09-01T17:23:44.1979345Z",
+      "createdBy": "tal@personoids.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2024-09-01T17:23:44.1979345Z",
+      "lastModifiedBy": "tal@personoids.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": null,
+    "type": "Microsoft.MachineLearningServices/workspaces/serverlessEndpoints"
+  },
+  {
+    "changedTime": "2024-09-01T17:47:34.699416+00:00",
+    "createdTime": "2024-09-01T17:36:57.052646+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal-0301/serverlessEndpoints/Cohere-command-r-plus-vbenr",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tal-0301/Cohere-command-r-plus-vbenr",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Consumption",
+      "size": null,
+      "tier": null
+    },
+    "systemData": {
+      "createdAt": "2024-09-01T17:36:57.1966575Z",
+      "createdBy": "tal@personoids.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2024-09-01T17:36:57.1966575Z",
+      "lastModifiedBy": "tal@personoids.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": null,
+    "type": "Microsoft.MachineLearningServices/workspaces/serverlessEndpoints"
+  },
+  {
+    "changedTime": "2024-09-01T17:48:37.518661+00:00",
+    "createdTime": "2024-09-01T17:38:15.736017+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal-0301/serverlessEndpoints/Cohere-rerank-v3-english-gnzej",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tal-0301/Cohere-rerank-v3-english-gnzej",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Consumption",
+      "size": null,
+      "tier": null
+    },
+    "systemData": {
+      "createdAt": "2024-09-01T17:38:15.8951927Z",
+      "createdBy": "tal@personoids.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2024-09-01T17:38:15.8951927Z",
+      "lastModifiedBy": "tal@personoids.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": null,
+    "type": "Microsoft.MachineLearningServices/workspaces/serverlessEndpoints"
+  }
+]

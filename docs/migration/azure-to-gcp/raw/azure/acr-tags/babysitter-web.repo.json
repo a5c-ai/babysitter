@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-02-21T14:51:01.0811451Z",
+  "imageName": "babysitter-web",
+  "lastUpdateTime": "2026-08-27T09:59:59.1232278Z",
+  "manifestCount": 17,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

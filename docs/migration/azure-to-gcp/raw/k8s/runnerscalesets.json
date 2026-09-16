@@ -1,0 +1,119 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "actions.github.com/v1alpha1",
+      "kind": "AutoscalingRunnerSet",
+      "metadata": {
+        "annotations": {
+          "actions.github.com/cleanup-kubernetes-mode-role-binding-name": "hub-dev-runners-gha-rs-kube-mode",
+          "actions.github.com/cleanup-kubernetes-mode-role-name": "hub-dev-runners-gha-rs-kube-mode",
+          "actions.github.com/cleanup-kubernetes-mode-service-account-name": "hub-dev-runners-gha-rs-kube-mode",
+          "actions.github.com/cleanup-manager-role-binding": "hub-dev-runners-gha-rs-manager",
+          "actions.github.com/cleanup-manager-role-name": "hub-dev-runners-gha-rs-manager",
+          "actions.github.com/runner-group-name": "Default",
+          "actions.github.com/runner-scale-set-name": "hub-dev-runners",
+          "actions.github.com/values-hash": "c4b140f1875e189a3bd245ea17e3556a684ea77958a7d56c65e08f26f645259",
+          "meta.helm.sh/release-name": "hub-dev-runners",
+          "meta.helm.sh/release-namespace": "arc-runners",
+          "runner-scale-set-id": "10"
+        },
+        "creationTimestamp": "2025-08-04T15:01:13Z",
+        "finalizers": [
+          "autoscalingrunnerset.actions.github.com/finalizer"
+        ],
+        "generation": 10,
+        "labels": {
+          "actions.github.com/organization": "a5c-ai",
+          "actions.github.com/scale-set-name": "hub-dev-runners",
+          "actions.github.com/scale-set-namespace": "arc-runners",
+          "app.kubernetes.io/component": "autoscaling-runner-set",
+          "app.kubernetes.io/instance": "hub-dev-runners",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "hub-dev-runners",
+          "app.kubernetes.io/part-of": "gha-rs",
+          "app.kubernetes.io/version": "0.12.1",
+          "helm.sh/chart": "gha-rs-0.12.1"
+        },
+        "name": "hub-dev-runners",
+        "namespace": "arc-runners",
+        "resourceVersion": "15881121",
+        "uid": "ec64179f-9c8f-4347-8849-344d99cbd005"
+      },
+      "spec": {
+        "githubConfigSecret": "github-secret",
+        "githubConfigUrl": "https://github.com/a5c-ai",
+        "maxRunners": 20,
+        "minRunners": 0,
+        "runnerGroup": "default",
+        "runnerScaleSetName": "hub-dev-runners",
+        "template": {
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "ACTIONS_RUNNER_CONTAINER_HOOKS",
+                    "value": "/home/runner/k8s/index.js"
+                  },
+                  {
+                    "name": "ACTIONS_RUNNER_POD_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "fieldPath": "metadata.name"
+                      }
+                    }
+                  },
+                  {
+                    "name": "ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER",
+                    "value": "true"
+                  }
+                ],
+                "image": "ghcr.io/actions/actions-runner:2.328.0",
+                "name": "runner",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/home/runner/_work",
+                    "name": "work"
+                  }
+                ]
+              }
+            ],
+            "restartPolicy": "Never",
+            "serviceAccountName": "hub-dev-runners-gha-rs-kube-mode",
+            "volumes": [
+              {
+                "ephemeral": {
+                  "volumeClaimTemplate": {
+                    "spec": {
+                      "accessModes": [
+                        "ReadWriteOnce"
+                      ],
+                      "resources": {
+                        "requests": {
+                          "storage": "10Gi"
+                        }
+                      },
+                      "storageClassName": "managed-csi-premium"
+                    }
+                  }
+                },
+                "name": "work"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "currentRunners": 0,
+        "failedEphemeralRunners": 0,
+        "pendingEphemeralRunners": 0,
+        "runningEphemeralRunners": 0
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

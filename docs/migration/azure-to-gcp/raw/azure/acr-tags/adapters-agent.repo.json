@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-06-05T11:54:48.8862142Z",
+  "imageName": "adapters-agent",
+  "lastUpdateTime": "2026-09-05T14:35:05.7982534Z",
+  "manifestCount": 74,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 22
+}

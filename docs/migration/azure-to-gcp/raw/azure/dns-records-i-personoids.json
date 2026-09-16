@@ -1,0 +1,324 @@
+[
+  {
+    "NSRecords": [
+      {
+        "nsdname": "ns1-07.azure-dns.com."
+      },
+      {
+        "nsdname": "ns2-07.azure-dns.net."
+      },
+      {
+        "nsdname": "ns3-07.azure-dns.org."
+      },
+      {
+        "nsdname": "ns4-07.azure-dns.info."
+      }
+    ],
+    "TTL": 172800,
+    "etag": "c3e18c26-5310-4fca-8cd9-6c03956da7c5",
+    "fqdn": "i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/NS/@",
+    "name": "@",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/NS"
+  },
+  {
+    "SOARecord": {
+      "email": "azuredns-hostmaster.microsoft.com",
+      "expireTime": 2419200,
+      "host": "ns1-07.azure-dns.com.",
+      "minimumTTL": 300,
+      "refreshTime": 3600,
+      "retryTime": 300,
+      "serialNumber": 1
+    },
+    "TTL": 3600,
+    "etag": "b38640e3-b022-4e4e-a243-0d8ea0e705ad",
+    "fqdn": "i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/SOA/@",
+    "name": "@",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/SOA"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/default/gengenai\""
+        ]
+      }
+    ],
+    "etag": "20849d92-e860-454a-b7ba-a4d1fe3432dd",
+    "fqdn": "externaldns-a-gengenai.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-a-gengenai",
+    "name": "externaldns-a-gengenai",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/api\""
+        ]
+      }
+    ],
+    "etag": "5b86a4b0-f566-4153-bc87-aace2983970d",
+    "fqdn": "externaldns-a-main-api.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-a-main-api",
+    "name": "externaldns-a-main-api",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/personoids-api\""
+        ]
+      }
+    ],
+    "etag": "bef5f731-9d8c-4921-8d34-3f4b3cae1575",
+    "fqdn": "externaldns-a-main-personoids-api.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-a-main-personoids-api",
+    "name": "externaldns-a-main-personoids-api",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/personoids-ui\""
+        ]
+      }
+    ],
+    "etag": "a2ca55f7-2fdd-409e-b9ca-788141626a27",
+    "fqdn": "externaldns-a-main-personoids-ui.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-a-main-personoids-ui",
+    "name": "externaldns-a-main-personoids-ui",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/ui\""
+        ]
+      }
+    ],
+    "etag": "e514324b-1e9e-4558-8932-989b2cd5f90d",
+    "fqdn": "externaldns-a-main-ui.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-a-main-ui",
+    "name": "externaldns-a-main-ui",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/default/gengenai\""
+        ]
+      }
+    ],
+    "etag": "9482449d-e11e-40df-9a55-6c88698b5a03",
+    "fqdn": "externaldns-gengenai.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-gengenai",
+    "name": "externaldns-gengenai",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/api\""
+        ]
+      }
+    ],
+    "etag": "5f1ad446-1162-4d20-b9e0-5860c21d0f8e",
+    "fqdn": "externaldns-main-api.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-main-api",
+    "name": "externaldns-main-api",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/personoids-api\""
+        ]
+      }
+    ],
+    "etag": "1ed8fea4-0ed0-4d8a-90a5-0709c301bac9",
+    "fqdn": "externaldns-main-personoids-api.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-main-personoids-api",
+    "name": "externaldns-main-personoids-api",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/personoids-ui\""
+        ]
+      }
+    ],
+    "etag": "e340b415-ac50-47b1-870e-1f76362d2a8d",
+    "fqdn": "externaldns-main-personoids-ui.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-main-personoids-ui",
+    "name": "externaldns-main-personoids-ui",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "TTL": 300,
+    "TXTRecords": [
+      {
+        "value": [
+          "\"heritage=external-dns,external-dns/owner=default,external-dns/resource=ingress/main/ui\""
+        ]
+      }
+    ],
+    "etag": "41b6925b-ba0c-4458-a0f5-a26114b17a50",
+    "fqdn": "externaldns-main-ui.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/TXT/externaldns-main-ui",
+    "name": "externaldns-main-ui",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/TXT"
+  },
+  {
+    "ARecords": [
+      {
+        "ipv4Address": "52.183.102.215"
+      }
+    ],
+    "TTL": 300,
+    "etag": "680eb887-95fc-4619-b444-75a3da2ef8f0",
+    "fqdn": "gengenai.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/A/gengenai",
+    "name": "gengenai",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/A"
+  },
+  {
+    "ARecords": [
+      {
+        "ipv4Address": "52.183.102.215"
+      }
+    ],
+    "TTL": 300,
+    "etag": "a881320f-a99e-46db-8dcd-b2234475425d",
+    "fqdn": "main-api.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/A/main-api",
+    "name": "main-api",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/A"
+  },
+  {
+    "ARecords": [
+      {
+        "ipv4Address": "52.183.102.215"
+      }
+    ],
+    "TTL": 300,
+    "etag": "6865ecde-baf7-46fc-99bf-3a8e2a784d4f",
+    "fqdn": "main-personoids-api.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/A/main-personoids-api",
+    "name": "main-personoids-api",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/A"
+  },
+  {
+    "ARecords": [
+      {
+        "ipv4Address": "52.183.102.215"
+      }
+    ],
+    "TTL": 300,
+    "etag": "4bc71edd-90c4-44c2-a021-3d7c4685268d",
+    "fqdn": "main-personoids-ui.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/A/main-personoids-ui",
+    "name": "main-personoids-ui",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/A"
+  },
+  {
+    "ARecords": [
+      {
+        "ipv4Address": "52.183.102.215"
+      }
+    ],
+    "TTL": 300,
+    "etag": "9b723a2c-7277-41ad-9358-50bd406ba70e",
+    "fqdn": "main-ui.i.personoids.com.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoidsclusterdnsresourcegroup/providers/Microsoft.Network/dnszones/i.personoids.com/A/main-ui",
+    "name": "main-ui",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoidsclusterdnsresourcegroup",
+    "targetResource": {},
+    "trafficManagementProfile": {},
+    "type": "Microsoft.Network/dnszones/A"
+  }
+]

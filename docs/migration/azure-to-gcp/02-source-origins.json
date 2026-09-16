@@ -1,0 +1,883 @@
+{
+  "generatedAt": "2026-09-16",
+  "inventory": "docs/migration/azure-to-gcp/01-azure-inventory.json",
+  "doc": "docs/migration/azure-to-gcp/02-source-origins.md",
+  "statusLegend": {
+    "ACTIVE": "a push to the origin still deploys the running artifact",
+    "STALE": "source exists but has not deployed for months and/or the running artifact drifted from HEAD",
+    "ORPHAN": "no source found in any a5c-ai repository",
+    "MANUAL": "deployed by hand (portal, CLI, one-off script), no CI path"
+  },
+  "origins": [
+    {
+      "system": "kradle-prod",
+      "repo": "a5c-ai/babysitter",
+      "paths": [
+        ".github/workflows/publish.yml (job deploy_kradle L2205-2544, e2e_smoke_kradle L2546, g0_rt_jitsi_e2e L2643)",
+        "packages/kradle/charts (Chart.yaml deps vela-core/kyverno/jitsi-meet L19-32; templates/deployments.yaml:463-464 ATLAS_BASE_URL default; values.yaml:37,484)",
+        "packages/kradle/core/Dockerfile, packages/kradle/web/Dockerfile, packages/adapters/agent, packages/kradle/jitsi-agent-sidecar/Dockerfile",
+        "packages/kradle/core/src/{assistant-runtime.js:106-116, agent-workspace-controller.js:30-62, agent-dispatch-controller.js:440,526, adapters-client.js:488-500}",
+        "packages/kradle/core/.github/workflows/publish.yml:90-117 (vendored deploy-kradle job, never executed)",
+        "packages/kradle/core/tests/deployment.test.js:506-515, packages/kradle/installer/tests/plans.test.ts:306-320 (pin AKS text)"
+      ],
+      "mechanism": "GitHub Actions publish.yml on push main: azure/login@v2 -> az acr login -> docker buildx push kradle-controller/adapters-agent/kradle-web/jitsi-agent-sidecar -> KUBE_CONFIG -> acr-pull secret -> kubectl apply CRDs -> secret kradle-assistant-keys -> helm upgrade --install kradle packages/kradle/charts (environment kradle-production)",
+      "trigger": "push to main (last: run 31739538073, 2026-08-13, tag 21ded0e5)",
+      "status": "ACTIVE",
+      "azureCouplings": [
+        "vars.AZURE_ACR_NAME / AZURE_APPLICATION_CLIENT_ID + secrets.AZURE_APPLICATION_CLIENT_SECRET (azure/login@v2 L2269)",
+        "secrets.KUBE_CONFIG cluster-admin kubeconfig (L2265)",
+        "secrets.AZURE_ACR_PULL_PASSWORD -> docker-registry secret acr-pull; global.imagePullSecrets[0].name=acr-pull (L2347-2368, 2484)",
+        "image repositories ${ACR_NAME}.azurecr.io/{kradle-controller,kradle-web,adapters-agent,jitsi-agent-sidecar} (L2288-2338, 2468-2482)",
+        "Azure Foundry LLM: AZURE_API_KEY + AGENT_MUX_API_BASE=https://<proj>.services.ai.azure.com in kradle-assistant-keys (L2447-2463); assistant-runtime.js hard-codes /openai/deployments/<m>/chat/completions?api-version=",
+        "AKS disk-CSI workarounds: gitea.persistence.type=emptyDir (L2502), agent workspaces emptyDir / omitted storageClassName (agent-workspace-controller.js:30-62); prosody PVC on cluster default class (Pending)",
+        "ingress assumes nginx + cert-manager letsencrypt-production + inert external-dns annotation (L2490-2514)",
+        "ATLAS_BASE_URL defaults to atlas-staging service (deployments.yaml:463-464) -> prod depends on staging",
+        "kyverno externalDependencies discoverExisting=true (L2518-2519) against a failed standalone release; helm uninstall kubevela -n vela-system (L2433)",
+        "tests/docs pin 'Deploy Kradle To AKS', AZURE_ACR_NAME, KUBE_CONFIG, acr-pull"
+      ]
+    },
+    {
+      "system": "kradle-staging",
+      "repo": "a5c-ai/babysitter",
+      "paths": [
+        ".github/workflows/publish.yml (job deploy_kradle, branch switch L2255)",
+        "packages/kradle/charts"
+      ],
+      "mechanism": "same job as kradle-prod on push staging (namespace kradle-staging, host kradle-staging.a5c.ai, environment kradle-staging)",
+      "trigger": "push to staging (last: run 33971785709, 2026-09-05, tag 57b13a4c = origin/staging HEAD)",
+      "status": "ACTIVE",
+      "azureCouplings": [
+        "identical to kradle-prod",
+        "shares cluster-scoped CRDs and namespace kradle-org-a5c-ai with prod (adoption logic L2389-2423)"
+      ]
+    },
+    {
+      "system": "krate-legacy-residue",
+      "repo": "none (pre-rename kradle chart, removed from tree 2026-05)",
+      "paths": [],
+      "mechanism": "none running",
+      "trigger": "none",
+      "status": "ORPHAN",
+      "azureCouplings": [
+        "ACR repos krate-controller/krate-web",
+        "100 krate.a5c.ai CRDs in etcd",
+        "secret kradle-staging/krate-tls"
+      ]
+    },
+    {
+      "system": "atlas-prod",
+      "repo": "a5c-ai/babysitter",
+      "paths": [
+        ".github/workflows/publish.yml (job deploy_atlas_webui L1748-2203; heredoc manifests L1930-2203; branch switch L1783)",
+        "packages/atlas/webui (Dockerfile)",
+        "packages/atlas/webui/tests/atlas-deploy-postgres-workflow.test.ts:11-32 (pins AKS/Azure text)"
+      ],
+      "mechanism": "publish.yml on push main: azure/login@v2 -> az acr login -> buildx push atlas-webui:<sha> -> KUBE_CONFIG -> acr-pull secret -> az storage account/share provisioning (or ATLAS_POSTGRES_STORAGE_* vars) -> kubectl apply heredoc PV/StatefulSet/Job/Deployment/Ingress (environment atlas-production)",
+      "trigger": "push to main (last: run 31739538073, 2026-08-13, b3c3cd97)",
+      "status": "ACTIVE",
+      "azureCouplings": [
+        "azure/login@v2, az acr login, ${ACR_NAME}.azurecr.io/atlas-webui (L1799-1811)",
+        "secrets.KUBE_CONFIG (L1795); secrets.AZURE_ACR_PULL_PASSWORD -> acr-pull; imagePullSecrets acr-pull (L1830-1841, 2076, 2122)",
+        "Azure Files Postgres: vars.ATLAS_POSTGRES_STORAGE_ACCOUNT + secrets.ATLAS_POSTGRES_STORAGE_KEY, az storage account create/keys list/share create (L1863-1927), static PV driver file.csi.azure.com + secret atlas-postgres-azure-file (L1959-1976), storage class atlas-postgres-static (L1890,1959,2040)",
+        "AKS node-resource-group parsing for RG/location (L1897-1907)",
+        "ingress nginx + cert-manager letsencrypt-production + inert external-dns annotation (L2176-2186)",
+        "workflow-literal secrets acr-pull, atlas-auth, atlas-postgres, atlas-postgres-azure-file (not chart-owned)"
+      ]
+    },
+    {
+      "system": "atlas-staging",
+      "repo": "a5c-ai/babysitter",
+      "paths": [
+        ".github/workflows/publish.yml (job deploy_atlas_webui, branch switch L1784)"
+      ],
+      "mechanism": "same job on push staging (namespace atlas-staging, share atlas-staging-atlas-postgres, environment atlas-staging)",
+      "trigger": "push to staging (last: run 33971785709, 2026-09-05 14:34, 57b13a4c)",
+      "status": "ACTIVE",
+      "azureCouplings": [
+        "identical to atlas-prod",
+        "consumed by BOTH kradle environments via ATLAS_BASE_URL default"
+      ]
+    },
+    {
+      "system": "content-studio",
+      "repo": "a5c-ai/company",
+      "paths": [
+        ".github/workflows/content-studio-deploy.yml (disabled_manually; L8, 35-44, 59-66)",
+        "apps/content-studio/deploy/k8s/app.yaml (L42-48 AZURE_OPENAI_*), postgres.yaml (L8-9, 65), postgres-pv.yaml (L23, 36-41)",
+        "docs/content-studio/deploy-runbook.md (one-time manual steps)"
+      ],
+      "mechanism": "workflow on push main paths apps/content-studio/**: docker login ACR with token content-studio-ci -> push content-studio:<12-char sha> -> KUBE_CONFIG + context aks-hub-development-westus3-v2-admin -> envsubst app.yaml | kubectl apply; Postgres StatefulSet/PV/secrets applied once by hand",
+      "trigger": "push to main (workflow disabled since; last success 2026-07-01, image 589e29f73f93)",
+      "status": "STALE",
+      "azureCouplings": [
+        "secrets ACR_TOKEN_USER/ACR_TOKEN_PASSWORD, KUBE_CONFIG, AZURE_OPENAI_API_KEY; var AZURE_ACR_NAME",
+        "image ${AZURE_ACR_NAME}.azurecr.io/content-studio",
+        "kubectl config use-context aks-hub-development-westus3-v2-admin (L60)",
+        "AZURE_OPENAI_ENDPOINT=https://a5c-sw-resource.openai.azure.com/openai (app.yaml:42-48; 0 deployments)",
+        "Azure Files static PV file.csi.azure.com share content-studio-postgres in atlas storage account a5catlaspg794e33cd, secret content-studio-azure-file, class content-studio-postgres-static (postgres-pv.yaml:23-41)",
+        "hand-made secrets acr-pull, content-studio-secrets, content-studio-postgres, content-studio-azure-file"
+      ]
+    },
+    {
+      "system": "babysitter-web-staging",
+      "repo": "a5c-ai/claude-web",
+      "paths": [
+        "helm/babysitter-web (Chart 1.1.0; values.yaml:15,24,39,79,125,252-255; values-staging.yaml:53)",
+        ".github/workflows/deploy-staging.yml (L14-16, 75-95, 151-184, 189-193, 219-246, 260-309, 316, ~331-357, ~373-420)",
+        ".github/workflows/deploy-production.yml (namespace production; never deployed)",
+        ".github/workflows/byod-runner.yml (REGISTRY claudewebacr.azurecr.io, dead)",
+        "infra/dns/main.tf, infrastructure/kubernetes/cert-manager/cluster-issuer.yaml:57-78 (Azure DNS; never applied)"
+      ],
+      "mechanism": "deploy-staging.yml on push main: SP token -> push babysitter-web:staging-<sha> + -runner to ACR -> KUBE_CONFIG (az aks get-credentials fallback) -> acr-secret -> inline ClusterIssuer letsencrypt-prod -> create babysitter-web-staging-{postgresql,redis,secrets} -> helm upgrade --install babysitter-web-staging helm/babysitter-web (environment staging)",
+      "trigger": "push to main (last runs 2026-04-12 failed; helm rev 15 same day; running image = HEAD 18addbf7)",
+      "status": "STALE",
+      "azureCouplings": [
+        "org vars AZURE_RESOURCE_GROUP_NAME/AZURE_AKS_CLUSTER_NAME/AZURE_ACR_NAME/AZURE_APPLICATION_CLIENT_ID + secrets AZURE_APPLICATION_CLIENT_SECRET, KUBE_CONFIG",
+        "ACR images ${AZURE_ACR_NAME}.azurecr.io/babysitter-web[-runner]:staging-<sha>; values.yaml still points at dead registry claudewebacr.azurecr.io",
+        "imagePullSecrets acr-secret; azure-keyvault secret-provider stub",
+        "bundled Postgres/Redis without PVC (ephemeral)",
+        "creates its own ClusterIssuer letsencrypt-prod (duplicate of letsencrypt-production)",
+        "Azure DNS zone terraform + DNS01 solver (unused)"
+      ]
+    },
+    {
+      "system": "a5c-app-prod",
+      "repo": "a5c-ai/app (archived 2025-12-31) — NOT a5c-ai/a5c",
+      "paths": [
+        ".github/workflows/ci-aks-deploy.yml (push main/a5c/main/release L7-12; env AZURE_* L28-34; ./scripts/deploy.sh L121)",
+        "scripts/deploy.sh (L95 APP_NAME, L102-116 branch defaults, L274 IMAGE, L308-327 az login, L350 az aks get-credentials, L359 az acr login, L552-585 postgres/redis, L607-662 otel/jaeger, L739 jaeger ingress)",
+        "k8s/base/{namespace,configmap,secret,deployment,service,ingress,postgres,redis}.yaml, k8s/observability/*, k8s/cert-manager/*",
+        "a5c-ai/a5c scripts/deploy-azure.sh = dead copy (references k8s/base that never existed there)"
+      ],
+      "mechanism": "workflow Deploy -> scripts/deploy.sh: az login (OIDC or SP) -> az aks get-credentials -> az acr login -> docker build/push a5c-app -> envsubst+kubectl apply manifests, postgres StatefulSet, redis StatefulSet, otel-collector, jaeger",
+      "trigger": "push to main (repo archived; HEAD 369bdcaf = running image tag; deployment revision 1404)",
+      "status": "STALE",
+      "azureCouplings": [
+        "org vars AZURE_APPLICATION_CLIENT_ID/TENANT_ID/SUBSCRIPTION_ID/RESOURCE_GROUP_NAME/ACR_NAME/AKS_CLUSTER_NAME, AZURE_OPENAI_PROJECT_NAME/API_KEY",
+        "image $AZURE_ACR_NAME.azurecr.io/a5c-app",
+        "Postgres 15 / Redis PVCs on AKS default disk class",
+        "cert-manager ClusterIssuer annotation + inert external-dns annotation",
+        "hand-rendered secrets a5c-app-secret, a5c-app-pg-secret, a5c-app-redis"
+      ]
+    },
+    {
+      "system": "a5c-app-staging",
+      "repo": "a5c-ai/app (branch a5c/main) + a5c-ai/install (archived 2025-09-16)",
+      "paths": [
+        "a5c-ai/app: same as a5c-app-prod with a5c/main -> NAMESPACE=app-staging, INGRESS_HOST=app-staging.a5c.ai (scripts/deploy.sh:102-116)",
+        "a5c-ai/install: .github/workflows/deploy.yml jobs deploy-staging (env a5c-staging; L108 NAMESPACE app-staging, L110 install-staging.a5c.ai, L182-188 azure/login@v2, L202 ./scripts/deploy.sh) and deploy-prod (L214-216, never deployed); k8s/base/*.yaml"
+      ],
+      "mechanism": "same scripts as prod; a5c-install deployed by install repo's deploy.yml (image tag = build timestamp)",
+      "trigger": "push to a5c/main (app) / push (install); both repos archived",
+      "status": "STALE",
+      "azureCouplings": [
+        "same as a5c-app-prod",
+        "a5c-install image $AZURE_ACR_NAME.azurecr.io/a5c-install:<timestamp>",
+        "install-staging.a5c.ai ingress without TLS"
+      ]
+    },
+    {
+      "system": "aeq",
+      "repo": "a5c-ai/askExpertQuestion",
+      "paths": [
+        ".github/workflows/deploy.yml (HEAD: NAMESPACE bpx, APP_HOST breakpoints-pro.a5c.ai L11-13; L56-62, 72-84, 103, 106-117, 121-138, 147-166)",
+        "k8s/{namespace,cluster-issuer,configmap,persistent-volume,server-deployment,mcp-deployment,dashboard-deployment,certificate,ingress}.yaml + kustomization.yaml",
+        "history: 4f1f1b99 (2026-04-03, namespace aeq / aeq.a5c.ai / aeq-* images = running aeq-server), 54a0641b (2026-04-21 rename to bmux = running bmux-server), 6e49e3d (2026-04-22 namespace bpx)",
+        "infra/terraform/{main,backend,providers,variables}.tf (own RG/ACR/AKS/PIP/ingress-nginx; never applied; backend commented out)",
+        ".github/workflows/terraform.yml (failing since 2026-03-24)",
+        ".a5c/bpx_pgflex_name.txt (= aeqpg0316203042; only trace of the Postgres server)"
+      ],
+      "mechanism": "deploy.yml on push main: azure/login@v3 (secrets.AZURE_CREDENTIALS) -> az acr login -> push bmux-server/bmux-dashboard -> KUBE_CONFIG -> acr-pull-secret from ACR admin creds -> bpx-secrets/bpx-postgres from repo secrets -> kubectl apply -k k8s/ -> kubectl set image; Postgres flexible server created by hand",
+      "trigger": "push to main (all runs since 2026-08-08 failed; live aeq namespace is the 2026-04 revision; HEAD targets namespace bpx which does not exist)",
+      "status": "STALE",
+      "azureCouplings": [
+        "repo secrets AZURE_CREDENTIALS, AZURE_APPLICATION_CLIENT_ID/SECRET (SPN askExpertQuestion-github-actions: Contributor + User Access Administrator on subscription), POSTGRES_DATABASE_URL; vars AZURE_ACR_NAME, AZURE_SUBSCRIPTION_ID, AZURE_TENANT_ID",
+        "images hard-coded acrhubdevelopmentwestus3.azurecr.io/bmux-*:latest in k8s/*-deployment.yaml:24",
+        "acr-pull-secret from az acr credential show (ACR admin user)",
+        "k8s/persistent-volume.yaml:9 storageClassName managed-csi (PVC Pending)",
+        "Azure Postgres aeqpg0316203042 (AEQ_DATABASE_SSL=true) with no IaC",
+        "infra/terraform azurerm_kubernetes_cluster/azurerm_container_registry/azure LB annotation (unapplied)",
+        "cert-manager letsencrypt-production + inert external-dns annotation"
+      ]
+    },
+    {
+      "system": "hub",
+      "repo": "a5c-ai/hub",
+      "paths": [
+        ".github/workflows/main.yml (job deploy L245-294 -> scripts/deploy.sh)",
+        "scripts/deploy.sh (L195-202 registry, L218-219 RG/AKS, L244 az login, L250-256 az aks get-credentials), scripts/build-images.sh, scripts/deploy-k8s.sh (L162-172 acr-auth, L243-268 manifest list)",
+        "k8s/{configmap,secrets,storage,certificates,cert-manager-issuers,postgresql-deployment,redis-deployment,backend-deployment,frontend-deployment,services,ingress,hpa,tcp-services-configmap,ssh-loadbalancer-service}.yaml",
+        "k8s/external-dns.yaml, ingress-azure.yaml, azure-ssl-config.yaml, azure-lb-service.yaml (not applied)"
+      ],
+      "mechanism": "main.yml deploy on push main: build images (hub/backend, hub/frontend) -> az login SP -> az aks get-credentials -> acr-auth secret -> kubectl apply manifest list into hub-development",
+      "trigger": "push to main (last success 2025-08-22; repo last push 2025-09-08; images 1b76672-dirty; backend 0/3 ever since)",
+      "status": "STALE",
+      "azureCouplings": [
+        "org vars AZURE_* + secrets AZURE_APPLICATION_CLIENT_SECRET (main.yml:73-77)",
+        "registry acrhubdevelopmentwestus3.azurecr.io hard-coded per env (deploy.sh:196)",
+        "k8s/storage.yaml: StorageClass azure-files + PVC hub-repositories-pvc 1Ti (L2-25), hub-database-pvc 100Gi / hub-redis-pvc 10Gi managed-premium (L41,57)",
+        "k8s/azure-lb-service.yaml:13-26 azure-load-balancer-* annotations, azure-dns-label-name",
+        "duplicate Certificate objects writing hub-azure-ssl-certificate (certificates.yaml:14, cert-manager-issuers.yaml:14)",
+        "AppGW ingress files (ingress-azure.yaml, azure-ssl-config.yaml); external-dns Azure provider manifest (unused)",
+        "AZURE_OPENAI_* env in main.yml:25-26",
+        "hand-made secrets acr-auth, hub-secrets"
+      ]
+    },
+    {
+      "system": "osb-staging",
+      "repo": "a5c-ai/osb",
+      "paths": [
+        ".github/workflows/cd.yml (push master; deploy-staging env staging; heredoc manifests L124-200; KUBE_CONFIG L104; ghcr-pull-secret L113-117; osb-secrets refs L170-191)",
+        ".github/workflows/build-images.yml (ghcr.io; BASE_IMAGE ghcr.io/a5c-ai/babysitter/babysitter:staging L37)",
+        "deploy/kubernetes (unused by workflow)"
+      ],
+      "mechanism": "cd.yml on push master: build/push ghcr.io/a5c-ai/osb/benchmark-cli -> azure/setup-kubectl + KUBE_CONFIG -> namespace osb-staging -> ghcr-pull-secret -> kubectl apply heredoc ConfigMap+Deployment -> rollout",
+      "trigger": "push to master (last success 2026-02-22; running tag master-b0370ba = HEAD)",
+      "status": "ACTIVE",
+      "azureCouplings": [
+        "secrets.KUBE_CONFIG (L104)",
+        "secret osb-secrets (ANTHROPIC_FOUNDRY_API_KEY, ANTHROPIC_FOUNDRY_RESOURCE) referenced but never created by the workflow -> hand-made; Foundry has 0 deployments",
+        "no Azure registry (ghcr); no storage"
+      ]
+    },
+    {
+      "system": "arc-runners",
+      "repo": "a5c-ai/hub",
+      "paths": [
+        "terraform/environments/development/main.tf (module github_runner L392-420; storage_class_name managed-csi-premium L420)",
+        "terraform/modules/github_runner/main.tf (helm_release arc_controller L15-19, arc_runner_set L103-107, secret github-secret L30, work volume claim L98,137)",
+        "terraform/environments/development/terraform.tfvars (L51-72: enable_github_runners, github_config_url https://github.com/a5c-ai, hub-dev-runners, min 0 max 20, kubernetes mode, runner_image ghcr.io/actions/actions-runner:2.328.0)",
+        ".github/workflows/infrastructure.yml (terraform apply; TF_VAR_github_token=secrets.RUNNER_GITHUB_TOKEN)",
+        "runners/README.md, runners/Dockerfile (custom image hub/github-runner, unused)",
+        "consumers: .github/workflows/release.yml:9,46, coverage-report.yml:12, integration-tests.yml:12 (runs-on: hub-dev-runners)"
+      ],
+      "mechanism": "terraform helm_release of gha-runner-scale-set-controller (arc-systems) + gha-runner-scale-set hub-dev-runners (arc-runners) applied by infrastructure.yml",
+      "trigger": "push to main under terraform/** (last success 2025-08-22; helm rev 39 same day)",
+      "status": "STALE",
+      "azureCouplings": [
+        "kubernetesModeWorkVolumeClaim storageClassName managed-csi-premium (broken on the failed cluster)",
+        "azure/login@v1 + azurerm backend a5ctf-rg/a5ctfstorage/tf-main for the apply",
+        "legacy actions.summerwind.dev CRDs from an older manual install (not in tf)",
+        "a5c-ai/runner-images (ghcr.io/a5c-ai/runner-images) is NOT the image in use"
+      ]
+    },
+    {
+      "system": "platform-addons",
+      "repo": "a5c-ai/hub (ingress-nginx, cert-manager, AKS addons) + a5c-ai/claude-web (ClusterIssuer letsencrypt-prod) + a5c-ai/babysitter history (kyverno, vela) + portal (app-routing)",
+      "paths": [
+        "hub terraform/environments/development/main.tf: module cert_manager L313-327 (v1.15.3, letsencrypt-production/staging), module ingress_nginx L353-363; terraform/modules/cert-manager/main.tf (helm_release L4-9, ClusterIssuers L47-95), terraform/modules/ingress-nginx/main.tf; terraform.tfvars:62-66",
+        "hub terraform/modules/aks/main.tf:66-77 (oms_agent, azure_policy_enabled=true, key_vault_secrets_provider, ingress_application_gateway)",
+        "claude-web .github/workflows/deploy-staging.yml (inline ClusterIssuer letsencrypt-prod)",
+        "babysitter publish.yml commits 31b332082..46dd8ea53 (2026-05-18) installed standalone kyverno/kubevela; now removed; publish.yml:2433 uninstalls kubevela",
+        "hub k8s/external-dns.yaml (never applied); infra-seed terraform/modules/addons/external-dns + terraform/cloud/gcp/addons.tf:9-16 (GCP variant)"
+      ],
+      "mechanism": "ingress-nginx + cert-manager + ClusterIssuers via hub terraform helm_release/kubernetes_manifest; AKS addons via azurerm_kubernetes_cluster block; app-routing addon toggled in portal; kyverno/vela residue of removed CI steps; no external-dns anywhere",
+      "trigger": "hub infrastructure.yml (last 2025-08-22); none for the rest",
+      "status": "STALE",
+      "azureCouplings": [
+        "AKS addon blocks (omsagent, azurepolicy/gatekeeper, KV secrets provider, AppGW) in modules/aks/main.tf",
+        "app-routing-system second nginx + LB 134.33.26.182 (portal, no source)",
+        "IngressClass azure-application-gateway + appgw CRD residue (hub k8s/ingress-azure.yaml, modules/security)",
+        "two ClusterIssuer names (letsencrypt-prod from claude-web, letsencrypt-production from hub tf)",
+        "kyverno helm release failed (no source); vela-system empty (no source)",
+        "DNS manual at GoDaddy; all external-dns annotations inert"
+      ]
+    },
+    {
+      "system": "aks-cluster-and-hub-rg",
+      "repo": "a5c-ai/hub",
+      "paths": [
+        "terraform/environments/development/main.tf (modules resource_group L78, networking L87, keyvault L105, storage L138, container_registry L169, postgresql L186, monitoring L212, aks L235, security/AppGW L268, role assignments L179,287-311)",
+        "terraform/modules/{aks,networking,keyvault,storage,container_registry,postgresql,monitoring,security,resource_group}",
+        "terraform/environments/development/terraform.tfvars (kubernetes_version 1.30 L29, Standard_D2s_v5 L33, subnets L9-13, PG B1ms L23-26)",
+        ".github/workflows/infrastructure.yml (azure/login@v1; backend a5ctf-rg/a5ctfstorage/tf-main/main.terraform.tfstate)",
+        "scripts/first_init.sh (one-off bootstrap of a5ctf-rg/a5ctfstorage)"
+      ],
+      "mechanism": "terraform apply via infrastructure.yml (push main under terraform/**)",
+      "trigger": "last success 2025-08-22; state in a5ctfstorage; cluster now provisioningState=Failed with both identities missing -> plan/apply would fail",
+      "status": "STALE",
+      "azureCouplings": [
+        "azurerm_kubernetes_cluster + azurerm_user_assigned_identity (modules/aks/main.tf:3-55) whose principals no longer exist",
+        "VNet/NSG/private DNS zones, AppGW+WAF (deleted by hand 2026-04-19), Key Vault in foreign tenant",
+        "Azure PG psql-hub-development-westus3-v2 (unused by workloads), storage sthubdevelopmentwestu3v2",
+        "azurerm remote state a5ctfstorage (must be archived before teardown)"
+      ]
+    },
+    {
+      "system": "acr-hub-registry",
+      "repo": "a5c-ai/hub (registry) + producers babysitter/company/askExpertQuestion/claude-web/app/install/hub",
+      "paths": [
+        "hub terraform/environments/development/main.tf:169-184 (module container_registry, aks_acr_pull role)",
+        "babysitter publish.yml:2361 (documents az acr token credential generate aks-pull)",
+        "producers: babysitter publish.yml (atlas-webui, kradle-controller, kradle-web, adapters-agent, jitsi-agent-sidecar); company content-studio-deploy.yml (content-studio); askExpertQuestion deploy.yml (bmux-*, formerly aeq-*); claude-web deploy-staging.yml (babysitter-web, babysitter-web-runner); app scripts/deploy.sh (a5c-app); install (a5c-install); hub scripts/build-images.sh (hub/backend, hub/frontend, hub/github-runner)"
+      ],
+      "mechanism": "registry from hub terraform; admin user + tokens aks-pull/content-studio-ci added by hand; images pushed by the workflows above",
+      "trigger": "per producer",
+      "status": "STALE",
+      "azureCouplings": [
+        "admin user enabled; scope-map tokens aks-pull, content-studio-ci; SPNs with AcrPush claude-web-acr-push (= org var AZURE_APPLICATION_CLIENT_ID), askExpertQuestion-github-actions",
+        "dead repos with no producer in any tree: budgets, onboard, tokens-dispenser, krate-*, claude-web*, hub/github-runner"
+      ]
+    },
+    {
+      "system": "ai-accounts",
+      "repo": "none (portal-created); consumers across babysitter, company, app, hub, osb, mantis-proxy, content-studio, geekonomy",
+      "paths": [
+        "babysitter .github/workflows/{agent-conflict-fix,agent-dispatch,agent-plan-dispatch,agent-review-dispatch,agent-version-check,failure-triage-live-stack,failure-triage-publish,issue-triage-dispatch,live-stack-gardening,live-stack-published,live-stack,model-version-check,publish,qa-daily,qa-dispatch}.yml",
+        "babysitter packages/adapters/core/src/provider-config.ts:48-49; packages/kradle/core/src/assistant-runtime.js:106-116; packages/kradle/core/src/agent-provider-config-controller.js:13-18; packages/kradle/charts/values.yaml:484; action.yml:66-75; packages/adapters/cli/tests/live-stack/{primary-live-runner,scenario-contract}.test.ts, scenario-contract.ts",
+        "company .github/workflows/{agent-dispatch,content-*,launch-content,x-*}.yml; apps/content-studio/deploy/k8s/app.yaml:42-48",
+        "a5c-ai/app .github/workflows/ci-aks-deploy.yml:25-26; hub .github/workflows/main.yml:25-26; osb cd.yml:176-185; mantis-proxy containerapp.template.yaml:81-83"
+      ],
+      "mechanism": "portal; keys distributed via org secret AZURE_OPENAI_API_KEY + org var AZURE_OPENAI_PROJECT_NAME=a5c-sw-resource",
+      "trigger": "none",
+      "status": "MANUAL",
+      "azureCouplings": [
+        "all 7 accounts have 0 deployments since 2026-09-05; every consumer above is broken",
+        "babysitter repo vars A5C_PROVIDER_NAME=azure_openai, A5C_SELECTED_CLI_COMMAND=azure_codex"
+      ]
+    },
+    {
+      "system": "litellm-archive",
+      "repo": "a5c-ai/mantis-proxy (Container App; deleted 2026-09-05) — older litellm-proxy/litellm-pgdb has no source",
+      "paths": [
+        "deploy.sh (L10 RG rg-litellm-proxy, L12 litellm-env, L13 litellm-pgdb2, L17 AOAI_RG rg-tmuskal-7935, L18 stlitellmproxy2026, L30-37 az storage file upload, L62-67 az containerapp create/update)",
+        "containerapp.template.yaml (L51 ghcr.io/berriai/litellm@sha256, L25-41 secrets, L81-83 AZURE_API_KEY/AZURE_API_BASE, L129-132 AzureFile volume litellmconfig)",
+        "config.yaml, README.md:39-44,108-122"
+      ],
+      "mechanism": "manual script: upload config to Azure Files share -> az containerapp create/update with rendered YAML",
+      "trigger": "manual (no workflow)",
+      "status": "STALE",
+      "azureCouplings": [
+        "Azure Container Apps env + AzureFile mount",
+        "Azure PG litellm-pgdb2 (+ litellm-pgdb from the older unsourced proxy) holding spend logs",
+        "AZURE_API_KEY/AZURE_API_BASE to a5c-sw-resource",
+        "storage stlitellmproxy2026 shares caddy-*, litellm-config*, mantis-job, postgres-data, $web"
+      ]
+    },
+    {
+      "system": "geekonomy",
+      "repo": "Benihakak/geekonomy (private; owner-confirmed 2026-09-16)",
+      "paths": [
+        "infra/azure/main.bicep",
+        "infra/azure/main.json",
+        "scripts/azure/build-and-push.sh",
+        "scripts/azure/deploy-prod.sh",
+        "scripts/azure/deploy-apps-only.sh",
+        "docs/deploy-azure-container-apps.md",
+        "infra/helm/geekonomy/",
+        "apps/web/Dockerfile",
+        "apps/worker/Dockerfile",
+        "apps/transcriber/Dockerfile",
+        "apps/migrator/Dockerfile"
+      ],
+      "mechanism": "manual: scripts/azure/build-and-push.sh (az acr build) + scripts/azure/deploy-prod.sh -> az deployment group create infra/azure/main.bicep (ACR, Container Apps env, web/worker/transcriber apps, db-migrate job, PG flex, Redis, Log Analytics); no GitHub workflow; also ships infra/helm/geekonomy chart (web+worker) and docker-compose.yml",
+      "trigger": "unknown (last image push 2026-01-12)",
+      "status": "ACTIVE",
+      "azureCouplings": [
+        "Container Apps + ACR admin user",
+        "Azure PG + Redis",
+        "container-app secrets acr-password, database-url, redis-url, azure-openai-api-key (Azure OpenAI, 0 deployments)",
+        "az acr build to geekonomyacrmkb5l5",
+        "Bicep: Microsoft.App containerApps/jobs/managedEnvironments, DBforPostgreSQL flexibleServers, Cache/Redis, OperationalInsights",
+        "TRANSCRIBER_PROVIDER=azure-openai (gpt-4o-transcribe on a deleted deployment); alternative local-faster-whisper exists"
+      ],
+      "notes": "ACR tags 6705780/f691852/04da826a match repo commits (2026-01-06..11); last push 2026-06-07"
+    },
+    {
+      "system": "personoids-residue",
+      "repo": "none (no IaC in a5c-ai; tmuskal/personoids.com (2023) not inspected)",
+      "paths": [],
+      "mechanism": "portal",
+      "trigger": "none",
+      "status": "ORPHAN",
+      "azureCouplings": [
+        "3 foreign-tenant Key Vaults",
+        "AzureML hubs/projects/serverless endpoints/code shares",
+        "Azure DNS zone i.personoids.com -> deleted cluster",
+        "Grafana/Monitor workspaces/alerts",
+        "static site a5c-website (provider None)"
+      ]
+    },
+    {
+      "system": "static-sites",
+      "repo": "a5c-ai/a5c-website (SWA a5c-website) ; a5c-ai/website-a5c + a5c-ai/site (Vercel apex) ; a5c-labs/intuitive-website-new (outside org) ; babysitter-benchmarks = MantisOS/babysitter-benchmarks (owner-confirmed 2026-09-16, pushed 2026-08-20) ; a5c-proxy-894866 / personoids a5c-website / $web containers: NOT FOUND",
+      "paths": [
+        "a5c-website/.github/workflows/azure-static-web-apps.yml (Azure/static-web-apps-deploy, secrets.AZURE_STATIC_WEB_APPS_API_TOKEN, output out), deploy-to-azure.sh (az staticwebapp create), staticwebapp.config.json",
+        "website-a5c/.github/workflows/folkware-landing-deploy-cli.yml (Vercel CLI; vars.VERCEL_ORG_ID, VERCEL_PROJECT_ID_FOLKWARE_WEBPAGE; secrets.VERCEL_TOKEN; last success 2026-07-09)",
+        "site/README.md:26-29 + docs/DEPLOY.md (manual npx vercel deploy --prod; no workflow)"
+      ],
+      "mechanism": "SWA GitHub Action (a5c-website, stale); Vercel CLI workflow (website-a5c, active); Vercel manual (site); SWA CLI uploads with no repo (benchmarks, proxy); portal (personoids copy, $web containers)",
+      "trigger": "a5c-website push main (last 2025-05-08); website-a5c push main (2026-07-09); others manual/unknown",
+      "status": "STALE",
+      "azureCouplings": [
+        "SWA a5c-website still binds custom domain a5c.ai although the apex resolves to Vercel 76.76.21.21",
+        "SWA babysitter-benchmarks (rg-babysitter-portal, SWA-CLI 2026-08-18) and a5c-proxy-894866 (2026-05-27): no source in any repo -> ORPHAN",
+        "SWA intuitive-website-new linked to a5c-labs/intuitive-website-new (private, last push 2025-04-06, WaitingForDeployment) -> STALE, out of org",
+        "$web containers a5cstatic (404), mantisb131bfc8 (rg-mantis-album, 2026-09-11, public blob access), stlitellmproxy2026: no source -> ORPHAN"
+      ]
+    },
+    {
+      "system": "web-app-promoted-idle",
+      "repo": "NOT FOUND (only company finops audit mentions it)",
+      "paths": [],
+      "mechanism": "unknown (App Service F1, Node 20)",
+      "trigger": "unknown (modified 2026-07-05)",
+      "status": "ORPHAN",
+      "azureCouplings": [
+        "App Service plan asp-promoted-idle (F1); httpsOnly=false; no HTTP response"
+      ]
+    },
+    {
+      "system": "dev-vms",
+      "repo": "none (hand/agent-created; a5c-ai/mantis holds only Odoo results in lab/deep-odoo-results)",
+      "paths": [],
+      "mechanism": "az vm create by hand / codex session (tags managed-by=codex, auto-delete-after=2026-07-16)",
+      "trigger": "none",
+      "status": "MANUAL",
+      "azureCouplings": [
+        "4 deallocated VMs with Premium OS disks + static PIPs",
+        "storage mantisodoo913061 / mantisodooevid1868 (evidence, retain=true)",
+        "SPN vm-odoo-validation (Storage Blob Data Contributor)"
+      ]
+    },
+    {
+      "system": "tb-fleet",
+      "repo": "NOT FOUND (terminal-bench-bootstrap / tb-fleet appear only in company finops reports; babysitter has terminal-bench benchmark metadata under packages/atlas/graph/benchmarks but no fleet provisioning)",
+      "paths": [],
+      "mechanism": "unknown (8 VMs with custom-script extension terminal-bench-bootstrap, tags lifecycle=persistent-manual)",
+      "trigger": "unknown (deallocated since 2026-08-11)",
+      "status": "ORPHAN",
+      "azureCouplings": [
+        "8 Premium OS disks + 8 static PIPs + VNets in swedencentral",
+        "empty rg-tb-fleet-3"
+      ]
+    },
+    {
+      "system": "archives-and-tfstate",
+      "repo": "a5c-ai/hub (tfstate bootstrap) + a5c-ai/infra (tfstate consumer); babysitterarchive2608 + a5c-mantis-workshop: none",
+      "paths": [
+        "hub scripts/first_init.sh (az group create a5ctf-rg; az storage account create a5ctfstorage; container tf-main)",
+        "hub .github/workflows/infrastructure.yml (backend key main.terraform.tfstate in tf-main)",
+        "infra .github/workflows/apply-azure.yml:25-28 (container tfstate, key prefix azure-dev)",
+        "mantis-proxy/mantis-workshop-setup.html (workshop handout; RG a5c-mantis-workshop is empty)"
+      ],
+      "mechanism": "one-off az CLI bootstrap; terraform remote state consumers",
+      "trigger": "manual",
+      "status": "MANUAL",
+      "azureCouplings": [
+        "azurerm backend a5ctfstorage (tf-main, tfstate) — must be exported before teardown",
+        "babysitterarchive2608/trial-telemetry has zero code references (ORPHAN)",
+        "a5c-mantis-workshop empty RG with Contributor group"
+      ]
+    },
+    {
+      "system": "monitoring",
+      "repo": "a5c-ai/hub (hub RG monitoring + Container Insights); rest portal",
+      "paths": [
+        "hub terraform/environments/development/main.tf:212-233 (module monitoring: log-hub-development-westus3-v2, appi-…, ag-…, DCR)",
+        "hub terraform/modules/aks/main.tf:66 (oms_agent -> aks-hub-development-westus3-v2-logs / ama-logs)",
+        "claude-web infra/monitoring/*.tf (App Insights alerts/workbooks; never applied)"
+      ],
+      "mechanism": "terraform (hub) for the hub-RG pieces; portal for personoids/DefaultResourceGroup/rg-tmuskal monitor workspaces, Grafana, Prometheus rule groups, DCE/DCR, alerts",
+      "trigger": "hub infrastructure.yml (last 2025-08-22)",
+      "status": "STALE",
+      "azureCouplings": [
+        "Container Insights (ama-logs DaemonSet) is the only in-cluster consumer",
+        "no AKS diagnostic settings, no budgets",
+        "5 Log Analytics, 2 App Insights, 2 Monitor workspaces, Grafana, 6 Prometheus rule groups, alerts — all Azure-native"
+      ]
+    }
+  ],
+  "githubWiring": {
+    "orgVariables": [
+      "AZURE_ACR_NAME=acrhubdevelopmentwestus3",
+      "AZURE_AKS_CLUSTER_NAME=aks-hub-development-westus3-v2",
+      "AZURE_APPLICATION_CLIENT_ID=22bb9d17-8777-42e2-8c6d-0128ea97742f (= SPN claude-web-acr-push, AcrPush only)",
+      "AZURE_OPENAI_PROJECT_NAME=a5c-sw-resource",
+      "AZURE_RESOURCE_GROUP_NAME=rg-hub-development-westus3",
+      "AZURE_SUBSCRIPTION_ID",
+      "AZURE_TENANT_ID",
+      "KRATE_GITHUB_CLIENT_ID",
+      "VERCEL_ORG_ID"
+    ],
+    "orgSecretsAzureRelated": [
+      "AZURE_APPLICATION_CLIENT_ID",
+      "AZURE_APPLICATION_CLIENT_SECRET",
+      "AZURE_OPENAI_API_KEY",
+      "KUBE_CONFIG",
+      "RUNNER_GITHUB_TOKEN",
+      "A5C_AGENT_GITHUB_TOKEN"
+    ],
+    "orgSecretsGcpAlreadyPresent": [
+      "GOOGLE_CLOUD_PROJECT",
+      "GOOGLE_API_KEY",
+      "GEMINI_API_KEY"
+    ],
+    "babysitterRepo": {
+      "secrets": [
+        "ANTHROPIC_DEFAULT_SONNET_MODEL",
+        "ATLAS_GITHUB_CLIENT_SECRET",
+        "ATLAS_POSTGRES_STORAGE_KEY",
+        "AZURE_ACR_PULL_PASSWORD",
+        "CLAUDE_CODE_OAUTH_TOKEN",
+        "KRADLE_TEST_AUTH_SECRET"
+      ],
+      "variables": [
+        "A5C_PROVIDER_NAME=azure_openai",
+        "A5C_SELECTED_CLI_COMMAND=azure_codex",
+        "A5C_SELECTED_MODEL=gpt-5.4",
+        "ATLAS_GITHUB_CLIENT_ID",
+        "ATLAS_POSTGRES_STORAGE_ACCOUNT=a5catlaspg794e33cd",
+        "KRADLE_GITHUB_CLIENT_ID"
+      ],
+      "environments": [
+        "atlas-production",
+        "atlas-staging",
+        "copilot",
+        "github-pages",
+        "kradle-production",
+        "kradle-staging",
+        "krate-staging",
+        "production",
+        "staging"
+      ],
+      "note": "no A5C_CLOUD_* variables exist -> publish.yml job deploy_staging_cloud has never run"
+    },
+    "otherRepos": {
+      "company": {
+        "secrets": [
+          "ACR_TOKEN_PASSWORD",
+          "ACR_TOKEN_USER",
+          "AZURE_OPENAI_API_KEY",
+          "BABYSITTER_REPO_WRITE_TOKEN",
+          "CS_CALLBACK_SECRET",
+          "KUBE_CONFIG"
+        ],
+        "variables": [
+          "A5C_CLI_TOOL",
+          "AZURE_ACR_NAME"
+        ],
+        "environments": [
+          "content-studio-production"
+        ]
+      },
+      "askExpertQuestion": {
+        "secrets": [
+          "AUTH_GITHUB_CLIENT_ID",
+          "AUTH_GITHUB_CLIENT_SECRET",
+          "AZURE_APPLICATION_CLIENT_ID",
+          "AZURE_APPLICATION_CLIENT_SECRET",
+          "AZURE_CREDENTIALS",
+          "JWT_SECRET",
+          "POSTGRES_DATABASE_URL"
+        ],
+        "variables": [
+          "AUTH_GITHUB_CLIENT_ID",
+          "AZURE_ACR_NAME",
+          "AZURE_APPLICATION_CLIENT_ID",
+          "AZURE_SUBSCRIPTION_ID",
+          "AZURE_TENANT_ID",
+          "COPILOT_AGENT_FIREWALL_ALLOW_LIST_ADDITIONS",
+          "COPILOT_AGENT_FIREWALL_ENABLED"
+        ],
+        "environments": [
+          "copilot",
+          "production"
+        ]
+      },
+      "claude-web": {
+        "secrets": [],
+        "variables": [],
+        "environments": [
+          "copilot",
+          "staging"
+        ]
+      },
+      "osb": {
+        "secrets": [],
+        "variables": [],
+        "environments": [
+          "staging"
+        ]
+      },
+      "hub": {
+        "secrets": [],
+        "variables": [],
+        "environments": [
+          "development"
+        ]
+      },
+      "a5c-website": {
+        "secrets": [
+          "AZURE_STATIC_WEB_APPS_API_TOKEN"
+        ],
+        "variables": [],
+        "environments": []
+      },
+      "app": {
+        "secrets": [
+          "AUTH_GITHUB_APP_ID",
+          "AUTH_GITHUB_CLIENT_ID",
+          "AUTH_GITHUB_CLIENT_SECRET",
+          "AUTH_GITHUB_PK",
+          "AUTH_WEBHOOK_SECRET"
+        ],
+        "variables": [
+          "A5C_ENABLE_SCHEDULED_EVENTS"
+        ],
+        "environments": [
+          "a5c-staging",
+          "github-pages"
+        ]
+      },
+      "install": {
+        "secrets": [],
+        "variables": [],
+        "environments": [
+          "a5c-staging",
+          "production"
+        ]
+      }
+    }
+  },
+  "couplingMap": [
+    {
+      "id": "C1",
+      "coupling": "azure/login + SP client secret / az login --service-principal",
+      "files": [
+        "babysitter publish.yml:1799,2269",
+        "hub infrastructure.yml, scripts/deploy.sh:244",
+        "askExpertQuestion deploy.yml:56-59,95-98, terraform.yml:38-41,116-119",
+        "claude-web deploy-staging.yml:75-95,228-246",
+        "app scripts/deploy.sh:308-327",
+        "install deploy.yml:182-188",
+        "infra apply-azure.yml:18-21"
+      ],
+      "gcpReplacement": "google-github-actions/auth@v2 with Workload Identity Federation; org vars GCP_PROJECT_ID/GCP_WIF_PROVIDER/GCP_DEPLOY_SA; delete AZURE_APPLICATION_CLIENT_* and both SPNs"
+    },
+    {
+      "id": "C2",
+      "coupling": "secrets.KUBE_CONFIG cluster-admin kubeconfig",
+      "files": [
+        "babysitter publish.yml:1795,2265,2669",
+        "babysitter g0-rt-jitsi-e2e.yml",
+        "company content-studio-deploy.yml:59-60",
+        "askExpertQuestion deploy.yml:103",
+        "claude-web deploy-staging.yml:219-225",
+        "osb cd.yml:104"
+      ],
+      "gcpReplacement": "google-github-actions/get-gke-credentials@v2 after WIF auth; namespace-scoped RBAC; delete org secret KUBE_CONFIG"
+    },
+    {
+      "id": "C3",
+      "coupling": "ACR: az acr login, azurecr.io image paths, admin creds, scope-map token, docker-registry pull secrets, imagePullSecrets",
+      "files": [
+        "babysitter publish.yml:1810-1841,2287-2368,2468-2484",
+        "company content-studio-deploy.yml:35-44",
+        "askExpertQuestion deploy.yml:62-117, k8s/*-deployment.yaml:24",
+        "claude-web deploy-staging.yml:151-184,260-309, helm/babysitter-web/values*.yaml",
+        "app scripts/deploy.sh:274,359",
+        "hub scripts/deploy.sh:196, scripts/deploy-k8s.sh:162-172"
+      ],
+      "gcpReplacement": "Artifact Registry <region>-docker.pkg.dev/boot-464019/<repo>; push via WIF; pull via node SA artifactregistry.reader (no pull secrets); infra-seed modules/artifact-registry/main.tf:98"
+    },
+    {
+      "id": "C4",
+      "coupling": "Azure Files static PVs for Postgres (file.csi.azure.com, az storage share create, *-azure-file secrets, atlas-postgres-static / content-studio-postgres-static / azure-files classes)",
+      "files": [
+        "babysitter publish.yml:1863-1976,2040",
+        "company postgres-pv.yaml:23-41, postgres.yaml:65",
+        "hub k8s/storage.yaml:2-25"
+      ],
+      "gcpReplacement": "Cloud SQL for PostgreSQL 16 (private IP / Auth Proxy) with pg_dump/pg_restore; remove in-cluster StatefulSets from workflows; Filestore only for hub 1Ti RWX if revived"
+    },
+    {
+      "id": "C5",
+      "coupling": "Azure disk storage classes + AKS-broken-CSI workarounds (emptyDir gitea/workspaces, omitted storageClassName)",
+      "files": [
+        "hub k8s/storage.yaml:41,57",
+        "hub terraform/environments/development/main.tf:420",
+        "askExpertQuestion k8s/persistent-volume.yaml:9",
+        "app k8s/base/postgres.yaml, redis.yaml",
+        "babysitter publish.yml:2502, charts/values.yaml:37, core/src/agent-workspace-controller.js:30-62"
+      ],
+      "gcpReplacement": "GKE standard-rwo / premium-rwo; gitea.persistence.type=pvc; keep emptyDir workspaces only as a documented product choice; ARC storage_class_name=standard-rwo"
+    },
+    {
+      "id": "C6",
+      "coupling": "Azure LB annotations, azure-dns-label-name, AppGW ingress class/annotations",
+      "files": [
+        "hub k8s/azure-lb-service.yaml:13-26, ingress-azure.yaml, azure-ssl-config.yaml",
+        "infra modules/azure-host/main.tf:132",
+        "askExpertQuestion infra/terraform/main.tf:132"
+      ],
+      "gcpReplacement": "ingress-nginx with reserved regional static IP (google_compute_address) as controller.service.loadBalancerIP; drop AppGW files"
+    },
+    {
+      "id": "C7",
+      "coupling": "ingress-nginx + cert-manager + ClusterIssuers via hub terraform / inline heredocs",
+      "files": [
+        "hub main.tf:313-363, modules/cert-manager, modules/ingress-nginx",
+        "claude-web deploy-staging.yml (inline letsencrypt-prod)"
+      ],
+      "gcpReplacement": "single add-on layer in the GCP IaC (infra-seed modules/addons/cert-manager, cloud/gcp/modules/addons/cert-manager-gcp, ingress-nginx helm release); one ClusterIssuer name letsencrypt-production"
+    },
+    {
+      "id": "C8",
+      "coupling": "DNS: manual GoDaddy A records; inert external-dns annotations; Azure DNS zone i.personoids.com; claude-web Azure DNS solver/zone tf",
+      "files": [
+        "babysitter publish.yml:2177,2498,2513",
+        "askExpertQuestion k8s/ingress.yaml",
+        "app k8s/base/ingress.yaml:8",
+        "company app.yaml",
+        "claude-web infra/dns/main.tf, infrastructure/kubernetes/cert-manager/cluster-issuer.yaml:57-78",
+        "hub k8s/external-dns.yaml"
+      ],
+      "gcpReplacement": "flip GoDaddy wildcard once at cut-over, or delegate a5c.ai to Cloud DNS + external-dns google provider (infra-seed cloud/gcp/addons.tf:9-16); delete i.personoids.com"
+    },
+    {
+      "id": "C9",
+      "coupling": "Azure OpenAI / Foundry endpoints and keys (AZURE_API_KEY, AGENT_MUX_API_BASE, AZURE_OPENAI_ENDPOINT, ANTHROPIC_FOUNDRY_*, provider foundry-openai, /openai/deployments URL shape)",
+      "files": [
+        "babysitter publish.yml:2447-2463 + 14 workflows",
+        "babysitter packages/adapters/core/src/provider-config.ts:48-49",
+        "babysitter packages/kradle/core/src/assistant-runtime.js:106-116",
+        "babysitter packages/kradle/core/src/agent-provider-config-controller.js:13-18",
+        "babysitter packages/kradle/charts/values.yaml:484, action.yml:66-75, live-stack tests",
+        "company app.yaml:42-48 + workflows",
+        "app ci-aks-deploy.yml:25-26",
+        "hub main.yml:25-26",
+        "osb cd.yml:176-185",
+        "mantis-proxy containerapp.template.yaml:81-83"
+      ],
+      "gcpReplacement": "Vertex AI (provider vertex / google-vertex already present; org secrets GOOGLE_CLOUD_PROJECT, GEMINI_API_KEY exist); kradle-assistant-keys -> KRADLE_ASSISTANT_PROVIDER=google-vertex with Workload Identity ADC; assistant-runtime.js needs a non-Azure URL shape; live-stack foundry-openai lanes -> vertex; delete AZURE_OPENAI_* and A5C_PROVIDER_NAME/A5C_SELECTED_CLI_COMMAND"
+    },
+    {
+      "id": "C10",
+      "coupling": "Key Vault / AKS KV secrets provider / hand-made k8s secrets",
+      "files": [
+        "hub main.tf:105-135, modules/aks/main.tf:72",
+        "claude-web values.yaml:252-255",
+        "workflow --from-literal secrets in babysitter/osb/claude-web/askExpertQuestion; company runbook"
+      ],
+      "gcpReplacement": "Secret Manager + External Secrets Operator (or secrets-store-csi GCP provider, infra-seed modules/addons/secrets-store-csi); ExternalSecret manifests in each origin repo"
+    },
+    {
+      "id": "C11",
+      "coupling": "Azure Monitor / Log Analytics / App Insights / omsagent",
+      "files": [
+        "hub main.tf:212-233, modules/aks/main.tf:66, modules/monitoring",
+        "claude-web infra/monitoring/*.tf"
+      ],
+      "gcpReplacement": "GKE Cloud Logging/Monitoring; google_monitoring_alert_policy; Managed Prometheus optional"
+    },
+    {
+      "id": "C12",
+      "coupling": "Azure Postgres flexible servers",
+      "files": [
+        "askExpertQuestion .a5c/bpx_pgflex_name.txt, deploy.yml:131-138",
+        "hub main.tf:186-210",
+        "mantis-proxy deploy.sh:13"
+      ],
+      "gcpReplacement": "Cloud SQL instances declared in the owning repo IaC; pg_dump -> gcloud sql import; archives dumped to GCS"
+    },
+    {
+      "id": "C13",
+      "coupling": "Container Apps + AzureFile config, Static Web Apps, App Service",
+      "files": [
+        "mantis-proxy deploy.sh, containerapp.template.yaml",
+        "a5c-website azure-static-web-apps.yml, deploy-to-azure.sh"
+      ],
+      "gcpReplacement": "Cloud Run (+GCS/Secret Manager) for the proxy if revived; Firebase Hosting or GCS+Cloud CDN for static sites (a5c-website superseded by Vercel -> likely delete)"
+    },
+    {
+      "id": "C14",
+      "coupling": "AKS terraform (azurerm_kubernetes_cluster, identities, addons, VNet/NSG, AppGW), node-RG parsing, renderAks",
+      "files": [
+        "hub terraform/**, modules/aks/main.tf:3-77",
+        "infra modules/azure-host/main.tf:156-245",
+        "askExpertQuestion infra/terraform/main.tf:39-100",
+        "babysitter publish.yml:1897-1907, packages/kradle/installer/src/terraform/root.ts:83"
+      ],
+      "gcpReplacement": "new GKE root from infra-seed terraform/cloud/gcp/main.tf + modules/k8s-cluster/main.tf:202-256 (Workload Identity, private nodes, release channel); babysitter renderGke (root.ts:115) for the installer path; GCS remote state bucket"
+    },
+    {
+      "id": "C15",
+      "coupling": "ARC runners via hub terraform with Azure disk work volume",
+      "files": [
+        "hub main.tf:392-420, modules/github_runner/main.tf"
+      ],
+      "gcpReplacement": "infra-seed cloud/gcp/addons.tf:27-45 module gcp_arc; keep scale-set name hub-dev-runners or retire (only hub CI uses it)"
+    },
+    {
+      "id": "C16",
+      "coupling": "Azure-pinned tests, docs, vendored workflow",
+      "files": [
+        "babysitter packages/atlas/webui/tests/atlas-deploy-postgres-workflow.test.ts:11-32",
+        "babysitter packages/kradle/core/tests/deployment.test.js:506-515",
+        "babysitter packages/kradle/installer/tests/plans.test.ts:306-320",
+        "babysitter packages/kradle/core/.github/workflows/publish.yml:90-117",
+        "babysitter docs/development/06-kradle-cloud-platform.md:35, docs/research/g0-rt-live-validation-runbook.md, docs/github-actions-setup-babysitter.md"
+      ],
+      "gcpReplacement": "rewrite assertions/docs in the same PR as the workflow change; delete or rewrite the vendored workflow"
+    },
+    {
+      "id": "C17",
+      "coupling": "kradle prod -> atlas-staging cross-dependency",
+      "files": [
+        "babysitter packages/kradle/charts/templates/deployments.yaml:463-464",
+        "babysitter publish.yml deploy_kradle (no --set atlasBaseUrl)"
+      ],
+      "gcpReplacement": "set atlasBaseUrl per environment in the deploy job; empty chart default that fails fast"
+    },
+    {
+      "id": "C18",
+      "coupling": "deploy-time heredoc manifests and inline kubectl create secret --from-literal",
+      "files": [
+        "babysitter publish.yml:1930-2203",
+        "osb cd.yml:124-200",
+        "claude-web deploy-staging.yml:~331-420",
+        "askExpertQuestion deploy.yml:106-138",
+        "company runbook one-time steps"
+      ],
+      "gcpReplacement": "versioned charts/kustomize dirs in each origin repo (atlas -> packages/atlas/webui/deploy/); secrets via Secret Manager + ExternalSecrets"
+    }
+  ],
+  "orphans": [
+    "tb-fleet VMs x8 (terminal-bench-bootstrap) — no provisioning source; decommission or re-author as Compute Engine MIG in a5c-ai/infra-seed",
+    "SWA a5c-proxy-894866 (a5c-website-rg) — unknown purpose; decommission",
+    "SWA a5c-website in personoids_sponsorship (provider None) and $web container a5cstatic — delete",
+    "$web container mantisb131bfc8 (rg-mantis-album, public blob access, 2026-09-11) — export to GCS archive; add deploy/ dir to a5c-ai/mantis if it is a product",
+    "Web App promoted-idle-a1cef5 — decommission",
+    "Storage babysitterarchive2608 container trial-telemetry — export to GCS archive, delete",
+    "Older LiteLLM proxy (litellm-proxy ACI + litellm-pgdb) — no source; dump to GCS, delete",
+    "personoids residue (KVs, ML workspaces, serverless endpoints, Grafana, Monitor workspaces, DNS zone i.personoids.com) — decommission",
+    "krate legacy CRDs/namespaces/ACR repos — delete in decommission",
+    "kyverno failed helm release, vela-system, app-routing addon, gatekeeper, AppGW residue — not carried to GKE",
+    "ACR dead repos budgets, onboard, tokens-dispenser, claude-web*, hub/github-runner — delete"
+  ],
+  "manualNeedingSource": [
+    "aeq Postgres aeqpg0316203042 -> google_sql_database_instance in a5c-ai/askExpertQuestion infra/terraform (currently only .a5c/bpx_pgflex_name.txt)",
+    "osb secret osb-secrets -> ExternalSecret in a5c-ai/osb deploy/kubernetes",
+    "hand-made k8s secrets (aeq-*, a5c-app-*, atlas-*, content-studio-*, hub-secrets, acr-*, babysitter-web-staging-*, arc-runners/github-secret, kradle-gitea-agent-token) -> Secret Manager + ExternalSecret in each origin repo",
+    "content-studio Postgres StatefulSet/PV/secrets (runbook one-time steps) -> Cloud SQL declared in a5c-ai/company IaC or Helm chart",
+    "ACR tokens aks-pull / content-studio-ci and admin user -> not needed on Artifact Registry (node SA pull)",
+    "a5ctfstorage terraform state bootstrap (hub scripts/first_init.sh) -> versioned GCS bucket declared in the new IaC bootstrap",
+    "ai-accounts (7 Azure AI resources) -> Vertex AI in boot-464019 (no IaC required beyond IAM/WIF)",
+    "dev VMs / vm-odoo-validation / ubuntu-large-02 -> optional Compute Engine instances in a5c-ai/infra-seed; export evidence container first",
+    "a5c-website SWA -> superseded by Vercel (website-a5c); remove the SWA custom-domain binding, delete",
+    "recommended home for the GKE/VPC/Artifact Registry/add-ons IaC: a5c-ai/infra-seed terraform/cloud/gcp -> new env terraform/envs/gcp-boot (alternative: a5c-ai/hub terraform/environments/gcp-development); babysitter packages/kradle/installer renderGke stays the per-product installer"
+  ],
+  "blockers": [
+    "gh search code is capped at 10 calls/min; the first sweep returned HTTP 403 for 10 queries and was re-run after the reset (results complete)",
+    "a5c-ai/app cannot be checked out on Windows (invalid path docs/dev/build-fixer-agent/...T11:49:56Z.md); files were read with git show, line numbers are from the blob",
+    "No source anywhere for geekonomy, tb-fleet, babysitter-benchmarks SWA, a5c-proxy-894866 SWA, promoted-idle, mantis-album/mantisb131bfc8, babysitterarchive2608 trial-telemetry, the older litellm-proxy, personoids stack — owner input required",
+    "aeq Postgres server has no IaC; only .a5c/bpx_pgflex_name.txt; schema/credentials live in repo secret POSTGRES_DATABASE_URL",
+    "Vercel ownership of the a5c.ai apex (website-a5c vs site) could not be verified without Vercel access (not an Azure resource; affects only the GoDaddy cut-over note)",
+    "Inventory guess corrected: org var AZURE_APPLICATION_CLIENT_ID = 22bb9d17 (claude-web-acr-push, AcrPush only); the over-privileged SPN 610b95c2 is wired via askExpertQuestion repo-level secrets"
+  ],
+  "corrections": [
+    "2026-09-16: geekonomy origin = Benihakak/geekonomy (private, outside a5c-ai org)",
+    "2026-09-16: babysitter-benchmarks SWA origin = MantisOS/babysitter-benchmarks"
+  ]
+}

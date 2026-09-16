@@ -1,0 +1,73 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.KeyVault/vaults/kv-tmuskal2530339506822",
+  "location": "swedencentral",
+  "name": "kv-tmuskal2530339506822",
+  "properties": {
+    "accessPolicies": [
+      {
+        "applicationId": null,
+        "objectId": "d8fba28a-1093-4e93-8eb1-e78a9a9b329a",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "all"
+          ],
+          "storage": []
+        },
+        "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b"
+      },
+      {
+        "applicationId": null,
+        "objectId": "912be4bf-1d0e-466c-ae9f-5ddeb1686957",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "all"
+          ],
+          "storage": []
+        },
+        "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b"
+      }
+    ],
+    "createMode": null,
+    "enablePurgeProtection": null,
+    "enableRbacAuthorization": false,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": null,
+    "enabledForTemplateDeployment": null,
+    "hsmPoolResourceId": null,
+    "networkAcls": null,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": null,
+    "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b",
+    "vaultUri": "https://kv-tmuskal2530339506822.vault.azure.net/"
+  },
+  "resourceGroup": "personoids_sponsorship",
+  "systemData": {
+    "createdAt": "2025-02-09T10:45:02.104000+00:00",
+    "createdBy": "tmuskal@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-02-09T10:45:02.104000+00:00",
+    "lastModifiedBy": "tmuskal@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.KeyVault/vaults"
+}

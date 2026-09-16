@@ -1,0 +1,20 @@
+[
+  {
+    "buildId": "default",
+    "createdTimeUtc": "2026-08-17T12:25:37.225913+00:00",
+    "databaseConnections": [],
+    "hostname": "happy-pond-0fcbef50f.7.azurestaticapps.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-babysitter-portal/providers/Microsoft.Web/staticSites/babysitter-benchmarks/builds/default",
+    "kind": null,
+    "lastUpdatedOn": "2026-08-18T18:12:30.096907+00:00",
+    "linkedBackends": [],
+    "location": "East US 2",
+    "name": "default",
+    "pullRequestTitle": null,
+    "resourceGroup": "rg-babysitter-portal",
+    "sourceBranch": null,
+    "status": "Ready",
+    "type": "Microsoft.Web/staticSitesbuilds",
+    "userProvidedFunctionApps": null
+  }
+]

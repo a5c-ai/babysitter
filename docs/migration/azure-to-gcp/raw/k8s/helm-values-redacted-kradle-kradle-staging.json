@@ -1,0 +1,140 @@
+{
+  "release": "kradle/kradle-staging",
+  "redactedShape": {
+    "admin": {
+      "org": "<string>",
+      "username": "<string>"
+    },
+    "apiService": {
+      "enabled": false
+    },
+    "argocd": {
+      "enabled": false
+    },
+    "assistant": {
+      "existingSecret": "<string>"
+    },
+    "auth": {
+      "github": {
+        "clientId": "<string>",
+        "clientSecret": "<string>"
+      },
+      "testSession": {
+        "secret": "<string>"
+      }
+    },
+    "controllers": {
+      "repoReconcileIntervalMs": 300000
+    },
+    "demo": {
+      "enabled": false
+    },
+    "externalDependencies": {
+      "kyverno": {
+        "discoverExisting": true,
+        "enabled": true
+      }
+    },
+    "gitea": {
+      "bootstrap": {
+        "sandboxRepo": "<string>"
+      },
+      "enabled": true,
+      "ingress": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "<string>",
+          "external-dns.alpha.kubernetes.io/hostname": "<string>",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "<string>",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "<string>"
+        },
+        "className": "<string>",
+        "enabled": true,
+        "host": "<string>",
+        "tls": [
+          {
+            "hosts": [
+              "<string>"
+            ],
+            "secretName": "<string>"
+          }
+        ]
+      },
+      "persistence": {
+        "type": "<string>"
+      },
+      "token": {
+        "autoProvision": true,
+        "existingSecret": "<string>"
+      }
+    },
+    "global": {
+      "imagePullSecrets": [
+        {
+          "name": "<string>"
+        }
+      ]
+    },
+    "image": {
+      "controller": {
+        "repository": "<string>",
+        "tag": "<string>"
+      },
+      "pullPolicy": "<string>",
+      "web": {
+        "repository": "<string>",
+        "tag": "<string>"
+      }
+    },
+    "ingress": {
+      "annotations": {
+        "cert-manager.io/cluster-issuer": "<string>",
+        "external-dns.alpha.kubernetes.io/hostname": "<string>",
+        "nginx.ingress.kubernetes.io/ssl-redirect": "<string>"
+      },
+      "className": "<string>",
+      "enabled": true,
+      "hosts": [
+        {
+          "host": "<string>",
+          "paths": [
+            {
+              "path": "<string>",
+              "pathType": "<string>"
+            }
+          ]
+        }
+      ],
+      "tls": [
+        {
+          "hosts": [
+            "<string>"
+          ],
+          "secretName": "<string>"
+        }
+      ]
+    },
+    "jitsi": {
+      "install": true,
+      "prosody": {
+        "auth": {
+          "jwt": {
+            "appSecret": "<string>"
+          }
+        }
+      }
+    },
+    "jitsi-subchart": {
+      "prosody": {
+        "secretEnvs": {
+          "JWT_APP_SECRET": "<string>"
+        }
+      }
+    },
+    "kubevela": {
+      "enabled": false
+    },
+    "networkPolicy": {
+      "enabled": false
+    }
+  }
+}

@@ -1,0 +1,25 @@
+[
+  {
+    "deleted": null,
+    "encryptionScope": {
+      "defaultEncryptionScope": "$account-encryption-key",
+      "preventEncryptionScopeOverride": false
+    },
+    "immutableStorageWithVersioningEnabled": false,
+    "metadata": null,
+    "name": "$web",
+    "properties": {
+      "etag": "\"0x8DF0FD53A27D7A5\"",
+      "hasImmutabilityPolicy": false,
+      "hasLegalHold": false,
+      "lastModified": "2026-09-11T07:20:58+00:00",
+      "lease": {
+        "duration": null,
+        "state": "available",
+        "status": "unlocked"
+      },
+      "publicAccess": null
+    },
+    "version": null
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "armRoleReceivers": [],
+    "automationRunbookReceivers": [],
+    "azureAppPushReceivers": [],
+    "azureFunctionReceivers": [],
+    "emailReceivers": [
+      {
+        "emailAddress": "tmuskal@gmail.com",
+        "name": "Email_-EmailAction-",
+        "status": "Enabled",
+        "useCommonAlertSchema": true
+      }
+    ],
+    "enabled": true,
+    "eventHubReceivers": [],
+    "groupShortName": "recalert1",
+    "id": "/subscriptions/794E33CD-48BA-4654-8CD9-B6CF2715E097/resourceGroups/personoids_sponsorship/providers/microsoft.insights/actionGroups/RecommendedAlertRules-AG-1",
+    "itsmReceivers": [],
+    "location": "Global",
+    "logicAppReceivers": [],
+    "name": "RecommendedAlertRules-AG-1",
+    "resourceGroup": "personoids_sponsorship",
+    "smsReceivers": [],
+    "type": "Microsoft.Insights/ActionGroups",
+    "voiceReceivers": [],
+    "webhookReceivers": []
+  },
+  {
+    "armRoleReceivers": [
+      {
+        "name": "Monitoring Contributor",
+        "roleId": "749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+        "useCommonAlertSchema": true
+      },
+      {
+        "name": "Monitoring Reader",
+        "roleId": "43d0d8ad-25c7-4714-9337-8ba259a9fe05",
+        "useCommonAlertSchema": true
+      }
+    ],
+    "automationRunbookReceivers": [],
+    "azureAppPushReceivers": [],
+    "azureFunctionReceivers": [],
+    "emailReceivers": [],
+    "enabled": true,
+    "eventHubReceivers": [],
+    "groupShortName": "SmartDetect",
+    "id": "/subscriptions/794E33CD-48BA-4654-8CD9-B6CF2715E097/resourceGroups/rg-tmuskal-7935/providers/microsoft.insights/actionGroups/Application Insights Smart Detection",
+    "itsmReceivers": [],
+    "location": "Global",
+    "logicAppReceivers": [],
+    "name": "Application Insights Smart Detection",
+    "resourceGroup": "rg-tmuskal-7935",
+    "smsReceivers": [],
+    "type": "Microsoft.Insights/ActionGroups",
+    "voiceReceivers": [],
+    "webhookReceivers": []
+  },
+  {
+    "armRoleReceivers": [],
+    "automationRunbookReceivers": [],
+    "azureAppPushReceivers": [],
+    "azureFunctionReceivers": [],
+    "emailReceivers": [
+      {
+        "emailAddress": "dev@a5c.ai",
+        "name": "dev-team",
+        "status": "Enabled",
+        "useCommonAlertSchema": false
+      }
+    ],
+    "enabled": true,
+    "eventHubReceivers": [],
+    "groupShortName": "hub-dev",
+    "id": "/subscriptions/794E33CD-48BA-4654-8CD9-B6CF2715E097/resourceGroups/rg-hub-development-westus3/providers/microsoft.insights/actionGroups/ag-hub-development-westus3-v2",
+    "itsmReceivers": [],
+    "location": "Global",
+    "logicAppReceivers": [],
+    "name": "ag-hub-development-westus3-v2",
+    "resourceGroup": "rg-hub-development-westus3",
+    "smsReceivers": [],
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Insights/ActionGroups",
+    "voiceReceivers": [],
+    "webhookReceivers": []
+  }
+]

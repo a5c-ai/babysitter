@@ -1,0 +1,518 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-05T06:35:25Z",
+        "generation": 44,
+        "labels": {
+          "app.kubernetes.io/component": "backend",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-backend-network-policy",
+        "namespace": "hub-development",
+        "resourceVersion": "14015651",
+        "uid": "e9f04314-fcd8-4318-b445-bd93084ac0d4"
+      },
+      "spec": {
+        "egress": [
+          {
+            "ports": [
+              {
+                "port": 53,
+                "protocol": "UDP"
+              }
+            ]
+          },
+          {
+            "ports": [
+              {
+                "port": 5432,
+                "protocol": "TCP"
+              }
+            ],
+            "to": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "postgresql"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "ports": [
+              {
+                "port": 6379,
+                "protocol": "TCP"
+              }
+            ],
+            "to": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "redis"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "ports": [
+              {
+                "port": 443,
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "hub-frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 8080,
+                "protocol": "TCP"
+              }
+            ]
+          },
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "ingress-nginx"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 8080,
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ],
+        "podSelector": {
+          "matchLabels": {
+            "app": "hub-backend"
+          }
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T16:25:11Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "database",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-database-network-policy",
+        "namespace": "hub-development",
+        "resourceVersion": "119626",
+        "uid": "753eb75c-8a5d-41d4-af62-e131c51675b2"
+      },
+      "spec": {
+        "ingress": [
+          {
+            "from": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "hub-backend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 5432,
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ],
+        "podSelector": {
+          "matchLabels": {
+            "app": "postgresql"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-05T06:35:26Z",
+        "generation": 44,
+        "labels": {
+          "app.kubernetes.io/component": "frontend",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-frontend-network-policy",
+        "namespace": "hub-development",
+        "resourceVersion": "14015652",
+        "uid": "b9375bb9-ba8c-4f2a-9fcf-3882e4d6b615"
+      },
+      "spec": {
+        "egress": [
+          {
+            "ports": [
+              {
+                "port": 53,
+                "protocol": "UDP"
+              }
+            ]
+          },
+          {
+            "ports": [
+              {
+                "port": 8080,
+                "protocol": "TCP"
+              }
+            ],
+            "to": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "hub-backend"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "ingress-nginx"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 3000,
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ],
+        "podSelector": {
+          "matchLabels": {
+            "app": "hub-frontend"
+          }
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T16:25:11Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "cache",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-redis-network-policy",
+        "namespace": "hub-development",
+        "resourceVersion": "119628",
+        "uid": "07654730-410d-4bf3-ba91-de6636f9d910"
+      },
+      "spec": {
+        "ingress": [
+          {
+            "from": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "hub-backend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 6379,
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ],
+        "podSelector": {
+          "matchLabels": {
+            "app": "redis"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-09-01T03:22:48Z",
+        "generation": 3,
+        "name": "knack-default-deny-egress",
+        "namespace": "kradle-org-knack",
+        "resourceVersion": "191708548",
+        "uid": "b6133965-0dc5-46e2-8f84-eaf9ebbf044a"
+      },
+      "spec": {
+        "podSelector": {},
+        "policyTypes": [
+          "Egress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:50Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile"
+        },
+        "name": "konnectivity-agent",
+        "namespace": "kube-system",
+        "resourceVersion": "649",
+        "uid": "22edc10c-3fdf-4509-8036-ef036ffb86f8"
+      },
+      "spec": {
+        "egress": [
+          {}
+        ],
+        "podSelector": {
+          "matchLabels": {
+            "app": "konnectivity-agent"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "babysitter-web-staging",
+          "meta.helm.sh/release-namespace": "staging"
+        },
+        "creationTimestamp": "2026-02-21T14:51:58Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging",
+        "namespace": "staging",
+        "resourceVersion": "97390532",
+        "uid": "36329be7-521a-4b62-a965-10f1478c67ae"
+      },
+      "spec": {
+        "egress": [
+          {
+            "ports": [
+              {
+                "port": 5432,
+                "protocol": "TCP"
+              },
+              {
+                "port": 6379,
+                "protocol": "TCP"
+              },
+              {
+                "port": 3000,
+                "protocol": "TCP"
+              }
+            ],
+            "to": [
+              {
+                "podSelector": {}
+              }
+            ]
+          },
+          {
+            "ports": [
+              {
+                "port": 5432,
+                "protocol": "TCP"
+              },
+              {
+                "port": 6379,
+                "protocol": "TCP"
+              },
+              {
+                "port": 443,
+                "protocol": "TCP"
+              },
+              {
+                "port": 53,
+                "protocol": "TCP"
+              },
+              {
+                "port": 53,
+                "protocol": "UDP"
+              }
+            ],
+            "to": [
+              {
+                "namespaceSelector": {}
+              }
+            ]
+          },
+          {
+            "ports": [
+              {
+                "port": 443,
+                "protocol": "TCP"
+              },
+              {
+                "port": 80,
+                "protocol": "TCP"
+              }
+            ],
+            "to": [
+              {
+                "ipBlock": {
+                  "cidr": "0.0.0.0/0"
+                }
+              }
+            ]
+          }
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "podSelector": {}
+              }
+            ],
+            "ports": [
+              {
+                "port": 5432,
+                "protocol": "TCP"
+              },
+              {
+                "port": 6379,
+                "protocol": "TCP"
+              },
+              {
+                "port": 3000,
+                "protocol": "TCP"
+              }
+            ]
+          },
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "name": "ingress-nginx"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 3000,
+                "protocol": "TCP"
+              },
+              {
+                "port": 8089,
+                "protocol": "TCP"
+              }
+            ]
+          },
+          {
+            "from": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app.kubernetes.io/name": "prometheus"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "port": 3000,
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ],
+        "podSelector": {
+          "matchLabels": {
+            "app.kubernetes.io/instance": "babysitter-web-staging",
+            "app.kubernetes.io/name": "babysitter-web"
+          }
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ]
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

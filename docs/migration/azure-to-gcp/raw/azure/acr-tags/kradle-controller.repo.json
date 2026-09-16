@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-06-03T15:26:39.4880541Z",
+  "imageName": "kradle-controller",
+  "lastUpdateTime": "2026-09-05T14:29:56.3438736Z",
+  "manifestCount": 74,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 21
+}

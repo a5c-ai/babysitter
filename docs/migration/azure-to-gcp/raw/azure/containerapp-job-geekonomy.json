@@ -1,0 +1,80 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/jobs/geekonomy-db-migrate",
+  "identity": {
+    "type": "None"
+  },
+  "location": "North Europe",
+  "name": "geekonomy-db-migrate",
+  "properties": {
+    "configuration": {
+      "dapr": null,
+      "eventTriggerConfig": null,
+      "manualTriggerConfig": {
+        "parallelism": 1,
+        "replicaCompletionCount": 1
+      },
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "geekonomyacrmkb5l5azurecrio-geekonomyacrmkb5l5",
+          "server": "geekonomyacrmkb5l5.azurecr.io",
+          "username": "geekonomyacrmkb5l5"
+        }
+      ],
+      "replicaRetryLimit": 1,
+      "replicaTimeout": 1800,
+      "scheduleTriggerConfig": null,
+      "secrets": [
+        {
+          "name": "database-url"
+        },
+        {
+          "name": "geekonomyacrmkb5l5azurecrio-geekonomyacrmkb5l5"
+        }
+      ],
+      "triggerType": "Manual"
+    },
+    "environmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "eventStreamEndpoint": "https://northeurope.azurecontainerapps.dev/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/containerApps/geekonomy-db-migrate/eventstream",
+    "outboundIpAddresses": [
+      "4.209.31.224"
+    ],
+    "provisioningState": "Succeeded",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "DATABASE_URL",
+              "secretRef": "database-url"
+            },
+            {
+              "name": "DATABASE_SSL",
+              "value": "require"
+            }
+          ],
+          "image": "geekonomyacrmkb5l5.azurecr.io/geekonomy-migrator:20260106131305-6705780",
+          "name": "geekonomy-db-migrate",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "volumes": null
+    },
+    "workloadProfileName": null
+  },
+  "resourceGroup": "geekonomy-prod",
+  "systemData": {
+    "createdAt": "2026-01-06T13:23:54.0867038",
+    "createdBy": "benihakak@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-01-06T13:23:54.0867038",
+    "lastModifiedBy": "benihakak@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/jobs"
+}

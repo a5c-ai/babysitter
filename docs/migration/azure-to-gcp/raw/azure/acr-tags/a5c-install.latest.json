@@ -1,0 +1,59 @@
+[
+  {
+    "architecture": "amd64",
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.docker.container.image.v1+json",
+    "createdTime": "2025-09-13T17:24:51.1029316Z",
+    "digest": "sha256:5ad0feb53355fe749d3539e5a7febc6d719683df5723223ff6c57c320d7ad910",
+    "imageSize": 300259440,
+    "lastUpdateTime": "2025-09-13T17:24:51.1029316Z",
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "os": "linux",
+    "tags": [
+      "20250913172226"
+    ]
+  },
+  {
+    "architecture": "amd64",
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.docker.container.image.v1+json",
+    "createdTime": "2025-09-13T16:49:20.4601827Z",
+    "digest": "sha256:8ff39b85e4a0d7a22a0f86d6d75eaaadb5ce2b57bd80b416876c805a031e13e9",
+    "imageSize": 297626164,
+    "lastUpdateTime": "2025-09-13T16:49:20.4601827Z",
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "os": "linux",
+    "tags": [
+      "20250913164659"
+    ]
+  },
+  {
+    "architecture": "amd64",
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.docker.container.image.v1+json",
+    "createdTime": "2025-09-13T16:39:28.3804459Z",
+    "digest": "sha256:7f4aa8c9ac626431cdb0822a473b032bace978f1eed717beef38ff0cce366479",
+    "imageSize": 237511041,
+    "lastUpdateTime": "2025-09-13T16:39:28.3804459Z",
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "os": "linux",
+    "tags": [
+      "20250913163713"
+    ]
+  }
+]

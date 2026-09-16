@@ -1,0 +1,132 @@
+.github	2026-02-03		PUBLIC
+PromptPasta	2025-10-15		PRIVATE
+a5c	2025-12-21		PUBLIC
+a5c-viewer	2025-10-05		INTERNAL
+a5c-website	2025-05-08		PRIVATE
+a5c-website-blue-theme	2025-03-24	archived	PRIVATE
+action	2025-12-17		PUBLIC
+agent-mux	2026-04-22		PUBLIC
+agentic-rpa-automation-platform	2025-04-27	archived	PRIVATE
+app	2025-12-31	archived	PRIVATE
+apptest	2025-08-14	archived	PRIVATE
+askExpertQuestion	2026-08-08		PRIVATE
+atlas	2026-07-01		PUBLIC
+atlas-antigravity	2026-08-10		PUBLIC
+atlas-claude	2026-08-10		PUBLIC
+atlas-codex	2026-08-10		PUBLIC
+atlas-cursor	2026-08-10		PUBLIC
+atlas-gemini	2026-08-10		PUBLIC
+atlas-genty	2026-08-10		PUBLIC
+atlas-github-copilot	2026-08-10		PUBLIC
+atlas-omp	2026-08-10		PUBLIC
+atlas-openclaw	2026-08-10		PUBLIC
+atlas-opencode	2026-08-10		PUBLIC
+atlas-pi	2026-08-10		PUBLIC
+autoco	2026-03-02		INTERNAL
+awesome-a5c	2025-07-11		PRIVATE
+babysitter	2026-09-05		PUBLIC
+babysitter-antigravity	2026-08-10		PUBLIC
+babysitter-breakpoints	2026-01-17		PUBLIC
+babysitter-claude	2026-08-10		PUBLIC
+babysitter-codex	2026-08-10		PUBLIC
+babysitter-cursor	2026-08-10		PUBLIC
+babysitter-gemini	2026-08-10		PUBLIC
+babysitter-github-copilot	2026-08-10		PUBLIC
+babysitter-hermes	2026-08-10		PUBLIC
+babysitter-omp	2026-08-10		PUBLIC
+babysitter-openclaw	2026-08-10		PUBLIC
+babysitter-opencode	2026-08-10		PUBLIC
+babysitter-paperclip	2026-05-05		PUBLIC
+babysitter-pi	2026-08-10		PUBLIC
+babysitter-routing-eval	2026-08-12		PUBLIC
+babysitter-skill	2026-01-08		PRIVATE
+blank-template	2025-04-02	archived	PRIVATE
+blog	2025-04-04		PRIVATE
+browsing-session-recorder-mcp-server	2025-04-08	archived	PRIVATE
+budgeting-proxy	2025-09-08	archived	PRIVATE
+business-plan-and-budget	2025-12-10		PRIVATE
+capacity-training	2025-07-15	archived	PRIVATE
+claude-code-telegram-bot	2026-02-02		PUBLIC
+claude-web	2026-04-12		PRIVATE
+cli	2025-07-11		PUBLIC
+coder-agent-mcp	2025-04-03	archived	PRIVATE
+company	2026-09-15		PRIVATE
+compendium	2026-05-07		PUBLIC
+curman	2025-04-03	archived	PRIVATE
+demo-expedia	2026-06-23		PRIVATE
+docs	2025-08-07		PUBLIC
+docs-analyzer	2025-07-17	archived	PRIVATE
+document-ingestion-tools	2025-07-30		PRIVATE
+doobi-test1	2025-08-21	archived	PRIVATE
+elections-committee-2025	2026-07-26		INTERNAL
+evoprompt-mcp-server	2025-04-03	archived	PRIVATE
+evosample	2025-04-03		PRIVATE
+fabric	2026-09-07		PRIVATE
+folkware	2025-06-30	archived	PRIVATE
+folkware-landing	2025-06-30	archived	PRIVATE
+forge	2026-01-02		PUBLIC
+frontend-analyzer	2025-04-02	archived	PRIVATE
+game-assets-mcp	2025-04-03	archived	PRIVATE
+generate-token-action	2025-09-08		PUBLIC
+genti-chat-poc	2026-06-17		PRIVATE
+gitagent	2025-07-05	archived	PRIVATE
+github-ops-test	2025-07-29		PRIVATE
+history-miner-mcp-server	2025-04-03	archived	PRIVATE
+hooks	2025-08-02		PRIVATE
+hub	2025-09-08		PUBLIC
+idea-manager	2025-04-04	archived	PRIVATE
+infra	2025-09-30		PRIVATE
+infra-seed	2025-12-16		PRIVATE
+install	2025-09-16	archived	PRIVATE
+ioc-code-planner-mcp-server	2025-04-04	archived	PRIVATE
+kanban	2026-01-05		PUBLIC
+knack	2026-09-06		PRIVATE
+leantime	2025-10-01		PRIVATE
+llama.cpp	2025-10-07	archived	PRIVATE
+llm-catalog	2025-04-02	archived	PRIVATE
+llmstxt-catalog	2025-04-04	archived	PRIVATE
+loom	2026-08-13		PRIVATE
+mantis	2026-07-13		PRIVATE
+mantis-proxy	2026-08-12		INTERNAL
+mcp-server-template	2025-04-08	archived	PRIVATE
+mcpml	2025-04-22	archived	PRIVATE
+mcpml-browser-recorder	2025-04-08	archived	PRIVATE
+mcpml-private	2025-04-08	archived	PRIVATE
+mcpml-serpapi-researcher	2025-04-08	archived	PRIVATE
+mcts-planner-mcp	2025-04-04	archived	PRIVATE
+nanoGPT	2026-03-02		PUBLIC
+nextjs-app-template	2025-06-30	archived	PRIVATE
+notes-test1	2025-07-12	archived	PRIVATE
+notes-test2	2025-07-12	archived	PRIVATE
+notes-test3	2025-07-13	archived	PRIVATE
+notes-test4	2025-08-20	archived	PRIVATE
+notes-test6	2025-07-16	archived	PRIVATE
+o	2026-01-22		PUBLIC
+obedience-benchmark	2026-03-16		PUBLIC
+onboard	2025-09-21		PRIVATE
+open-source-project-template	2025-04-04	archived	PRIVATE
+osb	2026-02-22		PRIVATE
+project	2025-07-30		PRIVATE
+project-specification--agentic-rpa-automation-platform	2025-04-27	archived	PRIVATE
+proof-of-ownership-protocol	2025-04-08	archived	PRIVATE
+registry	2025-11-27		PUBLIC
+runner-images	2025-12-18		PUBLIC
+sa-memory-game	2025-07-23		PUBLIC
+seed	2025-03-14	archived	PRIVATE
+seed-generic	2025-12-16		PUBLIC
+site	2026-08-10		INTERNAL
+spec	2025-07-29		PUBLIC
+sportfeeder	2025-04-02	archived	PRIVATE
+studio	2025-04-02	archived	PRIVATE
+task-management-app-test1	2025-07-11	archived	PRIVATE
+task-management-app-test2	2025-07-12	archived	PRIVATE
+task-management-app-test3	2025-07-12	archived	PRIVATE
+task-management-app-test4	2025-07-12	archived	PRIVATE
+tokens-dispenser	2025-09-12	archived	PRIVATE
+vibe	2025-04-03	archived	PRIVATE
+vibe-bootstrapper	2025-04-03	archived	PRIVATE
+vscode-extension	2025-10-02		PRIVATE
+web-app-template-strip-wip	2025-04-02	archived	PRIVATE
+web2llmstxt	2025-04-13	archived	PRIVATE
+website	2025-04-03	archived	PRIVATE
+website-a5c	2026-07-09		PRIVATE

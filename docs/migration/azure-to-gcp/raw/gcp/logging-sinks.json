@@ -1,0 +1,14 @@
+[
+  {
+    "destination": "logging.googleapis.com/projects/boot-464019/locations/global/buckets/_Required",
+    "filter": "LOG_ID(\"cloudaudit.googleapis.com/activity\") OR LOG_ID(\"externalaudit.googleapis.com/activity\") OR LOG_ID(\"cloudaudit.googleapis.com/system_event\") OR LOG_ID(\"externalaudit.googleapis.com/system_event\") OR LOG_ID(\"cloudaudit.googleapis.com/access_transparency\") OR LOG_ID(\"externalaudit.googleapis.com/access_transparency\")",
+    "name": "_Required",
+    "resourceName": "projects/boot-464019/sinks/_Required"
+  },
+  {
+    "destination": "logging.googleapis.com/projects/boot-464019/locations/global/buckets/_Default",
+    "filter": "NOT LOG_ID(\"cloudaudit.googleapis.com/activity\") AND NOT LOG_ID(\"externalaudit.googleapis.com/activity\") AND NOT LOG_ID(\"cloudaudit.googleapis.com/system_event\") AND NOT LOG_ID(\"externalaudit.googleapis.com/system_event\") AND NOT LOG_ID(\"cloudaudit.googleapis.com/access_transparency\") AND NOT LOG_ID(\"externalaudit.googleapis.com/access_transparency\")",
+    "name": "_Default",
+    "resourceName": "projects/boot-464019/sinks/_Default"
+  }
+]

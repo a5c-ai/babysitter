@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-05-12T09:40:27.0288641Z",
+  "imageName": "krate-web",
+  "lastUpdateTime": "2026-08-27T10:31:44.1533901Z",
+  "manifestCount": 20,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

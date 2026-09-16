@@ -1,0 +1,10 @@
+ERROR: (gcloud.billing) Invalid choice: 'projects'.
+Maybe you meant:
+  gcloud projects describe
+  gcloud projects get-ancestors
+  gcloud projects get-ancestors-iam-policy
+  gcloud projects get-iam-policy
+  gcloud billing budgets describe
+
+To search the help text of gcloud commands, run:
+  gcloud help -- SEARCH_TERMS

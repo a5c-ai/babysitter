@@ -1,0 +1,23 @@
+cannot import name 'get_arm_endpoints' from 'azure.mgmt.core.tools' (C:\Program Files\Microsoft SDKs\Azure\CLI2\Lib\site-packages\azure\mgmt\core\tools.pyc)
+[
+  {
+    "architecture": "amd64",
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.docker.container.image.v1+json",
+    "createdTime": "2026-04-21T11:43:53.3487755Z",
+    "digest": "sha256:ce48796c5ede01de24549bc5caf6e214f00907a7cba04589776861eef90be1a2",
+    "imageSize": 371369931,
+    "lastUpdateTime": "2026-04-21T11:43:53.3487755Z",
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "os": "linux",
+    "tags": [
+      "54a0641bf65378ba94214639e246ddd28e178250",
+      "latest"
+    ]
+  }
+]

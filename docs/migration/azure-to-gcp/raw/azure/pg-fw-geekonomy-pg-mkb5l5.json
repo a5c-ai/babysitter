@@ -1,0 +1,47 @@
+[
+  {
+    "endIpAddress": "0.0.0.0",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/firewallRules/AllowAllAzureIPs",
+    "name": "AllowAllAzureIPs",
+    "resourceGroup": "geekonomy-prod",
+    "startIpAddress": "0.0.0.0",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  },
+  {
+    "endIpAddress": "46.116.155.30",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/firewallRules/AllowExportScript",
+    "name": "AllowExportScript",
+    "resourceGroup": "geekonomy-prod",
+    "startIpAddress": "46.116.155.30",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  },
+  {
+    "endIpAddress": "89.138.174.124",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/firewallRules/AllowMyIP",
+    "name": "AllowMyIP",
+    "resourceGroup": "geekonomy-prod",
+    "startIpAddress": "89.138.174.124",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  },
+  {
+    "endIpAddress": "77.127.145.34",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/firewallRules/AllowLocalMigrations",
+    "name": "AllowLocalMigrations",
+    "resourceGroup": "geekonomy-prod",
+    "startIpAddress": "77.127.145.34",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  },
+  {
+    "endIpAddress": "46.116.155.30",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/firewallRules/AllowCurrentIP",
+    "name": "AllowCurrentIP",
+    "resourceGroup": "geekonomy-prod",
+    "startIpAddress": "46.116.155.30",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  }
+]

@@ -1,0 +1,22 @@
+API [cloudfunctions.googleapis.com] not enabled on project [boot-464019]. Would 
+you like to enable and retry (this will take a few minutes)? (y/N)?  
+ERROR: (gcloud.functions.list) PERMISSION_DENIED: Cloud Functions API has not been used in project boot-464019 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/cloudfunctions.googleapis.com/overview?project=boot-464019 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.
+- '@type': type.googleapis.com/google.rpc.ErrorInfo
+  domain: googleapis.com
+  metadata:
+    activationUrl: https://console.developers.google.com/apis/api/cloudfunctions.googleapis.com/overview?project=boot-464019
+    consumer: projects/boot-464019
+    containerInfo: boot-464019
+    service: cloudfunctions.googleapis.com
+    serviceTitle: Cloud Functions API
+  reason: SERVICE_DISABLED
+- '@type': type.googleapis.com/google.rpc.LocalizedMessage
+  locale: en-US
+  message: Cloud Functions API has not been used in project boot-464019 before or
+    it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/cloudfunctions.googleapis.com/overview?project=boot-464019
+    then retry. If you enabled this API recently, wait a few minutes for the action
+    to propagate to our systems and retry.
+- '@type': type.googleapis.com/google.rpc.Help
+  links:
+  - description: Google developers console API activation
+    url: https://console.developers.google.com/apis/api/cloudfunctions.googleapis.com/overview?project=boot-464019

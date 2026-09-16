@@ -1,0 +1,156 @@
+[
+  {
+    "createdDate": "2025-01-26T08:54:06.2117509Z",
+    "customerId": "09e1c501-7cbc-4bb3-a7a2-8b850ec88fba",
+    "etag": "\"bc002017-0000-0800-0000-6a90024b0000\"",
+    "features": {
+      "enableLogAccessUsingOnlyResourcePermissions": true
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/DefaultResourceGroup-WUS2/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-794e33cd-48ba-4654-8cd9-b6cf2715e097-WUS2",
+    "location": "westus2",
+    "modifiedDate": "2026-08-27T09:24:27.626037Z",
+    "name": "DefaultWorkspace-794e33cd-48ba-4654-8cd9-b6cf2715e097-WUS2",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccessForIngestion": "Enabled",
+    "publicNetworkAccessForQuery": "Enabled",
+    "resourceGroup": "DefaultResourceGroup-WUS2",
+    "retentionInDays": 30,
+    "sku": {
+      "lastSkuUpdate": "2025-01-26T08:54:06.2117509Z",
+      "name": "PerGB2018"
+    },
+    "tags": {},
+    "type": "Microsoft.OperationalInsights/workspaces",
+    "workspaceCapping": {
+      "dailyQuotaGb": 1.0,
+      "dataIngestionStatus": "RespectQuota",
+      "quotaNextResetTime": "2026-08-28T09:00:00Z"
+    }
+  },
+  {
+    "createdDate": "2026-01-06T11:03:28.1211601Z",
+    "customerId": "3213de54-0218-4913-99d2-40ddaaac1fb1",
+    "etag": "\"0400b6b6-0000-0c00-0000-6a90026d0000\"",
+    "features": {
+      "enableLogAccessUsingOnlyResourcePermissions": true
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.OperationalInsights/workspaces/geekonomy-law-mkb5l5",
+    "location": "northeurope",
+    "modifiedDate": "2026-08-27T09:25:01.4409574Z",
+    "name": "geekonomy-law-mkb5l5",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccessForIngestion": "Enabled",
+    "publicNetworkAccessForQuery": "Enabled",
+    "resourceGroup": "geekonomy-prod",
+    "retentionInDays": 30,
+    "sku": {
+      "lastSkuUpdate": "2026-01-06T11:03:28.1211601Z",
+      "name": "PerGB2018"
+    },
+    "type": "Microsoft.OperationalInsights/workspaces",
+    "workspaceCapping": {
+      "dailyQuotaGb": 1.0,
+      "dataIngestionStatus": "RespectQuota",
+      "quotaNextResetTime": "2026-08-28T03:00:00Z"
+    }
+  },
+  {
+    "createdDate": "2025-07-30T09:08:47.5103417Z",
+    "customerId": "b0fe6a09-e5ad-442f-b9f8-055fd549336a",
+    "etag": "\"1400dec1-0000-4d00-0000-6aa9e70d0000\"",
+    "features": {
+      "disableLocalAuth": false,
+      "enableLogAccessUsingOnlyResourcePermissions": true,
+      "immediatePurgeDataOn30Days": false
+    },
+    "forceCmkForQuery": false,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.OperationalInsights/workspaces/aks-hub-development-westus3-v2-logs",
+    "location": "westus3",
+    "modifiedDate": "2026-09-16T00:47:09.0103217Z",
+    "name": "aks-hub-development-westus3-v2-logs",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccessForIngestion": "Enabled",
+    "publicNetworkAccessForQuery": "Enabled",
+    "resourceGroup": "rg-hub-development-westus3",
+    "retentionInDays": 30,
+    "sku": {
+      "lastSkuUpdate": "2025-07-30T09:08:47.5103417Z",
+      "name": "PerGB2018"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.OperationalInsights/workspaces",
+    "workspaceCapping": {
+      "dailyQuotaGb": 1.0,
+      "dataIngestionStatus": "OverQuota",
+      "quotaNextResetTime": "2026-09-16T22:00:00Z"
+    }
+  },
+  {
+    "createdDate": "2025-07-30T09:08:47.6451895Z",
+    "customerId": "79550441-437c-4635-a662-57f2c717915b",
+    "etag": "\"7a016ddc-0000-4d00-0000-688dda240000\"",
+    "features": {
+      "disableLocalAuth": false,
+      "enableLogAccessUsingOnlyResourcePermissions": true,
+      "immediatePurgeDataOn30Days": false
+    },
+    "forceCmkForQuery": false,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.OperationalInsights/workspaces/log-hub-development-westus3-v2",
+    "location": "westus3",
+    "modifiedDate": "2025-08-02T09:28:04.2778748Z",
+    "name": "log-hub-development-westus3-v2",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccessForIngestion": "Enabled",
+    "publicNetworkAccessForQuery": "Enabled",
+    "resourceGroup": "rg-hub-development-westus3",
+    "retentionInDays": 30,
+    "sku": {
+      "lastSkuUpdate": "2025-07-30T09:08:47.6451895Z",
+      "name": "PerGB2018"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.OperationalInsights/workspaces",
+    "workspaceCapping": {
+      "dailyQuotaGb": 5.0,
+      "dataIngestionStatus": "RespectQuota",
+      "quotaNextResetTime": "2025-08-03T05:00:00Z"
+    }
+  },
+  {
+    "createdDate": "2025-07-26T22:37:51.5549276Z",
+    "customerId": "2c6cbbce-12c9-4726-b548-84899d7ac6e4",
+    "etag": "\"860f15d9-0000-4700-0000-6a9002b40000\"",
+    "features": {
+      "enableLogAccessUsingOnlyResourcePermissions": true
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tmuskal-7935/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-cb17b37c-90b5-46c0-bd4c-01d8129a5643",
+    "location": "swedencentral",
+    "modifiedDate": "2026-08-27T09:26:12.0412577Z",
+    "name": "DefaultWorkspace-cb17b37c-90b5-46c0-bd4c-01d8129a5643",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccessForIngestion": "Enabled",
+    "publicNetworkAccessForQuery": "Enabled",
+    "resourceGroup": "rg-tmuskal-7935",
+    "retentionInDays": 30,
+    "sku": {
+      "lastSkuUpdate": "2025-07-26T22:37:51.5549276Z",
+      "name": "PerGB2018"
+    },
+    "type": "Microsoft.OperationalInsights/workspaces",
+    "workspaceCapping": {
+      "dailyQuotaGb": 1.0,
+      "dataIngestionStatus": "RespectQuota",
+      "quotaNextResetTime": "2026-08-27T20:00:00Z"
+    }
+  }
+]

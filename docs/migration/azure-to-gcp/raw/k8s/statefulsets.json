@@ -1,0 +1,1603 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-02T16:40:17Z",
+        "generation": 3,
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "name": "a5c-app-postgres",
+        "namespace": "app-staging",
+        "resourceVersion": "51797527",
+        "uid": "508e31f7-9aca-4e3d-8966-be76fc792878"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "a5c-app-postgres"
+          }
+        },
+        "serviceName": "a5c-app-postgres",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/name": "a5c-app-postgres"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "PGDATA",
+                    "value": "/var/lib/postgresql/data/pgdata"
+                  },
+                  {
+                    "name": "POSTGRES_DB",
+                    "value": "app"
+                  },
+                  {
+                    "name": "POSTGRES_USER",
+                    "value": "app"
+                  },
+                  {
+                    "name": "POSTGRES_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "POSTGRES_PASSWORD",
+                        "name": "a5c-app-pg-secret"
+                      }
+                    }
+                  }
+                ],
+                "image": "postgres:15-alpine",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "sh",
+                      "-c",
+                      "pg_isready -U \"app\" -d \"app\" -h 127.0.0.1 -p 5432"
+                    ]
+                  },
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 5
+                },
+                "name": "postgres",
+                "ports": [
+                  {
+                    "containerPort": 5432,
+                    "name": "postgres",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "sh",
+                      "-c",
+                      "pg_isready -U \"app\" -d \"app\" -h 127.0.0.1 -p 5432"
+                    ]
+                  },
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 5,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 3
+                },
+                "resources": {
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "1Gi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "256Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/postgresql/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteOnce"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "10Gi"
+                }
+              },
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 1,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "a5c-app-postgres-788f459976",
+        "observedGeneration": 3,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "updateRevision": "a5c-app-postgres-788f459976",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-06T07:44:37Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "name": "a5c-app-redis",
+        "namespace": "app-staging",
+        "resourceVersion": "51804872",
+        "uid": "81d83fad-0c01-422a-8cab-ee1c591b0906"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "a5c-app-redis"
+          }
+        },
+        "serviceName": "a5c-app-redis",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/name": "a5c-app-redis"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "REDIS_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "redis-password",
+                        "name": "a5c-app-redis"
+                      }
+                    }
+                  },
+                  {
+                    "name": "REDIS_DISABLE_COMMANDS",
+                    "value": "FLUSHDB,FLUSHALL"
+                  }
+                ],
+                "image": "docker.io/bitnami/redis:7.2",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 15,
+                  "periodSeconds": 20,
+                  "successThreshold": 1,
+                  "tcpSocket": {
+                    "port": 6379
+                  },
+                  "timeoutSeconds": 3
+                },
+                "name": "redis",
+                "ports": [
+                  {
+                    "containerPort": 6379,
+                    "name": "redis",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "tcpSocket": {
+                    "port": 6379
+                  },
+                  "timeoutSeconds": 3
+                },
+                "resources": {
+                  "limits": {
+                    "cpu": "250m",
+                    "memory": "512Mi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "128Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/bitnami/redis/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteOnce"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "1Gi"
+                }
+              },
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 0,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "a5c-app-redis-76f8596c44",
+        "observedGeneration": 1,
+        "replicas": 1,
+        "updateRevision": "a5c-app-redis-76f8596c44",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-21T06:02:41Z",
+        "generation": 3,
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "name": "a5c-app-postgres",
+        "namespace": "app",
+        "resourceVersion": "51805601",
+        "uid": "bb5c84e5-9e28-4483-9302-65aa4d440609"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "a5c-app-postgres"
+          }
+        },
+        "serviceName": "a5c-app-postgres",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/name": "a5c-app-postgres"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "PGDATA",
+                    "value": "/var/lib/postgresql/data/pgdata"
+                  },
+                  {
+                    "name": "POSTGRES_DB",
+                    "value": "app"
+                  },
+                  {
+                    "name": "POSTGRES_USER",
+                    "value": "app"
+                  },
+                  {
+                    "name": "POSTGRES_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "POSTGRES_PASSWORD",
+                        "name": "a5c-app-pg-secret"
+                      }
+                    }
+                  }
+                ],
+                "image": "postgres:15-alpine",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "sh",
+                      "-c",
+                      "pg_isready -U \"app\" -d \"app\" -h 127.0.0.1 -p 5432"
+                    ]
+                  },
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 5
+                },
+                "name": "postgres",
+                "ports": [
+                  {
+                    "containerPort": 5432,
+                    "name": "postgres",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "sh",
+                      "-c",
+                      "pg_isready -U \"app\" -d \"app\" -h 127.0.0.1 -p 5432"
+                    ]
+                  },
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 5,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 3
+                },
+                "resources": {
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "1Gi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "256Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/postgresql/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteOnce"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "10Gi"
+                }
+              },
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 1,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "a5c-app-postgres-788f459976",
+        "observedGeneration": 3,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "updateRevision": "a5c-app-postgres-788f459976",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-06T15:17:13Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "name": "a5c-app-redis",
+        "namespace": "app",
+        "resourceVersion": "51804881",
+        "uid": "ac104a93-9fb3-442f-a0b6-bfaf92f89887"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "a5c-app-redis"
+          }
+        },
+        "serviceName": "a5c-app-redis",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/name": "a5c-app-redis"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "REDIS_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "key": "redis-password",
+                        "name": "a5c-app-redis"
+                      }
+                    }
+                  },
+                  {
+                    "name": "REDIS_DISABLE_COMMANDS",
+                    "value": "FLUSHDB,FLUSHALL"
+                  }
+                ],
+                "image": "docker.io/bitnami/redis:7.2",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 15,
+                  "periodSeconds": 20,
+                  "successThreshold": 1,
+                  "tcpSocket": {
+                    "port": 6379
+                  },
+                  "timeoutSeconds": 3
+                },
+                "name": "redis",
+                "ports": [
+                  {
+                    "containerPort": 6379,
+                    "name": "redis",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "failureThreshold": 6,
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "tcpSocket": {
+                    "port": 6379
+                  },
+                  "timeoutSeconds": 3
+                },
+                "resources": {
+                  "limits": {
+                    "cpu": "250m",
+                    "memory": "512Mi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "128Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/bitnami/redis/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteOnce"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "1Gi"
+                }
+              },
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 0,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "a5c-app-redis-76f8596c44",
+        "observedGeneration": 1,
+        "replicas": 1,
+        "updateRevision": "a5c-app-redis-76f8596c44",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-09-05T14:33:22Z",
+        "generation": 1,
+        "name": "atlas-postgres",
+        "namespace": "atlas-staging",
+        "resourceVersion": "194303553",
+        "uid": "82fb7510-570f-4ec2-a99f-b2f6c8ef7180"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "atlas-postgres"
+          }
+        },
+        "serviceName": "atlas-postgres",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "atlas-postgres"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "PGDATA",
+                    "value": "/var/lib/postgresql/data/pgdata"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "atlas-postgres"
+                    }
+                  }
+                ],
+                "image": "postgres:16-alpine",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "postgres",
+                "ports": [
+                  {
+                    "containerPort": 5432,
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "sh",
+                      "-c",
+                      "pg_isready -U \"atlas\" -d \"atlas_webui\""
+                    ]
+                  },
+                  "failureThreshold": 30,
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 5,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/postgresql/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteMany"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "8Gi"
+                }
+              },
+              "storageClassName": "atlas-postgres-static",
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 1,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "atlas-postgres-db7f559b5",
+        "observedGeneration": 1,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "updateRevision": "atlas-postgres-db7f559b5",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-08-13T21:38:48Z",
+        "generation": 1,
+        "name": "atlas-postgres",
+        "namespace": "atlas",
+        "resourceVersion": "182124363",
+        "uid": "3a811c5b-83cf-484f-a9e4-3d1f60c0ba58"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "atlas-postgres"
+          }
+        },
+        "serviceName": "atlas-postgres",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "atlas-postgres"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "PGDATA",
+                    "value": "/var/lib/postgresql/data/pgdata"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "atlas-postgres"
+                    }
+                  }
+                ],
+                "image": "postgres:16-alpine",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "postgres",
+                "ports": [
+                  {
+                    "containerPort": 5432,
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "sh",
+                      "-c",
+                      "pg_isready -U \"atlas\" -d \"atlas_webui\""
+                    ]
+                  },
+                  "failureThreshold": 30,
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 5,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/postgresql/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteMany"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "8Gi"
+                }
+              },
+              "storageClassName": "atlas-postgres-static",
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 1,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "atlas-postgres-db7f559b5",
+        "observedGeneration": 1,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "updateRevision": "atlas-postgres-db7f559b5",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-09T07:15:35Z",
+        "generation": 1,
+        "name": "content-studio-postgres",
+        "namespace": "content-studio",
+        "resourceVersion": "145451768",
+        "uid": "7b4b6898-c49a-4aec-b753-788cc67d8b0a"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "content-studio-postgres"
+          }
+        },
+        "serviceName": "content-studio-postgres",
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "content-studio-postgres"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "PGDATA",
+                    "value": "/var/lib/postgresql/data/pgdata"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "content-studio-postgres"
+                    }
+                  }
+                ],
+                "image": "postgres:16-alpine",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "pg_isready",
+                      "-U",
+                      "postgres"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 20,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "name": "postgres",
+                "ports": [
+                  {
+                    "containerPort": 5432,
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "pg_isready",
+                      "-U",
+                      "postgres"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 10,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/postgresql/data",
+                    "name": "data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteMany"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "8Gi"
+                }
+              },
+              "storageClassName": "content-studio-postgres-static",
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 1,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "content-studio-postgres-59dc89f4df",
+        "observedGeneration": 1,
+        "readyReplicas": 1,
+        "replicas": 1,
+        "updateRevision": "content-studio-postgres-59dc89f4df",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "prosody",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "prosody-1.5.2"
+        },
+        "name": "kradle-prosody",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305823",
+        "uid": "2985d105-b98b-4502-9e6d-abde7f188757"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/instance": "kradle",
+            "app.kubernetes.io/name": "prosody"
+          }
+        },
+        "serviceName": "kradle-prosody",
+        "template": {
+          "metadata": {
+            "annotations": {
+              "si.jit.meet/hash-configmap": "a049d99f9dd5db0dfc7bc32e3a3a77a9",
+              "si.jit.meet/hash-secret": "051521066a188bcc334faf98f6a65576"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/instance": "kradle",
+              "app.kubernetes.io/name": "prosody"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "kradle-prosody"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jibri"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jicofo"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jigasi"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-transcriber"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jvb"
+                    }
+                  },
+                  {
+                    "configMapRef": {
+                      "name": "kradle-prosody-common"
+                    }
+                  }
+                ],
+                "image": "jitsi/prosody:stable-10590",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/http-bind",
+                    "port": "bosh-insecure",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "name": "prosody",
+                "ports": [
+                  {
+                    "containerPort": 5222,
+                    "name": "xmpp-c2s",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5269,
+                    "name": "xmpp-s2s",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5347,
+                    "name": "xmpp-component",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5280,
+                    "name": "bosh-insecure",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5281,
+                    "name": "bosh-secure",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/http-bind",
+                    "port": "bosh-insecure",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {},
+                "securityContext": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/config",
+                    "name": "config"
+                  },
+                  {
+                    "mountPath": "/config/data",
+                    "name": "prosody-data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-prosody",
+            "serviceAccountName": "kradle-prosody",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "config"
+              },
+              {
+                "configMap": {
+                  "defaultMode": 493,
+                  "items": [
+                    {
+                      "key": "10-config",
+                      "path": "10-config"
+                    }
+                  ],
+                  "name": "kradle-prosody-cont-inits"
+                },
+                "name": "custom-cont-inits"
+              },
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "items": [
+                    {
+                      "key": "prosody.cfg.lua",
+                      "path": "prosody.cfg.lua"
+                    },
+                    {
+                      "key": "saslauthd.conf",
+                      "path": "saslauthd.conf"
+                    },
+                    {
+                      "key": "jitsi-meet.cfg.lua",
+                      "path": "jitsi-meet.cfg.lua"
+                    }
+                  ],
+                  "name": "kradle-prosody-defaults"
+                },
+                "name": "custom-defaults"
+              },
+              {
+                "name": "prosody-data",
+                "persistentVolumeClaim": {
+                  "claimName": "prosody-data"
+                }
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "prosody-data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteOnce"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "3G"
+                }
+              },
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 0,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "kradle-prosody-7785985d56",
+        "observedGeneration": 1,
+        "replicas": 1,
+        "updateRevision": "kradle-prosody-7785985d56",
+        "updatedReplicas": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "StatefulSet",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:56Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "prosody",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "prosody-1.5.2"
+        },
+        "name": "kradle-prosody",
+        "namespace": "kradle",
+        "resourceVersion": "182095268",
+        "uid": "3381c2b2-b7a1-457a-a778-9f68b8e3dbfd"
+      },
+      "spec": {
+        "persistentVolumeClaimRetentionPolicy": {
+          "whenDeleted": "Retain",
+          "whenScaled": "Retain"
+        },
+        "podManagementPolicy": "OrderedReady",
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/instance": "kradle",
+            "app.kubernetes.io/name": "prosody"
+          }
+        },
+        "serviceName": "kradle-prosody",
+        "template": {
+          "metadata": {
+            "annotations": {
+              "si.jit.meet/hash-configmap": "a049d99f9dd5db0dfc7bc32e3a3a77a9",
+              "si.jit.meet/hash-secret": "051521066a188bcc334faf98f6a65576"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/instance": "kradle",
+              "app.kubernetes.io/name": "prosody"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "kradle-prosody"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jibri"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jicofo"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jigasi"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-transcriber"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "kradle-prosody-jvb"
+                    }
+                  },
+                  {
+                    "configMapRef": {
+                      "name": "kradle-prosody-common"
+                    }
+                  }
+                ],
+                "image": "jitsi/prosody:stable-10590",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/http-bind",
+                    "port": "bosh-insecure",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "name": "prosody",
+                "ports": [
+                  {
+                    "containerPort": 5222,
+                    "name": "xmpp-c2s",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5269,
+                    "name": "xmpp-s2s",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5347,
+                    "name": "xmpp-component",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5280,
+                    "name": "bosh-insecure",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 5281,
+                    "name": "bosh-secure",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/http-bind",
+                    "port": "bosh-insecure",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {},
+                "securityContext": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/config",
+                    "name": "config"
+                  },
+                  {
+                    "mountPath": "/config/data",
+                    "name": "prosody-data"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-prosody",
+            "serviceAccountName": "kradle-prosody",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "config"
+              },
+              {
+                "configMap": {
+                  "defaultMode": 493,
+                  "items": [
+                    {
+                      "key": "10-config",
+                      "path": "10-config"
+                    }
+                  ],
+                  "name": "kradle-prosody-cont-inits"
+                },
+                "name": "custom-cont-inits"
+              },
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "items": [
+                    {
+                      "key": "prosody.cfg.lua",
+                      "path": "prosody.cfg.lua"
+                    },
+                    {
+                      "key": "saslauthd.conf",
+                      "path": "saslauthd.conf"
+                    },
+                    {
+                      "key": "jitsi-meet.cfg.lua",
+                      "path": "jitsi-meet.cfg.lua"
+                    }
+                  ],
+                  "name": "kradle-prosody-defaults"
+                },
+                "name": "custom-defaults"
+              },
+              {
+                "name": "prosody-data",
+                "persistentVolumeClaim": {
+                  "claimName": "prosody-data"
+                }
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "partition": 0
+          },
+          "type": "RollingUpdate"
+        },
+        "volumeClaimTemplates": [
+          {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+              "creationTimestamp": null,
+              "name": "prosody-data"
+            },
+            "spec": {
+              "accessModes": [
+                "ReadWriteOnce"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "3G"
+                }
+              },
+              "volumeMode": "Filesystem"
+            },
+            "status": {
+              "phase": "Pending"
+            }
+          }
+        ]
+      },
+      "status": {
+        "availableReplicas": 0,
+        "collisionCount": 0,
+        "currentReplicas": 1,
+        "currentRevision": "kradle-prosody-7785985d56",
+        "observedGeneration": 1,
+        "replicas": 1,
+        "updateRevision": "kradle-prosody-7785985d56",
+        "updatedReplicas": 1
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

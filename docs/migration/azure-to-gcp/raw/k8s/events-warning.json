@@ -1,0 +1,973 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "count": 2057378,
+      "eventTime": null,
+      "firstTimestamp": "2026-05-20T05:19:01Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{aeq-dashboard}",
+        "kind": "Pod",
+        "name": "aeq-dashboard-5844f98d6d-n78q6",
+        "namespace": "aeq",
+        "resourceVersion": "133793076",
+        "uid": "7c217ab2-48e3-4501-8883-fd2489920911"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:48:47Z",
+      "message": "Readiness probe warning: Probe terminated redirects, Response body: <!DOCTYPE html><html id=\"__next_error__\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-664b8087a19510b8.js\"/><script src=\"/_next/static/chunks/1dd3208c-a06fa82de54fafd9.js\" async=\"\"></script><script src=\"/_next/static/chunks/1528-49ce2766f0b505d7.js\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-7dd56bb3b36d6f66.js\" async=\"\"></script><title>AEQ Dashboard</title><meta name=\"description\" content=\"Ask Expert Question - Monitoring Dashboard\"/><script src=\"/_next/static/chunks/polyfills-42372ed130431b0a.js\" noModule=\"\"></script></head><body><script src=\"/_next/static/chunks/webpack-664b8087a19510b8.js\" async=\"\"></script><script>(self.__next_f=self.__next_f||[]).push([0]);self.__next_f.push([2,null])</script><script>self.__next_f.push([1,\"1:HL[\\\"/_next/static/css/65f7d8c6b11cfbab.css\\\",\\\"style\\\"]\\n\"])</script><script>self.__next_f.push([1,\"2:I[11815,[],\\\"\\\"]\\n5:I[68025,[\\\"8146\\\",\\\"static/chunks/8146-e86cc3396b9a8c04.js\\\",\\\"3185\\\",\\\"static/chunks/app/layout-e63bdd167a6ecf7b.js\\\"],\\\"default\\\"]\\n6:I[55092,[],\\\"\\\"]\\n7:I[82023,[],\\\"\\\"]\\n9:I[91584,[],\\\"\\\"]\\na:[]\\n0:[\\\"$\\\",\\\"$L2\\\",null,{\\\"buildId\\\":\\\"yzJdFF3dCKRLO6ha9eqd5\\\",\\\"assetPrefix\\\":\\\"\\\",\\\"urlParts\\\":[\\\"\\\",\\\"\\\"],\\\"initialTree\\\":[\\\"\\\",{\\\"children\\\":[\\\"__PAGE__\\\",{}]},\\\"$undefined\\\",\\\"$undefined\\\",true],\\\"initialSeedData\\\":[\\\"\\\",{\\\"children\\\":[\\\"__PAGE__\\\",{},[[\\\"$L3\\\",\\\"$L4\\\",null],null],null]},[[[[\\\"$\\\",\\\"link\\\",\\\"0\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/css/65f7d8c6b11cfbab.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossOrigin\\\":\\\"$undefined\\\"}]],[\\\"$\\\",\\\"html\\\",null,{\\\"lang\\\":\\\"en\\\",\\\"children\\\":[[\\\"$\\\",\\\"head\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"link\\\",null,{\\\"href\\\":\\\"https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700\\u0026family=JetBrains+Mono:wght@400;500;600\\u0026display=swap\\\",\\\"rel\\\":\\\"stylesheet\\\"}]}],[\\\"$\\\",\\\"body\\\",null,{\\\"className\\\":\\\"scanlines\\\",\\\"children\\\":[\\\"$\\\",\\\"$L5\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$L6\\\",null,{\\\"parallelRouterKey\\\":\\\"children\\\",\\\"segmentPath\\\":[\\\"children\\\"],\\\"error\\\":\\\"$undefined\\\",\\\"errorStyles\\\":\\\"$undefined\\\",\\\"errorScripts\\\":\\\"$undefined\\\",\\\"template\\\":[\\\"$\\\",\\\"$L7\\\",null,{}],\\\"templateStyles\\\":\\\"$undefined\\\",\\\"templateScripts\\\":\\\"$undefined\\\",\\\"notFound\\\":[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"h1\\\",null,{\\\"children\\\":\\\"404 - Not Found\\\"}],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"The page you are looking for does not exist.\\\"}]]}],\\\"notFoundStyles\\\":[]}]}]}]]}]],null],null],\\\"couldBeIntercepted\\\":false,\\\"initialHead\\\":[null,\\\"$L8\\\"],\\\"globalErrorComponent\\\":\\\"$9\\\",\\\"missingSlots\\\":\\\"$Wa\\\"}]\\n4:E{\\\"digest\\\":\\\"NEXT_REDIRECT;replace;/login;307;\\\"}\\n\"])</script><script>self.__next_f.push([1,\"8:[[\\\"$\\\",\\\"meta\\\",\\\"0\\\",{\\\"name\\\":\\\"viewport\\\",\\\"content\\\":\\\"width=device-width, initial-scale=1\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"1\\\",{\\\"charSet\\\":\\\"utf-8\\\"}],[\\\"$\\\",\\\"title\\\",\\\"2\\\",{\\\"children\\\":\\\"AEQ Dashboard\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"3\\\",{\\\"name\\\":\\\"description\\\",\\\"content\\\":\\\"Ask Expert Question - Monitoring Dashboard\\\"}]]\\n3:null\\n\"])</script></body></html>",
+      "metadata": {
+        "creationTimestamp": "2026-05-20T05:19:01Z",
+        "name": "aeq-dashboard-5844f98d6d-n78q6.18b12e658d0d4c58",
+        "namespace": "aeq",
+        "resourceVersion": "200511337",
+        "uid": "e7bde115-a1ab-472b-a6db-048205feb09f"
+      },
+      "reason": "ProbeWarning",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "aks-default-28513622-vmss000002",
+      "source": {
+        "component": "kubelet",
+        "host": "aks-default-28513622-vmss000002"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 2385,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-05T14:36:21Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{atlas-webui}",
+        "kind": "Pod",
+        "name": "atlas-webui-6696b74654-l8rqt",
+        "namespace": "atlas-staging",
+        "resourceVersion": "194303774",
+        "uid": "ce2f9e29-e67e-4365-bdf1-36fa13a3b8be"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:42:46Z",
+      "message": "Readiness probe failed: Get \"http://10.0.1.76:3000/api/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:42:46Z",
+        "name": "atlas-webui-6696b74654-l8rqt.18d2737cbb9ffa22",
+        "namespace": "atlas-staging",
+        "resourceVersion": "200508920",
+        "uid": "8231213c-f3a1-4af6-9b54-a5f1bd488980"
+      },
+      "reason": "Unhealthy",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "aks-default-28513622-vmss000002",
+      "source": {
+        "component": "kubelet",
+        "host": "aks-default-28513622-vmss000002"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1253,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-05T15:45:16Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{atlas-webui}",
+        "kind": "Pod",
+        "name": "atlas-webui-6696b74654-l8rqt",
+        "namespace": "atlas-staging",
+        "resourceVersion": "194303774",
+        "uid": "ce2f9e29-e67e-4365-bdf1-36fa13a3b8be"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:42:46Z",
+      "message": "Liveness probe failed: Get \"http://10.0.1.76:3000/api/health\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:42:46Z",
+        "name": "atlas-webui-6696b74654-l8rqt.18d2773f7ca955e8",
+        "namespace": "atlas-staging",
+        "resourceVersion": "200508921",
+        "uid": "693305bf-c55b-4fd6-8ead-81e43507accb"
+      },
+      "reason": "Unhealthy",
+      "reportingComponent": "kubelet",
+      "reportingInstance": "aks-default-28513622-vmss000002",
+      "source": {
+        "component": "kubelet",
+        "host": "aks-default-28513622-vmss000002"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T05:53:18Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T05:53:18Z",
+      "message": "Memory cgroup out of memory: Killed process 950335 (Kp56Xd) total-vm:2437448kB, anon-rss:767016kB, file-rss:4kB, shmem-rss:0kB, UID:1000 pgtables:1580kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T05:53:18Z",
+        "name": "aks-default-28513622-vmss000001.18d5b753eb909d6a",
+        "namespace": "default",
+        "resourceVersion": "200488973",
+        "uid": "107b2adc-b573-4972-be1d-4de630aa156e"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T05:53:18Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T05:53:18Z",
+      "message": "Memory cgroup out of memory: Killed process 928184 (next-server (v) total-vm:33123420kB, anon-rss:176072kB, file-rss:39624kB, shmem-rss:0kB, UID:1000 pgtables:5184kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T05:53:18Z",
+        "name": "aks-default-28513622-vmss000001.18d5b753eb90c71c",
+        "namespace": "default",
+        "resourceVersion": "200488974",
+        "uid": "d4065d26-b0c5-45b0-aa7a-04432fa8426e"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:43Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:43Z",
+      "message": "Memory cgroup out of memory: Killed process 997542 (60m466habjtq) total-vm:2437508kB, anon-rss:792380kB, file-rss:4kB, shmem-rss:3456kB, UID:1000 pgtables:1640kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:43Z",
+        "name": "aks-default-28513622-vmss000001.18d5b87152852ca5",
+        "namespace": "default",
+        "resourceVersion": "200497223",
+        "uid": "e0272370-3601-41a7-8c2c-416803727356"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:43Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:43Z",
+      "message": "Memory cgroup out of memory: Killed process 951547 (next-server (v) total-vm:32871764kB, anon-rss:153320kB, file-rss:40444kB, shmem-rss:0kB, UID:1000 pgtables:4772kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:43Z",
+        "name": "aks-default-28513622-vmss000001.18d5b87152917efe",
+        "namespace": "default",
+        "resourceVersion": "200497224",
+        "uid": "babf27b2-a9d3-405e-a017-045e44ea1066"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:43Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:43Z",
+      "message": "Memory cgroup out of memory: Killed process 997276 (sf4mazhw) total-vm:248kB, anon-rss:44kB, file-rss:0kB, shmem-rss:56kB, UID:1000 pgtables:32kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:43Z",
+        "name": "aks-default-28513622-vmss000001.18d5b87157bb46a7",
+        "namespace": "default",
+        "resourceVersion": "200497225",
+        "uid": "5d72b1ca-0f55-4ef6-ba36-f4225960d58c"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:43Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:43Z",
+      "message": "Memory cgroup out of memory: Killed process 997278 (sf4mazhw) total-vm:260kB, anon-rss:68kB, file-rss:4kB, shmem-rss:56kB, UID:1000 pgtables:36kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:43Z",
+        "name": "aks-default-28513622-vmss000001.18d5b87158ab06ea",
+        "namespace": "default",
+        "resourceVersion": "200497226",
+        "uid": "b777ff44-0f21-45b6-899a-b39641ee4277"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:27:44Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:27:44Z",
+      "message": "Memory cgroup out of memory: Killed process 1030602 (3Sojudr) total-vm:2437448kB, anon-rss:776564kB, file-rss:4kB, shmem-rss:0kB, UID:1000 pgtables:1588kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:27:44Z",
+        "name": "aks-default-28513622-vmss000001.18d5b93516cc33e7",
+        "namespace": "default",
+        "resourceVersion": "200502883",
+        "uid": "6fbb5ce4-464a-46cc-8fd2-f0e8ec6d7d77"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:27:44Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:27:44Z",
+      "message": "Memory cgroup out of memory: Killed process 998355 (next-server (v) total-vm:32879884kB, anon-rss:160072kB, file-rss:39544kB, shmem-rss:0kB, UID:1000 pgtables:4848kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:27:44Z",
+        "name": "aks-default-28513622-vmss000001.18d5b93516ccb705",
+        "namespace": "default",
+        "resourceVersion": "200502884",
+        "uid": "c594162b-bba4-44a6-8976-5ddb4dd31bd8"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:27:44Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000001",
+        "uid": "aks-default-28513622-vmss000001"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:27:44Z",
+      "message": "Memory cgroup out of memory: Killed process 1029428 (YOgd3n) total-vm:1705868kB, anon-rss:29832kB, file-rss:4kB, shmem-rss:0kB, UID:1000 pgtables:224kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:27:44Z",
+        "name": "aks-default-28513622-vmss000001.18d5b9351b0f42da",
+        "namespace": "default",
+        "resourceVersion": "200502885",
+        "uid": "0af6af24-aee2-4953-b6f4-3e1bfafcbd22"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000001",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000001"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T05:54:01Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000005",
+        "uid": "aks-default-28513622-vmss000005"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T05:54:01Z",
+      "message": "Memory cgroup out of memory: Killed process 1829820 (1LEqFomM) total-vm:2437448kB, anon-rss:778872kB, file-rss:4kB, shmem-rss:0kB, UID:1000 pgtables:1592kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T05:54:01Z",
+        "name": "aks-default-28513622-vmss000005.18d5b75e09062d15",
+        "namespace": "default",
+        "resourceVersion": "200489266",
+        "uid": "9ec2abf6-becc-4ae4-a823-d96611527636"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000005",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000005"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T05:54:01Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000005",
+        "uid": "aks-default-28513622-vmss000005"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T05:54:01Z",
+      "message": "Memory cgroup out of memory: Killed process 1806714 (next-server (v) total-vm:32879924kB, anon-rss:161648kB, file-rss:12088kB, shmem-rss:0kB, UID:1000 pgtables:5000kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T05:54:01Z",
+        "name": "aks-default-28513622-vmss000005.18d5b75e09065779",
+        "namespace": "default",
+        "resourceVersion": "200489268",
+        "uid": "7f180b9b-abaa-4893-8bd0-d944ceb09a81"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000005",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000005"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:39Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000005",
+        "uid": "aks-default-28513622-vmss000005"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:39Z",
+      "message": "Memory cgroup out of memory: Killed process 1871393 (phy3tqmskrz5) total-vm:2437508kB, anon-rss:773156kB, file-rss:4kB, shmem-rss:3456kB, UID:1000 pgtables:1604kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:39Z",
+        "name": "aks-default-28513622-vmss000005.18d5b8706d90037d",
+        "namespace": "default",
+        "resourceVersion": "200497184",
+        "uid": "ed33dbcf-2ea0-45dd-91b8-89320fb2bcc1"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000005",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000005"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:39Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000005",
+        "uid": "aks-default-28513622-vmss000005"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:39Z",
+      "message": "Memory cgroup out of memory: Killed process 1830556 (next-server (v) total-vm:32872740kB, anon-rss:157564kB, file-rss:11992kB, shmem-rss:0kB, UID:1000 pgtables:4796kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:39Z",
+        "name": "aks-default-28513622-vmss000005.18d5b8706d9a7968",
+        "namespace": "default",
+        "resourceVersion": "200497185",
+        "uid": "3c431f15-5688-4e38-b75f-75d420000138"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000005",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000005"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:40Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000005",
+        "uid": "aks-default-28513622-vmss000005"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:40Z",
+      "message": "Memory cgroup out of memory: Killed process 1871267 (ybmh5yrh) total-vm:248kB, anon-rss:44kB, file-rss:0kB, shmem-rss:56kB, UID:1000 pgtables:32kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:40Z",
+        "name": "aks-default-28513622-vmss000005.18d5b87070e8d09a",
+        "namespace": "default",
+        "resourceVersion": "200497186",
+        "uid": "4bfd2e95-7be8-4ca6-a82e-6bdf514283f3"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000005",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000005"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 1,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-16T06:13:40Z",
+      "involvedObject": {
+        "kind": "Node",
+        "name": "aks-default-28513622-vmss000005",
+        "uid": "aks-default-28513622-vmss000005"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:13:40Z",
+      "message": "Memory cgroup out of memory: Killed process 1871268 (ybmh5yrh) total-vm:260kB, anon-rss:68kB, file-rss:4kB, shmem-rss:56kB, UID:1000 pgtables:36kB oom_score_adj:936",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:13:40Z",
+        "name": "aks-default-28513622-vmss000005.18d5b87071cb0c19",
+        "namespace": "default",
+        "resourceVersion": "200497187",
+        "uid": "7da92cad-9269-44db-b3d6-cabb4a6e0426"
+      },
+      "reason": "OOMKilling",
+      "reportingComponent": "kernel-monitor",
+      "reportingInstance": "aks-default-28513622-vmss000005",
+      "source": {
+        "component": "kernel-monitor",
+        "host": "aks-default-28513622-vmss000005"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 34854,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-10T05:11:39Z",
+      "involvedObject": {
+        "apiVersion": "autoscaling/v2",
+        "kind": "HorizontalPodAutoscaler",
+        "name": "hub-backend-hpa",
+        "namespace": "hub-development",
+        "resourceVersion": "191172056",
+        "uid": "72fdf0c8-f245-465d-b358-9da416297f22"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:47:19Z",
+      "message": "failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API",
+      "metadata": {
+        "creationTimestamp": "2026-09-10T05:11:39Z",
+        "name": "hub-backend-hpa.18d3dd92cb1dbaea",
+        "namespace": "hub-development",
+        "resourceVersion": "200510765",
+        "uid": "ec8b9cc4-39cf-4731-a90e-980c0db84b40"
+      },
+      "reason": "FailedGetResourceMetric",
+      "reportingComponent": "horizontal-pod-autoscaler",
+      "reportingInstance": "",
+      "source": {
+        "component": "horizontal-pod-autoscaler"
+      },
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T05:48:02.335912Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194310099",
+        "uid": "6def3071-701b-4020-ac13-be2e72efa408"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T05:48:02Z",
+        "name": "kradle-prosody-0.18d5b70a6bceeaa8",
+        "namespace": "kradle-staging",
+        "resourceVersion": "200490964",
+        "uid": "69b73b42-4f13-4219-b1d4-7c59871ccf83"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "series": {
+        "count": 2,
+        "lastObservedTime": "2026-09-16T05:58:12.757378Z"
+      },
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:08:23.129611Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194310099",
+        "uid": "6def3071-701b-4020-ac13-be2e72efa408"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:08:23Z",
+        "name": "kradle-prosody-0.18d5b826a8c8793e",
+        "namespace": "kradle-staging",
+        "resourceVersion": "200495049",
+        "uid": "44a32458-3ddc-429b-b831-c9c0f11fb44d"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:18:33.528677Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194310099",
+        "uid": "6def3071-701b-4020-ac13-be2e72efa408"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:18:33Z",
+        "name": "kradle-prosody-0.18d5b8b4c7670c51",
+        "namespace": "kradle-staging",
+        "resourceVersion": "200503289",
+        "uid": "8d2625e3-0adb-4599-b8cb-68978fb6d509"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "series": {
+        "count": 2,
+        "lastObservedTime": "2026-09-16T06:28:43.894986Z"
+      },
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:38:54.280772Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194310099",
+        "uid": "6def3071-701b-4020-ac13-be2e72efa408"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:38:54Z",
+        "name": "kradle-prosody-0.18d5b9d101e5cc2b",
+        "namespace": "kradle-staging",
+        "resourceVersion": "200507387",
+        "uid": "2f51b515-b49e-491c-8002-a10ff2d1dde9"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:49:04.650917Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194310099",
+        "uid": "6def3071-701b-4020-ac13-be2e72efa408"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:49:04Z",
+        "name": "kradle-prosody-0.18d5ba5f1ecb0f40",
+        "namespace": "kradle-staging",
+        "resourceVersion": "200511454",
+        "uid": "46ef6006-0651-4bc6-9cf2-4e3a8233bfe4"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 783,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-10T13:05:29Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "name": "prosody-data-kradle-prosody-0",
+        "namespace": "kradle-staging",
+        "resourceVersion": "155098248",
+        "uid": "41fc7e74-1ad9-4077-9469-71e8683f2ad7"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:50:29Z",
+      "message": "failed to provision volume with StorageClass \"default\": rpc error: code = DeadlineExceeded desc = context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-10T13:05:29Z",
+        "name": "prosody-data-kradle-prosody-0.18d3f76e1f93e114",
+        "namespace": "kradle-staging",
+        "resourceVersion": "200512038",
+        "uid": "4ca0e5a9-380e-4e2a-8ad5-e6fcfccc35e1"
+      },
+      "reason": "ProvisioningFailed",
+      "reportingComponent": "disk.csi.azure.com_csi-azuredisk-controller-68849cb9dd-75fzw_04a6761e-b17e-4559-a047-c0e4d2c5acb7",
+      "reportingInstance": "",
+      "source": {
+        "component": "disk.csi.azure.com_csi-azuredisk-controller-68849cb9dd-75fzw_04a6761e-b17e-4559-a047-c0e4d2c5acb7"
+      },
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T05:48:02.334873Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "182098963",
+        "uid": "2fc76f8c-915d-459f-b86a-f37561cb0384"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T05:48:02Z",
+        "name": "kradle-prosody-0.18d5b70a6bbf0e6d",
+        "namespace": "kradle",
+        "resourceVersion": "200490963",
+        "uid": "e06f42d1-4852-427e-81a7-7830f3117e0b"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "series": {
+        "count": 2,
+        "lastObservedTime": "2026-09-16T05:58:12.756698Z"
+      },
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:08:23.131738Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "182098963",
+        "uid": "2fc76f8c-915d-459f-b86a-f37561cb0384"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:08:23Z",
+        "name": "kradle-prosody-0.18d5b826a8e8e8e8",
+        "namespace": "kradle",
+        "resourceVersion": "200495050",
+        "uid": "197af320-52eb-4ac1-8bd5-6083b43c325a"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:18:33.522244Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "182098963",
+        "uid": "2fc76f8c-915d-459f-b86a-f37561cb0384"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:18:33Z",
+        "name": "kradle-prosody-0.18d5b8b4c704fa66",
+        "namespace": "kradle",
+        "resourceVersion": "200503290",
+        "uid": "2fa2262e-76b2-4c88-9ec3-88ed36f54e72"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "series": {
+        "count": 2,
+        "lastObservedTime": "2026-09-16T06:28:43.897229Z"
+      },
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:38:54.285905Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "182098963",
+        "uid": "2fc76f8c-915d-459f-b86a-f37561cb0384"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:38:54Z",
+        "name": "kradle-prosody-0.18d5b9d102341bcb",
+        "namespace": "kradle",
+        "resourceVersion": "200507388",
+        "uid": "8d89568a-dbb7-40f8-af78-69b55f146845"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "action": "Scheduling",
+      "apiVersion": "v1",
+      "eventTime": "2026-09-16T06:49:04.652035Z",
+      "firstTimestamp": null,
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "name": "kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "182098963",
+        "uid": "2fc76f8c-915d-459f-b86a-f37561cb0384"
+      },
+      "kind": "Event",
+      "lastTimestamp": null,
+      "message": "running PreBind plugin \"VolumeBinding\": binding volumes: context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:49:04Z",
+        "name": "kradle-prosody-0.18d5ba5f1edc1718",
+        "namespace": "kradle",
+        "resourceVersion": "200511455",
+        "uid": "a2809bc8-7684-4c9c-ba70-1850aa381d4f"
+      },
+      "reason": "FailedScheduling",
+      "reportingComponent": "default-scheduler",
+      "reportingInstance": "default-scheduler-kube-scheduler-v2-5bf7759cd7-szw5v",
+      "source": {},
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 781,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-10T13:05:29Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "name": "prosody-data-kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "157887401",
+        "uid": "66cc352e-c4d0-420e-b868-c77d8f6b9df2"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:50:29Z",
+      "message": "failed to provision volume with StorageClass \"default\": rpc error: code = DeadlineExceeded desc = context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-10T13:05:29Z",
+        "name": "prosody-data-kradle-prosody-0.18d3f76e1f92c4b4",
+        "namespace": "kradle",
+        "resourceVersion": "200512039",
+        "uid": "6d7d4c6c-7350-44f5-84f7-0bf425930122"
+      },
+      "reason": "ProvisioningFailed",
+      "reportingComponent": "disk.csi.azure.com_csi-azuredisk-controller-68849cb9dd-75fzw_04a6761e-b17e-4559-a047-c0e4d2c5acb7",
+      "reportingInstance": "",
+      "source": {
+        "component": "disk.csi.azure.com_csi-azuredisk-controller-68849cb9dd-75fzw_04a6761e-b17e-4559-a047-c0e4d2c5acb7"
+      },
+      "type": "Warning"
+    },
+    {
+      "apiVersion": "v1",
+      "count": 50,
+      "eventTime": null,
+      "firstTimestamp": "2026-09-10T13:08:30Z",
+      "involvedObject": {
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "name": "prosody-data-kradle-prosody-0",
+        "namespace": "kradle",
+        "resourceVersion": "157887401",
+        "uid": "66cc352e-c4d0-420e-b868-c77d8f6b9df2"
+      },
+      "kind": "Event",
+      "lastTimestamp": "2026-09-16T06:23:29Z",
+      "message": "failed to provision volume with StorageClass \"default\": rpc error: code = Internal desc = context deadline exceeded",
+      "metadata": {
+        "creationTimestamp": "2026-09-16T06:23:29Z",
+        "name": "prosody-data-kradle-prosody-0.18d3f798447d7108",
+        "namespace": "kradle",
+        "resourceVersion": "200501145",
+        "uid": "cf0217ca-b502-4f4b-95ef-9a4110b7b1dc"
+      },
+      "reason": "ProvisioningFailed",
+      "reportingComponent": "disk.csi.azure.com_csi-azuredisk-controller-68849cb9dd-75fzw_04a6761e-b17e-4559-a047-c0e4d2c5acb7",
+      "reportingInstance": "",
+      "source": {
+        "component": "disk.csi.azure.com_csi-azuredisk-controller-68849cb9dd-75fzw_04a6761e-b17e-4559-a047-c0e4d2c5acb7"
+      },
+      "type": "Warning"
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

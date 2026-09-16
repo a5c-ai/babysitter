@@ -1,0 +1,202 @@
+A5C-DEV-RG	Microsoft.Compute/disks	a5c-dev-vm-2_OsDisk_1_b289f1270aae4f858d1b343d437f12d5	eastus2	Premium_LRS	
+A5C-DEV-RG	Microsoft.Compute/disks	a5c-dev-vm_OsDisk_1_cc25ac13e9b04615bb7bc312ecac96c8	eastus2	Premium_LRS	
+A5C-DEV-RG	Microsoft.Compute/virtualMachines	a5c-dev-vm-2	eastus2		
+A5C-DEV-RG	Microsoft.Network/networkInterfaces	a5c-dev-vm-2VMNic	eastus2		
+A5C-DEV-RG	Microsoft.Network/networkSecurityGroups	a5c-dev-vm-2-nsg	eastus2		
+A5C-DEV-RG	Microsoft.Network/publicIPAddresses	a5c-dev-vm-2PublicIP	eastus2	Standard	
+A5C-DEV-RG	Microsoft.Network/virtualNetworks	a5c-dev-vnet	eastus2		
+DefaultResourceGroup-WUS2	Microsoft.OperationalInsights/workspaces	DefaultWorkspace-794e33cd-48ba-4654-8cd9-b6cf2715e097-WUS2	westus2		
+DefaultResourceGroup-westus2	Microsoft.Storage/storageAccounts	a5cstatic	eastus	Standard_RAGRS	StorageV2
+DefaultResourceGroup-westus2	microsoft.monitor/accounts	DefaultAzureMonitorWorkspace-westus2	westus2		
+MA_defaultazuremonitorworkspace-westus2_westus2_managed	Microsoft.Insights/dataCollectionEndpoints	defaultazuremonitorworkspace-westus2	westus2		
+MA_defaultazuremonitorworkspace-westus2_westus2_managed	Microsoft.Insights/dataCollectionRules	defaultazuremonitorworkspace-westus2	westus2		
+MA_defaultazuremonitorworkspace-wus2_westus2_managed	Microsoft.Insights/dataCollectionEndpoints	defaultazuremonitorworkspace-wus2	westus2		
+MA_defaultazuremonitorworkspace-wus2_westus2_managed	Microsoft.Insights/dataCollectionRules	defaultazuremonitorworkspace-wus2	westus2		
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/disks	pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593	westus3	StandardSSD_LRS	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/disks	pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4	westus3	StandardSSD_LRS	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/disks	pvc-59ccf124-b094-45ef-8dd4-79f8bf381066	westus3	Premium_LRS	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/disks	pvc-66704332-aa3f-41fb-abe3-21e070780cae	westus3	StandardSSD_LRS	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/disks	pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94	westus3	StandardSSD_LRS	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/disks	pvc-f9e96cba-e872-48b9-b555-448ee38acaea	westus3	Premium_LRS	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Compute/virtualMachineScaleSets	aks-default-28513622-vmss	westus3	Standard_D2s_v5	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Network/loadBalancers	kubernetes	westus3	Standard	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Network/publicIPAddresses	f964f80d-c985-48f4-9e03-14d7bed85be9	westus3	Standard	
+MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Storage/storageAccounts	fc3e7eef89d6645fbae772d	westus3	Standard_LRS	StorageV2
+NetworkWatcherRG	Microsoft.Network/networkWatchers	NetworkWatcher_eastus	eastus		
+NetworkWatcherRG	Microsoft.Network/networkWatchers	NetworkWatcher_eastus2	eastus2		
+NetworkWatcherRG	Microsoft.Network/networkWatchers	NetworkWatcher_swedencentral	swedencentral		
+NetworkWatcherRG	Microsoft.Network/networkWatchers	NetworkWatcher_westus2	westus2		
+NetworkWatcherRG	Microsoft.Network/networkWatchers	NetworkWatcher_westus3	westus3		
+PersonoidsClusterDnsResourceGroup	Microsoft.Network/dnszones	i.personoids.com	global		
+RG-MANTIS-ODOO-VALIDATION-EASTUS2	Microsoft.Compute/disks	vm-odoo-validation_OsDisk_1_32e949e117d04ddba88a72760a36525a	eastus2	Premium_LRS	
+RG-UBUNTU-SSH-20260806	Microsoft.Compute/disks	ubuntu-large-02_OsDisk_1_97a1876ad0f84c83aa13499b095ca9de	eastus2	Premium_LRS	
+a5c-dev-rg	Microsoft.Compute/virtualMachines	a5c-dev-vm	eastus2		
+a5c-dev-rg	Microsoft.Network/networkInterfaces	a5c-dev-vmVMNic	eastus2		
+a5c-dev-rg	Microsoft.Network/networkSecurityGroups	a5c-dev-vmNSG	eastus2		
+a5c-dev-rg	Microsoft.Network/publicIPAddresses	a5c-dev-vmPublicIP	eastus2	Standard	
+a5c-dev-rg	Microsoft.Network/virtualNetworks	a5c-dev-vmVNET	eastus2		
+a5c-website-rg	Microsoft.Web/staticSites	a5c-proxy-894866	eastus2	Free	
+a5c-website-rg	Microsoft.Web/staticSites	a5c-website	eastus2	Free	
+a5ctf-rg	Microsoft.Storage/storageAccounts	a5ctfstorage	eastus	Standard_LRS	StorageV2
+geekonomy-prod	Microsoft.App/containerApps	geekonomy-transcriber	northeurope		
+geekonomy-prod	Microsoft.App/containerApps	geekonomy-web	northeurope		
+geekonomy-prod	Microsoft.App/containerApps	geekonomy-worker	northeurope		
+geekonomy-prod	Microsoft.App/jobs	geekonomy-db-migrate	northeurope		
+geekonomy-prod	Microsoft.App/managedEnvironments	geekonomy-cae-mkb5l5	northeurope		
+geekonomy-prod	Microsoft.Cache/Redis	geekonomy-redis-mkb5l5	northeurope		
+geekonomy-prod	Microsoft.ContainerRegistry/registries	geekonomyacrmkb5l5	northeurope	Basic	
+geekonomy-prod	Microsoft.DBforPostgreSQL/flexibleServers	geekonomy-pg-mkb5l5	northeurope	Standard_B1ms	
+geekonomy-prod	Microsoft.OperationalInsights/workspaces	geekonomy-law-mkb5l5	northeurope		
+intuitive-website-rg	Microsoft.Web/staticSites	intuitive-website-new	eastus2	Free	
+mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Network/networkSecurityGroups	aks-agentpool-12828736-nsg	westus3		
+mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Network/publicIPAddresses	kubernetes-a77bc58099d654cca998ddc8832f3dbf	westus3	Standard	
+mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3	Microsoft.Network/publicIPAddresses	kubernetes-a92fa767804c1424a983f3aa36c99dd5	westus3	Standard	
+personoids_sponsorship	Microsoft.AlertsManagement/prometheusRuleGroups	KubernetesRecordingRulesRuleGroup-personoids	westus2		
+personoids_sponsorship	Microsoft.AlertsManagement/prometheusRuleGroups	NodeAndKubernetesRecordingRulesRuleGroup-Win-personoids	westus2		
+personoids_sponsorship	Microsoft.AlertsManagement/prometheusRuleGroups	NodeRecordingRulesRuleGroup-Win-personoids	westus2		
+personoids_sponsorship	Microsoft.AlertsManagement/prometheusRuleGroups	NodeRecordingRulesRuleGroup-personoids	westus2		
+personoids_sponsorship	Microsoft.AlertsManagement/prometheusRuleGroups	UXRecordingRulesRuleGroup - personoids	westus2		
+personoids_sponsorship	Microsoft.AlertsManagement/prometheusRuleGroups	UXRecordingRulesRuleGroup-Win - personoids	westus2		
+personoids_sponsorship	Microsoft.CognitiveServices/accounts	contentsafetypersonoids	swedencentral	F0	ContentSafety
+personoids_sponsorship	Microsoft.CognitiveServices/accounts	swedenpersonoids	swedencentral	S0	OpenAI
+personoids_sponsorship	Microsoft.CognitiveServices/accounts	tmusk-ma0twksa-westus3	westus3	S0	AIServices
+personoids_sponsorship	Microsoft.Insights/dataCollectionEndpoints	MSProm-westus2-personoids	westus2		Linux
+personoids_sponsorship	Microsoft.Insights/dataCollectionRules	MSCI-westus2-personoids	westus2		Linux
+personoids_sponsorship	Microsoft.Insights/dataCollectionRules	MSProm-westus2-personoids	westus2		Linux
+personoids_sponsorship	Microsoft.KeyVault/vaults	kv-personoi362519582270	eastus		
+personoids_sponsorship	Microsoft.KeyVault/vaults	kv-talai084044774586	swedencentral		
+personoids_sponsorship	Microsoft.KeyVault/vaults	kv-tmuskal2530339506822	swedencentral		
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces	personoids_ai	eastus	Basic	Hub
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces	tal-0301	swedencentral	Basic	Project
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces	tal-0653	eastus	Basic	Project
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces	tal_ai	swedencentral	Basic	Hub
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces	tmuskal-2145_ai	swedencentral	Basic	Hub
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces	tmuskal-2447	swedencentral	Basic	Project
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces/serverlessEndpoints	tal-0301/Cohere-command-r-plus-vbenr	swedencentral	Consumption	
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces/serverlessEndpoints	tal-0301/Cohere-rerank-v3-english-gnzej	swedencentral	Consumption	
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces/serverlessEndpoints	tal-0301/Phi-3-medium-128k-instruct-mdbjo	swedencentral	Consumption	
+personoids_sponsorship	Microsoft.MachineLearningServices/workspaces/serverlessEndpoints	tal-0653/Phi-3-5-mini-instruct-azxsa	eastus	Consumption	
+personoids_sponsorship	Microsoft.Network/virtualNetworks	personoidsVnet	westus2		
+personoids_sponsorship	Microsoft.Storage/storageAccounts	stpersonoids362519582270	eastus	Standard_LRS	StorageV2
+personoids_sponsorship	Microsoft.Storage/storageAccounts	sttalai084044774586	swedencentral	Standard_LRS	StorageV2
+personoids_sponsorship	Microsoft.Storage/storageAccounts	sttmuskal214530339506822	swedencentral	Standard_LRS	StorageV2
+personoids_sponsorship	Microsoft.Web/connections	documentdb	centralus		V1
+personoids_sponsorship	Microsoft.Web/staticSites	a5c-website	eastus2	Free	
+personoids_sponsorship	microsoft.dashboard/grafana	grafana-20250126104729	westus2	Standard	
+personoids_sponsorship	microsoft.insights/actiongroups	RecommendedAlertRules-AG-1	global		
+personoids_sponsorship	microsoft.insights/activityLogAlerts	Azure Wide Alert	global		
+personoids_sponsorship	microsoft.insights/metricalerts	CPU Usage Percentage - personoids	global		
+personoids_sponsorship	microsoft.insights/metricalerts	Memory Working Set Percentage - personoids	global		
+personoids_sponsorship	microsoft.monitor/accounts	defaultazuremonitorworkspace-wus2	westus2		
+rg-babysitter-archive	Microsoft.Storage/storageAccounts	babysitterarchive2608	swedencentral	Standard_GRS	StorageV2
+rg-babysitter-portal	Microsoft.Web/staticSites	babysitter-benchmarks	eastus2	Free	
+rg-hub-development-westus3	Microsoft.ContainerRegistry/registries	acrhubdevelopmentwestus3	westus3	Standard	
+rg-hub-development-westus3	Microsoft.ContainerService/managedClusters	aks-hub-development-westus3-v2	westus3	Base	
+rg-hub-development-westus3	Microsoft.DBforPostgreSQL/flexibleServers	aeqpg0316203042	westus3	Standard_B1ms	
+rg-hub-development-westus3	Microsoft.DBforPostgreSQL/flexibleServers	psql-hub-development-westus3-v2	westus3	Standard_B1ms	
+rg-hub-development-westus3	Microsoft.Insights/actiongroups	ag-hub-development-westus3-v2	global		
+rg-hub-development-westus3	Microsoft.Insights/components	appi-hub-development-westus3-v2	westus3		web
+rg-hub-development-westus3	Microsoft.Insights/dataCollectionRules	hub-development-westus3-dcr	westus3		
+rg-hub-development-westus3	Microsoft.KeyVault/vaults	kv-hubdevelopmentwest3v2	westus3		
+rg-hub-development-westus3	Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies	appgw-hub-development-westus3-v2-wafpolicy	westus3		
+rg-hub-development-westus3	Microsoft.Network/networkSecurityGroups	appgw-hub-development-westus3-v2-nsg	westus3		
+rg-hub-development-westus3	Microsoft.Network/networkSecurityGroups	vnet-hub-development-westus3-aks-nsg	westus3		
+rg-hub-development-westus3	Microsoft.Network/networkSecurityGroups	vnet-hub-development-westus3-database-nsg	westus3		
+rg-hub-development-westus3	Microsoft.Network/privateDnsZones	privatelink.blob.core.windows.net	global		
+rg-hub-development-westus3	Microsoft.Network/privateDnsZones	privatelink.vaultcore.azure.net	global		
+rg-hub-development-westus3	Microsoft.Network/privateDnsZones/virtualNetworkLinks	privatelink.blob.core.windows.net/vnet-hub-development-westus3-storage-link	global		
+rg-hub-development-westus3	Microsoft.Network/privateDnsZones/virtualNetworkLinks	privatelink.vaultcore.azure.net/vnet-hub-development-westus3-keyvault-link	global		
+rg-hub-development-westus3	Microsoft.Network/publicIPAddresses	appgw-hub-development-westus3-v2-pip	westus3	Standard	
+rg-hub-development-westus3	Microsoft.Network/virtualNetworks	vnet-hub-development-westus3	westus3		
+rg-hub-development-westus3	Microsoft.OperationalInsights/workspaces	aks-hub-development-westus3-v2-logs	westus3		
+rg-hub-development-westus3	Microsoft.OperationalInsights/workspaces	log-hub-development-westus3-v2	westus3		
+rg-hub-development-westus3	Microsoft.OperationsManagement/solutions	ContainerInsights(aks-hub-development-westus3-v2-logs)	westus3		
+rg-hub-development-westus3	Microsoft.OperationsManagement/solutions	ContainerInsights(log-hub-development-westus3-v2)	westus3		
+rg-hub-development-westus3	Microsoft.OperationsManagement/solutions	Security(log-hub-development-westus3-v2)	westus3		
+rg-hub-development-westus3	Microsoft.Storage/storageAccounts	a5catlaspg794e33cd	westus3	Standard_LRS	StorageV2
+rg-hub-development-westus3	Microsoft.Storage/storageAccounts	sthubdevelopmentwestu3v2	westus3	Standard_LRS	StorageV2
+rg-hub-development-westus3	microsoft.alertsmanagement/smartDetectorAlertRules	Failure Anomalies - appi-hub-development-westus3-v2	global		
+rg-litellm-proxy	Microsoft.DBforPostgreSQL/flexibleServers	litellm-pgdb	swedencentral	Standard_B1ms	
+rg-litellm-proxy	Microsoft.DBforPostgreSQL/flexibleServers	litellm-pgdb2	swedencentral	Standard_B1ms	
+rg-litellm-proxy	Microsoft.Storage/storageAccounts	stlitellmproxy2026	swedencentral	Standard_LRS	StorageV2
+rg-mantis-album	Microsoft.Storage/storageAccounts	mantisb131bfc8	eastus	Standard_LRS	StorageV2
+rg-mantis-odoo-validation-eastus2	Microsoft.Compute/virtualMachines	vm-odoo-validation	eastus2		
+rg-mantis-odoo-validation-eastus2	Microsoft.Network/networkInterfaces	vm-odoo-validationVMNic	eastus2		
+rg-mantis-odoo-validation-eastus2	Microsoft.Network/virtualNetworks	vm-odoo-validationVNET	eastus2		
+rg-mantis-odoo-validation-eastus2	Microsoft.Storage/storageAccounts	mantisodoo913061	eastus2	Standard_LRS	StorageV2
+rg-mantis-odoo-validation-eastus2	Microsoft.Storage/storageAccounts	mantisodooevid1868	eastus2	Standard_LRS	StorageV2
+rg-promoted-idle	Microsoft.Web/serverFarms	asp-promoted-idle	eastus	F1	linux
+rg-promoted-idle	Microsoft.Web/sites	promoted-idle-a1cef5	eastus		app,linux
+rg-tb-fleet-0	Microsoft.Compute/disks	tb-fleet-0-os	swedencentral	Premium_LRS	
+rg-tb-fleet-0	Microsoft.Compute/virtualMachines	tb-fleet-0	swedencentral		
+rg-tb-fleet-0	Microsoft.Compute/virtualMachines/extensions	tb-fleet-0/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-0	Microsoft.Network/networkInterfaces	tb-fleet-0-nic	swedencentral		
+rg-tb-fleet-0	Microsoft.Network/networkSecurityGroups	tb-fleet-0-nsg	swedencentral		
+rg-tb-fleet-0	Microsoft.Network/publicIPAddresses	tb-fleet-0-pip	swedencentral	Standard	
+rg-tb-fleet-0	Microsoft.Network/virtualNetworks	tb-fleet-0-vnet	swedencentral		
+rg-tb-fleet-1	Microsoft.Compute/disks	tb-fleet-1-os	swedencentral	Premium_LRS	
+rg-tb-fleet-1	Microsoft.Compute/virtualMachines	tb-fleet-1	swedencentral		
+rg-tb-fleet-1	Microsoft.Compute/virtualMachines/extensions	tb-fleet-1/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-1	Microsoft.Network/networkInterfaces	tb-fleet-1-nic	swedencentral		
+rg-tb-fleet-1	Microsoft.Network/networkSecurityGroups	tb-fleet-1-nsg	swedencentral		
+rg-tb-fleet-1	Microsoft.Network/publicIPAddresses	tb-fleet-1-pip	swedencentral	Standard	
+rg-tb-fleet-1	Microsoft.Network/virtualNetworks	tb-fleet-1-vnet	swedencentral		
+rg-tb-fleet-2	Microsoft.Compute/disks	tb-fleet-2-os	swedencentral	Premium_LRS	
+rg-tb-fleet-2	Microsoft.Compute/virtualMachines	tb-fleet-2	swedencentral		
+rg-tb-fleet-2	Microsoft.Compute/virtualMachines/extensions	tb-fleet-2/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-2	Microsoft.Network/networkInterfaces	tb-fleet-2-nic	swedencentral		
+rg-tb-fleet-2	Microsoft.Network/networkSecurityGroups	tb-fleet-2-nsg	swedencentral		
+rg-tb-fleet-2	Microsoft.Network/publicIPAddresses	tb-fleet-2-pip	swedencentral	Standard	
+rg-tb-fleet-2	Microsoft.Network/virtualNetworks	tb-fleet-2-vnet	swedencentral		
+rg-tb-fleet-4	Microsoft.Compute/disks	tb-fleet-4-os	swedencentral	Premium_LRS	
+rg-tb-fleet-4	Microsoft.Compute/virtualMachines	tb-fleet-4	swedencentral		
+rg-tb-fleet-4	Microsoft.Compute/virtualMachines/extensions	tb-fleet-4/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-4	Microsoft.Network/networkInterfaces	tb-fleet-4-nic	swedencentral		
+rg-tb-fleet-4	Microsoft.Network/networkSecurityGroups	tb-fleet-4-nsg	swedencentral		
+rg-tb-fleet-4	Microsoft.Network/publicIPAddresses	tb-fleet-4-pip	swedencentral	Standard	
+rg-tb-fleet-4	Microsoft.Network/virtualNetworks	tb-fleet-4-vnet	swedencentral		
+rg-tb-fleet-5	Microsoft.Compute/disks	tb-fleet-5-os	swedencentral	Premium_LRS	
+rg-tb-fleet-5	Microsoft.Compute/virtualMachines	tb-fleet-5	swedencentral		
+rg-tb-fleet-5	Microsoft.Compute/virtualMachines/extensions	tb-fleet-5/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-5	Microsoft.Network/networkInterfaces	tb-fleet-5-nic	swedencentral		
+rg-tb-fleet-5	Microsoft.Network/networkSecurityGroups	tb-fleet-5-nsg	swedencentral		
+rg-tb-fleet-5	Microsoft.Network/publicIPAddresses	tb-fleet-5-pip	swedencentral	Standard	
+rg-tb-fleet-5	Microsoft.Network/virtualNetworks	tb-fleet-5-vnet	swedencentral		
+rg-tb-fleet-6	Microsoft.Compute/disks	tb-fleet-6-os	swedencentral	Premium_LRS	
+rg-tb-fleet-6	Microsoft.Compute/virtualMachines	tb-fleet-6	swedencentral		
+rg-tb-fleet-6	Microsoft.Compute/virtualMachines/extensions	tb-fleet-6/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-6	Microsoft.Network/networkInterfaces	tb-fleet-6-nic	swedencentral		
+rg-tb-fleet-6	Microsoft.Network/networkSecurityGroups	tb-fleet-6-nsg	swedencentral		
+rg-tb-fleet-6	Microsoft.Network/publicIPAddresses	tb-fleet-6-pip	swedencentral	Standard	
+rg-tb-fleet-6	Microsoft.Network/virtualNetworks	tb-fleet-6-vnet	swedencentral		
+rg-tb-fleet-7	Microsoft.Compute/disks	tb-fleet-7-os	swedencentral	Premium_LRS	
+rg-tb-fleet-7	Microsoft.Compute/virtualMachines	tb-fleet-7	swedencentral		
+rg-tb-fleet-7	Microsoft.Compute/virtualMachines/extensions	tb-fleet-7/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-7	Microsoft.Network/networkInterfaces	tb-fleet-7-nic	swedencentral		
+rg-tb-fleet-7	Microsoft.Network/networkSecurityGroups	tb-fleet-7-nsg	swedencentral		
+rg-tb-fleet-7	Microsoft.Network/publicIPAddresses	tb-fleet-7-pip	swedencentral	Standard	
+rg-tb-fleet-7	Microsoft.Network/virtualNetworks	tb-fleet-7-vnet	swedencentral		
+rg-tb-fleet-8	Microsoft.Compute/disks	tb-fleet-8-os	swedencentral	Premium_LRS	
+rg-tb-fleet-8	Microsoft.Compute/virtualMachines	tb-fleet-8	swedencentral		
+rg-tb-fleet-8	Microsoft.Compute/virtualMachines/extensions	tb-fleet-8/terminal-bench-bootstrap	swedencentral		
+rg-tb-fleet-8	Microsoft.Network/networkInterfaces	tb-fleet-8-nic	swedencentral		
+rg-tb-fleet-8	Microsoft.Network/networkSecurityGroups	tb-fleet-8-nsg	swedencentral		
+rg-tb-fleet-8	Microsoft.Network/publicIPAddresses	tb-fleet-8-pip	swedencentral	Standard	
+rg-tb-fleet-8	Microsoft.Network/virtualNetworks	tb-fleet-8-vnet	swedencentral		
+rg-tmuskal-7935	Microsoft.CognitiveServices/accounts	a5c-sw-resource	swedencentral	S0	AIServices
+rg-tmuskal-7935	Microsoft.CognitiveServices/accounts	tmusk-mdk7huum-eastus2	eastus2	S0	AIServices
+rg-tmuskal-7935	Microsoft.CognitiveServices/accounts	tmusk-mdk89kro-norwayeast	norwayeast	S0	AIServices
+rg-tmuskal-7935	Microsoft.CognitiveServices/accounts/projects	a5c-sw-resource/a5c-sw	swedencentral		AIServices
+rg-tmuskal-7935	Microsoft.CognitiveServices/accounts/projects	tmusk-mdk7huum-eastus2/tmusk-mdk7huum-eastus2_project	eastus2		AIServices
+rg-tmuskal-7935	Microsoft.CognitiveServices/accounts/projects	tmusk-mdk89kro-norwayeast/tmusk-mdk89kro-norwayeast_project	norwayeast		AIServices
+rg-tmuskal-7935	Microsoft.Insights/components	ai	swedencentral		web
+rg-tmuskal-7935	Microsoft.OperationalInsights/workspaces	DefaultWorkspace-cb17b37c-90b5-46c0-bd4c-01d8129a5643	swedencentral		
+rg-tmuskal-7935	microsoft.alertsmanagement/smartDetectorAlertRules	Failure Anomalies - ai	global		
+rg-tmuskal-7935	microsoft.insights/actiongroups	Application Insights Smart Detection	global		
+rg-tmuskal-9340	Microsoft.CognitiveServices/accounts	a5c-us-east-resource	eastus2	S0	AIServices
+rg-tmuskal-9340	Microsoft.CognitiveServices/accounts/projects	a5c-us-east-resource/a5c-us-east	eastus2		AIServices
+rg-ubuntu-ssh-20260806	Microsoft.Compute/virtualMachines	ubuntu-large-02	eastus2		
+rg-ubuntu-ssh-20260806	Microsoft.Network/networkInterfaces	ubuntu-large-02VMNic	eastus2		
+rg-ubuntu-ssh-20260806	Microsoft.Network/networkSecurityGroups	ubuntu-large-02NSG	eastus2		
+rg-ubuntu-ssh-20260806	Microsoft.Network/publicIPAddresses	ubuntu-large-02PublicIP	eastus2	Standard	
+rg-ubuntu-ssh-20260806	Microsoft.Network/virtualNetworks	ubuntu-ssh-01VNET	eastus2		

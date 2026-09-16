@@ -1,0 +1,11 @@
+[
+  {
+    "endIpAddress": "0.0.0.0",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.DBforPostgreSQL/flexibleServers/aeqpg0316203042/firewallRules/AllowAllAzureServicesAndResourcesWithinAzureIps_2026-3-16_20-35-0",
+    "name": "AllowAllAzureServicesAndResourcesWithinAzureIps_2026-3-16_20-35-0",
+    "resourceGroup": "rg-hub-development-westus3",
+    "startIpAddress": "0.0.0.0",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  }
+]

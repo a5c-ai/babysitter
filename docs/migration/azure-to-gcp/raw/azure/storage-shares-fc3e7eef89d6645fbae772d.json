@@ -1,0 +1,16 @@
+[
+  {
+    "accessTier": "TransactionOptimized",
+    "accessTierChangeTime": "2025-08-01T17:38:17.0000000Z",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DDD122330D7975\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Storage/storageAccounts/fc3e7eef89d6645fbae772d/fileServices/default/shares/pvc-7c8e1234-819a-44d7-8e77-0ab37e67bf86",
+    "lastModifiedTime": "2025-08-01T17:38:17.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "pvc-7c8e1234-819a-44d7-8e77-0ab37e67bf86",
+    "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "shareQuota": 1024,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  }
+]

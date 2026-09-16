@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-05-12T09:39:58.971706Z",
+  "imageName": "krate-controller",
+  "lastUpdateTime": "2026-08-27T10:23:20.9620737Z",
+  "manifestCount": 20,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

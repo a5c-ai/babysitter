@@ -1,0 +1,2 @@
+a5c.ai	nameserver = ns42.domaincontrol.com
+a5c.ai	nameserver = ns41.domaincontrol.com

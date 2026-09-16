@@ -1,0 +1,39 @@
+{
+  "release": "hub-dev-runners/arc-runners",
+  "redactedShape": {
+    "containerMode": {
+      "kubernetesMode": {
+        "requireJobContainer": false
+      },
+      "kubernetesModeWorkVolumeClaim": {
+        "accessModes": [
+          "<string>"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "<string>"
+          }
+        },
+        "storageClassName": "<string>"
+      },
+      "type": "<string>"
+    },
+    "githubConfigSecret": "<string>",
+    "githubConfigUrl": "<string>",
+    "maxRunners": 20,
+    "minRunners": 0,
+    "runnerGroup": "<string>",
+    "runnerScaleSetName": "<string>",
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "image": "<string>",
+            "name": "<string>"
+          }
+        ],
+        "nodeSelector": null
+      }
+    }
+  }
+}

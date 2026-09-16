@@ -1,0 +1,11 @@
+-- askExpertQuestion: CI[ci.yml|active] Deploy[deploy.yml|active] Terraform[terraform.yml|active] Copilot coding agent[copilot|active] Security Risk Assessment[code-security-risk-assessment|active] 
+-- company: Agent Dispatch[agent-dispatch.yml|active] Content Community[content-community.yml|disabled_manually] Content Hebrew[content-hebrew.yml|disabled_manually] Content Request[content-request.yml|disabled_manually] Content Research[content-research.yml|disabled_manually] Content Revise[content-revise.yml|disabled_manually] Deploy Content Studio[content-studio-deploy.yml|disabled_manually] Discord Pull[d
+-- osb: Build Docker Images[build-images.yml|active] Continuous Deployment[cd.yml|active] Continuous Integration[ci.yml|active] Generate Reports[generate-reports.yml|active] Test Suite[test-suite.yml|active] 
+-- hub: a5c[a5c.yml|disabled_inactivity] Coverage Report[coverage-report.yml|active] E2E Tests - Production[e2e-tests.yml|active] Infrastructure Deployment[infrastructure.yml|active] Integration Tests[integration-tests.yml|active] Build[main.yml|active] Release[release.yml|active] CodeQL[codeql|active] 
+-- claude-web: Build BYOD Runner Image[byod-runner.yml|active] CI[ci.yml|active] CodeQL Security Analysis[codeql.yml|active] Deploy to Production[deploy-production.yml|active] Deploy to Staging[deploy-staging.yml|active] Release Management[release.yml|active] Rollback Deployment[rollback.yml|active] Copilot cloud agent[copilot|active] 
+-- a5c: Release[release.yml|active] Dependabot Updates[dependabot-updates|active] CodeQL[codeql|active] 
+-- a5c-website: Azure Static Web Apps CI/CD[azure-static-web-apps.yml|active] Security Risk Assessment[code-security-risk-assessment|active] 
+-- site: 
+-- website-a5c: a5c[a5c.yml|active] Cleanup Preview Environments[folkware-landing-cleanup-environments.yml|active] Deploy Folkware Landing to Vercel[folkware-landing-deploy-cli.yml|active] Build[main.yml|active] Security Risk Assessment[code-security-risk-assessment|active] 
+-- infra: apply-azure[apply-azure.yml|active] build-platform-auth[build-platform-auth.yml|active] 
+-- infra-seed: a5c[a5c.yml|active] Deploy[deploy.yml|active] Build[main.yml|active] Post-Deploy Webhook Sync[post-deploy.yml|active] Setup[setup.yml|active] 

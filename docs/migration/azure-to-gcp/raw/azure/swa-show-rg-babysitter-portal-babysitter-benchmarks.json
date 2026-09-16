@@ -1,0 +1,44 @@
+cannot import name 'get_arm_endpoints' from 'azure.mgmt.core.tools' (C:\Program Files\Microsoft SDKs\Azure\CLI2\Lib\site-packages\azure\mgmt\core\tools.pyc)
+{
+  "allowConfigFileUpdates": true,
+  "branch": null,
+  "buildProperties": null,
+  "contentDistributionEndpoint": "https://content-eus2.infrastructure.7.azurestaticapps.net",
+  "customDomains": [],
+  "databaseConnections": [],
+  "defaultHostname": "happy-pond-0fcbef50f.7.azurestaticapps.net",
+  "enterpriseGradeCdnStatus": "Disabled",
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-babysitter-portal/providers/Microsoft.Web/staticSites/babysitter-benchmarks",
+  "identity": null,
+  "keyVaultReferenceIdentity": "SystemAssigned",
+  "kind": null,
+  "linkedBackends": [],
+  "location": "East US 2",
+  "name": "babysitter-benchmarks",
+  "privateEndpointConnections": [],
+  "provider": "SwaCli",
+  "publicNetworkAccess": null,
+  "repositoryToken": null,
+  "repositoryUrl": null,
+  "resourceGroup": "rg-babysitter-portal",
+  "sku": {
+    "capabilities": null,
+    "capacity": null,
+    "family": null,
+    "locations": null,
+    "name": "Free",
+    "size": null,
+    "skuCapacity": null,
+    "tier": "Free"
+  },
+  "stagingEnvironmentPolicy": "Disabled",
+  "tags": {
+    "data-classification": "internal",
+    "managedBy": "scripts/deploy-portal.sh",
+    "purpose": "benchmark results portal, GitHub sign-in required",
+    "workload": "babysitter-portal"
+  },
+  "templateProperties": null,
+  "type": "Microsoft.Web/staticSites",
+  "userProvidedFunctionApps": null
+}

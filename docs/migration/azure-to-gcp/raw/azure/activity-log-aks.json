@@ -1,0 +1,14 @@
+[
+  {
+    "caller": "benihakak@gmail.com",
+    "op": "Microsoft.ContainerService/managedClusters/listClusterUserCredential/action",
+    "status": "Succeeded",
+    "time": "2026-08-27T10:14:39.3570733Z"
+  },
+  {
+    "caller": "benihakak@gmail.com",
+    "op": "Microsoft.ContainerService/managedClusters/listClusterUserCredential/action",
+    "status": "Started",
+    "time": "2026-08-27T10:14:39.1226994Z"
+  }
+]

@@ -1,0 +1,45 @@
+# Captured 2026-09-16 on the migration workstation (Windows 11, Git Bash). Read-only. No secret values.
+
+$ gcloud version
+Google Cloud SDK 405.0.1   (released 2022-10-14; components installed: gcloud-crc32c only; gke-gcloud-auth-plugin NOT installed)
+
+$ gcloud auth list
+           Credentialed Accounts
+ACTIVE             ACCOUNT
+*                  tal@muskal.net
+
+$ gcloud config list
+[core]
+account = tal@muskal.net
+project = muskaltech
+Your active configuration is: [default]
+
+$ gcloud config configurations list
+NAME     IS_ACTIVE  ACCOUNT         PROJECT     COMPUTE_DEFAULT_ZONE  COMPUTE_DEFAULT_REGION
+default  True       tal@muskal.net  muskaltech
+
+$ gcloud projects describe boot-464019
+ERROR: (gcloud.projects.describe) There was a problem refreshing your current auth tokens: ('invalid_grant: Bad Request', {'error': 'invalid_grant', 'error_description': 'Bad Request'})
+Please run:  $ gcloud auth login
+exit code 1
+
+$ gcloud auth application-default print-access-token
+Reauthentication required.
+ERROR: (gcloud.auth.application-default.print-access-token) There was a problem reauthenticating while refreshing your current auth tokens: Reauthentication challenge failed due to API error: Your application is authenticating by using local Application Default Credentials. The reauth.googleapis.com API requires a quota project, which is not set by default. ...
+Please retry your command or run:  $ gcloud auth application-default login
+exit code 1
+
+$ jq -r '.type' %APPDATA%/gcloud/application_default_credentials.json   (file dated 2026-04-14, 300 bytes)
+authorized_user            # a user refresh token (stale), not a service-account key
+
+$ ls %APPDATA%/gcloud/legacy_credentials/
+tal@muskal.net/            # only one credentialed account on the machine
+
+$ env | grep -E 'GOOGLE_APPLICATION_CREDENTIALS|CLOUDSDK_|GOOGLE_CLOUD_PROJECT|GOOGLE_API_KEY|GEMINI'
+(nothing set)
+
+$ which gke-gcloud-auth-plugin
+not found
+$ kubectl version --client   -> v1.32.2
+$ helm version --short       -> v3.13.0
+$ terraform version          -> v1.6.0

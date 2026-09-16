@@ -1,0 +1,43 @@
+[
+  {
+    "changedTime": "2025-07-26T22:47:56.945299+00:00",
+    "createdTime": "2025-07-26T22:37:55.997866+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tmuskal-7935/providers/Microsoft.Insights/components/ai",
+    "identity": null,
+    "kind": "web",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "ai",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tmuskal-7935",
+    "sku": null,
+    "tags": {},
+    "type": "Microsoft.Insights/components"
+  },
+  {
+    "changedTime": "2025-08-02T09:38:17.497821+00:00",
+    "createdTime": "2025-07-30T09:09:11.724882+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Insights/components/appi-hub-development-westus3-v2",
+    "identity": null,
+    "kind": "web",
+    "location": "westus3",
+    "managedBy": null,
+    "name": "appi-hub-development-westus3-v2",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "sku": null,
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Insights/components"
+  }
+]

@@ -1,0 +1,30 @@
+ERROR: The command failed with an unexpected error. Here is the traceback:
+ERROR: EOF when reading a line
+Traceback (most recent call last):
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/cli.py", line 233, in invoke
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/__init__.py", line 591, in execute
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/parser.py", line 261, in parse_args
+  File "argparse.py", line 1904, in parse_args
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/parser.py", line 281, in parse_known_args
+  File "argparse.py", line 1914, in parse_known_args
+  File "argparse.py", line 1943, in _parse_known_args2
+  File "argparse.py", line 2165, in _parse_known_args
+  File "argparse.py", line 2141, in consume_positionals
+  File "argparse.py", line 2018, in take_action
+  File "argparse.py", line 1272, in __call__
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/parser.py", line 281, in parse_known_args
+  File "argparse.py", line 1914, in parse_known_args
+  File "argparse.py", line 1943, in _parse_known_args2
+  File "argparse.py", line 2165, in _parse_known_args
+  File "argparse.py", line 2141, in consume_positionals
+  File "argparse.py", line 2003, in take_action
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/parser.py", line 272, in _get_values
+  File "argparse.py", line 2523, in _get_values
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/parser.py", line 300, in _check_value
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/extension/dynamic_install.py", line 132, in try_install_extension
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/extension/dynamic_install.py", line 226, in _check_value_in_extensions
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/prompting.py", line 71, in prompt_y_n
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/prompting.py", line 85, in _prompt_bool
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/prompting.py", line 22, in _input
+EOFError: EOF when reading a line
+To check existing issues, please visit: https://github.com/Azure/azure-cli/issues

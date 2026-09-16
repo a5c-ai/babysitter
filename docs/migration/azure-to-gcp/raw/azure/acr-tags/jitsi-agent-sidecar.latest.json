@@ -1,0 +1,49 @@
+[
+  {
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "createdTime": "2026-09-05T14:37:18.0673827Z",
+    "digest": "sha256:ef505b25d5d24727c94f1726a8eb1dd6e441b77f67bc61410697b51a30962b6d",
+    "imageSize": 0,
+    "lastUpdateTime": "2026-09-05T14:37:18.0673827Z",
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "tags": [
+      "57b13a4c535633fef005e1660996cfdb3629fbbd",
+      "latest"
+    ]
+  },
+  {
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.oci.empty.v1+json",
+    "createdTime": "2026-09-05T14:37:17.719879Z",
+    "digest": "sha256:6903f30a93490932fd2396e8ac59cd79d0affb1fd8907a1cf270c23afb86c850",
+    "imageSize": 13152,
+    "lastUpdateTime": "2026-09-05T14:37:17.719879Z",
+    "mediaType": "application/vnd.oci.image.manifest.v1+json"
+  },
+  {
+    "architecture": "amd64",
+    "changeableAttributes": {
+      "deleteEnabled": true,
+      "listEnabled": true,
+      "readEnabled": true,
+      "writeEnabled": true
+    },
+    "configMediaType": "application/vnd.oci.image.config.v1+json",
+    "createdTime": "2026-09-05T14:37:17.336603Z",
+    "digest": "sha256:fb38f2a1e0df030e88aa2ac36957698bf0443bb46fb74e691ec597b34685321f",
+    "imageSize": 420484779,
+    "lastUpdateTime": "2026-09-05T14:37:17.336603Z",
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "os": "linux"
+  }
+]

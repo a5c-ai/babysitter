@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-06-09T07:00:44.7630492Z",
+  "imageName": "content-studio",
+  "lastUpdateTime": "2026-08-27T10:01:33.3956456Z",
+  "manifestCount": 20,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

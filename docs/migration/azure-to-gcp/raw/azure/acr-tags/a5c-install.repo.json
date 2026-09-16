@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2025-09-13T10:17:20.835036Z",
+  "imageName": "a5c-install",
+  "lastUpdateTime": "2026-08-27T09:39:20.0179349Z",
+  "manifestCount": 10,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

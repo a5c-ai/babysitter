@@ -1,0 +1,13 @@
+{
+  "release": "ingress-nginx/ingress-nginx",
+  "redactedShape": {
+    "controller": {
+      "service": {
+        "annotations": {
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-port": 10254,
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path": "<string>"
+        }
+      }
+    }
+  }
+}

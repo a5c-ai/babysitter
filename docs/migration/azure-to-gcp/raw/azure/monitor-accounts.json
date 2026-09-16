@@ -1,0 +1,54 @@
+[
+  {
+    "changedTime": "2025-01-26T09:12:05.004849+00:00",
+    "createdTime": "2025-01-26T09:02:04.202329+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/microsoft.monitor/accounts/defaultazuremonitorworkspace-wus2",
+    "identity": null,
+    "kind": null,
+    "location": "westus2",
+    "managedBy": null,
+    "name": "defaultazuremonitorworkspace-wus2",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": null,
+    "systemData": {
+      "createdAt": "2025-01-26T09:02:04.2174378Z",
+      "createdBy": "tmuskal@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2025-01-26T09:02:04.2174378Z",
+      "lastModifiedBy": "tmuskal@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {},
+    "type": "microsoft.monitor/accounts"
+  },
+  {
+    "changedTime": "2025-01-27T18:31:02.299848+00:00",
+    "createdTime": "2025-01-27T18:21:01.558898+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/DefaultResourceGroup-westus2/providers/microsoft.monitor/accounts/DefaultAzureMonitorWorkspace-westus2",
+    "identity": null,
+    "kind": null,
+    "location": "westus2",
+    "managedBy": null,
+    "name": "DefaultAzureMonitorWorkspace-westus2",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "DefaultResourceGroup-westus2",
+    "sku": null,
+    "systemData": {
+      "createdAt": "2025-01-27T18:21:01.7786023Z",
+      "createdBy": "tmuskal@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2025-01-27T18:21:01.7786023Z",
+      "lastModifiedBy": "tmuskal@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": null,
+    "type": "microsoft.monitor/accounts"
+  }
+]

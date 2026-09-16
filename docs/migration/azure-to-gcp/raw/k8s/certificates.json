@@ -1,0 +1,752 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-03-16T10:23:03Z",
+        "generation": 4,
+        "name": "aeq-tls",
+        "namespace": "aeq",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "aeq-ingress",
+            "uid": "6c90cc5e-b9ed-4687-90ce-95ecd4d22024"
+          }
+        ],
+        "resourceVersion": "185005174",
+        "uid": "e206720c-5935-4e63-a2bc-02950e6cac58"
+      },
+      "spec": {
+        "dnsNames": [
+          "bmux.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "aeq-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-04-21T11:46:38Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 4,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-17T08:51:50Z",
+        "notBefore": "2026-08-19T08:51:51Z",
+        "renewalTime": "2026-10-18T08:51:50Z",
+        "revision": 4
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2025-09-02T16:40:20Z",
+        "generation": 1,
+        "name": "app-azure-ssl-certificate",
+        "namespace": "app-staging",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "a5c-app",
+            "uid": "96011fac-2c96-462b-907a-72dc7bb4c4e9"
+          }
+        ],
+        "resourceVersion": "189753591",
+        "uid": "1c17864e-9a1a-42f2-b383-d22d4947c23b"
+      },
+      "spec": {
+        "dnsNames": [
+          "app-staging.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "app-azure-ssl-certificate",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2025-09-02T16:40:43Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-26T09:53:23Z",
+        "notBefore": "2026-08-28T09:53:24Z",
+        "renewalTime": "2026-10-27T09:53:23Z",
+        "revision": 7
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2025-08-27T10:56:33Z",
+        "generation": 1,
+        "name": "app-azure-ssl-certificate",
+        "namespace": "app",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "a5c-app",
+            "uid": "6ab22249-e7b1-4192-9a83-e59089b792b8"
+          }
+        ],
+        "resourceVersion": "186498915",
+        "uid": "7fba1a30-0495-404a-b106-5de916459177"
+      },
+      "spec": {
+        "dnsNames": [
+          "app.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "app-azure-ssl-certificate",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2025-08-27T10:56:56Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-20T05:09:39Z",
+        "notBefore": "2026-08-22T05:09:40Z",
+        "renewalTime": "2026-10-21T05:09:39Z",
+        "revision": 7
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-05-06T16:40:19Z",
+        "generation": 1,
+        "name": "atlas-webui-tls",
+        "namespace": "atlas-staging",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "atlas-webui",
+            "uid": "8e7358fa-75de-4858-86d3-1c46ed99725a"
+          }
+        ],
+        "resourceVersion": "193163854",
+        "uid": "5f5333a8-07ae-44a3-bffb-12548995d62b"
+      },
+      "spec": {
+        "dnsNames": [
+          "atlas-staging.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "atlas-webui-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-05-06T16:40:47Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-12-02T14:46:03Z",
+        "notBefore": "2026-09-03T14:46:04Z",
+        "renewalTime": "2026-11-02T14:46:03Z",
+        "revision": 3
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-06-30T09:13:32Z",
+        "generation": 1,
+        "name": "atlas-webui-tls",
+        "namespace": "atlas",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "atlas-webui",
+            "uid": "b624f4dc-573d-404c-b80f-f448258e5c9e"
+          }
+        ],
+        "resourceVersion": "190222385",
+        "uid": "ad68ac5a-cf62-4467-b0c3-e971b72a610c"
+      },
+      "spec": {
+        "dnsNames": [
+          "atlas.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "atlas-webui-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-06-30T09:13:56Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-27T07:17:16Z",
+        "notBefore": "2026-08-29T07:17:17Z",
+        "renewalTime": "2026-10-28T07:17:16Z",
+        "revision": 2
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-06-09T07:02:01Z",
+        "generation": 1,
+        "name": "content-studio-tls",
+        "namespace": "content-studio",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "content-studio",
+            "uid": "021289f3-f237-4d6c-9fe4-c34d05d69a74"
+          }
+        ],
+        "resourceVersion": "179169533",
+        "uid": "bd8bd0f8-f7c3-4567-b04e-066a2de221d4"
+      },
+      "spec": {
+        "dnsNames": [
+          "studio.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "content-studio-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-06-09T07:02:27Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-06T05:05:46Z",
+        "notBefore": "2026-08-08T05:05:47Z",
+        "renewalTime": "2026-10-07T05:05:46Z",
+        "revision": 2
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2025-08-03T21:17:08Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "ingress",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-azure-ssl-certificate",
+        "namespace": "hub-development",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "hub-ingress",
+            "uid": "60cf7202-6800-46cd-9bff-cf95582710da"
+          }
+        ],
+        "resourceVersion": "173588493",
+        "uid": "21d5330b-be52-4319-ba6f-2437e6ff43e9"
+      },
+      "spec": {
+        "dnsNames": [
+          "hub.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "hub-azure-ssl-certificate",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2025-08-03T21:17:08Z",
+            "message": "Secret was issued for \"hub-tls\". If this message is not transient, you might have two conflicting Certificates pointing to the same secret.",
+            "observedGeneration": 1,
+            "reason": "IncorrectCertificate",
+            "status": "False",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-10-26T13:06:12Z",
+        "notBefore": "2026-07-28T13:06:13Z",
+        "renewalTime": "2026-09-26T13:06:12Z"
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-02T13:57:51Z",
+        "generation": 2,
+        "labels": {
+          "app.kubernetes.io/component": "tls-certificate",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-tls",
+        "namespace": "hub-development",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "hub-ingress",
+            "uid": "60cf7202-6800-46cd-9bff-cf95582710da"
+          }
+        ],
+        "resourceVersion": "173588501",
+        "uid": "ea277332-0d06-446c-a077-8faf002229c2"
+      },
+      "spec": {
+        "dnsNames": [
+          "hub.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "hub-azure-ssl-certificate",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2025-08-02T18:53:36Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 2,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-10-26T13:06:12Z",
+        "notBefore": "2026-07-28T13:06:13Z",
+        "renewalTime": "2026-09-26T13:06:12Z",
+        "revision": 7
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-09-05T14:38:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "gitea-backend",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-gitea-tls",
+        "namespace": "kradle-staging",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "kradle-kradle-gitea",
+            "uid": "cdbdc174-c3f9-42f1-8570-825d43fc4986"
+          }
+        ],
+        "resourceVersion": "194305836",
+        "uid": "c9084cf9-5565-4f0b-840d-b80329c75ba3"
+      },
+      "spec": {
+        "dnsNames": [
+          "gitea.kradle-staging.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "kradle-gitea-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-09-05T14:38:04Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-23T14:01:42Z",
+        "notBefore": "2026-08-25T14:01:43Z",
+        "renewalTime": "2026-10-24T14:01:42Z"
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-09-05T14:38:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-tls",
+        "namespace": "kradle-staging",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "kradle-kradle-web",
+            "uid": "a9c5e311-9cbc-4885-a626-ed6da51b4d44"
+          }
+        ],
+        "resourceVersion": "194305851",
+        "uid": "ebfc8a23-ce61-4fe5-8444-48bf346671bb"
+      },
+      "spec": {
+        "dnsNames": [
+          "kradle-staging.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "kradle-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-09-05T14:38:04Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-01T04:29:48Z",
+        "notBefore": "2026-08-03T04:29:49Z",
+        "renewalTime": "2026-10-02T04:29:48Z"
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-08-13T20:18:56Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "gitea-backend",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-gitea-tls",
+        "namespace": "kradle",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "kradle-kradle-gitea",
+            "uid": "af543018-074a-48e8-baea-e27ae6595a37"
+          }
+        ],
+        "resourceVersion": "190384159",
+        "uid": "b4df645a-a7f0-47e9-a837-382d92f3da39"
+      },
+      "spec": {
+        "dnsNames": [
+          "gitea.kradle.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "kradle-gitea-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-08-13T20:18:56Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-27T14:39:55Z",
+        "notBefore": "2026-08-29T14:39:56Z",
+        "renewalTime": "2026-10-28T14:39:55Z",
+        "revision": 1
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "creationTimestamp": "2026-08-13T20:18:56Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-tls",
+        "namespace": "kradle",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "kradle-kradle-web",
+            "uid": "95e6a586-26d3-4499-a9d4-a4329befba7c"
+          }
+        ],
+        "resourceVersion": "190384175",
+        "uid": "fd91d637-9e71-4bef-8c9d-d5710a5a7b93"
+      },
+      "spec": {
+        "dnsNames": [
+          "kradle.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-production"
+        },
+        "secretName": "kradle-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-08-13T20:18:56Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-27T14:39:55Z",
+        "notBefore": "2026-08-29T14:39:56Z",
+        "renewalTime": "2026-10-28T14:39:55Z",
+        "revision": 1
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "annotations": {
+          "acme.cert-manager.io/http01-override-ingress-name": "babysitter-web-staging",
+          "cert-manager.io/issue-temporary-certificate": "true"
+        },
+        "creationTimestamp": "2026-02-21T15:02:58Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging-tls",
+        "namespace": "staging",
+        "ownerReferences": [
+          {
+            "apiVersion": "networking.k8s.io/v1",
+            "blockOwnerDeletion": true,
+            "controller": true,
+            "kind": "Ingress",
+            "name": "babysitter-web-staging",
+            "uid": "f69215f9-b654-4290-ba47-84ff5c509c38"
+          }
+        ],
+        "resourceVersion": "185580698",
+        "uid": "fa1bc25d-6f35-4a1e-9c20-93d51fd27b8f"
+      },
+      "spec": {
+        "dnsNames": [
+          "staging.web.a5c.ai"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "letsencrypt-prod"
+        },
+        "secretName": "babysitter-web-staging-tls",
+        "usages": [
+          "digital signature",
+          "key encipherment"
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-02-21T15:03:03Z",
+            "message": "Certificate is up to date and has not expired",
+            "observedGeneration": 1,
+            "reason": "Ready",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "notAfter": "2026-11-18T11:10:06Z",
+        "notBefore": "2026-08-20T11:10:07Z",
+        "renewalTime": "2026-10-19T11:10:06Z",
+        "revision": 4
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

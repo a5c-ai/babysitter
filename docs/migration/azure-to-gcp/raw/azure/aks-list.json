@@ -1,0 +1,308 @@
+[
+  {
+    "aadProfile": null,
+    "addonProfiles": {
+      "azureKeyvaultSecretsProvider": {
+        "config": {
+          "enableSecretRotation": "true",
+          "rotationPollInterval": "2m"
+        },
+        "enabled": true,
+        "identity": {
+          "clientId": "903729f0-814d-4229-8548-b57f5ddd76f3",
+          "objectId": "6971e47c-7264-40c4-bedc-adf505c66e02",
+          "resourceId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azurekeyvaultsecretsprovider-aks-hub-development-westus3-v2"
+        }
+      },
+      "azurepolicy": {
+        "config": {
+          "version": "v2"
+        },
+        "enabled": true,
+        "identity": {
+          "clientId": "fbce063e-7fcb-4415-8aa0-52ad84cabb8f",
+          "objectId": "f9489e61-b9b6-40a6-9ab3-d957adb32b2a",
+          "resourceId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.ManagedIdentity/userAssignedIdentities/azurepolicy-aks-hub-development-westus3-v2"
+        }
+      },
+      "extensionManager": {
+        "config": null,
+        "enabled": true,
+        "identity": null
+      },
+      "ingressApplicationGateway": {
+        "config": null,
+        "enabled": false,
+        "identity": null
+      },
+      "omsagent": {
+        "config": {
+          "logAnalyticsWorkspaceResourceID": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.OperationalInsights/workspaces/aks-hub-development-westus3-v2-logs",
+          "useAADAuth": "false"
+        },
+        "enabled": true,
+        "identity": {
+          "clientId": "dc6e7d1a-368c-47fa-91d0-1c9b9f67fe7e",
+          "objectId": "0bda0c95-6c17-4386-b2bf-88bcdc4ebc22",
+          "resourceId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.ManagedIdentity/userAssignedIdentities/omsagent-aks-hub-development-westus3-v2"
+        }
+      }
+    },
+    "agentPoolProfiles": [
+      {
+        "availabilityZones": null,
+        "capacityReservationGroupId": null,
+        "count": 4,
+        "creationData": null,
+        "currentOrchestratorVersion": "1.30.12",
+        "eTag": null,
+        "enableAutoScaling": true,
+        "enableEncryptionAtHost": false,
+        "enableFips": false,
+        "enableNodePublicIp": false,
+        "enableUltraSsd": false,
+        "gpuInstanceProfile": null,
+        "hostGroupId": null,
+        "kubeletConfig": null,
+        "kubeletDiskType": "OS",
+        "linuxOsConfig": null,
+        "maxCount": 6,
+        "maxPods": 30,
+        "messageOfTheDay": null,
+        "minCount": 1,
+        "mode": "System",
+        "name": "default",
+        "networkProfile": null,
+        "nodeImageVersion": "AKSUbuntu-2204gen2containerd-202510.19.1",
+        "nodeLabels": null,
+        "nodePublicIpPrefixId": null,
+        "nodeTaints": null,
+        "orchestratorVersion": "1.30",
+        "osDiskSizeGb": 128,
+        "osDiskType": "Managed",
+        "osSku": "Ubuntu",
+        "osType": "Linux",
+        "podSubnetId": null,
+        "powerState": {
+          "code": "Running"
+        },
+        "provisioningState": "Succeeded",
+        "proximityPlacementGroupId": null,
+        "scaleDownMode": "Delete",
+        "scaleSetEvictionPolicy": null,
+        "scaleSetPriority": null,
+        "securityProfile": {
+          "enableSecureBoot": false,
+          "enableVtpm": false
+        },
+        "spotMaxPrice": null,
+        "tags": {
+          "Environment": "development",
+          "ManagedBy": "terraform",
+          "Owner": "hub-development-team",
+          "Project": "hub"
+        },
+        "type": "VirtualMachineScaleSets",
+        "upgradeSettings": {
+          "drainTimeoutInMinutes": null,
+          "maxSurge": "10%",
+          "nodeSoakDurationInMinutes": 0
+        },
+        "vmSize": "Standard_D2s_v5",
+        "vnetSubnetId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-aks-subnet",
+        "windowsProfile": null,
+        "workloadRuntime": null
+      }
+    ],
+    "apiServerAccessProfile": null,
+    "autoScalerProfile": {
+      "balanceSimilarNodeGroups": "false",
+      "daemonsetEvictionForEmptyNodes": false,
+      "daemonsetEvictionForOccupiedNodes": true,
+      "expander": "random",
+      "ignoreDaemonsetsUtilization": false,
+      "maxEmptyBulkDelete": "10",
+      "maxGracefulTerminationSec": "600",
+      "maxNodeProvisionTime": "15m",
+      "maxTotalUnreadyPercentage": "45",
+      "newPodScaleUpDelay": "10s",
+      "okTotalUnreadyCount": "3",
+      "scaleDownDelayAfterAdd": "10m",
+      "scaleDownDelayAfterDelete": "10s",
+      "scaleDownDelayAfterFailure": "3m",
+      "scaleDownUnneededTime": "10m",
+      "scaleDownUnreadyTime": "20m",
+      "scaleDownUtilizationThreshold": "0.5",
+      "scanInterval": "10s",
+      "skipNodesWithLocalStorage": "true",
+      "skipNodesWithSystemPods": "true"
+    },
+    "autoUpgradeProfile": {
+      "nodeOsUpgradeChannel": "NodeImage",
+      "upgradeChannel": "none"
+    },
+    "azureMonitorProfile": {
+      "metrics": {
+        "enabled": false,
+        "kubeStateMetrics": {
+          "metricAnnotationsAllowList": null,
+          "metricLabelsAllowlist": null
+        }
+      }
+    },
+    "azurePortalFqdn": "hub-dev-7zjxqq33.portal.hcp.westus3.azmk8s.io",
+    "currentKubernetesVersion": "1.30.12",
+    "disableLocalAccounts": false,
+    "diskEncryptionSetId": null,
+    "dnsPrefix": "hub-dev",
+    "eTag": null,
+    "enablePodSecurityPolicy": null,
+    "enableRbac": true,
+    "extendedLocation": null,
+    "fqdn": "hub-dev-7zjxqq33.hcp.westus3.azmk8s.io",
+    "fqdnSubdomain": null,
+    "httpProxyConfig": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2",
+    "identity": {
+      "delegatedResources": null,
+      "principalId": null,
+      "tenantId": null,
+      "type": "UserAssigned",
+      "userAssignedIdentities": {
+        "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-hub-development-westus3-v2-identity": {
+          "clientId": "f6c51fc9-b2ab-400b-b4a6-c10c05afd318",
+          "principalId": "a976b8c9-a0d5-4df6-8cfb-1e3ffe73e632"
+        }
+      }
+    },
+    "identityProfile": {
+      "kubeletidentity": {
+        "clientId": "850de58e-a51b-452b-8eee-42e3f3e56597",
+        "objectId": "678ee5cf-a5b0-42d3-8127-ec3f74de32f4",
+        "resourceId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-hub-development-westus3-v2-agentpool"
+      }
+    },
+    "ingressProfile": {
+      "webAppRouting": {
+        "dnsZoneResourceIds": null,
+        "enabled": false,
+        "identity": null
+      }
+    },
+    "kubernetesVersion": "1.30",
+    "linuxProfile": null,
+    "location": "westus3",
+    "maxAgentPools": 100,
+    "metricsProfile": {
+      "costAnalysis": {
+        "enabled": false
+      }
+    },
+    "name": "aks-hub-development-westus3-v2",
+    "networkProfile": {
+      "advancedNetworking": null,
+      "dnsServiceIp": "10.1.0.10",
+      "ipFamilies": [
+        "IPv4"
+      ],
+      "loadBalancerProfile": {
+        "allocatedOutboundPorts": null,
+        "backendPoolType": "nodeIPConfiguration",
+        "effectiveOutboundIPs": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/f964f80d-c985-48f4-9e03-14d7bed85be9",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "enableMultipleStandardLoadBalancers": null,
+        "idleTimeoutInMinutes": null,
+        "managedOutboundIPs": {
+          "count": 1,
+          "countIpv6": null
+        },
+        "outboundIPs": null,
+        "outboundIpPrefixes": null
+      },
+      "loadBalancerSku": "standard",
+      "natGatewayProfile": null,
+      "networkDataplane": "azure",
+      "networkMode": null,
+      "networkPlugin": "azure",
+      "networkPluginMode": null,
+      "networkPolicy": "azure",
+      "outboundType": "loadBalancer",
+      "podCidr": null,
+      "podCidrs": null,
+      "serviceCidr": "10.1.0.0/16",
+      "serviceCidrs": [
+        "10.1.0.0/16"
+      ]
+    },
+    "nodeResourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "nodeResourceGroupProfile": null,
+    "oidcIssuerProfile": {
+      "enabled": false,
+      "issuerUrl": null
+    },
+    "podIdentityProfile": null,
+    "powerState": {
+      "code": "Running"
+    },
+    "privateFqdn": null,
+    "privateLinkResources": null,
+    "provisioningState": "Failed",
+    "publicNetworkAccess": null,
+    "resourceGroup": "rg-hub-development-westus3",
+    "resourceUid": "6889e147bca62d000117c884",
+    "securityProfile": {
+      "azureKeyVaultKms": null,
+      "defender": null,
+      "imageCleaner": {
+        "enabled": false,
+        "intervalHours": 0
+      },
+      "workloadIdentity": null
+    },
+    "serviceMeshProfile": null,
+    "servicePrincipalProfile": {
+      "clientId": "msi"
+    },
+    "sku": {
+      "name": "Base",
+      "tier": "Free"
+    },
+    "storageProfile": {
+      "blobCsiDriver": null,
+      "diskCsiDriver": {
+        "enabled": true
+      },
+      "fileCsiDriver": {
+        "enabled": true
+      },
+      "snapshotController": {
+        "enabled": true
+      }
+    },
+    "supportPlan": "KubernetesOfficial",
+    "systemData": null,
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.ContainerService/ManagedClusters",
+    "upgradeSettings": null,
+    "windowsProfile": {
+      "adminPassword": null,
+      "adminUsername": "azureuser",
+      "enableCsiProxy": true,
+      "gmsaProfile": null,
+      "licenseType": null
+    },
+    "workloadAutoScalerProfile": {
+      "keda": null,
+      "verticalPodAutoscaler": null
+    }
+  }
+]

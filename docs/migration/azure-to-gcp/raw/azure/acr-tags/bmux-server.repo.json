@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-04-21T11:43:53.290589Z",
+  "imageName": "bmux-server",
+  "lastUpdateTime": "2026-04-21T11:43:55.0285127Z",
+  "manifestCount": 1,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 2
+}

@@ -1,0 +1,73 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.KeyVault/vaults/kv-talai084044774586",
+  "location": "swedencentral",
+  "name": "kv-talai084044774586",
+  "properties": {
+    "accessPolicies": [
+      {
+        "applicationId": null,
+        "objectId": "ac0f3d58-3b71-44be-9909-c7a445dc7716",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "all"
+          ],
+          "storage": []
+        },
+        "tenantId": "0c79caa9-4a82-4d4f-8acd-b7d4514a08ee"
+      },
+      {
+        "applicationId": null,
+        "objectId": "8fa3633f-0f47-41cc-b34e-20d345cdfeae",
+        "permissions": {
+          "certificates": [
+            "all"
+          ],
+          "keys": [
+            "all"
+          ],
+          "secrets": [
+            "all"
+          ],
+          "storage": []
+        },
+        "tenantId": "0c79caa9-4a82-4d4f-8acd-b7d4514a08ee"
+      }
+    ],
+    "createMode": null,
+    "enablePurgeProtection": null,
+    "enableRbacAuthorization": false,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": null,
+    "enabledForTemplateDeployment": null,
+    "hsmPoolResourceId": null,
+    "networkAcls": null,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": null,
+    "tenantId": "0c79caa9-4a82-4d4f-8acd-b7d4514a08ee",
+    "vaultUri": "https://kv-talai084044774586.vault.azure.net/"
+  },
+  "resourceGroup": "personoids_sponsorship",
+  "systemData": {
+    "createdAt": "2024-08-14T10:47:20.509000+00:00",
+    "createdBy": "tal@personoids.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2024-08-14T10:47:20.509000+00:00",
+    "lastModifiedBy": "tal@personoids.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.KeyVault/vaults"
+}

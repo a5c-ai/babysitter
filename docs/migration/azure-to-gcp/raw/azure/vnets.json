@@ -1,0 +1,1231 @@
+[
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.0.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"a5ffd173-d573-4645-b4e5-2a5f62a58aec\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/virtualNetworks/a5c-dev-vmVNET",
+    "location": "eastus2",
+    "name": "a5c-dev-vmVNET",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "a5c-dev-rg",
+    "resourceGuid": "713a644c-fb07-4c88-9a5a-5282753d29d5",
+    "subnets": [
+      {
+        "addressPrefix": "10.0.0.0/24",
+        "delegations": [],
+        "etag": "W/\"a5ffd173-d573-4645-b4e5-2a5f62a58aec\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/virtualNetworks/a5c-dev-vmVNET/subnets/a5c-dev-vmSubnet",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkInterfaces/A5C-DEV-VMVMNIC/ipConfigurations/IPCONFIGA5C-DEV-VM",
+            "resourceGroup": "A5C-DEV-RG"
+          }
+        ],
+        "name": "a5c-dev-vmSubnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "a5c-dev-rg",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {},
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.0.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"37a00901-eb7c-4789-89de-35040dbd49e4\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/virtualNetworks/a5c-dev-vnet",
+    "location": "eastus2",
+    "name": "a5c-dev-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "A5C-DEV-RG",
+    "resourceGuid": "0e588ee1-5dfb-4b43-abe1-67b960c53a1e",
+    "subnets": [
+      {
+        "addressPrefix": "10.0.0.0/24",
+        "delegations": [],
+        "etag": "W/\"37a00901-eb7c-4789-89de-35040dbd49e4\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/virtualNetworks/a5c-dev-vnet/subnets/a5c-dev-subnet",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkInterfaces/A5C-DEV-VM-2VMNIC/ipConfigurations/IPCONFIGA5C-DEV-VM-2",
+            "resourceGroup": "A5C-DEV-RG"
+          }
+        ],
+        "name": "a5c-dev-subnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "A5C-DEV-RG",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {},
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.0.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"7378d6e2-bc00-4a03-bf28-2420c8cd903e\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Network/virtualNetworks/vm-odoo-validationVNET",
+    "location": "eastus2",
+    "name": "vm-odoo-validationVNET",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-mantis-odoo-validation-eastus2",
+    "resourceGuid": "8e9e4144-8f5d-44be-ae23-4c956b76cb58",
+    "subnets": [
+      {
+        "addressPrefix": "10.0.0.0/24",
+        "delegations": [],
+        "etag": "W/\"ed613f7b-f83e-4913-8944-148c994e5c64\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Network/virtualNetworks/vm-odoo-validationVNET/subnets/vm-odoo-validationSubnet",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-MANTIS-ODOO-VALIDATION-EASTUS2/providers/Microsoft.Network/networkInterfaces/VM-ODOO-VALIDATIONVMNIC/ipConfigurations/IPCONFIGVM-ODOO-VALIDATION",
+            "resourceGroup": "RG-MANTIS-ODOO-VALIDATION-EASTUS2"
+          }
+        ],
+        "name": "vm-odoo-validationSubnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-mantis-odoo-validation-eastus2",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "auto-delete-after": "2026-07-16",
+      "managed-by": "codex",
+      "purpose": "defensive-research",
+      "workload": "odoo-validation"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.0.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"3c10bf66-1c3d-4d35-a501-404627223a55\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/virtualNetworks/ubuntu-ssh-01VNET",
+    "location": "eastus2",
+    "name": "ubuntu-ssh-01VNET",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-ubuntu-ssh-20260806",
+    "resourceGuid": "cc4bfd32-cb84-4ed9-b99c-c17af0cdbf52",
+    "subnets": [
+      {
+        "addressPrefix": "10.0.0.0/24",
+        "delegations": [],
+        "etag": "W/\"3c10bf66-1c3d-4d35-a501-404627223a55\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/virtualNetworks/ubuntu-ssh-01VNET/subnets/ubuntu-ssh-01Subnet",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-UBUNTU-SSH-20260806/providers/Microsoft.Network/networkInterfaces/UBUNTU-LARGE-02VMNIC/ipConfigurations/IPCONFIGUBUNTU-LARGE-02",
+            "resourceGroup": "RG-UBUNTU-SSH-20260806"
+          }
+        ],
+        "name": "ubuntu-ssh-01Subnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-ubuntu-ssh-20260806",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {},
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.0.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"6d698fe9-ed40-4b48-b411-b5d7642b7277\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Network/virtualNetworks/personoidsVnet",
+    "location": "westus2",
+    "name": "personoidsVnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "resourceGuid": "ed9e6719-9134-4c64-a448-4e135b525edb",
+    "subnets": [
+      {
+        "addressPrefix": "10.0.0.0/24",
+        "delegations": [],
+        "etag": "W/\"6d698fe9-ed40-4b48-b411-b5d7642b7277\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Network/virtualNetworks/personoidsVnet/subnets/personoidsSubnet",
+        "name": "personoidsSubnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "personoids_sponsorship",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {},
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": [
+      {
+        "allowForwardedTraffic": false,
+        "allowGatewayTransit": false,
+        "allowVirtualNetworkAccess": true,
+        "doNotVerifyRemoteGateways": false,
+        "etag": "W/\"6d698fe9-ed40-4b48-b411-b5d7642b7277\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Network/virtualNetworks/personoidsVnet/virtualNetworkPeerings/AppGWtoAKSVnetPeering",
+        "name": "AppGWtoAKSVnetPeering",
+        "peerCompleteVnets": true,
+        "peeringState": "Disconnected",
+        "peeringSyncLevel": "FullyInSync",
+        "provisioningState": "Succeeded",
+        "remoteAddressSpace": {
+          "addressPrefixes": [
+            "10.224.0.0/12"
+          ]
+        },
+        "remoteVirtualNetwork": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_personoids_sponsorship_personoids_westus2/providers/Microsoft.Network/virtualNetworks/aks-vnet-41580625",
+          "resourceGroup": "MC_personoids_sponsorship_personoids_westus2"
+        },
+        "remoteVirtualNetworkAddressSpace": {
+          "addressPrefixes": [
+            "10.224.0.0/12"
+          ]
+        },
+        "resourceGroup": "personoids_sponsorship",
+        "resourceGuid": "976aa76c-1fbd-01c0-0d13-2c49e2769f08",
+        "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+        "useRemoteGateways": false
+      }
+    ]
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.0.0.0/16"
+      ]
+    },
+    "dhcpOptions": {
+      "dnsServers": []
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"94d7811f-fb38-476e-b163-58fb54da71cb\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3",
+    "location": "westus3",
+    "name": "vnet-hub-development-westus3",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "resourceGuid": "79cbf328-5a58-4560-bec5-421917dc1ee6",
+    "subnets": [
+      {
+        "addressPrefix": "10.0.1.0/24",
+        "defaultOutboundAccess": true,
+        "delegations": [],
+        "etag": "W/\"94d7811f-fb38-476e-b163-58fb54da71cb\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-aks-subnet",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG10",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG11",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG12",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG13",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG14",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG15",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG16",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG17",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG18",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG19",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG2",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG20",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG21",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG22",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG23",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG24",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG25",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG26",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG27",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG28",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG29",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG3",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG4",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG5",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG6",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG7",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG8",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/0/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG9",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG10",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG11",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG12",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG13",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG14",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG15",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG16",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG17",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG18",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG19",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG2",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG20",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG21",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG22",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG23",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG24",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG25",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG26",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG27",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG28",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG29",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG3",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG4",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG5",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG6",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG7",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG8",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/1/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG9",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG10",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG11",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG12",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG13",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG14",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG15",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG16",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG17",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG18",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG19",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG2",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG20",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG21",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG22",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG23",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG24",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG25",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG26",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG27",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG28",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG29",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG3",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG4",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG5",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG6",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG7",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG8",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/2/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG9",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG10",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG11",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG12",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG13",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG14",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG15",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG16",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG17",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG18",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG19",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG2",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG20",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG21",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG22",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG23",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG24",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG25",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG26",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG27",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG28",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG29",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG3",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG4",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG5",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG6",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG7",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG8",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/AKS-DEFAULT-28513622-VMSS/VIRTUALMACHINES/5/NETWORKINTERFACES/AKS-DEFAULT-28513622-VMSS/ipConfigurations/IPCONFIG9",
+            "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3"
+          }
+        ],
+        "name": "vnet-hub-development-westus3-aks-subnet",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/networkSecurityGroups/vnet-hub-development-westus3-aks-nsg",
+          "resourceGroup": "rg-hub-development-westus3"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-hub-development-westus3",
+        "serviceEndpoints": [
+          {
+            "locations": [
+              "*"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.KeyVault"
+          },
+          {
+            "locations": [
+              "westus3",
+              "eastus"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.Storage"
+          },
+          {
+            "locations": [
+              "westus3"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.Sql"
+          }
+        ],
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      },
+      {
+        "addressPrefix": "10.0.4.0/24",
+        "defaultOutboundAccess": true,
+        "delegations": [],
+        "etag": "W/\"94d7811f-fb38-476e-b163-58fb54da71cb\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-appgw-subnet",
+        "name": "vnet-hub-development-westus3-appgw-subnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-hub-development-westus3",
+        "serviceEndpoints": [],
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      },
+      {
+        "addressPrefix": "10.0.3.0/24",
+        "defaultOutboundAccess": true,
+        "delegations": [],
+        "etag": "W/\"94d7811f-fb38-476e-b163-58fb54da71cb\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-pe-subnet",
+        "name": "vnet-hub-development-westus3-pe-subnet",
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-hub-development-westus3",
+        "serviceEndpoints": [
+          {
+            "locations": [
+              "*"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.KeyVault"
+          },
+          {
+            "locations": [
+              "westus3",
+              "eastus"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.Storage"
+          }
+        ],
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      },
+      {
+        "addressPrefix": "10.0.2.0/24",
+        "defaultOutboundAccess": true,
+        "delegations": [
+          {
+            "actions": [
+              "Microsoft.Network/virtualNetworks/subnets/join/action"
+            ],
+            "etag": "W/\"94d7811f-fb38-476e-b163-58fb54da71cb\"",
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-database-subnet/delegations/fs",
+            "name": "fs",
+            "provisioningState": "Succeeded",
+            "resourceGroup": "rg-hub-development-westus3",
+            "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers",
+            "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
+          }
+        ],
+        "etag": "W/\"94d7811f-fb38-476e-b163-58fb54da71cb\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-database-subnet",
+        "name": "vnet-hub-development-westus3-database-subnet",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/networkSecurityGroups/vnet-hub-development-westus3-database-nsg",
+          "resourceGroup": "rg-hub-development-westus3"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-hub-development-westus3",
+        "serviceEndpoints": [
+          {
+            "locations": [
+              "*"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.KeyVault"
+          },
+          {
+            "locations": [
+              "westus3",
+              "eastus"
+            ],
+            "provisioningState": "Succeeded",
+            "service": "Microsoft.Storage"
+          }
+        ],
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"b7ba7265-f36f-492c-b2d9-0c31dc7ede51\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/virtualNetworks/tb-fleet-0-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-0-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-0",
+    "resourceGuid": "71cbaaf1-53ea-49c5-be1d-669c153b8fbb",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"b7ba7265-f36f-492c-b2d9-0c31dc7ede51\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/virtualNetworks/tb-fleet-0-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-0/providers/Microsoft.Network/networkInterfaces/TB-FLEET-0-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-0"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-0-nsg",
+          "resourceGroup": "rg-tb-fleet-0"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-0",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"fd181146-cdf1-45ff-8c4f-b0162d41644a\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/virtualNetworks/tb-fleet-1-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-1-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-1",
+    "resourceGuid": "34d51fee-6669-4937-a54d-b1b5b6984ecd",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"fd181146-cdf1-45ff-8c4f-b0162d41644a\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/virtualNetworks/tb-fleet-1-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-1/providers/Microsoft.Network/networkInterfaces/TB-FLEET-1-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-1"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-1-nsg",
+          "resourceGroup": "rg-tb-fleet-1"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-1",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"a5167e83-e742-4346-88ce-6313d685fac1\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/virtualNetworks/tb-fleet-2-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-2-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-2",
+    "resourceGuid": "a9f2b8db-d441-485f-af97-49ad03750c0d",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"a5167e83-e742-4346-88ce-6313d685fac1\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/virtualNetworks/tb-fleet-2-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-2/providers/Microsoft.Network/networkInterfaces/TB-FLEET-2-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-2"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-2-nsg",
+          "resourceGroup": "rg-tb-fleet-2"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-2",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"26e18f84-7545-4e15-9e4b-e6bd0b6ed4f9\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/virtualNetworks/tb-fleet-4-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-4-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-4",
+    "resourceGuid": "0f305bed-f608-476a-8fc2-4c1ce9ad4784",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"26e18f84-7545-4e15-9e4b-e6bd0b6ed4f9\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/virtualNetworks/tb-fleet-4-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-4/providers/Microsoft.Network/networkInterfaces/TB-FLEET-4-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-4"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-4-nsg",
+          "resourceGroup": "rg-tb-fleet-4"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-4",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"5725a9dc-0c30-4259-8c32-c1aafdfdb0c4\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/virtualNetworks/tb-fleet-5-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-5-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-5",
+    "resourceGuid": "69a27bd4-bf61-4347-96b0-787e85db3ddf",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"5725a9dc-0c30-4259-8c32-c1aafdfdb0c4\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/virtualNetworks/tb-fleet-5-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-5/providers/Microsoft.Network/networkInterfaces/TB-FLEET-5-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-5"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-5-nsg",
+          "resourceGroup": "rg-tb-fleet-5"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-5",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"1ad7026e-fe17-4f50-ad9c-66d05a8fa62d\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/virtualNetworks/tb-fleet-6-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-6-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-6",
+    "resourceGuid": "10df1e6a-927d-4781-8531-408c79014b5c",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"1ad7026e-fe17-4f50-ad9c-66d05a8fa62d\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/virtualNetworks/tb-fleet-6-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-6/providers/Microsoft.Network/networkInterfaces/TB-FLEET-6-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-6"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-6-nsg",
+          "resourceGroup": "rg-tb-fleet-6"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-6",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"6a58a356-b15e-4d09-ba73-67221c611a38\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/virtualNetworks/tb-fleet-7-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-7-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-7",
+    "resourceGuid": "cc146a33-d39f-4294-a984-8abd86f28c52",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"6a58a356-b15e-4d09-ba73-67221c611a38\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/virtualNetworks/tb-fleet-7-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-7/providers/Microsoft.Network/networkInterfaces/TB-FLEET-7-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-7"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-7-nsg",
+          "resourceGroup": "rg-tb-fleet-7"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-7",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  },
+  {
+    "addressSpace": {
+      "addressPrefixes": [
+        "10.20.0.0/16"
+      ]
+    },
+    "enableDdosProtection": false,
+    "etag": "W/\"b8b52788-56d1-47b2-b207-a0d750529016\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/virtualNetworks/tb-fleet-8-vnet",
+    "location": "swedencentral",
+    "name": "tb-fleet-8-vnet",
+    "privateEndpointVNetPolicies": "Disabled",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-8",
+    "resourceGuid": "e44b6f42-bd44-45fb-8f38-092c745d0bf6",
+    "subnets": [
+      {
+        "addressPrefix": "10.20.0.0/24",
+        "delegations": [],
+        "etag": "W/\"b8b52788-56d1-47b2-b207-a0d750529016\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/virtualNetworks/tb-fleet-8-vnet/subnets/default",
+        "ipConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-8/providers/Microsoft.Network/networkInterfaces/TB-FLEET-8-NIC/ipConfigurations/IPCONFIG1",
+            "resourceGroup": "RG-TB-FLEET-8"
+          }
+        ],
+        "name": "default",
+        "networkSecurityGroup": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/networkSecurityGroups/tb-fleet-8-nsg",
+          "resourceGroup": "rg-tb-fleet-8"
+        },
+        "privateEndpointNetworkPolicies": "Disabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-tb-fleet-8",
+        "type": "Microsoft.Network/virtualNetworks/subnets"
+      }
+    ],
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/virtualNetworks",
+    "virtualNetworkPeerings": []
+  }
+]

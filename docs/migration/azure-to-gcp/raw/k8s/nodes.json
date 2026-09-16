@@ -1,0 +1,2308 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "Node",
+      "metadata": {
+        "annotations": {
+          "alpha.kubernetes.io/provided-node-ip": "10.0.1.4",
+          "csi.volume.kubernetes.io/nodeid": "{\"disk.csi.azure.com\":\"aks-default-28513622-vmss000000\",\"file.csi.azure.com\":\"aks-default-28513622-vmss000000\",\"secrets-store.csi.k8s.io\":\"aks-default-28513622-vmss000000\"}",
+          "node.alpha.kubernetes.io/ttl": "0",
+          "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+        },
+        "creationTimestamp": "2025-11-09T00:08:15Z",
+        "labels": {
+          "agentpool": "default",
+          "beta.kubernetes.io/arch": "amd64",
+          "beta.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "beta.kubernetes.io/os": "linux",
+          "failure-domain.beta.kubernetes.io/region": "westus3",
+          "failure-domain.beta.kubernetes.io/zone": "0",
+          "kubernetes.azure.com/agentpool": "default",
+          "kubernetes.azure.com/cluster": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_we",
+          "kubernetes.azure.com/consolidated-additional-properties": "14e5c95d-bcff-11f0-9a47-52424872e0c1",
+          "kubernetes.azure.com/kubelet-identity-client-id": "850de58e-a51b-452b-8eee-42e3f3e56597",
+          "kubernetes.azure.com/localdns-state": "disabled",
+          "kubernetes.azure.com/mode": "system",
+          "kubernetes.azure.com/network-policy": "azure",
+          "kubernetes.azure.com/node-image-version": "AKSUbuntu-2204gen2containerd-202510.19.1",
+          "kubernetes.azure.com/nodepool-type": "VirtualMachineScaleSets",
+          "kubernetes.azure.com/os-sku": "Ubuntu",
+          "kubernetes.azure.com/os-sku-effective": "Ubuntu2204",
+          "kubernetes.azure.com/os-sku-requested": "Ubuntu",
+          "kubernetes.azure.com/role": "agent",
+          "kubernetes.azure.com/sku-cpu": "2",
+          "kubernetes.azure.com/sku-memory": "8192",
+          "kubernetes.azure.com/storageprofile": "managed",
+          "kubernetes.azure.com/storagetier": "Premium_LRS",
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/hostname": "aks-default-28513622-vmss000000",
+          "kubernetes.io/os": "linux",
+          "node.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "storageprofile": "managed",
+          "storagetier": "Premium_LRS",
+          "topology.disk.csi.azure.com/zone": "",
+          "topology.kubernetes.io/region": "westus3",
+          "topology.kubernetes.io/zone": "0"
+        },
+        "name": "aks-default-28513622-vmss000000",
+        "resourceVersion": "200511712",
+        "uid": "18bcbcbc-6290-4003-afbf-1dc67854acf0"
+      },
+      "spec": {
+        "providerID": "azure:///subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/0"
+      },
+      "status": {
+        "addresses": [
+          {
+            "address": "10.0.1.4",
+            "type": "InternalIP"
+          },
+          {
+            "address": "aks-default-28513622-vmss000000",
+            "type": "Hostname"
+          }
+        ],
+        "allocatable": {
+          "cpu": "1900m",
+          "ephemeral-storage": "119703055367",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "7360924Ki",
+          "pods": "30"
+        },
+        "capacity": {
+          "cpu": "2",
+          "ephemeral-storage": "129886128Ki",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "8128924Ki",
+          "pods": "30"
+        },
+        "conditions": [
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "kubelet service is up",
+            "reason": "KubeletIsUp",
+            "status": "False",
+            "type": "KubeletProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "Filesystem is healthy",
+            "reason": "FilesystemIsOK",
+            "status": "False",
+            "type": "FilesystemCorruptionProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "kubelet is functioning properly",
+            "reason": "NoFrequentKubeletRestart",
+            "status": "False",
+            "type": "FrequentKubeletRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "docker is functioning properly",
+            "reason": "NoFrequentDockerRestart",
+            "status": "False",
+            "type": "FrequentDockerRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "kernel has no deadlock",
+            "reason": "KernelHasNoDeadlock",
+            "status": "False",
+            "type": "KernelDeadlock"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "Filesystem is not read-only",
+            "reason": "FilesystemIsNotReadOnly",
+            "status": "False",
+            "type": "ReadonlyFilesystem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "containerd is functioning properly",
+            "reason": "NoFrequentContainerdRestart",
+            "status": "False",
+            "type": "FrequentContainerdRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "node is functioning properly",
+            "reason": "NoFrequentUnregisterNetDevice",
+            "status": "False",
+            "type": "FrequentUnregisterNetDevice"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2025-12-06T04:41:05Z",
+            "message": "container runtime service is up",
+            "reason": "ContainerRuntimeIsUp",
+            "status": "False",
+            "type": "ContainerRuntimeProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:44Z",
+            "lastTransitionTime": "2026-09-01T07:58:39Z",
+            "message": "VM has no scheduled event",
+            "reason": "NoVMEventScheduled",
+            "status": "False",
+            "type": "VMEventScheduled"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:21Z",
+            "lastTransitionTime": "2025-11-09T00:08:14Z",
+            "message": "kubelet has sufficient memory available",
+            "reason": "KubeletHasSufficientMemory",
+            "status": "False",
+            "type": "MemoryPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:21Z",
+            "lastTransitionTime": "2025-11-09T00:08:14Z",
+            "message": "kubelet has no disk pressure",
+            "reason": "KubeletHasNoDiskPressure",
+            "status": "False",
+            "type": "DiskPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:21Z",
+            "lastTransitionTime": "2025-11-09T00:08:14Z",
+            "message": "kubelet has sufficient PID available",
+            "reason": "KubeletHasSufficientPID",
+            "status": "False",
+            "type": "PIDPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:21Z",
+            "lastTransitionTime": "2025-11-09T00:08:15Z",
+            "message": "kubelet is posting ready status",
+            "reason": "KubeletReady",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "daemonEndpoints": {
+          "kubeletEndpoint": {
+            "Port": 10250
+          }
+        },
+        "images": [
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:a4172ddda1c20454c9d0d72fe12445dba63787e9d987f983344457b41b30a4be",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:7f5cfbdc635a1e90e80cb1a72feb57edc4523449"
+            ],
+            "sizeBytes": 987673266
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jvb@sha256:9b2a15ecae9b0efe7d559f6a6b79b44e1beef100ecde9d12f9448442a2d6cee1",
+              "docker.io/jitsi/jvb:stable-10590"
+            ],
+            "sizeBytes": 351010303
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/a5c-install@sha256:5ad0feb53355fe749d3539e5a7febc6d719683df5723223ff6c57c320d7ad910",
+              "acrhubdevelopmentwestus3.azurecr.io/a5c-install:20250913172226"
+            ],
+            "sizeBytes": 300269250
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:57f7ff4183c0036e62d3510f61837af69d00d208234d27b1ba7e8ec12fa99577",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:3ca58c4b4bbf632ab0b0232a183dbf4e713bae17"
+            ],
+            "sizeBytes": 271974171
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:21b319db96f8875d1f0d592b3813ba829443b6acc4314e246304d7ad2eba7178",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b3c3cd9737c1646ec36bce6888cfd7a6a3b4d526"
+            ],
+            "sizeBytes": 271958211
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:916ba61ce240aba407fe279a38702fa626b7f7ce6088d3e3f0d2f9d13a5d2652",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:21ded0e52f96e1f49c735b66dc494883ecead408"
+            ],
+            "sizeBytes": 271952336
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a6199d0094b2f5624ee21dc2628c4ee2e9f56e11f0d026d5615d2ccbf0e1fa17",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:120926cf0f706e1fc4b7eda5e196aa40aa804e68"
+            ],
+            "sizeBytes": 271930738
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6a9801b6ca1c84c9bc2e829e0cf793308be3038a9947bf13fc73aac28f876b04",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a92992776c25f9ad4c094291db35a7bc3ee8d148"
+            ],
+            "sizeBytes": 271923567
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d4ae187b592e4ee23d6b11d7d9c03dcda70b75a82bffdf57ce90e0ae53912561",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0d4b52140f739d4facf9001041aeb134f48aefda"
+            ],
+            "sizeBytes": 271901578
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:19016772c15a4b68e5bfdf0e18549fc405fa3f25aa0fbdd645a5cea5ea9a1aa4",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:38b4f082bccd287947cf9f8464ee5ed253d696a0"
+            ],
+            "sizeBytes": 271887429
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:472eae639ebc21a91b10aa7643dd2c234b2c18c66ae8754658c0471c719d1f52",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:fe0e313bd8d2529deea2ca73afd41d666542f793"
+            ],
+            "sizeBytes": 271795834
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6818aa3fc1d71bf067270c50f2b925f9cf9f3c6e87631f103cbb60ef9aba71a7",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:11dddf312e8cb70b45fc683fb32448fbbf17e186"
+            ],
+            "sizeBytes": 271345469
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3e430b2688155ef0dc83879e2bd7c557aa4fc44998f7149364fa796e1840c8d8",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:6db27fbdc4261a7609b198005de4bbb2e8cae43b"
+            ],
+            "sizeBytes": 271342413
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:67dca915bd412c86f57904f5fd07252fde242f4701e8e327bef0c7b3d604abf2",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:06229323d3e1bc4a3ba35766ab4aa1d89604774b"
+            ],
+            "sizeBytes": 271342102
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a9ae9fdf1f35bfead50fd7ee3cd5427db4d032572e33f1f7f4733e99dabccf8a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:644a28dd8504fc4c39329783c061a790f21c8807"
+            ],
+            "sizeBytes": 271314683
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:098efc66c0a5d2dbf0b0902699edc940ff1491bc4518336376b363f4fd41f64d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:e950a5c8f961230115e236fc4327df5c1ab15c4a"
+            ],
+            "sizeBytes": 271308059
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:c9ba0d33d18b8cfeae1bb1f8a45ca6f3d6f200527176bf993e68e05271f269de",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ca6e2eaa04a61c528776b1480d6a1bd3896cc028"
+            ],
+            "sizeBytes": 271291371
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b856eceac2ac99b21fbfd550170b2f58d32bd3201bff53bdc5d59701fcc5e347",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:c7daf3e64948b3857f850ed3e76f1506b385dad7"
+            ],
+            "sizeBytes": 271284829
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:1a8a608164437bf9632746f301fb10f9c509ca69a9c6489c9e9b783495dc4618",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9423fe81a153bc659a709354ab840e7820eed766"
+            ],
+            "sizeBytes": 271274065
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2856d7e6f2a2ccbf62b14334c63e04802a36f45a1da2bfd9edf4cefb54b46dde",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:43ceb5f9af17a2217f7f3c27d6d8d31febf3fefb"
+            ],
+            "sizeBytes": 271266486
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:dee20a80cac3e6154fa00eebbe601c5f6b14e99d459cdbd04944ac46b1118651",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:19b1ae726d5fc632b38a8462bb761870d38862e9"
+            ],
+            "sizeBytes": 271258846
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:f761afb6d3aaca82d2d00ff23c33ddd583cb387658d1d0bf1973bbbeb6888643",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:47f26ee0634e029dce062e07bdebfd9641bea956"
+            ],
+            "sizeBytes": 271247744
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a79c13990460073fe9dfbd116740438f4661975888319a90b1bf33058455ffe4",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:587ef894cb18c3aff526512751a55ddd4e479962"
+            ],
+            "sizeBytes": 271244846
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:146d22574dd6cd5d91bc8021a9f1042880020f752944e3d087f405ffbb5a8e8e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:dfdea74f60f221159b1a751652929b80fb70a164"
+            ],
+            "sizeBytes": 271241785
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6aafd60c5f114621fb220f5bddf8dc3776412fda8022b5929dbdebb3147b259e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:032e07a1ffa0250982b860290e4e580de6efcc2b"
+            ],
+            "sizeBytes": 271238225
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:05c228c20eb9edfa57e8fe9951d0e4478b4ab2252adc31ccdabe73daf2cf940e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:424c5405cbedff25d30689153c7253d66c8044dd"
+            ],
+            "sizeBytes": 271238217
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3077b2569e5d6810c3658fd320c07118920ced827cb3d848bbb9bff996d0d93d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:dba6a269f3fc4a177523022f69975366eccaa1f5"
+            ],
+            "sizeBytes": 271236925
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:cdf3424768e71c9f1e0d44b1c9248ca1da848e9a5f39c7e48c461bbd57cffba8",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:8ac3500d852d881cd7f703e7208929dc9f77d2d9"
+            ],
+            "sizeBytes": 271235986
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:4b0681225e815971b73476cd32e9423c9d45a48a3716ca1ed6ae2b3cce7ecdeb",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:4d5a1451b55c55474dec043fb09493a7149af1c6"
+            ],
+            "sizeBytes": 271230346
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:50c00681e1623f0f9ef6f6830dc6865395284976816ab965e427bf4c8a0ce0b1",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9bc375d7ca6175cdd7822201d983f3230bea2d8e"
+            ],
+            "sizeBytes": 271229374
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b3c7463b34a791cccada4c84425b81c745dd5aedb630e908dcb2c5a16fe1aceb",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:00bdadd67cf14e1361d4df07ad8e7828065750a5"
+            ],
+            "sizeBytes": 271228909
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:4e408fcee8b63dfd9f993e1a162e6c14a96dcd8d419eb30f2d7bf331c86ed188",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:3ab5f5512cfaac7b0510d4ebe12ab38a979ee408"
+            ],
+            "sizeBytes": 271228439
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d9ef46692970a699641cca9ae5441ce7d8c857d45e4f8a7152096b73ace93253",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:08aa8d162f66a77054ea60fb7255dce369cc4895"
+            ],
+            "sizeBytes": 271227772
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7b8b051076a5b4885b42cd6b71a6d398ba303b3b808f7e4431d6e92db3fedc68",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:3197e04635bb1fbc40c0b22d96da75181f5a6e9e"
+            ],
+            "sizeBytes": 271223115
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2fa67ac065c165b7d845c68cac5c4699b62cfece958b69d36f1a6adf3b40a102",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:c9aa8f113eda905d3e8104e7d0990070e26118b7"
+            ],
+            "sizeBytes": 271222693
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b6b4f43d903dc7e43af792f500db336e0577f2837dbd5b2fbe43bd260711d74a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:7d126e58076b5525189e5b7d23ac2b24eb13a2bf"
+            ],
+            "sizeBytes": 271220275
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d34614ecedf4d33fd925956103244aeaab7a62ae549e7704972e2b86ca900757",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b1caae733e5718507f89c8640ca209cea2b3a35b"
+            ],
+            "sizeBytes": 271218055
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e1a2e12fad20e1e8b97a13c7758d1fb13e1089ac3f2423ed3527ef9ea48b5a62",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:d09eb12490db51508e20062c6224baf93fb430a3"
+            ],
+            "sizeBytes": 271211361
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b12343aa7a6ad3ba792771c20900f034041a24ed71251dc1f2d96927a1d6ca32",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f3c73669f2e2e2c148b4d11533ce1109d1cabf5d"
+            ],
+            "sizeBytes": 271207728
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7c8494ff8ae2bc9a4bd884b23a503abc6087e95cbf1dee94bf194767a4ace3c1",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:19bf3d1ef6424ffa749b45b39ae0ecf9204ef1fb"
+            ],
+            "sizeBytes": 271205008
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6217508c298611c53e5d7d168d3765e823746d67475ecf37f44dd4618ec14605",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9b682c1c28ac101b0a2405ac3f37f1a2fd2c8644"
+            ],
+            "sizeBytes": 271204897
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:cc380a7963d046191c934dfe9e26e8d29da340ca9009a1571ed8ce00b9d0dd50",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a54d014c98f26e0e8133abb394ad7f313a615cea"
+            ],
+            "sizeBytes": 270872849
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b918f34fae23212e5969cf777180e6bc4468cc8ddb59fb4d11db1505bd72afb0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a0377b13140a635688bd748fa79370d1f337046e"
+            ],
+            "sizeBytes": 270869942
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:36424476fbfb5c79ab04bde3e85349d1cfd67740dba26e3fe94d8eb4dddb0dc6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:994e70374bdb6dce4c13a7a24f3e4a965959bc03"
+            ],
+            "sizeBytes": 270853909
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b9d74cb9a96bf9d49e7f5ec6adb344da9db66fd7635d4b2b323289550cf4239c",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:44a5d58b47b93962f143914e0652d9e3ae5dcf2c"
+            ],
+            "sizeBytes": 270846869
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d61d1fbdbc162ba71ea2210c4bcf3aa93b9f60ee8af879cd812f3ee2aef004c6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:6e8c63e09c3bf4a3369439a2e74f58e336948e47"
+            ],
+            "sizeBytes": 270833764
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:177cbbe1c70b0ab8747d32c0a4c56864fd4ee5fefc42a427cd189a2afd5651d5",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f8aae93c2dbcb86cf3eb81e2a4d87afb532d9c9a"
+            ],
+            "sizeBytes": 270808842
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:956444372e87d95cf5f5b55fd8cc6c93adc66a50e69cfe4cf30e8a528dba31d9",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:5a194f2ccb0ed621b6a99d3e45b4321fae08a80a"
+            ],
+            "sizeBytes": 270803864
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:32d146c8b5ad951b5daedd60c96d9d65442d2033e17c6cd97ee3c9e869b18dbf",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a1b5c14b4fac1b9029fbe088b53558bc2baa6737"
+            ],
+            "sizeBytes": 270731171
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3dc853b33a6c613d97aa2c4b40498e12efa77bc09c745fb0b25a0e6dbd6f2445",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a86b28e1b5df80713c1afd67afbcb13b8ea216ed"
+            ],
+            "sizeBytes": 267343013
+          }
+        ],
+        "nodeInfo": {
+          "architecture": "amd64",
+          "bootID": "6f6a51c7-e19b-48f5-b750-95e6371bfc95",
+          "containerRuntimeVersion": "containerd://1.7.28-1",
+          "kernelVersion": "5.15.0-1097-azure",
+          "kubeProxyVersion": "v1.30.12",
+          "kubeletVersion": "v1.30.12",
+          "machineID": "8355da9cc3c842c797ac365bb7b6c226",
+          "operatingSystem": "linux",
+          "osImage": "Ubuntu 22.04.5 LTS",
+          "systemUUID": "92d2347f-973d-46cc-ac44-8051ce33dfdb"
+        },
+        "volumesAttached": [
+          {
+            "devicePath": "",
+            "name": "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94"
+          }
+        ],
+        "volumesInUse": [
+          "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94"
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Node",
+      "metadata": {
+        "annotations": {
+          "alpha.kubernetes.io/provided-node-ip": "10.0.1.33",
+          "csi.volume.kubernetes.io/nodeid": "{\"disk.csi.azure.com\":\"aks-default-28513622-vmss000001\",\"file.csi.azure.com\":\"aks-default-28513622-vmss000001\",\"secrets-store.csi.k8s.io\":\"aks-default-28513622-vmss000001\"}",
+          "node.alpha.kubernetes.io/ttl": "0",
+          "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+        },
+        "creationTimestamp": "2025-11-09T00:13:44Z",
+        "labels": {
+          "agentpool": "default",
+          "beta.kubernetes.io/arch": "amd64",
+          "beta.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "beta.kubernetes.io/os": "linux",
+          "failure-domain.beta.kubernetes.io/region": "westus3",
+          "failure-domain.beta.kubernetes.io/zone": "0",
+          "kubernetes.azure.com/agentpool": "default",
+          "kubernetes.azure.com/cluster": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_we",
+          "kubernetes.azure.com/consolidated-additional-properties": "14e5c95d-bcff-11f0-9a47-52424872e0c1",
+          "kubernetes.azure.com/kubelet-identity-client-id": "850de58e-a51b-452b-8eee-42e3f3e56597",
+          "kubernetes.azure.com/localdns-state": "disabled",
+          "kubernetes.azure.com/mode": "system",
+          "kubernetes.azure.com/network-policy": "azure",
+          "kubernetes.azure.com/node-image-version": "AKSUbuntu-2204gen2containerd-202510.19.1",
+          "kubernetes.azure.com/nodepool-type": "VirtualMachineScaleSets",
+          "kubernetes.azure.com/os-sku": "Ubuntu",
+          "kubernetes.azure.com/os-sku-effective": "Ubuntu2204",
+          "kubernetes.azure.com/os-sku-requested": "Ubuntu",
+          "kubernetes.azure.com/role": "agent",
+          "kubernetes.azure.com/sku-cpu": "2",
+          "kubernetes.azure.com/sku-memory": "8192",
+          "kubernetes.azure.com/storageprofile": "managed",
+          "kubernetes.azure.com/storagetier": "Premium_LRS",
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/hostname": "aks-default-28513622-vmss000001",
+          "kubernetes.io/os": "linux",
+          "node.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "storageprofile": "managed",
+          "storagetier": "Premium_LRS",
+          "topology.disk.csi.azure.com/zone": "",
+          "topology.kubernetes.io/region": "westus3",
+          "topology.kubernetes.io/zone": "0"
+        },
+        "name": "aks-default-28513622-vmss000001",
+        "resourceVersion": "200511024",
+        "uid": "1178a434-5100-4ca0-868e-825825ce86f2"
+      },
+      "spec": {
+        "providerID": "azure:///subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/1"
+      },
+      "status": {
+        "addresses": [
+          {
+            "address": "10.0.1.33",
+            "type": "InternalIP"
+          },
+          {
+            "address": "aks-default-28513622-vmss000001",
+            "type": "Hostname"
+          }
+        ],
+        "allocatable": {
+          "cpu": "1900m",
+          "ephemeral-storage": "119703055367",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "7360924Ki",
+          "pods": "30"
+        },
+        "capacity": {
+          "cpu": "2",
+          "ephemeral-storage": "129886128Ki",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "8128924Ki",
+          "pods": "30"
+        },
+        "conditions": [
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "kubelet service is up",
+            "reason": "KubeletIsUp",
+            "status": "False",
+            "type": "KubeletProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "container runtime service is up",
+            "reason": "ContainerRuntimeIsUp",
+            "status": "False",
+            "type": "ContainerRuntimeProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "kernel has no deadlock",
+            "reason": "KernelHasNoDeadlock",
+            "status": "False",
+            "type": "KernelDeadlock"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "node is functioning properly",
+            "reason": "NoFrequentUnregisterNetDevice",
+            "status": "False",
+            "type": "FrequentUnregisterNetDevice"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "Filesystem is not read-only",
+            "reason": "FilesystemIsNotReadOnly",
+            "status": "False",
+            "type": "ReadonlyFilesystem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2026-08-31T03:41:18Z",
+            "message": "VM has no scheduled event",
+            "reason": "NoVMEventScheduled",
+            "status": "False",
+            "type": "VMEventScheduled"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "docker is functioning properly",
+            "reason": "NoFrequentDockerRestart",
+            "status": "False",
+            "type": "FrequentDockerRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "kubelet is functioning properly",
+            "reason": "NoFrequentKubeletRestart",
+            "status": "False",
+            "type": "FrequentKubeletRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "Filesystem is healthy",
+            "reason": "FilesystemIsOK",
+            "status": "False",
+            "type": "FilesystemCorruptionProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:45:33Z",
+            "lastTransitionTime": "2025-12-06T06:12:21Z",
+            "message": "containerd is functioning properly",
+            "reason": "NoFrequentContainerdRestart",
+            "status": "False",
+            "type": "FrequentContainerdRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:47:59Z",
+            "lastTransitionTime": "2026-01-13T08:36:39Z",
+            "message": "kubelet has sufficient memory available",
+            "reason": "KubeletHasSufficientMemory",
+            "status": "False",
+            "type": "MemoryPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:47:59Z",
+            "lastTransitionTime": "2026-01-13T08:36:39Z",
+            "message": "kubelet has no disk pressure",
+            "reason": "KubeletHasNoDiskPressure",
+            "status": "False",
+            "type": "DiskPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:47:59Z",
+            "lastTransitionTime": "2026-01-13T08:36:39Z",
+            "message": "kubelet has sufficient PID available",
+            "reason": "KubeletHasSufficientPID",
+            "status": "False",
+            "type": "PIDPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:47:59Z",
+            "lastTransitionTime": "2026-01-13T08:36:39Z",
+            "message": "kubelet is posting ready status",
+            "reason": "KubeletReady",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "daemonEndpoints": {
+          "kubeletEndpoint": {
+            "Port": 10250
+          }
+        },
+        "images": [
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/bmux-server@sha256:ce48796c5ede01de24549bc5caf6e214f00907a7cba04589776861eef90be1a2",
+              "acrhubdevelopmentwestus3.azurecr.io/bmux-server:54a0641bf65378ba94214639e246ddd28e178250"
+            ],
+            "sizeBytes": 371384286
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jvb@sha256:9b2a15ecae9b0efe7d559f6a6b79b44e1beef100ecde9d12f9448442a2d6cee1",
+              "docker.io/jitsi/jvb:stable-10590"
+            ],
+            "sizeBytes": 351010303
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/a5c-install@sha256:5ad0feb53355fe749d3539e5a7febc6d719683df5723223ff6c57c320d7ad910",
+              "acrhubdevelopmentwestus3.azurecr.io/a5c-install:20250913172226"
+            ],
+            "sizeBytes": 300269250
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jicofo@sha256:0b0f71d11e34db241517e9ecb87dc9aa5fd19d79be8a3211a30d300f47a57c2e",
+              "docker.io/jitsi/jicofo:stable-10590"
+            ],
+            "sizeBytes": 291299970
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:c93b891bf3beeb6b2e215d8192333e81984f5a629f8f04dcf47aaa046554d45e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:57b13a4c535633fef005e1660996cfdb3629fbbd"
+            ],
+            "sizeBytes": 272482161
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:21b319db96f8875d1f0d592b3813ba829443b6acc4314e246304d7ad2eba7178",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b3c3cd9737c1646ec36bce6888cfd7a6a3b4d526"
+            ],
+            "sizeBytes": 271958211
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:146d22574dd6cd5d91bc8021a9f1042880020f752944e3d087f405ffbb5a8e8e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:dfdea74f60f221159b1a751652929b80fb70a164"
+            ],
+            "sizeBytes": 271241785
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6aafd60c5f114621fb220f5bddf8dc3776412fda8022b5929dbdebb3147b259e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:032e07a1ffa0250982b860290e4e580de6efcc2b"
+            ],
+            "sizeBytes": 271238225
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:05c228c20eb9edfa57e8fe9951d0e4478b4ab2252adc31ccdabe73daf2cf940e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:424c5405cbedff25d30689153c7253d66c8044dd"
+            ],
+            "sizeBytes": 271238217
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:4b0681225e815971b73476cd32e9423c9d45a48a3716ca1ed6ae2b3cce7ecdeb",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:4d5a1451b55c55474dec043fb09493a7149af1c6"
+            ],
+            "sizeBytes": 271230346
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:50c00681e1623f0f9ef6f6830dc6865395284976816ab965e427bf4c8a0ce0b1",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9bc375d7ca6175cdd7822201d983f3230bea2d8e"
+            ],
+            "sizeBytes": 271229374
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:4e408fcee8b63dfd9f993e1a162e6c14a96dcd8d419eb30f2d7bf331c86ed188",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:3ab5f5512cfaac7b0510d4ebe12ab38a979ee408"
+            ],
+            "sizeBytes": 271228439
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:aa85e13c2d56fb7cec7f7ea2a8aaeef72c5c93bffb70e15ca2ab5181c27b3ef0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:fcfd9ae91b2cf6b8691872a1e2861384361f468c"
+            ],
+            "sizeBytes": 271224032
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:94f1d1bf60b4e79a576c38d299a0b26d3f654c67b7fbba923b9ca5b64dee931c",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ffe807c6dbedbc98bc343f4908d5ec8b4004ea9f"
+            ],
+            "sizeBytes": 271220096
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e44531cdb163cc0d177e75237afbaf4064135e7e5c7b706e03c2a436687189ac",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:1f36a5158c425e332b00180e989a5938832ff8cb"
+            ],
+            "sizeBytes": 270858832
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3e623bc32a39a159bee8057cb67644a3470221c9b96ce16a99de810c18c63ff3",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:cd5326fa440f751aa21e8c73229f7f7f5748032a"
+            ],
+            "sizeBytes": 270849338
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:ef850596410375b72c1f0d495714d2b9e166b9835483c2b48ba43d26ef0d052f",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:cd822e2b006abf37798a466d5c5509d6d6d40829"
+            ],
+            "sizeBytes": 270846321
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:c0a29a69ebc7598dbe988c2a1527406e55259a06367c5b6e23d8a4d1d463eb68",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ebcda277f0ca40e1d452c78c54c91feb18ea0f15"
+            ],
+            "sizeBytes": 270843942
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:44e237d6fd1c8632d89028876dd385e0b3c51d8078a1f87e02f2fb896c0fc024",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ec0a2182b658689b133555e5c979672d70bd46fb"
+            ],
+            "sizeBytes": 270840827
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:78b60a559d2bd592d8bf170d7528e189ea7fc6cac81990b5e7f772cb681002a0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:040275fa2b1fe5d1091bc3af74ec2187e7dc4a94"
+            ],
+            "sizeBytes": 270839810
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:fd8fd5599f4097579e628af0050a9f6f8bc4c44dfe4bec72e7a8939cf0f7d602",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ae6aabd3fe34193f2c0d2aca294aef3e0feac149"
+            ],
+            "sizeBytes": 270802704
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d52e256ad2cc91756ee8b3869a0d873bc2003c36b426d659e61f871d8add720b",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ecc49a53ac1f20eb6ff2f667b6d12ee9772c6bb2"
+            ],
+            "sizeBytes": 267090578
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:010c3b6c6158d9a70978d4fdf18bbaba6b63c7c5b904f9251cd30a658dd4ee6d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:5f2efb97eba7d7f3b90ddad748b4b7f69b98dcb7"
+            ],
+            "sizeBytes": 267077968
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:570b61000136aba8e6e45f58483f02e8bdc3a353115f1f744b753f70d26edf54",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0ad6ac75ae4a41f7b99e46d7c0742e0f61a3d566"
+            ],
+            "sizeBytes": 267074614
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d6f046326881d663e45b75ca48559fbf0439a4eaec63244c92d76a97865e8772",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:002d7545c60370e3387581a1d2401de1955166e1"
+            ],
+            "sizeBytes": 267057375
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3078fd46a7862003c1af71d97e06c651db03530905f89cf2ab223c3eb31dbe48",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:583e3d9a6ed794df885a309b28700c62ee94d5b7"
+            ],
+            "sizeBytes": 267049471
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:269d5341556d215712dd97a9298a6ad06249d0ec88ee1d89b515d8249ae8faba",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9a2421b53f73d40f3b9a0b471679fa2df942f768"
+            ],
+            "sizeBytes": 267042105
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:9c0a95b0cfd814a5dff9f1a5dcbd0c74937c9da1db27ba7590777f89f1641ae6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:c9525ef3217c98e00ce012c8d6fce7fd9921fee5"
+            ],
+            "sizeBytes": 267033336
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:eac2a7e8d2a4902ede6e29227856e6008b49232af74f15c9740b081c0f6a5861",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:e76b52902d9b6c9f3ac84b0e20acafc722fc7b60"
+            ],
+            "sizeBytes": 267003371
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:79b16acc95244d9bdd6732d5b8ad053c7b70028cc328bdf81ef8cc0cc19dad6a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a24ec132eb5afff3c25e81face0651b01c2879d6"
+            ],
+            "sizeBytes": 267003320
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:379d32ed2ae7379ba787fee1be8abc3e79a6c98d8367740b24f71648502e34fc",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:5e094482aaadfd7e7c3c534ea56ce8f71c7cf1a3"
+            ],
+            "sizeBytes": 267002199
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:f30f12edd1b8f8b011452a0386c29db8a5428b43f3ef2dd19df7f4ba4addbb14",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:6584bace6e0e9e8afab886294dd56921492a20de"
+            ],
+            "sizeBytes": 266991589
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6345935e5efc5263a0c9f0fef3a5df1c91ab335b4fdbb316f451aa5223efd8b9",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:86c83c02c4c05d663a07086631653388bd617b6b"
+            ],
+            "sizeBytes": 266991106
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:75b6b797e1241a285474fa7d4d9b3f2b1a390e21d0730bdf8853a9ec0a87e76d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:95ca8941da226b7d17a742e542e6bc7af60c6954"
+            ],
+            "sizeBytes": 266983160
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:bd273bda9dc7158f1de1530ee9ce42fddb9efcfdcf6c723f59f65121824bfbec",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:264cd636b1f8b50140a8264a4b532b19bf5efd35"
+            ],
+            "sizeBytes": 266974529
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:ec6afb9563d264cdad5090eedf8088702d2584b66bea558228e193626bae8907",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:85abd300f365cc698609188417393dba28d60fd7"
+            ],
+            "sizeBytes": 266969311
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:21f043c52f6c7ca5deaf852881d0650fb25c36d2bfd904fab406ea0920e664b7",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:2ec4297e186768bde23dc2b438aae887e3eec0b0"
+            ],
+            "sizeBytes": 266967813
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:8c09086a41f2053130084c15f73ee259e36997273c662d242f5b215b30f8536d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0b2c7570525ebb6d644988ae53bc89b25790f7d8"
+            ],
+            "sizeBytes": 261880006
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d58e30ec04e66bbf3bd7e1911dd375e039c5aeea748a113f4f824b85dc99efd3",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:940c497b17fb97e5fb0f8be94dd6294e00f690fa"
+            ],
+            "sizeBytes": 261869784
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:788c7880fc1342b7f3a3e5377c27922e74c757d0c5da7ce2362818616249efc9",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:40aef9d16aaec2be16c09ed3a0a341be99128c53"
+            ],
+            "sizeBytes": 261867578
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3593a3b18ee5f512bd917beb5a6d08242e5de0c85ea30eb471b52ece20012638",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:bdc57daf1186d08e8dbbb8dc3fd7f53c812bbd4b"
+            ],
+            "sizeBytes": 261860733
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:8fc9ca0b5a9dad1f0d0ccbcc68b231f167e28a22cd23f5f075d38685b2308abe",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:458d565d7120368c012f50ae717850fbc59c3a0d"
+            ],
+            "sizeBytes": 261859983
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d6242a8258b52a8322bc4f7c23a51da155044049a08c33f502e5b38c5ba27a8d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:4b92bc7a3e3bb2b793b3abc6f104e9484e760158"
+            ],
+            "sizeBytes": 261856834
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:791627c99290f1e03f194f8487e90e889e575b41bc45de926e60c98e14dc707a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:d5bf6583b54a8f030b5913b0b29c95aee77b8b72"
+            ],
+            "sizeBytes": 261705214
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e9d0234cfbad484e561edce92ab6ce1ce8253eaa24058180c6bcb70fbab70136",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:8959a740debc771b8cb3cc93d421160913e60e43"
+            ],
+            "sizeBytes": 261700131
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a8585466cc9f6e617a3095efecfc411a01793f588e6ecb538a584537bb7dcafa",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f94b3c080de8debd64feae301ebeb81a83412410"
+            ],
+            "sizeBytes": 261695078
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:0f06c2d9324764cce11434c263891c5b925748bc655f8f3cf8df328fe7dc5d4d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:45914f54eb8b72ccb7ccf6afe54e591569d32fd2"
+            ],
+            "sizeBytes": 261684617
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6a79d6bd67d61d324cea204a8e5f5b90eb2ce8c6a483290b341c2f6be48a5af1",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b6a8018ff1fdf84e5fbd6e777407b72dc49cf26b"
+            ],
+            "sizeBytes": 261679040
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2967ae77dc88ad5af04d0a6a3f3327447487c79d438204fc5ccb3b91eac61180",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:1b2d68b3ee1871e7339d5d3a12e9850e0520b548"
+            ],
+            "sizeBytes": 261676955
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:c03953d4898cad16f32fcd874e82963040ebbc219e5943c94f07a5c3855c0079",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:06a107bf5e1a464e5e64f039e26718a0f3190ccf"
+            ],
+            "sizeBytes": 261676018
+          }
+        ],
+        "nodeInfo": {
+          "architecture": "amd64",
+          "bootID": "35b6810e-89cb-4ad8-96ac-f00263171d5c",
+          "containerRuntimeVersion": "containerd://1.7.28-1",
+          "kernelVersion": "5.15.0-1097-azure",
+          "kubeProxyVersion": "v1.30.12",
+          "kubeletVersion": "v1.30.12",
+          "machineID": "c7b1095506b749fea6468cd4a10df628",
+          "operatingSystem": "linux",
+          "osImage": "Ubuntu 22.04.5 LTS",
+          "systemUUID": "0064e5b4-57b9-4184-b39f-b05eb9a3c93d"
+        },
+        "volumesAttached": [
+          {
+            "devicePath": "",
+            "name": "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-59ccf124-b094-45ef-8dd4-79f8bf381066"
+          }
+        ],
+        "volumesInUse": [
+          "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-59ccf124-b094-45ef-8dd4-79f8bf381066"
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Node",
+      "metadata": {
+        "annotations": {
+          "alpha.kubernetes.io/provided-node-ip": "10.0.1.62",
+          "csi.volume.kubernetes.io/nodeid": "{\"disk.csi.azure.com\":\"aks-default-28513622-vmss000002\",\"file.csi.azure.com\":\"aks-default-28513622-vmss000002\",\"secrets-store.csi.k8s.io\":\"aks-default-28513622-vmss000002\"}",
+          "node.alpha.kubernetes.io/ttl": "0",
+          "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+        },
+        "creationTimestamp": "2025-11-09T00:18:30Z",
+        "labels": {
+          "agentpool": "default",
+          "beta.kubernetes.io/arch": "amd64",
+          "beta.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "beta.kubernetes.io/os": "linux",
+          "failure-domain.beta.kubernetes.io/region": "westus3",
+          "failure-domain.beta.kubernetes.io/zone": "0",
+          "kubernetes.azure.com/agentpool": "default",
+          "kubernetes.azure.com/cluster": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_we",
+          "kubernetes.azure.com/consolidated-additional-properties": "14e5c95d-bcff-11f0-9a47-52424872e0c1",
+          "kubernetes.azure.com/kubelet-identity-client-id": "850de58e-a51b-452b-8eee-42e3f3e56597",
+          "kubernetes.azure.com/localdns-state": "disabled",
+          "kubernetes.azure.com/mode": "system",
+          "kubernetes.azure.com/network-policy": "azure",
+          "kubernetes.azure.com/node-image-version": "AKSUbuntu-2204gen2containerd-202510.19.1",
+          "kubernetes.azure.com/nodepool-type": "VirtualMachineScaleSets",
+          "kubernetes.azure.com/os-sku": "Ubuntu",
+          "kubernetes.azure.com/os-sku-effective": "Ubuntu2204",
+          "kubernetes.azure.com/os-sku-requested": "Ubuntu",
+          "kubernetes.azure.com/role": "agent",
+          "kubernetes.azure.com/sku-cpu": "2",
+          "kubernetes.azure.com/sku-memory": "8192",
+          "kubernetes.azure.com/storageprofile": "managed",
+          "kubernetes.azure.com/storagetier": "Premium_LRS",
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/hostname": "aks-default-28513622-vmss000002",
+          "kubernetes.io/os": "linux",
+          "node.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "storageprofile": "managed",
+          "storagetier": "Premium_LRS",
+          "topology.disk.csi.azure.com/zone": "",
+          "topology.kubernetes.io/region": "westus3",
+          "topology.kubernetes.io/zone": "0"
+        },
+        "name": "aks-default-28513622-vmss000002",
+        "resourceVersion": "200511075",
+        "uid": "2893a7e0-74d1-45ce-84cf-8b27aa5a8906"
+      },
+      "spec": {
+        "providerID": "azure:///subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/2"
+      },
+      "status": {
+        "addresses": [
+          {
+            "address": "10.0.1.62",
+            "type": "InternalIP"
+          },
+          {
+            "address": "aks-default-28513622-vmss000002",
+            "type": "Hostname"
+          }
+        ],
+        "allocatable": {
+          "cpu": "1900m",
+          "ephemeral-storage": "119703055367",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "7360972Ki",
+          "pods": "30"
+        },
+        "capacity": {
+          "cpu": "2",
+          "ephemeral-storage": "129886128Ki",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "8128972Ki",
+          "pods": "30"
+        },
+        "conditions": [
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "docker is functioning properly",
+            "reason": "NoFrequentDockerRestart",
+            "status": "False",
+            "type": "FrequentDockerRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "Filesystem is not read-only",
+            "reason": "FilesystemIsNotReadOnly",
+            "status": "False",
+            "type": "ReadonlyFilesystem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "container runtime service is up",
+            "reason": "ContainerRuntimeIsUp",
+            "status": "False",
+            "type": "ContainerRuntimeProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "containerd is functioning properly",
+            "reason": "NoFrequentContainerdRestart",
+            "status": "False",
+            "type": "FrequentContainerdRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "node is functioning properly",
+            "reason": "NoFrequentUnregisterNetDevice",
+            "status": "False",
+            "type": "FrequentUnregisterNetDevice"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2026-09-16T03:52:47Z",
+            "message": "VM has no scheduled event",
+            "reason": "NoVMEventScheduled",
+            "status": "False",
+            "type": "VMEventScheduled"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "kernel has no deadlock",
+            "reason": "KernelHasNoDeadlock",
+            "status": "False",
+            "type": "KernelDeadlock"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "Filesystem is healthy",
+            "reason": "FilesystemIsOK",
+            "status": "False",
+            "type": "FilesystemCorruptionProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "kubelet service is up",
+            "reason": "KubeletIsUp",
+            "status": "False",
+            "type": "KubeletProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:07Z",
+            "lastTransitionTime": "2025-12-06T02:43:28Z",
+            "message": "kubelet is functioning properly",
+            "reason": "NoFrequentKubeletRestart",
+            "status": "False",
+            "type": "FrequentKubeletRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:46:50Z",
+            "lastTransitionTime": "2026-01-13T08:36:47Z",
+            "message": "kubelet has sufficient memory available",
+            "reason": "KubeletHasSufficientMemory",
+            "status": "False",
+            "type": "MemoryPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:46:50Z",
+            "lastTransitionTime": "2026-01-13T08:36:47Z",
+            "message": "kubelet has no disk pressure",
+            "reason": "KubeletHasNoDiskPressure",
+            "status": "False",
+            "type": "DiskPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:46:50Z",
+            "lastTransitionTime": "2026-01-13T08:36:47Z",
+            "message": "kubelet has sufficient PID available",
+            "reason": "KubeletHasSufficientPID",
+            "status": "False",
+            "type": "PIDPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:46:50Z",
+            "lastTransitionTime": "2026-01-13T08:36:47Z",
+            "message": "kubelet is posting ready status",
+            "reason": "KubeletReady",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "daemonEndpoints": {
+          "kubeletEndpoint": {
+            "Port": 10250
+          }
+        },
+        "images": [
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:b00a568c4234c73b77278a4de669083ae0214726d5f573af4d9ff50ae47bfca9",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:cd822e2b006abf37798a466d5c5509d6d6d40829"
+            ],
+            "sizeBytes": 991346042
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:8195437bbbc4f2ba2b8bbb62bdfc846236badb54b08d601d9a895bd22c791855",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:d6c8032725bc275093828ea2bcedaa949d007c17"
+            ],
+            "sizeBytes": 991342769
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:7943c94a0ecaf3a616e366f619974b7bf12b9ab13c8fcfd5fb2044f98edf3da5",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:f8aae93c2dbcb86cf3eb81e2a4d87afb532d9c9a"
+            ],
+            "sizeBytes": 991318218
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:8f0bfa3fb63ac886b616cbbe27fcc60e3a0e5baab57f12ddfa3a6ccde797977b",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:y2"
+            ],
+            "sizeBytes": 990763176
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:38582933c3a42e882bb7d804abca6fc4413f71d4e31b5940c001ef6fe484e7ab",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:yolo-test"
+            ],
+            "sizeBytes": 990762949
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:2ed0c1c8997e6dad02f992c9ad164d9ed03184d8def3d47ea5157191053d1acf",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:b41276f72c3a732affe8f318b6b7544400d7e6f0"
+            ],
+            "sizeBytes": 990756781
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:2f0e2bcc8bc2748a000e00c46d70820bf058f3351681c953dc1c4e91b8d43cbd",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:baf40a2ebe309efafdf6f3b04c368baf7198e208"
+            ],
+            "sizeBytes": 990724273
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:5daa92c3bccb89a497d048ef8c765ade0b71ba9084af43d407a6f0a336eca3c7",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:0fa3583157a15a1e8a7227377ae0693de3714e0c"
+            ],
+            "sizeBytes": 990697585
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent@sha256:9f8a9504e5734ae36bd4d8bea911e13df4e41d2e85e49f7181e5728b80908769",
+              "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:81f3aa715d054564fd5768570bde8fea14fde1f5"
+            ],
+            "sizeBytes": 987711841
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jvb@sha256:9b2a15ecae9b0efe7d559f6a6b79b44e1beef100ecde9d12f9448442a2d6cee1",
+              "docker.io/jitsi/jvb:stable-10590"
+            ],
+            "sizeBytes": 351010303
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jicofo@sha256:0b0f71d11e34db241517e9ecb87dc9aa5fd19d79be8a3211a30d300f47a57c2e",
+              "docker.io/jitsi/jicofo:stable-10590"
+            ],
+            "sizeBytes": 291299970
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:32ae09292ce885eee5c7dd66a81080a3807b3633053705af39f7357a8a6febea",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:acd20ba42243770c6cb301095455be0c862afa57"
+            ],
+            "sizeBytes": 272496117
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:961f42302bd328dbcff6e42a3e8835db4d3221a1a83ac5fed36cf4eabcfe1b2a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:03a9efa540829bf25f60ce8d16542e47e9967b6d"
+            ],
+            "sizeBytes": 272495289
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:64dec49927da767ebcf861488e4b3e6f7f0a6b2d4cb506e858507a30596196a6"
+            ],
+            "sizeBytes": 272486316
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:c93b891bf3beeb6b2e215d8192333e81984f5a629f8f04dcf47aaa046554d45e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:57b13a4c535633fef005e1660996cfdb3629fbbd"
+            ],
+            "sizeBytes": 272482161
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d831215c87143c8ab1398a82cc70ffd9d470d575084844676e7172d164d69de7",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f5f113c68e2c28e64db0e255c57a25acc4e3c2e7"
+            ],
+            "sizeBytes": 271954275
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6a9801b6ca1c84c9bc2e829e0cf793308be3038a9947bf13fc73aac28f876b04",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a92992776c25f9ad4c094291db35a7bc3ee8d148"
+            ],
+            "sizeBytes": 271923567
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d4ae187b592e4ee23d6b11d7d9c03dcda70b75a82bffdf57ce90e0ae53912561",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0d4b52140f739d4facf9001041aeb134f48aefda"
+            ],
+            "sizeBytes": 271901578
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:20526ff831c3b52121b26185b9b5a0f9de7d5df9300f399211d0eac65c0dc235",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f3731924766264943781091224b53139e9eb9362"
+            ],
+            "sizeBytes": 271899233
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:616d258767fc3e3d65e43cbfcc6c9399f38868a1f0e9f749f799e87485d4dec4",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:4b5d366a78a4ca909d57d7b0e671b53a760a7a08"
+            ],
+            "sizeBytes": 271340580
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:83b908bfa3d702e8b0ed308fdff512103889617796c627544da756e4eaaea631",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:cc429f39a3c56ba843bce06d3ce51a89c76668e2"
+            ],
+            "sizeBytes": 271339180
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a9ae9fdf1f35bfead50fd7ee3cd5427db4d032572e33f1f7f4733e99dabccf8a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:644a28dd8504fc4c39329783c061a790f21c8807"
+            ],
+            "sizeBytes": 271314683
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:1eec81b6ed2f9cb1a67bb9eb240a4183fc874f96784a78bcfcdff725b523b0af",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:875959358e30938c300ae7e8108769a9099ff115"
+            ],
+            "sizeBytes": 271239619
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:11e0b1a3e2010a3ce10eb6ba32fb06d5615d1f3904d57671761fa1a24d3eb044",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:af45ed046b26811715cecbb10681bb2301d87dd8"
+            ],
+            "sizeBytes": 271203551
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b2ed79f5b63f72bfe5f4531dd440df47bf3784b43abb7e1661c48b54f521155f",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:1aa1c6a0e567bda393d4d77eb01d07ec69f103bb"
+            ],
+            "sizeBytes": 270867686
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:979d983ddba1e2920330ed24ba04eb0fa88da01b303a91434c7661b7b69821c0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9368680e8bc8eb8ad77fa1a94caffabdbe29a1cf"
+            ],
+            "sizeBytes": 270866032
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e44531cdb163cc0d177e75237afbaf4064135e7e5c7b706e03c2a436687189ac",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:1f36a5158c425e332b00180e989a5938832ff8cb"
+            ],
+            "sizeBytes": 270858832
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:714b076a8ee9461b8bbf462a0d9b8363eb86c62002fd7a5093693b1a1b37de44",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:23a00eafd0cb9e160c929490efdcc7d3daacb4b9"
+            ],
+            "sizeBytes": 270854945
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7fc0e858a7ab5ee37fb3a3701a04d9134708d4b9cbbb7b791b501f58cb7cc575",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ebcda277f0ca40e1d452c78c54c91feb18ea0f15"
+            ],
+            "sizeBytes": 270850736
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:88afafdc4f2e8b79b1cdbe760c697abfa85862daf5400351b76b9961f16375e1",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:bd11c5b1bca5f9594be2b04117f512e3d67d5ffe"
+            ],
+            "sizeBytes": 270848375
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d496db5e731e8e8aeb122916357282d2ec0d63aeab9e3372bc473c6e8cbccb7f",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:8c19f814d477290195b02bccdb14c09b0f2a4147"
+            ],
+            "sizeBytes": 270848321
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b9d74cb9a96bf9d49e7f5ec6adb344da9db66fd7635d4b2b323289550cf4239c",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:44a5d58b47b93962f143914e0652d9e3ae5dcf2c"
+            ],
+            "sizeBytes": 270846869
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:8295236c59525b79cd7ff4db4af2a0983f8b3db7172be1e23bac52d248828fb0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:91c0f79b3c61fb062b54e82af52eaf0fbaed2708"
+            ],
+            "sizeBytes": 270843582
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:14fe64f03296d7ff07a5afd4cba80de22046f819e0987416fb994db0eddf7668",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0c70bfb344b9c68299798ed0ca4a82eab06e5403"
+            ],
+            "sizeBytes": 270841690
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7ff1e63bf8420fabf5055bc8cd2687fa9d9abab74849f71f9446a1e0e229a799",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:78b481cadaca94ae454f0fde42ee44f3e07d0af5"
+            ],
+            "sizeBytes": 270841105
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:78b60a559d2bd592d8bf170d7528e189ea7fc6cac81990b5e7f772cb681002a0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:040275fa2b1fe5d1091bc3af74ec2187e7dc4a94"
+            ],
+            "sizeBytes": 270839810
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7aae368058486bc8df494544d55aa849c0531388d6eb400bec8ec7b8450b04e6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f655307e6aefce6543700b766a5ccdd5ea61cc34"
+            ],
+            "sizeBytes": 270839601
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:78b3ddc118fd0b3020ad5d90ece9db6e19f1e184bc17ff4f4f1bee2770e074dc",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:d9198e13b7bac8dae2b819fb8be6b75b5ef13b4c"
+            ],
+            "sizeBytes": 270815596
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e12d4f77d2db4ec41cd192fd71d4cccda78492aaafda939690877201cbd1514e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b91ca13883bce69dbf2e71363f0c884b399ff3f8"
+            ],
+            "sizeBytes": 270809666
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:177cbbe1c70b0ab8747d32c0a4c56864fd4ee5fefc42a427cd189a2afd5651d5",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f8aae93c2dbcb86cf3eb81e2a4d87afb532d9c9a"
+            ],
+            "sizeBytes": 270808842
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6182955e60f9f975df001cadbfa6a5007dbc974ddc5a39fe5e443647ea06ba0d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:567815b20e8bddc17f6bd22d0b88a02f2cf9c33c"
+            ],
+            "sizeBytes": 270808201
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2b6883b27386c4f49876be427d4a3814c77de2b3eb432a3e7669d7c784ddd262",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ffc4f312f8c081256bd586f246967655a927fec9"
+            ],
+            "sizeBytes": 270802428
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2ef0fea7ed2733e07d27dc0fb92eb70cc35859982564c049ffdb269c6b3a3bd7"
+            ],
+            "sizeBytes": 270800473
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7c29e8db3aeaa9774b16767e0aec57c011aa8b1163d2990706caf73bae21a391",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0c92ca1dc4d3a53cad500af3f75cab8295bacfd1"
+            ],
+            "sizeBytes": 270751308
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b2644be3677f993ce56f12897b9527e4765c6632b90e71e6ae06748cf1d74e6f",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:baf40a2ebe309efafdf6f3b04c368baf7198e208"
+            ],
+            "sizeBytes": 270724361
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7866614755cb2d432978243358d8ac97dc90d4656b01a50cbffed8c26e7f991e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:3ba6092d9b5f72d8a0dbbe48ef572d4691d42d07"
+            ],
+            "sizeBytes": 267389399
+          },
+          {
+            "names": [
+              "mcr.microsoft.com/azuremonitor/containerinsights/ciprod@sha256:9b47d0e34e8959e0745c6bc08638750b15fb6947b7c5f3de7781b22cb5928c54",
+              "mcr.microsoft.com/azuremonitor/containerinsights/ciprod:3.3.0"
+            ],
+            "sizeBytes": 238085864
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/content-studio@sha256:1c75fb344319de7c6645f0725f4af1c24099ebeca3340117c34cb2327b403b1a",
+              "acrhubdevelopmentwestus3.azurecr.io/content-studio:fd7cf07ceda9"
+            ],
+            "sizeBytes": 192712691
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/content-studio@sha256:0b3d0e3c12b2e09e90d56ef98008d0857786e37fb0c61fc959798f51ff9bcc51",
+              "acrhubdevelopmentwestus3.azurecr.io/content-studio:032cb30d4112"
+            ],
+            "sizeBytes": 192427143
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/content-studio@sha256:ecc76de0933e29300397eaa4189d1d6ef6ab1bd2bfe2695a33445695a0246472",
+              "acrhubdevelopmentwestus3.azurecr.io/content-studio:649a1959a01a"
+            ],
+            "sizeBytes": 191987857
+          }
+        ],
+        "nodeInfo": {
+          "architecture": "amd64",
+          "bootID": "a7c17d29-8a54-4775-a472-227725b7e760",
+          "containerRuntimeVersion": "containerd://1.7.28-1",
+          "kernelVersion": "5.15.0-1097-azure",
+          "kubeProxyVersion": "v1.30.12",
+          "kubeletVersion": "v1.30.12",
+          "machineID": "1f4299ab29794a268f4d6b0a3fe91447",
+          "operatingSystem": "linux",
+          "osImage": "Ubuntu 22.04.5 LTS",
+          "systemUUID": "e7645a11-6fda-4474-8367-6600c0737c75"
+        },
+        "volumesAttached": [
+          {
+            "devicePath": "",
+            "name": "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-f9e96cba-e872-48b9-b555-448ee38acaea"
+          }
+        ],
+        "volumesInUse": [
+          "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-f9e96cba-e872-48b9-b555-448ee38acaea"
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Node",
+      "metadata": {
+        "annotations": {
+          "alpha.kubernetes.io/provided-node-ip": "10.0.1.120",
+          "csi.volume.kubernetes.io/nodeid": "{\"disk.csi.azure.com\":\"aks-default-28513622-vmss000005\",\"file.csi.azure.com\":\"aks-default-28513622-vmss000005\",\"secrets-store.csi.k8s.io\":\"aks-default-28513622-vmss000005\"}",
+          "node.alpha.kubernetes.io/ttl": "0",
+          "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+        },
+        "creationTimestamp": "2025-11-09T00:23:13Z",
+        "labels": {
+          "agentpool": "default",
+          "beta.kubernetes.io/arch": "amd64",
+          "beta.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "beta.kubernetes.io/os": "linux",
+          "failure-domain.beta.kubernetes.io/region": "westus3",
+          "failure-domain.beta.kubernetes.io/zone": "0",
+          "kubernetes.azure.com/agentpool": "default",
+          "kubernetes.azure.com/cluster": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_we",
+          "kubernetes.azure.com/consolidated-additional-properties": "14e5c95d-bcff-11f0-9a47-52424872e0c1",
+          "kubernetes.azure.com/kubelet-identity-client-id": "850de58e-a51b-452b-8eee-42e3f3e56597",
+          "kubernetes.azure.com/localdns-state": "disabled",
+          "kubernetes.azure.com/mode": "system",
+          "kubernetes.azure.com/network-policy": "azure",
+          "kubernetes.azure.com/node-image-version": "AKSUbuntu-2204gen2containerd-202510.19.1",
+          "kubernetes.azure.com/nodepool-type": "VirtualMachineScaleSets",
+          "kubernetes.azure.com/os-sku": "Ubuntu",
+          "kubernetes.azure.com/os-sku-effective": "Ubuntu2204",
+          "kubernetes.azure.com/os-sku-requested": "Ubuntu",
+          "kubernetes.azure.com/role": "agent",
+          "kubernetes.azure.com/sku-cpu": "2",
+          "kubernetes.azure.com/sku-memory": "8192",
+          "kubernetes.azure.com/storageprofile": "managed",
+          "kubernetes.azure.com/storagetier": "Premium_LRS",
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/hostname": "aks-default-28513622-vmss000005",
+          "kubernetes.io/os": "linux",
+          "node.kubernetes.io/instance-type": "Standard_D2s_v5",
+          "storageprofile": "managed",
+          "storagetier": "Premium_LRS",
+          "topology.disk.csi.azure.com/zone": "",
+          "topology.kubernetes.io/region": "westus3",
+          "topology.kubernetes.io/zone": "0"
+        },
+        "name": "aks-default-28513622-vmss000005",
+        "resourceVersion": "200511744",
+        "uid": "bf019a16-4f44-437c-8ce8-776a337def72"
+      },
+      "spec": {
+        "providerID": "azure:///subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/5"
+      },
+      "status": {
+        "addresses": [
+          {
+            "address": "10.0.1.120",
+            "type": "InternalIP"
+          },
+          {
+            "address": "aks-default-28513622-vmss000005",
+            "type": "Hostname"
+          }
+        ],
+        "allocatable": {
+          "cpu": "1900m",
+          "ephemeral-storage": "119703055367",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "7360924Ki",
+          "pods": "30"
+        },
+        "capacity": {
+          "cpu": "2",
+          "ephemeral-storage": "129886128Ki",
+          "hugepages-1Gi": "0",
+          "hugepages-2Mi": "0",
+          "memory": "8128924Ki",
+          "pods": "30"
+        },
+        "conditions": [
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "node is functioning properly",
+            "reason": "NoFrequentUnregisterNetDevice",
+            "status": "False",
+            "type": "FrequentUnregisterNetDevice"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2026-09-08T12:01:23Z",
+            "message": "VM has no scheduled event",
+            "reason": "NoVMEventScheduled",
+            "status": "False",
+            "type": "VMEventScheduled"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "docker is functioning properly",
+            "reason": "NoFrequentDockerRestart",
+            "status": "False",
+            "type": "FrequentDockerRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "container runtime service is up",
+            "reason": "ContainerRuntimeIsUp",
+            "status": "False",
+            "type": "ContainerRuntimeProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "Filesystem is not read-only",
+            "reason": "FilesystemIsNotReadOnly",
+            "status": "False",
+            "type": "ReadonlyFilesystem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "kubelet is functioning properly",
+            "reason": "NoFrequentKubeletRestart",
+            "status": "False",
+            "type": "FrequentKubeletRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "containerd is functioning properly",
+            "reason": "NoFrequentContainerdRestart",
+            "status": "False",
+            "type": "FrequentContainerdRestart"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:27Z",
+            "message": "kubelet service is up",
+            "reason": "KubeletIsUp",
+            "status": "False",
+            "type": "KubeletProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "kernel has no deadlock",
+            "reason": "KernelHasNoDeadlock",
+            "status": "False",
+            "type": "KernelDeadlock"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:48:11Z",
+            "lastTransitionTime": "2025-12-06T05:42:26Z",
+            "message": "Filesystem is healthy",
+            "reason": "FilesystemIsOK",
+            "status": "False",
+            "type": "FilesystemCorruptionProblem"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:49Z",
+            "lastTransitionTime": "2025-11-09T00:23:13Z",
+            "message": "kubelet has sufficient memory available",
+            "reason": "KubeletHasSufficientMemory",
+            "status": "False",
+            "type": "MemoryPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:49Z",
+            "lastTransitionTime": "2025-11-09T00:23:13Z",
+            "message": "kubelet has no disk pressure",
+            "reason": "KubeletHasNoDiskPressure",
+            "status": "False",
+            "type": "DiskPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:49Z",
+            "lastTransitionTime": "2025-11-09T00:23:13Z",
+            "message": "kubelet has sufficient PID available",
+            "reason": "KubeletHasSufficientPID",
+            "status": "False",
+            "type": "PIDPressure"
+          },
+          {
+            "lastHeartbeatTime": "2026-09-16T06:49:49Z",
+            "lastTransitionTime": "2025-11-09T00:23:13Z",
+            "message": "kubelet is posting ready status",
+            "reason": "KubeletReady",
+            "status": "True",
+            "type": "Ready"
+          }
+        ],
+        "daemonEndpoints": {
+          "kubeletEndpoint": {
+            "Port": 10250
+          }
+        },
+        "images": [
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/aeq-mcp@sha256:1bae4479e46057b8483f27e7ce30da7b798c2f3f277d31f928aa9e11a59cdcd3",
+              "acrhubdevelopmentwestus3.azurecr.io/aeq-mcp:54a0641bf65378ba94214639e246ddd28e178250"
+            ],
+            "sizeBytes": 371390231
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/aeq-server@sha256:0637bd2903f9392be8e00d0b3a369de0b759b9f91ad821bda48e924ea12c9bca",
+              "acrhubdevelopmentwestus3.azurecr.io/aeq-server:4f1f1b99bb898c1dacd62dd09f6161207c1b2e11"
+            ],
+            "sizeBytes": 371050733
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jvb@sha256:9b2a15ecae9b0efe7d559f6a6b79b44e1beef100ecde9d12f9448442a2d6cee1",
+              "docker.io/jitsi/jvb:stable-10590"
+            ],
+            "sizeBytes": 351010303
+          },
+          {
+            "names": [
+              "ghcr.io/a5c-ai/osb/benchmark-cli@sha256:e3d7956c32014501191a22ecfd3b58c6594441d29dd6e117bd3418f778ef97e3",
+              "ghcr.io/a5c-ai/osb/benchmark-cli:master-b0370ba"
+            ],
+            "sizeBytes": 332491650
+          },
+          {
+            "names": [
+              "docker.io/jitsi/jicofo@sha256:0b0f71d11e34db241517e9ecb87dc9aa5fd19d79be8a3211a30d300f47a57c2e",
+              "docker.io/jitsi/jicofo:stable-10590"
+            ],
+            "sizeBytes": 291299970
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a6199d0094b2f5624ee21dc2628c4ee2e9f56e11f0d026d5615d2ccbf0e1fa17",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:120926cf0f706e1fc4b7eda5e196aa40aa804e68"
+            ],
+            "sizeBytes": 271930738
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:20526ff831c3b52121b26185b9b5a0f9de7d5df9300f399211d0eac65c0dc235",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f3731924766264943781091224b53139e9eb9362"
+            ],
+            "sizeBytes": 271899233
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:19016772c15a4b68e5bfdf0e18549fc405fa3f25aa0fbdd645a5cea5ea9a1aa4",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:38b4f082bccd287947cf9f8464ee5ed253d696a0"
+            ],
+            "sizeBytes": 271887429
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:9d676777668e3c4b719c6a3a79a6c704140c4fd8c0deccbba939179db43e5f99",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:8b3609964d6bc60969c30b8d68c474c80bf46c0e"
+            ],
+            "sizeBytes": 271877819
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6818aa3fc1d71bf067270c50f2b925f9cf9f3c6e87631f103cbb60ef9aba71a7",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:11dddf312e8cb70b45fc683fb32448fbbf17e186"
+            ],
+            "sizeBytes": 271345469
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:616d258767fc3e3d65e43cbfcc6c9399f38868a1f0e9f749f799e87485d4dec4",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:4b5d366a78a4ca909d57d7b0e671b53a760a7a08"
+            ],
+            "sizeBytes": 271340580
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:292fc593283684a77d45bb0b51dd88dce839f4f5aadcf31401a9988bf5533ccc",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:547d8874062b9b6ec5755d583d895967c007a8d5"
+            ],
+            "sizeBytes": 271327941
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:1a8a608164437bf9632746f301fb10f9c509ca69a9c6489c9e9b783495dc4618",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9423fe81a153bc659a709354ab840e7820eed766"
+            ],
+            "sizeBytes": 271274065
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2856d7e6f2a2ccbf62b14334c63e04802a36f45a1da2bfd9edf4cefb54b46dde",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:43ceb5f9af17a2217f7f3c27d6d8d31febf3fefb"
+            ],
+            "sizeBytes": 271266486
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:dee20a80cac3e6154fa00eebbe601c5f6b14e99d459cdbd04944ac46b1118651",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:19b1ae726d5fc632b38a8462bb761870d38862e9"
+            ],
+            "sizeBytes": 271258846
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:f761afb6d3aaca82d2d00ff23c33ddd583cb387658d1d0bf1973bbbeb6888643",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:47f26ee0634e029dce062e07bdebfd9641bea956"
+            ],
+            "sizeBytes": 271247744
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:a79c13990460073fe9dfbd116740438f4661975888319a90b1bf33058455ffe4",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:587ef894cb18c3aff526512751a55ddd4e479962"
+            ],
+            "sizeBytes": 271244846
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:1eec81b6ed2f9cb1a67bb9eb240a4183fc874f96784a78bcfcdff725b523b0af",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:875959358e30938c300ae7e8108769a9099ff115"
+            ],
+            "sizeBytes": 271239619
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:3077b2569e5d6810c3658fd320c07118920ced827cb3d848bbb9bff996d0d93d",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:dba6a269f3fc4a177523022f69975366eccaa1f5"
+            ],
+            "sizeBytes": 271236925
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:cdf3424768e71c9f1e0d44b1c9248ca1da848e9a5f39c7e48c461bbd57cffba8",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:8ac3500d852d881cd7f703e7208929dc9f77d2d9"
+            ],
+            "sizeBytes": 271235986
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b3c7463b34a791cccada4c84425b81c745dd5aedb630e908dcb2c5a16fe1aceb",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:00bdadd67cf14e1361d4df07ad8e7828065750a5"
+            ],
+            "sizeBytes": 271228909
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d9ef46692970a699641cca9ae5441ce7d8c857d45e4f8a7152096b73ace93253",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:08aa8d162f66a77054ea60fb7255dce369cc4895"
+            ],
+            "sizeBytes": 271227772
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:ac342ed0c6f538130edf297051139f1792f7c1663ebe7442fde6cca875a9917a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f8347bbd1de8796757b978655836e245e802b7e4"
+            ],
+            "sizeBytes": 271227202
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:aa85e13c2d56fb7cec7f7ea2a8aaeef72c5c93bffb70e15ca2ab5181c27b3ef0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:fcfd9ae91b2cf6b8691872a1e2861384361f468c"
+            ],
+            "sizeBytes": 271224032
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7b8b051076a5b4885b42cd6b71a6d398ba303b3b808f7e4431d6e92db3fedc68",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:3197e04635bb1fbc40c0b22d96da75181f5a6e9e"
+            ],
+            "sizeBytes": 271223115
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:2fa67ac065c165b7d845c68cac5c4699b62cfece958b69d36f1a6adf3b40a102",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:c9aa8f113eda905d3e8104e7d0990070e26118b7"
+            ],
+            "sizeBytes": 271222693
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b6b4f43d903dc7e43af792f500db336e0577f2837dbd5b2fbe43bd260711d74a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:7d126e58076b5525189e5b7d23ac2b24eb13a2bf"
+            ],
+            "sizeBytes": 271220275
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d34614ecedf4d33fd925956103244aeaab7a62ae549e7704972e2b86ca900757",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b1caae733e5718507f89c8640ca209cea2b3a35b"
+            ],
+            "sizeBytes": 271218055
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e1a2e12fad20e1e8b97a13c7758d1fb13e1089ac3f2423ed3527ef9ea48b5a62",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:d09eb12490db51508e20062c6224baf93fb430a3"
+            ],
+            "sizeBytes": 271211361
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b12343aa7a6ad3ba792771c20900f034041a24ed71251dc1f2d96927a1d6ca32",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f3c73669f2e2e2c148b4d11533ce1109d1cabf5d"
+            ],
+            "sizeBytes": 271207728
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7c8494ff8ae2bc9a4bd884b23a503abc6087e95cbf1dee94bf194767a4ace3c1",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:19bf3d1ef6424ffa749b45b39ae0ecf9204ef1fb"
+            ],
+            "sizeBytes": 271205008
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:6217508c298611c53e5d7d168d3765e823746d67475ecf37f44dd4618ec14605",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9b682c1c28ac101b0a2405ac3f37f1a2fd2c8644"
+            ],
+            "sizeBytes": 271204897
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:11e0b1a3e2010a3ce10eb6ba32fb06d5615d1f3904d57671761fa1a24d3eb044",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:af45ed046b26811715cecbb10681bb2301d87dd8"
+            ],
+            "sizeBytes": 271203551
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:c1fd39185b5b977e73a43ab252d00f780b5b66b59068cbe4f9c101dde49cac58",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:36fed89b06c7ed5cde5151062a0c3c339e44a6e4"
+            ],
+            "sizeBytes": 270878042
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:b918f34fae23212e5969cf777180e6bc4468cc8ddb59fb4d11db1505bd72afb0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:a0377b13140a635688bd748fa79370d1f337046e"
+            ],
+            "sizeBytes": 270869942
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:979d983ddba1e2920330ed24ba04eb0fa88da01b303a91434c7661b7b69821c0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:9368680e8bc8eb8ad77fa1a94caffabdbe29a1cf"
+            ],
+            "sizeBytes": 270866032
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:473854cf1622061f1a2f813a3c12e83f80eb3cb9c8084b3a28a193b6f8285e5a",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:320051e3a6ace8c6511335fefbbec589014a7f42"
+            ],
+            "sizeBytes": 270860262
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:36424476fbfb5c79ab04bde3e85349d1cfd67740dba26e3fe94d8eb4dddb0dc6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:994e70374bdb6dce4c13a7a24f3e4a965959bc03"
+            ],
+            "sizeBytes": 270853909
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:ef850596410375b72c1f0d495714d2b9e166b9835483c2b48ba43d26ef0d052f",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:cd822e2b006abf37798a466d5c5509d6d6d40829"
+            ],
+            "sizeBytes": 270846321
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:8295236c59525b79cd7ff4db4af2a0983f8b3db7172be1e23bac52d248828fb0",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:91c0f79b3c61fb062b54e82af52eaf0fbaed2708"
+            ],
+            "sizeBytes": 270843582
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7599a8e4260335ac0aeb2feb530b3260a7d3565defd008da0a3e1b9c26ed0667",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:adbec7d181ae1e903ebf9dc750b9f28d8629fb06"
+            ],
+            "sizeBytes": 270843457
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:14fe64f03296d7ff07a5afd4cba80de22046f819e0987416fb994db0eddf7668",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:0c70bfb344b9c68299798ed0ca4a82eab06e5403"
+            ],
+            "sizeBytes": 270841690
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:44e237d6fd1c8632d89028876dd385e0b3c51d8078a1f87e02f2fb896c0fc024",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ec0a2182b658689b133555e5c979672d70bd46fb"
+            ],
+            "sizeBytes": 270840827
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:7aae368058486bc8df494544d55aa849c0531388d6eb400bec8ec7b8450b04e6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:f655307e6aefce6543700b766a5ccdd5ea61cc34"
+            ],
+            "sizeBytes": 270839601
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:d61d1fbdbc162ba71ea2210c4bcf3aa93b9f60ee8af879cd812f3ee2aef004c6",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:6e8c63e09c3bf4a3369439a2e74f58e336948e47"
+            ],
+            "sizeBytes": 270833764
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:78b3ddc118fd0b3020ad5d90ece9db6e19f1e184bc17ff4f4f1bee2770e074dc",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:d9198e13b7bac8dae2b819fb8be6b75b5ef13b4c"
+            ],
+            "sizeBytes": 270815596
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:e12d4f77d2db4ec41cd192fd71d4cccda78492aaafda939690877201cbd1514e",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b91ca13883bce69dbf2e71363f0c884b399ff3f8"
+            ],
+            "sizeBytes": 270809666
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:617e6362656f6fa1229e9601cee75783f578242d146cceaf5699928c855c8c94"
+            ],
+            "sizeBytes": 270805429
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:956444372e87d95cf5f5b55fd8cc6c93adc66a50e69cfe4cf30e8a528dba31d9",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:5a194f2ccb0ed621b6a99d3e45b4321fae08a80a"
+            ],
+            "sizeBytes": 270803864
+          },
+          {
+            "names": [
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui@sha256:fd8fd5599f4097579e628af0050a9f6f8bc4c44dfe4bec72e7a8939cf0f7d602",
+              "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:ae6aabd3fe34193f2c0d2aca294aef3e0feac149"
+            ],
+            "sizeBytes": 270802704
+          }
+        ],
+        "nodeInfo": {
+          "architecture": "amd64",
+          "bootID": "5e2e44bb-97a1-4098-82d5-e41697141b95",
+          "containerRuntimeVersion": "containerd://1.7.28-1",
+          "kernelVersion": "5.15.0-1097-azure",
+          "kubeProxyVersion": "v1.30.12",
+          "kubeletVersion": "v1.30.12",
+          "machineID": "db701f04ac2d472892ee041c189cdc05",
+          "operatingSystem": "linux",
+          "osImage": "Ubuntu 22.04.5 LTS",
+          "systemUUID": "583edca6-7e21-4f8b-a54d-cbcfd18b3ab3"
+        },
+        "volumesAttached": [
+          {
+            "devicePath": "",
+            "name": "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593"
+          },
+          {
+            "devicePath": "",
+            "name": "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4"
+          },
+          {
+            "devicePath": "",
+            "name": "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-66704332-aa3f-41fb-abe3-21e070780cae"
+          }
+        ],
+        "volumesInUse": [
+          "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593",
+          "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4",
+          "kubernetes.io/csi/disk.csi.azure.com^/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-66704332-aa3f-41fb-abe3-21e070780cae"
+        ]
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

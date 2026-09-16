@@ -1,0 +1,48 @@
+[
+  {
+    "encryption": {
+      "customerManagedEncryptionEnforcementConfig": {
+        "restrictionMode": "NotRestricted"
+      },
+      "customerSuppliedEncryptionEnforcementConfig": {
+        "effectiveTime": "2026-06-19T09:03:12.269Z",
+        "restrictionMode": "FullyRestricted"
+      },
+      "googleManagedEncryptionEnforcementConfig": {
+        "restrictionMode": "NotRestricted"
+      }
+    },
+    "etag": "CAE=",
+    "generation": "1781859672333981409",
+    "hierarchicalNamespace": {
+      "enabled": false
+    },
+    "iamConfiguration": {
+      "bucketPolicyOnly": {
+        "enabled": true,
+        "lockedTime": "2026-09-17T09:01:12.632000+00:00"
+      },
+      "publicAccessPrevention": "inherited",
+      "uniformBucketLevelAccess": {
+        "enabled": true,
+        "lockedTime": "2026-09-17T09:01:12.632000+00:00"
+      }
+    },
+    "id": "a5c-videos",
+    "kind": "storage#bucket",
+    "location": "US",
+    "locationType": "multi-region",
+    "metageneration": "1",
+    "name": "a5c-videos",
+    "projectNumber": "1024539647872",
+    "rpo": "DEFAULT",
+    "selfLink": "https://www.googleapis.com/storage/v1/b/a5c-videos",
+    "softDeletePolicy": {
+      "effectiveTime": "2026-06-19T09:01:12.632Z",
+      "retentionDurationSeconds": "604800"
+    },
+    "storageClass": "STANDARD",
+    "timeCreated": "2026-06-19T09:01:12.632000+00:00",
+    "updated": "2026-06-19T09:01:12.632000+00:00"
+  }
+]

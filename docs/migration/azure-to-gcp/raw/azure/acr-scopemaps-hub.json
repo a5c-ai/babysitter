@@ -1,0 +1,103 @@
+[
+  {
+    "actions": [
+      "repositories/*/metadata/read",
+      "repositories/*/metadata/write",
+      "repositories/*/content/read",
+      "repositories/*/content/write",
+      "repositories/*/content/delete"
+    ],
+    "creationDate": "2026-09-05T09:03:29.226005+00:00",
+    "description": "Can perform all read, write and delete operations on the registry",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/_repositories_admin",
+    "name": "_repositories_admin",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "systemData": null,
+    "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
+    "typePropertiesType": "SystemDefined"
+  },
+  {
+    "actions": [
+      "repositories/*/content/read"
+    ],
+    "creationDate": "2026-09-05T09:03:29.226093+00:00",
+    "description": "Can pull any repository of the registry",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/_repositories_pull",
+    "name": "_repositories_pull",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "systemData": null,
+    "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
+    "typePropertiesType": "SystemDefined"
+  },
+  {
+    "actions": [
+      "repositories/*/content/read",
+      "repositories/*/content/write"
+    ],
+    "creationDate": "2026-09-05T09:03:29.226093+00:00",
+    "description": "Can push to any repository of the registry",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/_repositories_push",
+    "name": "_repositories_push",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "systemData": null,
+    "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
+    "typePropertiesType": "SystemDefined"
+  },
+  {
+    "actions": [
+      "repositories/*/content/read",
+      "repositories/*/metadata/read"
+    ],
+    "creationDate": "2026-09-05T09:03:29.226093+00:00",
+    "description": "Can perform all read operations on the registry",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/_repositories_pull_metadata_read",
+    "name": "_repositories_pull_metadata_read",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "systemData": null,
+    "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
+    "typePropertiesType": "SystemDefined"
+  },
+  {
+    "actions": [
+      "repositories/*/metadata/read",
+      "repositories/*/metadata/write",
+      "repositories/*/content/read",
+      "repositories/*/content/write"
+    ],
+    "creationDate": "2026-09-05T09:03:29.226094+00:00",
+    "description": "Can perform all read and write operations on the registry",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/_repositories_push_metadata_write",
+    "name": "_repositories_push_metadata_write",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "systemData": null,
+    "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
+    "typePropertiesType": "SystemDefined"
+  },
+  {
+    "actions": [
+      "repositories/content-studio/content/write",
+      "repositories/content-studio/content/read"
+    ],
+    "creationDate": "2026-06-09T09:18:42.173775+00:00",
+    "description": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/content-studio-ci-scope-map",
+    "name": "content-studio-ci-scope-map",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "systemData": {
+      "createdAt": "2026-06-09T09:18:42.112942+00:00",
+      "createdBy": "benihakak@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2026-06-09T09:18:42.112942+00:00",
+      "lastModifiedBy": "benihakak@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "type": "Microsoft.ContainerRegistry/registries/scopeMaps",
+    "typePropertiesType": "UserDefined"
+  }
+]

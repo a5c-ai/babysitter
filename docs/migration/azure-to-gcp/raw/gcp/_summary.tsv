@@ -1,0 +1,32 @@
+file	count
+artifact-repos	
+auth-list	2
+billing-info	
+cloud-functions	0
+cloud-run	
+compute-addresses	0
+compute-disks	0
+compute-firewall	4
+compute-forwarding	0
+compute-instances	0
+compute-networks	1
+compute-routers	0
+compute-subnets	42
+config-list	1
+dns-zones	0
+filestore	
+gcr-legacy	
+gcs-buckets	1
+gke-clusters	
+logging-sinks	2
+monitoring-channels	
+project-describe	1
+project-iam-policy	1
+redis	0
+secrets-names	0
+service-accounts	2
+services-enabled	44
+sql-instances	0
+vertex-endpoints	0
+vertex-models	0
+wif-pools	0

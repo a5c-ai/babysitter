@@ -1,0 +1,135 @@
+[
+  {
+    "adminUserEnabled": true,
+    "anonymousPullEnabled": false,
+    "creationDate": "2026-01-06T11:03:28.109852+00:00",
+    "dataEndpointEnabled": false,
+    "dataEndpointHostNames": [],
+    "encryption": {
+      "keyVaultProperties": null,
+      "status": "disabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.ContainerRegistry/registries/geekonomyacrmkb5l5",
+    "identity": null,
+    "location": "northeurope",
+    "loginServer": "geekonomyacrmkb5l5.azurecr.io",
+    "metadataSearch": "Disabled",
+    "name": "geekonomyacrmkb5l5",
+    "networkRuleBypassOptions": "AzureServices",
+    "networkRuleSet": null,
+    "policies": {
+      "azureAdAuthenticationAsArmPolicy": {
+        "status": "enabled"
+      },
+      "exportPolicy": {
+        "status": "enabled"
+      },
+      "quarantinePolicy": {
+        "status": "disabled"
+      },
+      "retentionPolicy": {
+        "days": 7,
+        "lastUpdatedTime": "2026-01-07T09:56:47.149041+00:00",
+        "status": "disabled"
+      },
+      "softDeletePolicy": {
+        "lastUpdatedTime": "2026-01-07T09:56:47.149107+00:00",
+        "retentionDays": 7,
+        "status": "disabled"
+      },
+      "trustPolicy": {
+        "status": "disabled",
+        "type": "Notary"
+      }
+    },
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "geekonomy-prod",
+    "sku": {
+      "name": "Basic",
+      "tier": "Basic"
+    },
+    "status": null,
+    "systemData": {
+      "createdAt": "2026-01-06T11:03:28.109852+00:00",
+      "createdBy": "benihakak@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2026-01-07T09:56:47.069529+00:00",
+      "lastModifiedBy": "benihakak@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {},
+    "type": "Microsoft.ContainerRegistry/registries",
+    "zoneRedundancy": "Disabled"
+  },
+  {
+    "adminUserEnabled": true,
+    "anonymousPullEnabled": false,
+    "creationDate": "2025-07-31T11:06:06.827915+00:00",
+    "dataEndpointEnabled": false,
+    "dataEndpointHostNames": [],
+    "encryption": {
+      "keyVaultProperties": null,
+      "status": "disabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3",
+    "identity": null,
+    "location": "westus3",
+    "loginServer": "acrhubdevelopmentwestus3.azurecr.io",
+    "metadataSearch": "Disabled",
+    "name": "acrhubdevelopmentwestus3",
+    "networkRuleBypassOptions": "AzureServices",
+    "networkRuleSet": null,
+    "policies": {
+      "azureAdAuthenticationAsArmPolicy": {
+        "status": "enabled"
+      },
+      "exportPolicy": {
+        "status": "enabled"
+      },
+      "quarantinePolicy": {
+        "status": "disabled"
+      },
+      "retentionPolicy": {
+        "days": 7,
+        "lastUpdatedTime": "2025-07-31T11:06:13.890195+00:00",
+        "status": "disabled"
+      },
+      "softDeletePolicy": {
+        "lastUpdatedTime": "2025-07-31T11:06:13.890234+00:00",
+        "retentionDays": 7,
+        "status": "disabled"
+      },
+      "trustPolicy": {
+        "status": "disabled",
+        "type": "Notary"
+      }
+    },
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "rg-hub-development-westus3",
+    "sku": {
+      "name": "Standard",
+      "tier": "Standard"
+    },
+    "status": null,
+    "systemData": {
+      "createdAt": "2025-07-31T11:06:06.827915+00:00",
+      "createdBy": "4010e15d-da1c-44c1-9ad2-02d2d8291892",
+      "createdByType": "Application",
+      "lastModifiedAt": "2026-03-15T10:53:31.867964+00:00",
+      "lastModifiedBy": "tmuskal@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.ContainerRegistry/registries",
+    "zoneRedundancy": "Disabled"
+  }
+]

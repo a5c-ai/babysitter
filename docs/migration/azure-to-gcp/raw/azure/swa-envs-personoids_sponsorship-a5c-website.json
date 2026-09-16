@@ -1,0 +1,38 @@
+[
+  {
+    "buildId": "default",
+    "createdTimeUtc": "2025-03-20T17:07:44.320017",
+    "databaseConnections": [],
+    "hostname": "victorious-rock-0d970850f.6.azurestaticapps.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Web/staticSites/a5c-website/builds/default",
+    "kind": null,
+    "lastUpdatedOn": "2025-03-20T17:07:44.320017",
+    "linkedBackends": [],
+    "location": "East US 2",
+    "name": "default",
+    "pullRequestTitle": null,
+    "resourceGroup": "personoids_sponsorship",
+    "sourceBranch": null,
+    "status": "WaitingForDeployment",
+    "type": "Microsoft.Web/staticSitesbuilds",
+    "userProvidedFunctionApps": null
+  },
+  {
+    "buildId": "preview",
+    "createdTimeUtc": "2025-03-20T17:08:46.316943",
+    "databaseConnections": [],
+    "hostname": "victorious-rock-0d970850f-preview.eastus2.6.azurestaticapps.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Web/staticSites/a5c-website/builds/preview",
+    "kind": null,
+    "lastUpdatedOn": "2025-03-24T08:12:12.017855",
+    "linkedBackends": [],
+    "location": "East US 2",
+    "name": "preview",
+    "pullRequestTitle": null,
+    "resourceGroup": "personoids_sponsorship",
+    "sourceBranch": null,
+    "status": "Ready",
+    "type": "Microsoft.Web/staticSitesbuilds",
+    "userProvidedFunctionApps": null
+  }
+]

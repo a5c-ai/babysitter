@@ -1,0 +1,178 @@
+[
+  {
+    "changedTime": "2026-08-11T07:37:53.987273+00:00",
+    "createdTime": "2026-08-11T07:18:50.726242+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Compute/virtualMachines/tb-fleet-0/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-0/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-0",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T09:57:39.768875+00:00",
+    "createdTime": "2026-08-11T09:47:38.256616+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Compute/virtualMachines/tb-fleet-6/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-6/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-6",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T10:15:25.869726+00:00",
+    "createdTime": "2026-08-11T10:05:25.170016+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Compute/virtualMachines/tb-fleet-1/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-1/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-1",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T10:15:48.909652+00:00",
+    "createdTime": "2026-08-11T10:05:48.077416+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Compute/virtualMachines/tb-fleet-2/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-2/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-2",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T10:15:55.877774+00:00",
+    "createdTime": "2026-08-11T10:05:54.318840+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Compute/virtualMachines/tb-fleet-7/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-7/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-7",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T10:15:56.010707+00:00",
+    "createdTime": "2026-08-11T10:05:54.779934+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Compute/virtualMachines/tb-fleet-5/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-5/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-5",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T10:16:10.144554+00:00",
+    "createdTime": "2026-08-11T10:06:07.378042+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Compute/virtualMachines/tb-fleet-4/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-4/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-4",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  },
+  {
+    "changedTime": "2026-08-11T10:26:09.648596+00:00",
+    "createdTime": "2026-08-11T10:16:08.366766+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Compute/virtualMachines/tb-fleet-8/extensions/terminal-bench-bootstrap",
+    "identity": null,
+    "kind": null,
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tb-fleet-8/terminal-bench-bootstrap",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-8",
+    "sku": null,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Compute/virtualMachines/extensions"
+  }
+]

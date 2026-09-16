@@ -1,0 +1,440 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "autoscaling/v2",
+      "kind": "HorizontalPodAutoscaler",
+      "metadata": {
+        "creationTimestamp": "2025-08-04T22:09:50Z",
+        "labels": {
+          "app.kubernetes.io/component": "ingress-controller",
+          "app.kubernetes.io/managed-by": "aks-app-routing-operator",
+          "app.kubernetes.io/name": "nginx",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "nginx",
+        "namespace": "app-routing-system",
+        "ownerReferences": [
+          {
+            "apiVersion": "approuting.kubernetes.azure.com/v1alpha1",
+            "controller": true,
+            "kind": "NginxIngressController",
+            "name": "default",
+            "uid": "b27f7012-3953-493b-bb72-7a0c749a9a82"
+          }
+        ],
+        "resourceVersion": "200511046",
+        "uid": "9ac6e712-dfe1-41c3-bedf-8ee15e23b945"
+      },
+      "spec": {
+        "maxReplicas": 100,
+        "metrics": [
+          {
+            "resource": {
+              "name": "cpu",
+              "target": {
+                "averageUtilization": 70,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          }
+        ],
+        "minReplicas": 2,
+        "scaleTargetRef": {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "name": "nginx"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-05-13T05:35:30Z",
+            "message": "recommended size matches current size",
+            "reason": "ReadyForNewScale",
+            "status": "True",
+            "type": "AbleToScale"
+          },
+          {
+            "lastTransitionTime": "2026-08-31T03:36:45Z",
+            "message": "the HPA was able to successfully calculate a replica count from cpu resource utilization (percentage of request)",
+            "reason": "ValidMetricFound",
+            "status": "True",
+            "type": "ScalingActive"
+          },
+          {
+            "lastTransitionTime": "2026-09-10T05:16:39Z",
+            "message": "the desired replica count is less than the minimum replica count",
+            "reason": "TooFewReplicas",
+            "status": "True",
+            "type": "ScalingLimited"
+          }
+        ],
+        "currentMetrics": [
+          {
+            "resource": {
+              "current": {
+                "averageUtilization": 0,
+                "averageValue": "1m"
+              },
+              "name": "cpu"
+            },
+            "type": "Resource"
+          }
+        ],
+        "currentReplicas": 2,
+        "desiredReplicas": 2,
+        "lastScaleTime": "2025-08-04T22:10:37Z"
+      }
+    },
+    {
+      "apiVersion": "autoscaling/v2",
+      "kind": "HorizontalPodAutoscaler",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T16:25:10Z",
+        "labels": {
+          "app.kubernetes.io/component": "backend",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-backend-hpa",
+        "namespace": "hub-development",
+        "resourceVersion": "191172056",
+        "uid": "72fdf0c8-f245-465d-b358-9da416297f22"
+      },
+      "spec": {
+        "behavior": {
+          "scaleDown": {
+            "policies": [
+              {
+                "periodSeconds": 60,
+                "type": "Percent",
+                "value": 50
+              }
+            ],
+            "selectPolicy": "Max",
+            "stabilizationWindowSeconds": 300
+          },
+          "scaleUp": {
+            "policies": [
+              {
+                "periodSeconds": 60,
+                "type": "Percent",
+                "value": 100
+              },
+              {
+                "periodSeconds": 60,
+                "type": "Pods",
+                "value": 2
+              }
+            ],
+            "selectPolicy": "Max",
+            "stabilizationWindowSeconds": 0
+          }
+        },
+        "maxReplicas": 10,
+        "metrics": [
+          {
+            "resource": {
+              "name": "cpu",
+              "target": {
+                "averageUtilization": 70,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          },
+          {
+            "resource": {
+              "name": "memory",
+              "target": {
+                "averageUtilization": 80,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          }
+        ],
+        "minReplicas": 3,
+        "scaleTargetRef": {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "name": "hub-backend"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-05-13T05:35:30Z",
+            "message": "the HPA controller was able to get the target's current scale",
+            "reason": "SucceededGetScale",
+            "status": "True",
+            "type": "AbleToScale"
+          },
+          {
+            "lastTransitionTime": "2026-08-31T03:37:15Z",
+            "message": "the HPA was unable to compute the replica count: failed to get cpu utilization: unable to get metrics for resource cpu: no metrics returned from resource metrics API",
+            "reason": "FailedGetResourceMetric",
+            "status": "False",
+            "type": "ScalingActive"
+          },
+          {
+            "lastTransitionTime": "2026-08-26T05:19:23Z",
+            "message": "the desired replica count is less than the minimum replica count",
+            "reason": "TooFewReplicas",
+            "status": "True",
+            "type": "ScalingLimited"
+          }
+        ],
+        "currentMetrics": [
+          {
+            "type": ""
+          },
+          {
+            "type": ""
+          }
+        ],
+        "currentReplicas": 3,
+        "desiredReplicas": 3
+      }
+    },
+    {
+      "apiVersion": "autoscaling/v2",
+      "kind": "HorizontalPodAutoscaler",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T16:25:10Z",
+        "labels": {
+          "app.kubernetes.io/component": "frontend",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-frontend-hpa",
+        "namespace": "hub-development",
+        "resourceVersion": "200512186",
+        "uid": "057b3eb1-a31a-4f8f-a7c1-af7e981138de"
+      },
+      "spec": {
+        "maxReplicas": 5,
+        "metrics": [
+          {
+            "resource": {
+              "name": "cpu",
+              "target": {
+                "averageUtilization": 70,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          },
+          {
+            "resource": {
+              "name": "memory",
+              "target": {
+                "averageUtilization": 80,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          }
+        ],
+        "minReplicas": 2,
+        "scaleTargetRef": {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "name": "hub-frontend"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-05-13T05:35:30Z",
+            "message": "recommended size matches current size",
+            "reason": "ReadyForNewScale",
+            "status": "True",
+            "type": "AbleToScale"
+          },
+          {
+            "lastTransitionTime": "2026-08-31T03:36:45Z",
+            "message": "the HPA was able to successfully calculate a replica count from memory resource utilization (percentage of request)",
+            "reason": "ValidMetricFound",
+            "status": "True",
+            "type": "ScalingActive"
+          },
+          {
+            "lastTransitionTime": "2025-08-02T14:26:37Z",
+            "message": "the desired count is within the acceptable range",
+            "reason": "DesiredWithinRange",
+            "status": "False",
+            "type": "ScalingLimited"
+          }
+        ],
+        "currentMetrics": [
+          {
+            "resource": {
+              "current": {
+                "averageUtilization": 2,
+                "averageValue": "2m"
+              },
+              "name": "cpu"
+            },
+            "type": "Resource"
+          },
+          {
+            "resource": {
+              "current": {
+                "averageUtilization": 74,
+                "averageValue": "100308992"
+              },
+              "name": "memory"
+            },
+            "type": "Resource"
+          }
+        ],
+        "currentReplicas": 2,
+        "desiredReplicas": 2,
+        "lastScaleTime": "2026-09-04T05:17:46Z"
+      }
+    },
+    {
+      "apiVersion": "autoscaling/v2",
+      "kind": "HorizontalPodAutoscaler",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "babysitter-web-staging",
+          "meta.helm.sh/release-namespace": "staging"
+        },
+        "creationTimestamp": "2026-02-21T14:51:58Z",
+        "labels": {
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging",
+        "namespace": "staging",
+        "resourceVersion": "200512192",
+        "uid": "fa3105a4-42bf-4bf7-834e-67657aeb1d9d"
+      },
+      "spec": {
+        "behavior": {
+          "scaleDown": {
+            "policies": [
+              {
+                "periodSeconds": 60,
+                "type": "Percent",
+                "value": 10
+              }
+            ],
+            "selectPolicy": "Max",
+            "stabilizationWindowSeconds": 300
+          },
+          "scaleUp": {
+            "policies": [
+              {
+                "periodSeconds": 15,
+                "type": "Percent",
+                "value": 100
+              },
+              {
+                "periodSeconds": 15,
+                "type": "Pods",
+                "value": 4
+              }
+            ],
+            "selectPolicy": "Max",
+            "stabilizationWindowSeconds": 0
+          }
+        },
+        "maxReplicas": 3,
+        "metrics": [
+          {
+            "resource": {
+              "name": "cpu",
+              "target": {
+                "averageUtilization": 80,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          },
+          {
+            "resource": {
+              "name": "memory",
+              "target": {
+                "averageUtilization": 85,
+                "type": "Utilization"
+              }
+            },
+            "type": "Resource"
+          }
+        ],
+        "minReplicas": 1,
+        "scaleTargetRef": {
+          "apiVersion": "apps/v1",
+          "kind": "Deployment",
+          "name": "babysitter-web-staging"
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-05-13T05:35:30Z",
+            "message": "recommended size matches current size",
+            "reason": "ReadyForNewScale",
+            "status": "True",
+            "type": "AbleToScale"
+          },
+          {
+            "lastTransitionTime": "2026-09-06T23:08:08Z",
+            "message": "the HPA was able to successfully calculate a replica count from memory resource utilization (percentage of request)",
+            "reason": "ValidMetricFound",
+            "status": "True",
+            "type": "ScalingActive"
+          },
+          {
+            "lastTransitionTime": "2026-02-21T15:28:03Z",
+            "message": "the desired count is within the acceptable range",
+            "reason": "DesiredWithinRange",
+            "status": "False",
+            "type": "ScalingLimited"
+          }
+        ],
+        "currentMetrics": [
+          {
+            "resource": {
+              "current": {
+                "averageUtilization": 4,
+                "averageValue": "3m"
+              },
+              "name": "cpu"
+            },
+            "type": "Resource"
+          },
+          {
+            "resource": {
+              "current": {
+                "averageUtilization": 28,
+                "averageValue": "51993600"
+              },
+              "name": "memory"
+            },
+            "type": "Resource"
+          }
+        ],
+        "currentReplicas": 2,
+        "desiredReplicas": 2,
+        "lastScaleTime": "2026-09-15T11:42:58Z"
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

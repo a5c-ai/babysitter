@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-03-15T10:44:57.2891044Z",
+  "imageName": "aeq-dashboard",
+  "lastUpdateTime": "2026-08-27T09:42:56.5521462Z",
+  "manifestCount": 9,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

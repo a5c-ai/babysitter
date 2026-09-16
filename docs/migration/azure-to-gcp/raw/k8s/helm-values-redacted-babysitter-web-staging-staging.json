@@ -1,0 +1,300 @@
+{
+  "release": "babysitter-web-staging/staging",
+  "redactedShape": {
+    "autoscaling": {
+      "enabled": true,
+      "maxReplicas": 3,
+      "minReplicas": 1,
+      "targetCPUUtilizationPercentage": 80,
+      "targetMemoryUtilizationPercentage": 85
+    },
+    "config": {
+      "appUrl": "<string>",
+      "logLevel": "<string>",
+      "nextTelemetryDisabled": "<string>",
+      "nodeEnv": "<string>"
+    },
+    "deployment": {
+      "annotations": {
+        "deployedAt": "<string>",
+        "gitSha": "<string>"
+      }
+    },
+    "image": {
+      "pullPolicy": "<string>",
+      "repository": "<string>",
+      "tag": "<string>"
+    },
+    "imagePullSecrets": [
+      {
+        "name": "<string>"
+      }
+    ],
+    "ingress": {
+      "annotations": {
+        "acme.cert-manager.io/http01-edit-in-place": "<string>",
+        "cert-manager.io/cluster-issuer": "<string>",
+        "nginx.ingress.kubernetes.io/proxy-body-size": "<string>",
+        "nginx.ingress.kubernetes.io/ssl-redirect": "<string>"
+      },
+      "className": "<string>",
+      "enabled": true,
+      "hosts": [
+        {
+          "host": "<string>",
+          "paths": [
+            {
+              "path": "<string>",
+              "pathType": "<string>"
+            }
+          ]
+        }
+      ],
+      "tls": [
+        {
+          "hosts": [
+            "<string>"
+          ],
+          "secretName": "<string>"
+        }
+      ]
+    },
+    "monitoring": {
+      "enabled": false,
+      "prometheusRule": {
+        "enabled": false
+      },
+      "serviceMonitor": {
+        "enabled": false,
+        "interval": "<string>"
+      }
+    },
+    "networkPolicy": {
+      "egress": [
+        {
+          "ports": [
+            {
+              "port": 5432,
+              "protocol": "<string>"
+            },
+            {
+              "port": 6379,
+              "protocol": "<string>"
+            },
+            {
+              "port": 3000,
+              "protocol": "<string>"
+            }
+          ],
+          "to": [
+            {
+              "podSelector": {}
+            }
+          ]
+        },
+        {
+          "ports": [
+            {
+              "port": 5432,
+              "protocol": "<string>"
+            },
+            {
+              "port": 6379,
+              "protocol": "<string>"
+            },
+            {
+              "port": 443,
+              "protocol": "<string>"
+            },
+            {
+              "port": 53,
+              "protocol": "<string>"
+            },
+            {
+              "port": 53,
+              "protocol": "<string>"
+            }
+          ],
+          "to": [
+            {
+              "namespaceSelector": {}
+            }
+          ]
+        },
+        {
+          "ports": [
+            {
+              "port": 443,
+              "protocol": "<string>"
+            },
+            {
+              "port": 80,
+              "protocol": "<string>"
+            }
+          ],
+          "to": [
+            {
+              "ipBlock": {
+                "cidr": "<string>"
+              }
+            }
+          ]
+        }
+      ],
+      "enabled": true,
+      "ingress": [
+        {
+          "from": [
+            {
+              "podSelector": {}
+            }
+          ],
+          "ports": [
+            {
+              "port": 5432,
+              "protocol": "<string>"
+            },
+            {
+              "port": 6379,
+              "protocol": "<string>"
+            },
+            {
+              "port": 3000,
+              "protocol": "<string>"
+            }
+          ]
+        },
+        {
+          "from": [
+            {
+              "namespaceSelector": {
+                "matchLabels": {
+                  "name": "<string>"
+                }
+              }
+            }
+          ],
+          "ports": [
+            {
+              "port": 3000,
+              "protocol": "<string>"
+            },
+            {
+              "port": 8089,
+              "protocol": "<string>"
+            }
+          ]
+        },
+        {
+          "from": [
+            {
+              "podSelector": {
+                "matchLabels": {
+                  "app.kubernetes.io/name": "<string>"
+                }
+              }
+            }
+          ],
+          "ports": [
+            {
+              "port": 3000,
+              "protocol": "<string>"
+            }
+          ]
+        }
+      ]
+    },
+    "podDisruptionBudget": {
+      "enabled": false,
+      "minAvailable": 0
+    },
+    "postgresql": {
+      "enabled": false
+    },
+    "redis": {
+      "enabled": false
+    },
+    "replicaCount": 1,
+    "resources": {
+      "limits": {
+        "cpu": "<string>",
+        "memory": "<string>"
+      },
+      "requests": {
+        "cpu": "<string>",
+        "memory": "<string>"
+      }
+    },
+    "runner": {
+      "enabled": false,
+      "image": {
+        "pullPolicy": "<string>",
+        "repository": "<string>",
+        "tag": "<string>"
+      },
+      "resources": {
+        "limits": {
+          "cpu": "<string>",
+          "memory": "<string>"
+        },
+        "requests": {
+          "cpu": "<string>",
+          "memory": "<string>"
+        }
+      }
+    },
+    "secretEnv": [
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      },
+      {
+        "name": "<string>",
+        "secretKey": "<string>",
+        "secretName": "<string>"
+      }
+    ],
+    "stagingPostgresql": {
+      "enabled": true
+    },
+    "stagingRedis": {
+      "enabled": true
+    }
+  }
+}

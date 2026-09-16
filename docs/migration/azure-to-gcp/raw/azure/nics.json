@@ -1,0 +1,682 @@
+[
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "2ghfqdx1lvbuxk5bm42wbrj0dg.cx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": false,
+    "enableIPForwarding": false,
+    "etag": "W/\"445f1c29-c466-46f3-8bfc-7591a3618216\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkInterfaces/a5c-dev-vm-2VMNic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"445f1c29-c466-46f3-8bfc-7591a3618216\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkInterfaces/a5c-dev-vm-2VMNic/ipConfigurations/ipconfiga5c-dev-vm-2",
+        "name": "ipconfiga5c-dev-vm-2",
+        "primary": true,
+        "privateIPAddress": "10.0.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/publicIPAddresses/a5c-dev-vm-2PublicIP",
+          "resourceGroup": "A5C-DEV-RG"
+        },
+        "resourceGroup": "A5C-DEV-RG",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/virtualNetworks/a5c-dev-vnet/subnets/a5c-dev-subnet",
+          "resourceGroup": "A5C-DEV-RG"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "eastus2",
+    "macAddress": "7C-1E-52-CA-02-37",
+    "name": "a5c-dev-vm-2VMNic",
+    "networkSecurityGroup": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkSecurityGroups/a5c-dev-vm-2-nsg",
+      "resourceGroup": "A5C-DEV-RG"
+    },
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "A5C-DEV-RG",
+    "resourceGuid": "884b52ba-c943-4006-9f8c-7a718c7db733",
+    "tags": {},
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/virtualMachines/a5c-dev-vm-2",
+      "resourceGroup": "A5C-DEV-RG"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "jrsdu2ih5oeezgs0kkbhkpjj0f.cx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": false,
+    "enableIPForwarding": false,
+    "etag": "W/\"21662a3a-27f1-48aa-bed3-f097c1d7a120\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/networkInterfaces/a5c-dev-vmVMNic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"21662a3a-27f1-48aa-bed3-f097c1d7a120\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/networkInterfaces/a5c-dev-vmVMNic/ipConfigurations/ipconfiga5c-dev-vm",
+        "name": "ipconfiga5c-dev-vm",
+        "primary": true,
+        "privateIPAddress": "10.0.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/publicIPAddresses/a5c-dev-vmPublicIP",
+          "resourceGroup": "a5c-dev-rg"
+        },
+        "resourceGroup": "a5c-dev-rg",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/virtualNetworks/a5c-dev-vmVNET/subnets/a5c-dev-vmSubnet",
+          "resourceGroup": "a5c-dev-rg"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "eastus2",
+    "macAddress": "60-45-BD-85-E9-0E",
+    "name": "a5c-dev-vmVMNic",
+    "networkSecurityGroup": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/networkSecurityGroups/a5c-dev-vmNSG",
+      "resourceGroup": "a5c-dev-rg"
+    },
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "a5c-dev-rg",
+    "resourceGuid": "1c321d7e-0852-401e-ae6b-da8c6b5f8a88",
+    "tags": {},
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Compute/virtualMachines/a5c-dev-vm",
+      "resourceGroup": "a5c-dev-rg"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": []
+    },
+    "enableAcceleratedNetworking": false,
+    "enableIPForwarding": false,
+    "etag": "W/\"861cfd11-1c57-4d17-9e22-9104b70a2478\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Network/networkInterfaces/vm-odoo-validationVMNic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"861cfd11-1c57-4d17-9e22-9104b70a2478\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Network/networkInterfaces/vm-odoo-validationVMNic/ipConfigurations/ipconfigvm-odoo-validation",
+        "name": "ipconfigvm-odoo-validation",
+        "primary": true,
+        "privateIPAddress": "10.0.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "rg-mantis-odoo-validation-eastus2",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Network/virtualNetworks/vm-odoo-validationVNET/subnets/vm-odoo-validationSubnet",
+          "resourceGroup": "rg-mantis-odoo-validation-eastus2"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "eastus2",
+    "macAddress": "7C-1E-52-DC-CB-71",
+    "name": "vm-odoo-validationVMNic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-mantis-odoo-validation-eastus2",
+    "resourceGuid": "c02d3f98-ea7a-48e2-9ef9-4d245d1a18d8",
+    "tags": {
+      "auto-delete-after": "2026-07-16",
+      "managed-by": "codex",
+      "purpose": "defensive-research",
+      "workload": "odoo-validation"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-MANTIS-ODOO-VALIDATION-EASTUS2/providers/Microsoft.Compute/virtualMachines/vm-odoo-validation",
+      "resourceGroup": "RG-MANTIS-ODOO-VALIDATION-EASTUS2"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "gl4uxteezpmu3om2yf3pbtn5kc.cx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": false,
+    "enableIPForwarding": false,
+    "etag": "W/\"e185e292-7357-4383-80dc-82bcf19fbd7a\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/networkInterfaces/ubuntu-large-02VMNic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"e185e292-7357-4383-80dc-82bcf19fbd7a\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/networkInterfaces/ubuntu-large-02VMNic/ipConfigurations/ipconfigubuntu-large-02",
+        "name": "ipconfigubuntu-large-02",
+        "primary": true,
+        "privateIPAddress": "10.0.0.6",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/publicIPAddresses/ubuntu-large-02PublicIP",
+          "resourceGroup": "rg-ubuntu-ssh-20260806"
+        },
+        "resourceGroup": "rg-ubuntu-ssh-20260806",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/virtualNetworks/ubuntu-ssh-01VNET/subnets/ubuntu-ssh-01Subnet",
+          "resourceGroup": "rg-ubuntu-ssh-20260806"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "eastus2",
+    "macAddress": "7C-1E-52-BE-D1-CD",
+    "name": "ubuntu-large-02VMNic",
+    "networkSecurityGroup": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/networkSecurityGroups/ubuntu-large-02NSG",
+      "resourceGroup": "rg-ubuntu-ssh-20260806"
+    },
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-ubuntu-ssh-20260806",
+    "resourceGuid": "64abb2ad-695d-4a90-a52c-3aa0b2affeac",
+    "tags": {},
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Compute/virtualMachines/ubuntu-large-02",
+      "resourceGroup": "rg-ubuntu-ssh-20260806"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "4gvmw2pkkpcutpq3m0obko2pxd.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"9aa186e1-8dea-4d7f-87c4-4eec6c05e3f8\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/networkInterfaces/tb-fleet-0-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"9aa186e1-8dea-4d7f-87c4-4eec6c05e3f8\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/networkInterfaces/tb-fleet-0-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/publicIPAddresses/tb-fleet-0-pip",
+          "resourceGroup": "rg-tb-fleet-0"
+        },
+        "resourceGroup": "rg-tb-fleet-0",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/virtualNetworks/tb-fleet-0-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-0"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "60-45-BD-AA-58-98",
+    "name": "tb-fleet-0-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-0",
+    "resourceGuid": "737b8b66-2c99-4f64-8cf7-689a88eeb63b",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Compute/virtualMachines/tb-fleet-0",
+      "resourceGroup": "rg-tb-fleet-0"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "3yp3kndjmy1utjknwg01ngcozf.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"9f8bb41b-f29c-4b75-a3d1-eac8608ca44b\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/networkInterfaces/tb-fleet-1-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"9f8bb41b-f29c-4b75-a3d1-eac8608ca44b\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/networkInterfaces/tb-fleet-1-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/publicIPAddresses/tb-fleet-1-pip",
+          "resourceGroup": "rg-tb-fleet-1"
+        },
+        "resourceGroup": "rg-tb-fleet-1",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/virtualNetworks/tb-fleet-1-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-1"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "7C-1E-52-3F-B8-8C",
+    "name": "tb-fleet-1-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-1",
+    "resourceGuid": "87f21615-439f-424e-bd5d-c2c006d61a2e",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Compute/virtualMachines/tb-fleet-1",
+      "resourceGroup": "rg-tb-fleet-1"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "1o2pfkkb0rpurl2xjgwqg3imbf.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"ec6e4815-664c-4ed7-83ae-d0c693d9cdbe\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/networkInterfaces/tb-fleet-2-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"ec6e4815-664c-4ed7-83ae-d0c693d9cdbe\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/networkInterfaces/tb-fleet-2-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/publicIPAddresses/tb-fleet-2-pip",
+          "resourceGroup": "rg-tb-fleet-2"
+        },
+        "resourceGroup": "rg-tb-fleet-2",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/virtualNetworks/tb-fleet-2-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-2"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "7C-ED-8D-B3-5A-E6",
+    "name": "tb-fleet-2-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-2",
+    "resourceGuid": "bae830d9-dcda-4aa6-a30a-a09835de1b31",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Compute/virtualMachines/tb-fleet-2",
+      "resourceGroup": "rg-tb-fleet-2"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "3vntadyi4zvepd4cjqootlkhqe.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"f20ed816-6c0b-4fb8-a9a1-0c06989b25a9\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/networkInterfaces/tb-fleet-4-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"f20ed816-6c0b-4fb8-a9a1-0c06989b25a9\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/networkInterfaces/tb-fleet-4-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/publicIPAddresses/tb-fleet-4-pip",
+          "resourceGroup": "rg-tb-fleet-4"
+        },
+        "resourceGroup": "rg-tb-fleet-4",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/virtualNetworks/tb-fleet-4-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-4"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "7C-1E-52-13-72-0C",
+    "name": "tb-fleet-4-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-4",
+    "resourceGuid": "7322a876-3fd7-4326-b075-181fbcce3c07",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Compute/virtualMachines/tb-fleet-4",
+      "resourceGroup": "rg-tb-fleet-4"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "0r30e0lbx3duhfvqpb5ilwz31h.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"322a51a2-e2b5-4bb0-9b05-f566d08512c2\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/networkInterfaces/tb-fleet-5-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"322a51a2-e2b5-4bb0-9b05-f566d08512c2\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/networkInterfaces/tb-fleet-5-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/publicIPAddresses/tb-fleet-5-pip",
+          "resourceGroup": "rg-tb-fleet-5"
+        },
+        "resourceGroup": "rg-tb-fleet-5",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/virtualNetworks/tb-fleet-5-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-5"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "7C-ED-8D-B3-D3-80",
+    "name": "tb-fleet-5-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-5",
+    "resourceGuid": "cf295db1-1701-4d22-92f9-560e242eebbb",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Compute/virtualMachines/tb-fleet-5",
+      "resourceGroup": "rg-tb-fleet-5"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "nipn4ed3skaupbjricghsaklle.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"53a230d5-1331-40d5-9601-da5ba632e981\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/networkInterfaces/tb-fleet-6-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"53a230d5-1331-40d5-9601-da5ba632e981\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/networkInterfaces/tb-fleet-6-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/publicIPAddresses/tb-fleet-6-pip",
+          "resourceGroup": "rg-tb-fleet-6"
+        },
+        "resourceGroup": "rg-tb-fleet-6",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/virtualNetworks/tb-fleet-6-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-6"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "70-A8-A5-52-E2-35",
+    "name": "tb-fleet-6-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-6",
+    "resourceGuid": "dea12281-0572-4037-8acb-a1941441ecd2",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Compute/virtualMachines/tb-fleet-6",
+      "resourceGroup": "rg-tb-fleet-6"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "gnvbjte50okefkmerk4yn2umkc.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"b2b68f4e-608a-433d-854a-2216ceb868e2\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/networkInterfaces/tb-fleet-7-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"b2b68f4e-608a-433d-854a-2216ceb868e2\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/networkInterfaces/tb-fleet-7-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/publicIPAddresses/tb-fleet-7-pip",
+          "resourceGroup": "rg-tb-fleet-7"
+        },
+        "resourceGroup": "rg-tb-fleet-7",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/virtualNetworks/tb-fleet-7-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-7"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "7C-ED-8D-AD-E0-B2",
+    "name": "tb-fleet-7-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-7",
+    "resourceGuid": "9447dc6d-d4e7-42e4-9349-5ab4ab116ab6",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Compute/virtualMachines/tb-fleet-7",
+      "resourceGroup": "rg-tb-fleet-7"
+    },
+    "vnetEncryptionSupported": false
+  },
+  {
+    "auxiliaryMode": "None",
+    "auxiliarySku": "None",
+    "disableTcpStateTracking": false,
+    "dnsSettings": {
+      "appliedDnsServers": [],
+      "dnsServers": [],
+      "internalDomainNameSuffix": "ijxuxzcexx3uldzybewhixil4g.gvxx.internal.cloudapp.net"
+    },
+    "enableAcceleratedNetworking": true,
+    "enableIPForwarding": false,
+    "etag": "W/\"1a49cb22-b24f-4fc2-91d7-c0d0279671dd\"",
+    "hostedWorkloads": [],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/networkInterfaces/tb-fleet-8-nic",
+    "ipConfigurations": [
+      {
+        "etag": "W/\"1a49cb22-b24f-4fc2-91d7-c0d0279671dd\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/networkInterfaces/tb-fleet-8-nic/ipConfigurations/ipconfig1",
+        "name": "ipconfig1",
+        "primary": true,
+        "privateIPAddress": "10.20.0.4",
+        "privateIPAddressVersion": "IPv4",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/publicIPAddresses/tb-fleet-8-pip",
+          "resourceGroup": "rg-tb-fleet-8"
+        },
+        "resourceGroup": "rg-tb-fleet-8",
+        "subnet": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/virtualNetworks/tb-fleet-8-vnet/subnets/default",
+          "resourceGroup": "rg-tb-fleet-8"
+        },
+        "type": "Microsoft.Network/networkInterfaces/ipConfigurations"
+      }
+    ],
+    "location": "swedencentral",
+    "macAddress": "7C-ED-8D-AE-2B-AE",
+    "name": "tb-fleet-8-nic",
+    "nicType": "Standard",
+    "primary": true,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-tb-fleet-8",
+    "resourceGuid": "4900f96c-c52d-43de-8b47-fcc14eae888d",
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "tapConfigurations": [],
+    "type": "Microsoft.Network/networkInterfaces",
+    "virtualMachine": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Compute/virtualMachines/tb-fleet-8",
+      "resourceGroup": "rg-tb-fleet-8"
+    },
+    "vnetEncryptionSupported": false
+  }
+]

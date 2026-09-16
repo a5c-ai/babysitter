@@ -1,0 +1,72 @@
+[
+  {
+    "creationDate": "2026-06-09T09:18:43.256364+00:00",
+    "credentials": {
+      "certificates": null,
+      "passwords": [
+        {
+          "creationTime": "2026-06-09T09:18:56.863150+00:00",
+          "expiry": null,
+          "name": "password1",
+          "value": null
+        },
+        {
+          "creationTime": "2026-06-09T09:18:56.863259+00:00",
+          "expiry": null,
+          "name": "password2",
+          "value": null
+        }
+      ]
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/tokens/content-studio-ci",
+    "name": "content-studio-ci",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "scopeMapId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/content-studio-ci-scope-map",
+    "status": "enabled",
+    "systemData": {
+      "createdAt": "2026-06-09T09:18:43.228688+00:00",
+      "createdBy": "benihakak@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2026-06-09T09:18:43.228688+00:00",
+      "lastModifiedBy": "benihakak@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "type": "Microsoft.ContainerRegistry/registries/tokens"
+  },
+  {
+    "creationDate": "2026-08-03T17:15:51.261637+00:00",
+    "credentials": {
+      "certificates": null,
+      "passwords": [
+        {
+          "creationTime": "2026-09-05T14:07:26.067881+00:00",
+          "expiry": "2027-09-05T14:07:23.404355+00:00",
+          "name": "password1",
+          "value": null
+        },
+        {
+          "creationTime": "2026-09-05T05:51:34.695038+00:00",
+          "expiry": null,
+          "name": "password2",
+          "value": null
+        }
+      ]
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/tokens/aks-pull",
+    "name": "aks-pull",
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "scopeMapId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerRegistry/registries/acrhubdevelopmentwestus3/scopeMaps/_repositories_pull",
+    "status": "enabled",
+    "systemData": {
+      "createdAt": "2026-08-03T17:15:51.231725+00:00",
+      "createdBy": "tmuskal@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2026-08-03T17:15:51.231725+00:00",
+      "lastModifiedBy": "tmuskal@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "type": "Microsoft.ContainerRegistry/registries/tokens"
+  }
+]

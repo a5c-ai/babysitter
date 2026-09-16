@@ -1,0 +1,69 @@
+[
+  {
+    "accessKeys": null,
+    "disableAccessKeyAuthentication": false,
+    "enableNonSslPort": false,
+    "hostName": "geekonomy-redis-mkb5l5.redis.cache.windows.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.Cache/Redis/geekonomy-redis-mkb5l5",
+    "identity": null,
+    "instances": [
+      {
+        "isMaster": true,
+        "isPrimary": true,
+        "nonSslPort": null,
+        "shardId": null,
+        "sslPort": 15000,
+        "zone": null
+      }
+    ],
+    "linkedServers": [],
+    "location": "North Europe",
+    "minimumTlsVersion": "1.2",
+    "name": "geekonomy-redis-mkb5l5",
+    "port": 6379,
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "redisConfiguration": {
+      "aadEnabled": null,
+      "additionalProperties": null,
+      "aofBackupEnabled": null,
+      "aofStorageConnectionString0": null,
+      "aofStorageConnectionString1": null,
+      "authnotrequired": null,
+      "maxclients": "256",
+      "maxfragmentationmemoryReserved": "30",
+      "maxmemoryDelta": "30",
+      "maxmemoryPolicy": null,
+      "maxmemoryReserved": "30",
+      "notifyKeyspaceEvents": null,
+      "preferredDataArchiveAuthMethod": null,
+      "preferredDataPersistenceAuthMethod": null,
+      "rdbBackupEnabled": null,
+      "rdbBackupFrequency": null,
+      "rdbBackupMaxSnapshotCount": null,
+      "rdbStorageConnectionString": null,
+      "storageSubscriptionId": null,
+      "zonalConfiguration": null
+    },
+    "redisVersion": "6.0",
+    "replicasPerMaster": null,
+    "replicasPerPrimary": null,
+    "resourceGroup": "geekonomy-prod",
+    "shardCount": null,
+    "sku": {
+      "capacity": 0,
+      "family": "C",
+      "name": "Basic"
+    },
+    "sslPort": 6380,
+    "staticIp": null,
+    "subnetId": null,
+    "tags": {},
+    "tenantSettings": null,
+    "type": "Microsoft.Cache/Redis",
+    "updateChannel": "Stable",
+    "zonalAllocationPolicy": null,
+    "zones": null
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2025-08-03T07:24:51.4703244Z",
+  "imageName": "hub/github-runner",
+  "lastUpdateTime": "2026-08-27T10:05:14.9918309Z",
+  "manifestCount": 10,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

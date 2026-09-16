@@ -1,0 +1,90 @@
+ERROR: The command failed with an unexpected error. Here is the traceback:
+ERROR: EOF when reading a line
+Traceback (most recent call last):
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/cli.py", line 233, in invoke
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/__init__.py", line 591, in execute
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/parser.py", line 261, in parse_args
+  File "argparse.py", line 1904, in parse_args
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/parser.py", line 281, in parse_known_args
+  File "argparse.py", line 1914, in parse_known_args
+  File "argparse.py", line 1943, in _parse_known_args2WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+WARNING: The command requires the extension ml. It will be installed first.
+WARNING: Extension 'ml' None is already installed.
+WARNING: It will be overridden with version 2.45.0.
+ERROR: An error occurred whilst updating.
+ERROR: An error occurred. Pip failed with status code 3221225794. Use --debug for more information.
+ERROR: Failed to update. Rolled ml back to None.

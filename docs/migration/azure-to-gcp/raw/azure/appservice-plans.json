@@ -1,0 +1,42 @@
+[
+  {
+    "elasticScaleEnabled": false,
+    "extendedLocation": null,
+    "freeOfferExpirationTime": null,
+    "hostingEnvironmentProfile": null,
+    "hyperV": false,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-promoted-idle/providers/Microsoft.Web/serverfarms/asp-promoted-idle",
+    "isSpot": false,
+    "isXenon": false,
+    "kind": "linux",
+    "kubeEnvironmentProfile": null,
+    "location": "East US",
+    "maximumElasticWorkerCount": 1,
+    "maximumNumberOfWorkers": 1,
+    "name": "asp-promoted-idle",
+    "numberOfSites": 1,
+    "numberOfWorkers": 1,
+    "perSiteScaling": false,
+    "provisioningState": null,
+    "reserved": true,
+    "resourceGroup": "rg-promoted-idle",
+    "sku": {
+      "capabilities": null,
+      "capacity": 1,
+      "family": "F",
+      "locations": null,
+      "name": "F1",
+      "size": "F1",
+      "skuCapacity": null,
+      "tier": "Free"
+    },
+    "spotExpirationTime": null,
+    "status": "Ready",
+    "tags": null,
+    "targetWorkerCount": 0,
+    "targetWorkerSizeId": 0,
+    "type": "Microsoft.Web/serverfarms",
+    "workerTierName": null,
+    "zoneRedundant": false
+  }
+]

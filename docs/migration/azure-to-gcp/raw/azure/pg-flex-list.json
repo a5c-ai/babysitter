@@ -1,0 +1,432 @@
+[
+  {
+    "administratorLogin": "geekonomy",
+    "administratorLoginPassword": null,
+    "authConfig": {
+      "activeDirectoryAuth": "Disabled",
+      "passwordAuth": "Enabled",
+      "tenantId": null
+    },
+    "availabilityZone": "1",
+    "backup": {
+      "backupRetentionDays": 7,
+      "earliestRestoreDate": "2026-09-09T14:50:48.637954+00:00",
+      "geoRedundantBackup": "Disabled"
+    },
+    "cluster": null,
+    "createMode": null,
+    "dataEncryption": {
+      "geoBackupEncryptionKeyStatus": null,
+      "geoBackupKeyUri": null,
+      "geoBackupUserAssignedIdentityId": null,
+      "primaryEncryptionKeyStatus": null,
+      "primaryKeyUri": null,
+      "primaryUserAssignedIdentityId": null,
+      "type": "SystemManaged"
+    },
+    "fullyQualifiedDomainName": "geekonomy-pg-mkb5l5.postgres.database.azure.com",
+    "highAvailability": {
+      "mode": "Disabled",
+      "standbyAvailabilityZone": null,
+      "state": "NotEnabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5",
+    "identity": null,
+    "location": "North Europe",
+    "maintenanceWindow": {
+      "customWindow": "Disabled",
+      "dayOfWeek": 0,
+      "startHour": 0,
+      "startMinute": 0
+    },
+    "minorVersion": "15",
+    "name": "geekonomy-pg-mkb5l5",
+    "network": {
+      "delegatedSubnetResourceId": null,
+      "privateDnsZoneArmResourceId": null,
+      "publicNetworkAccess": "Enabled"
+    },
+    "pointInTimeUtc": null,
+    "privateEndpointConnections": [],
+    "replica": {
+      "capacity": 5,
+      "promoteMode": null,
+      "promoteOption": null,
+      "replicationState": null,
+      "role": "Primary"
+    },
+    "replicaCapacity": 5,
+    "replicationRole": "Primary",
+    "resourceGroup": "geekonomy-prod",
+    "sku": {
+      "name": "Standard_B1ms",
+      "tier": "Burstable"
+    },
+    "sourceServerResourceId": null,
+    "state": "Ready",
+    "storage": {
+      "autoGrow": "Disabled",
+      "iops": 120,
+      "storageSizeGb": 32,
+      "throughput": null,
+      "tier": "P4",
+      "type": "Premium_LRS"
+    },
+    "systemData": {
+      "createdAt": "2026-01-06T11:03:36.454092+00:00",
+      "createdBy": null,
+      "createdByType": null,
+      "lastModifiedAt": null,
+      "lastModifiedBy": null,
+      "lastModifiedByType": null
+    },
+    "tags": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+    "version": "16"
+  },
+  {
+    "administratorLogin": "litellm",
+    "administratorLoginPassword": null,
+    "authConfig": {
+      "activeDirectoryAuth": "Disabled",
+      "passwordAuth": "Enabled",
+      "tenantId": null
+    },
+    "availabilityZone": "1",
+    "backup": {
+      "backupRetentionDays": 7,
+      "earliestRestoreDate": "2026-09-09T22:57:44.184893+00:00",
+      "geoRedundantBackup": "Disabled"
+    },
+    "cluster": null,
+    "createMode": null,
+    "dataEncryption": {
+      "geoBackupEncryptionKeyStatus": null,
+      "geoBackupKeyUri": null,
+      "geoBackupUserAssignedIdentityId": null,
+      "primaryEncryptionKeyStatus": null,
+      "primaryKeyUri": null,
+      "primaryUserAssignedIdentityId": null,
+      "type": "SystemManaged"
+    },
+    "fullyQualifiedDomainName": "litellm-pgdb.postgres.database.azure.com",
+    "highAvailability": {
+      "mode": "Disabled",
+      "standbyAvailabilityZone": null,
+      "state": "NotEnabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb",
+    "identity": null,
+    "location": "Sweden Central",
+    "maintenanceWindow": {
+      "customWindow": "Disabled",
+      "dayOfWeek": 0,
+      "startHour": 0,
+      "startMinute": 0
+    },
+    "minorVersion": "15",
+    "name": "litellm-pgdb",
+    "network": {
+      "delegatedSubnetResourceId": null,
+      "privateDnsZoneArmResourceId": null,
+      "publicNetworkAccess": "Enabled"
+    },
+    "pointInTimeUtc": null,
+    "privateEndpointConnections": [],
+    "replica": {
+      "capacity": 5,
+      "promoteMode": null,
+      "promoteOption": null,
+      "replicationState": null,
+      "role": "Primary"
+    },
+    "replicaCapacity": 5,
+    "replicationRole": "Primary",
+    "resourceGroup": "rg-litellm-proxy",
+    "sku": {
+      "name": "Standard_B1ms",
+      "tier": "Burstable"
+    },
+    "sourceServerResourceId": null,
+    "state": "Ready",
+    "storage": {
+      "autoGrow": "Disabled",
+      "iops": 120,
+      "storageSizeGb": 32,
+      "throughput": null,
+      "tier": "P4",
+      "type": "Premium_LRS"
+    },
+    "systemData": {
+      "createdAt": "2026-02-15T19:14:12.379092+00:00",
+      "createdBy": null,
+      "createdByType": null,
+      "lastModifiedAt": null,
+      "lastModifiedBy": null,
+      "lastModifiedByType": null
+    },
+    "tags": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+    "version": "16"
+  },
+  {
+    "administratorLogin": "litellm",
+    "administratorLoginPassword": null,
+    "authConfig": {
+      "activeDirectoryAuth": "Disabled",
+      "passwordAuth": "Enabled",
+      "tenantId": null
+    },
+    "availabilityZone": "1",
+    "backup": {
+      "backupRetentionDays": 7,
+      "earliestRestoreDate": "2026-09-09T08:16:06.846717+00:00",
+      "geoRedundantBackup": "Disabled"
+    },
+    "cluster": null,
+    "createMode": null,
+    "dataEncryption": {
+      "geoBackupEncryptionKeyStatus": null,
+      "geoBackupKeyUri": null,
+      "geoBackupUserAssignedIdentityId": null,
+      "primaryEncryptionKeyStatus": null,
+      "primaryKeyUri": null,
+      "primaryUserAssignedIdentityId": null,
+      "type": "SystemManaged"
+    },
+    "fullyQualifiedDomainName": "litellm-pgdb2.postgres.database.azure.com",
+    "highAvailability": {
+      "mode": "Disabled",
+      "standbyAvailabilityZone": null,
+      "state": "NotEnabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb2",
+    "identity": null,
+    "location": "Sweden Central",
+    "maintenanceWindow": {
+      "customWindow": "Disabled",
+      "dayOfWeek": 0,
+      "startHour": 0,
+      "startMinute": 0
+    },
+    "minorVersion": "15",
+    "name": "litellm-pgdb2",
+    "network": {
+      "delegatedSubnetResourceId": null,
+      "privateDnsZoneArmResourceId": null,
+      "publicNetworkAccess": "Enabled"
+    },
+    "pointInTimeUtc": null,
+    "privateEndpointConnections": [],
+    "replica": {
+      "capacity": 5,
+      "promoteMode": null,
+      "promoteOption": null,
+      "replicationState": null,
+      "role": "Primary"
+    },
+    "replicaCapacity": 5,
+    "replicationRole": "Primary",
+    "resourceGroup": "rg-litellm-proxy",
+    "sku": {
+      "name": "Standard_B1ms",
+      "tier": "Burstable"
+    },
+    "sourceServerResourceId": null,
+    "state": "Ready",
+    "storage": {
+      "autoGrow": "Disabled",
+      "iops": 120,
+      "storageSizeGb": 32,
+      "throughput": null,
+      "tier": "P4",
+      "type": "Premium_LRS"
+    },
+    "systemData": {
+      "createdAt": "2026-08-05T07:58:34.194899+00:00",
+      "createdBy": null,
+      "createdByType": null,
+      "lastModifiedAt": null,
+      "lastModifiedBy": null,
+      "lastModifiedByType": null
+    },
+    "tags": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+    "version": "16"
+  },
+  {
+    "administratorLogin": "aeqadmin",
+    "administratorLoginPassword": null,
+    "authConfig": {
+      "activeDirectoryAuth": "Disabled",
+      "passwordAuth": "Enabled",
+      "tenantId": null
+    },
+    "availabilityZone": "2",
+    "backup": {
+      "backupRetentionDays": 7,
+      "earliestRestoreDate": "2026-09-09T20:23:49.165276+00:00",
+      "geoRedundantBackup": "Disabled"
+    },
+    "cluster": null,
+    "createMode": null,
+    "dataEncryption": {
+      "geoBackupEncryptionKeyStatus": null,
+      "geoBackupKeyUri": null,
+      "geoBackupUserAssignedIdentityId": null,
+      "primaryEncryptionKeyStatus": null,
+      "primaryKeyUri": null,
+      "primaryUserAssignedIdentityId": null,
+      "type": "SystemManaged"
+    },
+    "fullyQualifiedDomainName": "aeqpg0316203042.postgres.database.azure.com",
+    "highAvailability": {
+      "mode": "Disabled",
+      "standbyAvailabilityZone": null,
+      "state": "NotEnabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.DBforPostgreSQL/flexibleServers/aeqpg0316203042",
+    "identity": null,
+    "location": "West US 3",
+    "maintenanceWindow": {
+      "customWindow": "Disabled",
+      "dayOfWeek": 0,
+      "startHour": 0,
+      "startMinute": 0
+    },
+    "minorVersion": "15",
+    "name": "aeqpg0316203042",
+    "network": {
+      "delegatedSubnetResourceId": null,
+      "privateDnsZoneArmResourceId": null,
+      "publicNetworkAccess": "Enabled"
+    },
+    "pointInTimeUtc": null,
+    "privateEndpointConnections": [],
+    "replica": {
+      "capacity": 5,
+      "promoteMode": null,
+      "promoteOption": null,
+      "replicationState": null,
+      "role": "Primary"
+    },
+    "replicaCapacity": 5,
+    "replicationRole": "Primary",
+    "resourceGroup": "rg-hub-development-westus3",
+    "sku": {
+      "name": "Standard_B1ms",
+      "tier": "Burstable"
+    },
+    "sourceServerResourceId": null,
+    "state": "Ready",
+    "storage": {
+      "autoGrow": "Disabled",
+      "iops": 120,
+      "storageSizeGb": 32,
+      "throughput": null,
+      "tier": "P4",
+      "type": "Premium_LRS"
+    },
+    "systemData": {
+      "createdAt": "2026-03-16T18:31:01.634217+00:00",
+      "createdBy": null,
+      "createdByType": null,
+      "lastModifiedAt": null,
+      "lastModifiedBy": null,
+      "lastModifiedByType": null
+    },
+    "tags": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+    "version": "16"
+  },
+  {
+    "administratorLogin": "hub_admin",
+    "administratorLoginPassword": null,
+    "authConfig": {
+      "activeDirectoryAuth": "Disabled",
+      "passwordAuth": "Enabled",
+      "tenantId": null
+    },
+    "availabilityZone": "1",
+    "backup": {
+      "backupRetentionDays": 7,
+      "earliestRestoreDate": "2026-09-09T17:17:33.347802+00:00",
+      "geoRedundantBackup": "Disabled"
+    },
+    "cluster": null,
+    "createMode": null,
+    "dataEncryption": {
+      "geoBackupEncryptionKeyStatus": null,
+      "geoBackupKeyUri": null,
+      "geoBackupUserAssignedIdentityId": null,
+      "primaryEncryptionKeyStatus": null,
+      "primaryKeyUri": null,
+      "primaryUserAssignedIdentityId": null,
+      "type": "SystemManaged"
+    },
+    "fullyQualifiedDomainName": "psql-hub-development-westus3-v2.postgres.database.azure.com",
+    "highAvailability": {
+      "mode": "Disabled",
+      "standbyAvailabilityZone": null,
+      "state": "NotEnabled"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.DBforPostgreSQL/flexibleServers/psql-hub-development-westus3-v2",
+    "identity": null,
+    "location": "West US 3",
+    "maintenanceWindow": {
+      "customWindow": "Disabled",
+      "dayOfWeek": 0,
+      "startHour": 0,
+      "startMinute": 0
+    },
+    "minorVersion": "19",
+    "name": "psql-hub-development-westus3-v2",
+    "network": {
+      "delegatedSubnetResourceId": null,
+      "privateDnsZoneArmResourceId": null,
+      "publicNetworkAccess": "Enabled"
+    },
+    "pointInTimeUtc": null,
+    "privateEndpointConnections": [],
+    "replica": {
+      "capacity": 5,
+      "promoteMode": null,
+      "promoteOption": null,
+      "replicationState": null,
+      "role": "Primary"
+    },
+    "replicaCapacity": 5,
+    "replicationRole": "Primary",
+    "resourceGroup": "rg-hub-development-westus3",
+    "sku": {
+      "name": "Standard_B1ms",
+      "tier": "Burstable"
+    },
+    "sourceServerResourceId": null,
+    "state": "Ready",
+    "storage": {
+      "autoGrow": "Disabled",
+      "iops": 120,
+      "storageSizeGb": 32,
+      "throughput": null,
+      "tier": "P4",
+      "type": "Premium_LRS"
+    },
+    "systemData": {
+      "createdAt": "2025-07-30T12:01:15.403058+00:00",
+      "createdBy": null,
+      "createdByType": null,
+      "lastModifiedAt": null,
+      "lastModifiedBy": null,
+      "lastModifiedByType": null
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+    "version": "15"
+  }
+]

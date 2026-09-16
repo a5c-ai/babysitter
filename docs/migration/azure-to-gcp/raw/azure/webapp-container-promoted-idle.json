@@ -1,0 +1,6 @@
+[
+  {
+    "name": "DOCKER_CUSTOM_IMAGE_NAME",
+    "value": "NODE|20-lts"
+  }
+]

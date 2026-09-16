@@ -1,0 +1,15 @@
+[
+  {
+    "accessTier": "TransactionOptimized",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DD48F7132A0955\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Storage/storageAccounts/sttmuskal214530339506822/fileServices/default/shares/b2236fd8-d083-4283-a408-a4e4a5b6b381-code",
+    "lastModifiedTime": "2025-02-09T10:46:57.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "b2236fd8-d083-4283-a408-a4e4a5b6b381-code",
+    "resourceGroup": "personoids_sponsorship",
+    "shareQuota": 102400,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  }
+]

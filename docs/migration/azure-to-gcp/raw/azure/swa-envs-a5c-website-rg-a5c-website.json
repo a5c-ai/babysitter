@@ -1,0 +1,20 @@
+[
+  {
+    "buildId": "default",
+    "createdTimeUtc": "2025-05-08T08:20:19.649182+00:00",
+    "databaseConnections": [],
+    "hostname": "agreeable-sea-01b46490f.6.azurestaticapps.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-website-rg/providers/Microsoft.Web/staticSites/a5c-website/builds/default",
+    "kind": null,
+    "lastUpdatedOn": "2025-05-08T10:25:25.840155+00:00",
+    "linkedBackends": [],
+    "location": "East US 2",
+    "name": "default",
+    "pullRequestTitle": null,
+    "resourceGroup": "a5c-website-rg",
+    "sourceBranch": "main",
+    "status": "Ready",
+    "type": "Microsoft.Web/staticSitesbuilds",
+    "userProvidedFunctionApps": null
+  }
+]

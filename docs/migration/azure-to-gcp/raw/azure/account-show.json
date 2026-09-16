@@ -1,0 +1,14 @@
+{
+  "environmentName": "AzureCloud",
+  "homeTenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+  "id": "794e33cd-48ba-4654-8cd9-b6cf2715e097",
+  "isDefault": true,
+  "managedByTenants": [],
+  "name": "Microsoft Azure Sponsorship",
+  "state": "Enabled",
+  "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+  "user": {
+    "name": "tmuskal@gmail.com",
+    "type": "user"
+  }
+}

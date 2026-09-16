@@ -1,0 +1,459 @@
+[
+  {
+    "backendAddressPools": [
+      {
+        "backendIPConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/0/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/1/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/2/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/5/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/aksOutboundBackendPool",
+        "loadBalancerBackendAddresses": [
+          {
+            "name": "91b2d179-a767-4014-8c90-54adb4a3ff49",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/0/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          },
+          {
+            "name": "46310da0-d3e1-477f-923f-bbba7f830bfb",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/1/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          },
+          {
+            "name": "010c4c45-17ea-49a5-8292-54194effc4f8",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/2/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          },
+          {
+            "name": "5109e423-eec3-43ef-afe0-c12559a60a4c",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/5/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          }
+        ],
+        "name": "aksOutboundBackendPool",
+        "outboundRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/outboundRules/aksOutboundRule",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/backendAddressPools"
+      },
+      {
+        "backendIPConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/0/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/1/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/2/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/5/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+            "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+        "loadBalancerBackendAddresses": [
+          {
+            "name": "d1771672-dd0a-42c8-b1aa-e8f0e04cbc63",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/0/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          },
+          {
+            "name": "af426ae0-4d5b-48bf-9bf7-bf25dc9c6b29",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/1/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          },
+          {
+            "name": "5fe07ffb-a683-4e28-b304-59621a130494",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/2/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          },
+          {
+            "name": "4645e648-b969-4343-a970-3329a4f92d74",
+            "networkInterfaceIPConfiguration": {
+              "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/5/networkInterfaces/aks-default-28513622-vmss/ipConfigurations/ipconfig1",
+              "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-80",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-443",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "name": "kubernetes",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/backendAddressPools"
+      }
+    ],
+    "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+    "frontendIPConfigurations": [
+      {
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/f964f80d-c985-48f4-9e03-14d7bed85be9",
+        "name": "f964f80d-c985-48f4-9e03-14d7bed85be9",
+        "outboundRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/outboundRules/aksOutboundRule",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/f964f80d-c985-48f4-9e03-14d7bed85be9",
+          "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/frontendIPConfigurations"
+      },
+      {
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a77bc58099d654cca998ddc8832f3dbf",
+        "loadBalancingRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "name": "a77bc58099d654cca998ddc8832f3dbf",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/kubernetes-a77bc58099d654cca998ddc8832f3dbf",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/frontendIPConfigurations"
+      },
+      {
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a92fa767804c1424a983f3aa36c99dd5",
+        "loadBalancingRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-80",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-443",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "name": "a92fa767804c1424a983f3aa36c99dd5",
+        "privateIPAllocationMethod": "Dynamic",
+        "provisioningState": "Succeeded",
+        "publicIPAddress": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/kubernetes-a92fa767804c1424a983f3aa36c99dd5",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/frontendIPConfigurations"
+      }
+    ],
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes",
+    "inboundNatPools": [],
+    "inboundNatRules": [],
+    "loadBalancingRules": [
+      {
+        "backendAddressPool": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "backendAddressPools": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "backendPort": 80,
+        "disableOutboundSnat": true,
+        "enableFloatingIP": true,
+        "enableTcpReset": true,
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "frontendIPConfiguration": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a77bc58099d654cca998ddc8832f3dbf",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "frontendPort": 80,
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+        "idleTimeoutInMinutes": 4,
+        "loadDistribution": "Default",
+        "name": "a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+        "probe": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "protocol": "Tcp",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/loadBalancingRules"
+      },
+      {
+        "backendAddressPool": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "backendAddressPools": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "backendPort": 443,
+        "disableOutboundSnat": true,
+        "enableFloatingIP": true,
+        "enableTcpReset": true,
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "frontendIPConfiguration": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a77bc58099d654cca998ddc8832f3dbf",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "frontendPort": 443,
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+        "idleTimeoutInMinutes": 4,
+        "loadDistribution": "Default",
+        "name": "a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+        "probe": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "protocol": "Tcp",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/loadBalancingRules"
+      },
+      {
+        "backendAddressPool": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "backendAddressPools": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "backendPort": 80,
+        "disableOutboundSnat": true,
+        "enableFloatingIP": true,
+        "enableTcpReset": true,
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "frontendIPConfiguration": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a92fa767804c1424a983f3aa36c99dd5",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "frontendPort": 80,
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-80",
+        "idleTimeoutInMinutes": 4,
+        "loadDistribution": "Default",
+        "name": "a92fa767804c1424a983f3aa36c99dd5-TCP-80",
+        "probe": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a92fa767804c1424a983f3aa36c99dd5-TCP-30150",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "protocol": "Tcp",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/loadBalancingRules"
+      },
+      {
+        "backendAddressPool": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "backendAddressPools": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/kubernetes",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "backendPort": 443,
+        "disableOutboundSnat": true,
+        "enableFloatingIP": true,
+        "enableTcpReset": true,
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "frontendIPConfiguration": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a92fa767804c1424a983f3aa36c99dd5",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "frontendPort": 443,
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-443",
+        "idleTimeoutInMinutes": 4,
+        "loadDistribution": "Default",
+        "name": "a92fa767804c1424a983f3aa36c99dd5-TCP-443",
+        "probe": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a92fa767804c1424a983f3aa36c99dd5-TCP-30150",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "protocol": "Tcp",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/loadBalancingRules"
+      }
+    ],
+    "location": "westus3",
+    "name": "kubernetes",
+    "outboundRules": [
+      {
+        "allocatedOutboundPorts": 0,
+        "backendAddressPool": {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/backendAddressPools/aksOutboundBackendPool",
+          "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+        },
+        "enableTcpReset": true,
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "frontendIPConfigurations": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/f964f80d-c985-48f4-9e03-14d7bed85be9",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/outboundRules/aksOutboundRule",
+        "idleTimeoutInMinutes": 30,
+        "name": "aksOutboundRule",
+        "protocol": "All",
+        "provisioningState": "Succeeded",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/outboundRules"
+      }
+    ],
+    "probes": [
+      {
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+        "intervalInSeconds": 5,
+        "loadBalancingRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "name": "a77bc58099d654cca998ddc8832f3dbf-TCP-80",
+        "numberOfProbes": 2,
+        "port": 30110,
+        "probeThreshold": 2,
+        "protocol": "Http",
+        "provisioningState": "Succeeded",
+        "requestPath": "/healthz",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/probes"
+      },
+      {
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+        "intervalInSeconds": 5,
+        "loadBalancingRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "name": "a77bc58099d654cca998ddc8832f3dbf-TCP-443",
+        "numberOfProbes": 2,
+        "port": 31336,
+        "probeThreshold": 2,
+        "protocol": "Https",
+        "provisioningState": "Succeeded",
+        "requestPath": "/healthz",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/probes"
+      },
+      {
+        "etag": "W/\"86a2b933-56aa-4ac7-8152-ef90f496c384\"",
+        "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/probes/a92fa767804c1424a983f3aa36c99dd5-TCP-30150",
+        "intervalInSeconds": 5,
+        "loadBalancingRules": [
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-80",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          },
+          {
+            "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/loadBalancingRules/a92fa767804c1424a983f3aa36c99dd5-TCP-443",
+            "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+          }
+        ],
+        "name": "a92fa767804c1424a983f3aa36c99dd5-TCP-30150",
+        "numberOfProbes": 2,
+        "port": 30150,
+        "probeThreshold": 2,
+        "protocol": "Http",
+        "provisioningState": "Succeeded",
+        "requestPath": "/healthz",
+        "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+        "type": "Microsoft.Network/loadBalancers/probes"
+      }
+    ],
+    "provisioningState": "Succeeded",
+    "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "resourceGuid": "812d94d3-3acd-449f-bdf7-8fea7540ddcb",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub",
+      "aks-managed-cluster-name": "aks-hub-development-westus3-v2",
+      "aks-managed-cluster-rg": "rg-hub-development-westus3"
+    },
+    "type": "Microsoft.Network/loadBalancers"
+  }
+]

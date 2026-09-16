@@ -1,0 +1,6 @@
+You do not currently have this command group installed.  Using it 
+requires the installation of components: [alpha]
+
+ERROR: (gcloud) You cannot perform this action because you do not have permission to modify the Google Cloud SDK installation directory [C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk].
+
+Click the Google Cloud SDK Shell icon and re-run the command in that window, or re-run the command with elevated privileges by right-clicking cmd.exe and selecting "Run as Administrator".

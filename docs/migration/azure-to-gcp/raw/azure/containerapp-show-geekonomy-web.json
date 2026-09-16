@@ -1,0 +1,132 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/containerapps/geekonomy-web",
+  "identity": {
+    "type": "None"
+  },
+  "location": "North Europe",
+  "name": "geekonomy-web",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "geekonomy-web.yellowwater-3ed650dd.northeurope.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 3000,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": null,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "acr-password",
+          "server": "geekonomyacrmkb5l5.azurecr.io",
+          "username": "geekonomyacrmkb5l5"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "acr-password"
+        },
+        {
+          "name": "database-url"
+        },
+        {
+          "name": "redis-url"
+        }
+      ],
+      "service": null
+    },
+    "customDomainVerificationId": "C2B425A984517990227CB472406DA5C25A496FB24B772AC0B6E3BC4597F59A3F",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "eventStreamEndpoint": "https://northeurope.azurecontainerapps.dev/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/containerApps/geekonomy-web/eventstream",
+    "latestReadyRevisionName": "geekonomy-web--0000017",
+    "latestRevisionFqdn": "geekonomy-web--0000017.yellowwater-3ed650dd.northeurope.azurecontainerapps.io",
+    "latestRevisionName": "geekonomy-web--0000017",
+    "managedEnvironmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "outboundIpAddresses": [
+      "4.209.31.224"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NODE_ENV",
+              "value": "production"
+            },
+            {
+              "name": "PORT",
+              "value": "3000"
+            },
+            {
+              "name": "DATABASE_SSL",
+              "value": "require"
+            },
+            {
+              "name": "DATABASE_URL",
+              "secretRef": "database-url"
+            },
+            {
+              "name": "REDIS_URL",
+              "secretRef": "redis-url"
+            },
+            {
+              "name": "GEEKONOMY_CONTENT_POLICY",
+              "value": "all"
+            },
+            {
+              "name": "GEEKONOMY_SINGLE_CONTENT_ITEM_ID",
+              "value": ""
+            }
+          ],
+          "image": "geekonomyacrmkb5l5.azurecr.io/geekonomy-web:20260112122343-04da826a",
+          "name": "web",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "maxReplicas": 3,
+        "minReplicas": 0,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": null
+  },
+  "resourceGroup": "geekonomy-prod",
+  "systemData": {
+    "createdAt": "2026-01-06T11:33:46.3055695",
+    "createdBy": "benihakak@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-01-12T12:32:36.1699004",
+    "lastModifiedBy": "benihakak@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}

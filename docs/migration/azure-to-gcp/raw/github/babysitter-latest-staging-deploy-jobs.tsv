@@ -1,0 +1,9 @@
+Deploy Kradle To AKS	completed	success	2026-09-05T14:38
+Validate Kradle	completed	success	2026-09-05T14:33
+Deploy Docs Site	completed	failure	2026-09-05T14:33
+Deploy Atlas WebUI To AKS	completed	success	2026-09-05T14:34
+Kradle E2E Smoke Test	completed	success	2026-09-05T14:39
+G0-RT Live Jitsi E2E	completed	skipped	2026-09-05T14:38
+Publish Foundation - atlas	completed	failure	2026-09-05T14:42
+Deploy Cloud	completed	success	2026-09-05T14:42
+Sync Atlas Plugins	completed	skipped	2026-09-05T14:42

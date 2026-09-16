@@ -1,0 +1,34 @@
+{
+  "value": [
+    {
+      "currentValue": 63886444772,
+      "limit": 107374182400,
+      "name": "Size",
+      "unit": "Bytes"
+    },
+    {
+      "currentValue": 63886444772,
+      "limit": 43980465111040,
+      "name": "MaximumStorageCapacity",
+      "unit": "Bytes"
+    },
+    {
+      "currentValue": 0,
+      "limit": 10,
+      "name": "Webhooks",
+      "unit": "Count"
+    },
+    {
+      "currentValue": 1,
+      "limit": 500,
+      "name": "ScopeMaps",
+      "unit": "Count"
+    },
+    {
+      "currentValue": 2,
+      "limit": 500,
+      "name": "Tokens",
+      "unit": "Count"
+    }
+  ]
+}

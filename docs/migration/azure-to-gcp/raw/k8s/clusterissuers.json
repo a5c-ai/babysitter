@@ -1,0 +1,151 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "ClusterIssuer",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-02-20T15:10:01Z",
+        "generation": 1,
+        "name": "letsencrypt-prod",
+        "resourceVersion": "96989313",
+        "uid": "cbf85e35-4379-4260-a344-d07533f32b39"
+      },
+      "spec": {
+        "acme": {
+          "email": "devops@a5c.ai",
+          "privateKeySecretRef": {
+            "name": "letsencrypt-prod-account-key"
+          },
+          "server": "https://acme-v02.api.letsencrypt.org/directory",
+          "solvers": [
+            {
+              "http01": {
+                "ingress": {
+                  "class": "nginx",
+                  "serviceType": "ClusterIP"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "status": {
+        "acme": {
+          "lastPrivateKeyHash": "yy+4J5vd2kt/8bCS9Sn5GdNmdPseFEfgMAuvUT41uMs=",
+          "lastRegisteredEmail": "devops@a5c.ai"
+        },
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-02-20T15:10:02Z",
+            "message": "The ACME account was registered with the ACME server",
+            "observedGeneration": 1,
+            "reason": "ACMEAccountRegistered",
+            "status": "True",
+            "type": "Ready"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "ClusterIssuer",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-03T21:49:30Z",
+        "generation": 2,
+        "name": "letsencrypt-production",
+        "resourceVersion": "106804710",
+        "uid": "deb4a883-970f-4fa2-83d9-05718fd65402"
+      },
+      "spec": {
+        "acme": {
+          "email": "support@a5c.ai",
+          "privateKeySecretRef": {
+            "name": "letsencrypt-production"
+          },
+          "server": "https://acme-v02.api.letsencrypt.org/directory",
+          "solvers": [
+            {
+              "http01": {
+                "ingress": {
+                  "class": "nginx"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "status": {
+        "acme": {
+          "lastPrivateKeyHash": "cJqze4FEVVr6AZBxwU8SHaySupv4Gj+tVHjZj9tkrtA=",
+          "lastRegisteredEmail": "support@a5c.ai"
+        },
+        "conditions": [
+          {
+            "lastTransitionTime": "2025-08-03T21:49:31Z",
+            "message": "The ACME account was registered with the ACME server",
+            "observedGeneration": 2,
+            "reason": "ACMEAccountRegistered",
+            "status": "True",
+            "type": "Ready"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "ClusterIssuer",
+      "metadata": {
+        "creationTimestamp": "2025-08-03T21:49:30Z",
+        "generation": 2,
+        "name": "letsencrypt-staging",
+        "resourceVersion": "2127505",
+        "uid": "bf4b3219-3c34-4ef8-bc5e-1c479c565645"
+      },
+      "spec": {
+        "acme": {
+          "email": "support@a5c.ai",
+          "privateKeySecretRef": {
+            "name": "letsencrypt-staging"
+          },
+          "server": "https://acme-staging-v02.api.letsencrypt.org/directory",
+          "solvers": [
+            {
+              "http01": {
+                "ingress": {
+                  "class": "nginx"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "status": {
+        "acme": {
+          "lastPrivateKeyHash": "7kgHbdlYTXhA0g8+KZrIcCgWGiRuksOp2J+DPl057gc=",
+          "lastRegisteredEmail": "support@a5c.ai"
+        },
+        "conditions": [
+          {
+            "lastTransitionTime": "2025-08-03T21:49:31Z",
+            "message": "The ACME account was registered with the ACME server",
+            "observedGeneration": 2,
+            "reason": "ACMEAccountRegistered",
+            "status": "True",
+            "type": "Ready"
+          }
+        ]
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

@@ -1,0 +1,4 @@
+WARNING: This command is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus
+ERROR: (400) Billing Period is not supported in (2023-05-01) API Version for Subscription Scope With Web Direct Offer. Please provide the UsageStart and UsageEnd dates in the $filter key as parameters. (Request ID: d9f7f22c-193f-4187-9b8a-6be03fcec199)
+Code: 400
+Message: Billing Period is not supported in (2023-05-01) API Version for Subscription Scope With Web Direct Offer. Please provide the UsageStart and UsageEnd dates in the $filter key as parameters. (Request ID: d9f7f22c-193f-4187-9b8a-6be03fcec199)

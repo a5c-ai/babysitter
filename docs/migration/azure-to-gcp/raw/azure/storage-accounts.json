@@ -1,0 +1,1256 @@
+[
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": true,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2025-03-23T08:35:16.466752+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": false,
+    "dnsEndpointType": "Standard",
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": false,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-03-23T08:35:16.638621+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-03-23T08:35:16.638621+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/DefaultResourceGroup-westus2/providers/Microsoft.Storage/storageAccounts/a5cstatic",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2025-03-23T08:35:16.622995+00:00",
+      "key2": "2025-03-23T08:35:16.622995+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": "Enabled",
+    "lastGeoFailoverTime": null,
+    "location": "eastus",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "a5cstatic",
+    "networkRuleSet": {
+      "bypass": "AzureServices",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://a5cstatic.blob.core.windows.net/",
+      "dfs": "https://a5cstatic.dfs.core.windows.net/",
+      "file": "https://a5cstatic.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://a5cstatic.queue.core.windows.net/",
+      "table": "https://a5cstatic.table.core.windows.net/",
+      "web": "https://a5cstatic.z13.web.core.windows.net/"
+    },
+    "primaryLocation": "eastus",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "DefaultResourceGroup-westus2",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": {
+      "blob": "https://a5cstatic-secondary.blob.core.windows.net/",
+      "dfs": "https://a5cstatic-secondary.dfs.core.windows.net/",
+      "file": null,
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://a5cstatic-secondary.queue.core.windows.net/",
+      "table": "https://a5cstatic-secondary.table.core.windows.net/",
+      "web": "https://a5cstatic-secondary.z13.web.core.windows.net/"
+    },
+    "secondaryLocation": "westus",
+    "sku": {
+      "name": "Standard_RAGRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": "available",
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2025-07-29T21:03:40.756807+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-07-29T21:03:40.913060+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-07-29T21:03:40.913060+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5ctf-rg/providers/Microsoft.Storage/storageAccounts/a5ctfstorage",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2025-07-29T21:03:40.913060+00:00",
+      "key2": "2025-07-29T21:03:40.913060+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "eastus",
+    "minimumTlsVersion": "TLS1_0",
+    "name": "a5ctfstorage",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://a5ctfstorage.blob.core.windows.net/",
+      "dfs": "https://a5ctfstorage.dfs.core.windows.net/",
+      "file": "https://a5ctfstorage.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://a5ctfstorage.queue.core.windows.net/",
+      "table": "https://a5ctfstorage.table.core.windows.net/",
+      "web": "https://a5ctfstorage.z13.web.core.windows.net/"
+    },
+    "primaryLocation": "eastus",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "a5ctf-rg",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": true,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2026-09-11T07:18:51.688498+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-09-11T07:18:52.339804+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-09-11T07:18:52.339804+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-album/providers/Microsoft.Storage/storageAccounts/mantisb131bfc8",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2026-09-11T07:18:52.329666+00:00",
+      "key2": "2026-09-11T07:18:52.329666+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "eastus",
+    "minimumTlsVersion": "TLS1_0",
+    "name": "mantisb131bfc8",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://mantisb131bfc8.blob.core.windows.net/",
+      "dfs": "https://mantisb131bfc8.dfs.core.windows.net/",
+      "file": "https://mantisb131bfc8.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://mantisb131bfc8.queue.core.windows.net/",
+      "table": "https://mantisb131bfc8.table.core.windows.net/",
+      "web": "https://mantisb131bfc8.z13.web.core.windows.net/"
+    },
+    "primaryLocation": "eastus",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "rg-mantis-album",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2024-08-14T08:39:57.001514+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2024-08-14T08:39:58.907768+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2024-08-14T08:39:58.907768+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Storage/storageAccounts/stpersonoids362519582270",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2024-08-14T08:39:57.142140+00:00",
+      "key2": "2024-08-14T08:39:57.142140+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "eastus",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "stpersonoids362519582270",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://stpersonoids362519582270.blob.core.windows.net/",
+      "dfs": "https://stpersonoids362519582270.dfs.core.windows.net/",
+      "file": "https://stpersonoids362519582270.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://stpersonoids362519582270.queue.core.windows.net/",
+      "table": "https://stpersonoids362519582270.table.core.windows.net/",
+      "web": "https://stpersonoids362519582270.z13.web.core.windows.net/"
+    },
+    "primaryLocation": "eastus",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "personoids_sponsorship",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2026-07-13T16:26:22.267484+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-07-13T16:26:22.817024+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-07-13T16:26:22.817024+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Storage/storageAccounts/mantisodoo913061",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2026-07-13T16:26:22.806812+00:00",
+      "key2": "2026-07-13T16:26:22.806812+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "eastus2",
+    "minimumTlsVersion": "TLS1_0",
+    "name": "mantisodoo913061",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://mantisodoo913061.blob.core.windows.net/",
+      "dfs": "https://mantisodoo913061.dfs.core.windows.net/",
+      "file": "https://mantisodoo913061.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://mantisodoo913061.queue.core.windows.net/",
+      "table": "https://mantisodoo913061.table.core.windows.net/",
+      "web": "https://mantisodoo913061.z20.web.core.windows.net/"
+    },
+    "primaryLocation": "eastus2",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "rg-mantis-odoo-validation-eastus2",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2026-07-13T16:53:29.302416+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-07-13T16:53:30.011798+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-07-13T16:53:30.011798+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Storage/storageAccounts/mantisodooevid1868",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2026-07-13T16:53:29.997647+00:00",
+      "key2": "2026-07-13T16:53:29.997647+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "eastus2",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "mantisodooevid1868",
+    "networkRuleSet": {
+      "bypass": "AzureServices",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://mantisodooevid1868.blob.core.windows.net/",
+      "dfs": "https://mantisodooevid1868.dfs.core.windows.net/",
+      "file": "https://mantisodooevid1868.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://mantisodooevid1868.queue.core.windows.net/",
+      "table": "https://mantisodooevid1868.table.core.windows.net/",
+      "web": "https://mantisodooevid1868.z20.web.core.windows.net/"
+    },
+    "primaryLocation": "eastus2",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "rg-mantis-odoo-validation-eastus2",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {
+      "managed-by": "codex",
+      "purpose": "private-evidence",
+      "retain": "true",
+      "workload": "odoo-validation"
+    },
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2026-05-14T14:37:12.360248+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-05-14T14:37:12.648477+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-05-14T14:37:12.648477+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Storage/storageAccounts/a5catlaspg794e33cd",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2026-05-14T14:37:12.638320+00:00",
+      "key2": "2026-05-14T14:37:12.638320+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "westus3",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "a5catlaspg794e33cd",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://a5catlaspg794e33cd.blob.core.windows.net/",
+      "dfs": "https://a5catlaspg794e33cd.dfs.core.windows.net/",
+      "file": "https://a5catlaspg794e33cd.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://a5catlaspg794e33cd.queue.core.windows.net/",
+      "table": "https://a5catlaspg794e33cd.table.core.windows.net/",
+      "web": "https://a5catlaspg794e33cd.z1.web.core.windows.net/"
+    },
+    "primaryLocation": "westus3",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "rg-hub-development-westus3",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2025-08-01T17:37:53.964857+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-08-01T17:37:54.136739+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-08-01T17:37:54.136739+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Storage/storageAccounts/fc3e7eef89d6645fbae772d",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2025-08-01T17:37:54.121110+00:00",
+      "key2": "2025-08-01T17:37:54.121110+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "westus3",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "fc3e7eef89d6645fbae772d",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://fc3e7eef89d6645fbae772d.blob.core.windows.net/",
+      "dfs": "https://fc3e7eef89d6645fbae772d.dfs.core.windows.net/",
+      "file": "https://fc3e7eef89d6645fbae772d.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://fc3e7eef89d6645fbae772d.queue.core.windows.net/",
+      "table": "https://fc3e7eef89d6645fbae772d.table.core.windows.net/",
+      "web": "https://fc3e7eef89d6645fbae772d.z1.web.core.windows.net/"
+    },
+    "primaryLocation": "westus3",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {
+      "k8s-azure-created-by": "azure"
+    },
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": true,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2025-07-30T12:01:21.118231+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": false,
+    "dnsEndpointType": "Standard",
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": false,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-07-30T12:01:21.258853+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-07-30T12:01:21.258853+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Storage/storageAccounts/sthubdevelopmentwestu3v2",
+    "identity": {
+      "principalId": null,
+      "tenantId": null,
+      "type": "None",
+      "userAssignedIdentities": null
+    },
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": false,
+    "isLocalUserEnabled": true,
+    "isSftpEnabled": false,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2025-07-30T12:01:21.258853+00:00",
+      "key2": "2025-07-30T12:01:21.258853+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "westus3",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "sthubdevelopmentwestu3v2",
+    "networkRuleSet": {
+      "bypass": "AzureServices",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": [],
+      "virtualNetworkRules": [
+        {
+          "action": "Allow",
+          "state": "Succeeded",
+          "virtualNetworkResourceId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-aks-subnet"
+        }
+      ]
+    },
+    "primaryEndpoints": {
+      "blob": "https://sthubdevelopmentwestu3v2.blob.core.windows.net/",
+      "dfs": "https://sthubdevelopmentwestu3v2.dfs.core.windows.net/",
+      "file": "https://sthubdevelopmentwestu3v2.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://sthubdevelopmentwestu3v2.queue.core.windows.net/",
+      "table": "https://sthubdevelopmentwestu3v2.table.core.windows.net/",
+      "web": "https://sthubdevelopmentwestu3v2.z1.web.core.windows.net/"
+    },
+    "primaryLocation": "westus3",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "rg-hub-development-westus3",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Cool",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2026-08-13T13:42:33.576509+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-08-13T13:42:33.718272+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-08-13T13:42:33.718272+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-babysitter-archive/providers/Microsoft.Storage/storageAccounts/babysitterarchive2608",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2026-08-13T13:42:33.708128+00:00",
+      "key2": "2026-08-13T13:42:33.708128+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "swedencentral",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "babysitterarchive2608",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://babysitterarchive2608.blob.core.windows.net/",
+      "dfs": "https://babysitterarchive2608.dfs.core.windows.net/",
+      "file": "https://babysitterarchive2608.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://babysitterarchive2608.queue.core.windows.net/",
+      "table": "https://babysitterarchive2608.table.core.windows.net/",
+      "web": null
+    },
+    "primaryLocation": "swedencentral",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "rg-babysitter-archive",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": "swedensouth",
+    "sku": {
+      "name": "Standard_GRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": "available",
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2026-02-13T10:52:09.923648+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-02-13T10:52:10.033000+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2026-02-13T10:52:10.033000+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.Storage/storageAccounts/stlitellmproxy2026",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2026-02-13T10:52:10.017374+00:00",
+      "key2": "2026-02-13T10:52:10.017374+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "swedencentral",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "stlitellmproxy2026",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://stlitellmproxy2026.blob.core.windows.net/",
+      "dfs": "https://stlitellmproxy2026.dfs.core.windows.net/",
+      "file": "https://stlitellmproxy2026.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://stlitellmproxy2026.queue.core.windows.net/",
+      "table": "https://stlitellmproxy2026.table.core.windows.net/",
+      "web": "https://stlitellmproxy2026.z1.web.core.windows.net/"
+    },
+    "primaryLocation": "swedencentral",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "rg-litellm-proxy",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2024-08-14T10:47:20.895478+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2024-08-14T10:47:21.192293+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2024-08-14T10:47:21.192293+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Storage/storageAccounts/sttalai084044774586",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2024-08-14T10:47:20.957956+00:00",
+      "key2": "2024-08-14T10:47:20.957956+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "swedencentral",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "sttalai084044774586",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://sttalai084044774586.blob.core.windows.net/",
+      "dfs": "https://sttalai084044774586.dfs.core.windows.net/",
+      "file": "https://sttalai084044774586.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://sttalai084044774586.queue.core.windows.net/",
+      "table": "https://sttalai084044774586.table.core.windows.net/",
+      "web": "https://sttalai084044774586.z1.web.core.windows.net/"
+    },
+    "primaryLocation": "swedencentral",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "personoids_sponsorship",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  },
+  {
+    "accessTier": "Hot",
+    "accountMigrationInProgress": null,
+    "allowBlobPublicAccess": false,
+    "allowCrossTenantReplication": false,
+    "allowSharedKeyAccess": null,
+    "allowedCopyScope": null,
+    "azureFilesIdentityBasedAuthentication": null,
+    "blobRestoreStatus": null,
+    "creationTime": "2025-02-09T10:45:02.513938+00:00",
+    "customDomain": null,
+    "defaultToOAuthAuthentication": null,
+    "dnsEndpointType": null,
+    "enableExtendedGroups": null,
+    "enableHttpsTrafficOnly": true,
+    "enableNfsV3": null,
+    "encryption": {
+      "encryptionIdentity": null,
+      "keySource": "Microsoft.Storage",
+      "keyVaultProperties": null,
+      "requireInfrastructureEncryption": null,
+      "services": {
+        "blob": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-02-09T10:45:02.576442+00:00"
+        },
+        "file": {
+          "enabled": true,
+          "keyType": "Account",
+          "lastEnabledTime": "2025-02-09T10:45:02.576442+00:00"
+        },
+        "queue": null,
+        "table": null
+      }
+    },
+    "extendedLocation": null,
+    "failoverInProgress": null,
+    "geoReplicationStats": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Storage/storageAccounts/sttmuskal214530339506822",
+    "identity": null,
+    "immutableStorageWithVersioning": null,
+    "isHnsEnabled": null,
+    "isLocalUserEnabled": null,
+    "isSftpEnabled": null,
+    "isSkuConversionBlocked": null,
+    "keyCreationTime": {
+      "key1": "2025-02-09T10:45:02.576442+00:00",
+      "key2": "2025-02-09T10:45:02.576442+00:00"
+    },
+    "keyPolicy": null,
+    "kind": "StorageV2",
+    "largeFileSharesState": null,
+    "lastGeoFailoverTime": null,
+    "location": "swedencentral",
+    "minimumTlsVersion": "TLS1_2",
+    "name": "sttmuskal214530339506822",
+    "networkRuleSet": {
+      "bypass": "None",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "ipv6Rules": [],
+      "resourceAccessRules": null,
+      "virtualNetworkRules": []
+    },
+    "primaryEndpoints": {
+      "blob": "https://sttmuskal214530339506822.blob.core.windows.net/",
+      "dfs": "https://sttmuskal214530339506822.dfs.core.windows.net/",
+      "file": "https://sttmuskal214530339506822.file.core.windows.net/",
+      "internetEndpoints": null,
+      "microsoftEndpoints": null,
+      "queue": "https://sttmuskal214530339506822.queue.core.windows.net/",
+      "table": "https://sttmuskal214530339506822.table.core.windows.net/",
+      "web": "https://sttmuskal214530339506822.z1.web.core.windows.net/"
+    },
+    "primaryLocation": "swedencentral",
+    "privateEndpointConnections": [],
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": null,
+    "resourceGroup": "personoids_sponsorship",
+    "routingPreference": null,
+    "sasPolicy": null,
+    "secondaryEndpoints": null,
+    "secondaryLocation": null,
+    "sku": {
+      "name": "Standard_LRS",
+      "tier": "Standard"
+    },
+    "statusOfPrimary": "available",
+    "statusOfSecondary": null,
+    "storageAccountSkuConversionStatus": null,
+    "tags": {},
+    "type": "Microsoft.Storage/storageAccounts"
+  }
+]

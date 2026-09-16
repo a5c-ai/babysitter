@@ -1,0 +1,178 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/containerapps/geekonomy-worker",
+  "identity": {
+    "type": "None"
+  },
+  "location": "North Europe",
+  "name": "geekonomy-worker",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "ingress": null,
+      "maxInactiveRevisions": null,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "acr-password",
+          "server": "geekonomyacrmkb5l5.azurecr.io",
+          "username": "geekonomyacrmkb5l5"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "acr-password"
+        },
+        {
+          "name": "database-url"
+        },
+        {
+          "name": "redis-url"
+        }
+      ],
+      "service": null
+    },
+    "customDomainVerificationId": "C2B425A984517990227CB472406DA5C25A496FB24B772AC0B6E3BC4597F59A3F",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "eventStreamEndpoint": "https://northeurope.azurecontainerapps.dev/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/containerApps/geekonomy-worker/eventstream",
+    "latestReadyRevisionName": "geekonomy-worker--0000024",
+    "latestRevisionFqdn": "",
+    "latestRevisionName": "geekonomy-worker--0000024",
+    "managedEnvironmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "outboundIpAddresses": [
+      "4.209.31.224"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NODE_ENV",
+              "value": "production"
+            },
+            {
+              "name": "PORT",
+              "value": "3001"
+            },
+            {
+              "name": "DATABASE_SSL",
+              "value": "require"
+            },
+            {
+              "name": "DATABASE_URL",
+              "secretRef": "database-url"
+            },
+            {
+              "name": "REDIS_URL",
+              "secretRef": "redis-url"
+            },
+            {
+              "name": "GEEKONOMY_CONTENT_POLICY",
+              "value": "all"
+            },
+            {
+              "name": "GEEKONOMY_SINGLE_CONTENT_ITEM_ID",
+              "value": ""
+            },
+            {
+              "name": "FEEDS_EPISODES_URL",
+              "value": "https://geekonomy.net/category/%D7%A4%D7%A8%D7%A7%D7%99%D7%9D/feed/"
+            },
+            {
+              "name": "FEEDS_OPINIONS_URL",
+              "value": "https://geekonomy.net/category/%D7%93%D7%A2%D7%95%D7%AA/feed/"
+            },
+            {
+              "name": "TRANSCRIPTION_ENABLED",
+              "value": "true"
+            },
+            {
+              "name": "TRANSCRIPTION_ENQUEUE_ON_INGEST",
+              "value": "false"
+            },
+            {
+              "name": "TRANSCRIPTION_DEBUG",
+              "value": "false"
+            },
+            {
+              "name": "TRANSCRIBER_URL",
+              "value": "https://geekonomy-transcriber.internal.yellowwater-3ed650dd.northeurope.azurecontainerapps.io"
+            },
+            {
+              "name": "TRANSCRIPTION_PROVIDER",
+              "value": "local-faster-whisper"
+            },
+            {
+              "name": "TRANSCRIPTION_DESIRED_PROVIDER",
+              "value": "local-faster-whisper"
+            },
+            {
+              "name": "TRANSCRIPTION_LATEST_EPISODES_WINDOW",
+              "value": "0"
+            },
+            {
+              "name": "TRANSCRIPTION_INITIAL_SEED_LIMIT",
+              "value": "0"
+            },
+            {
+              "name": "TRANSCRIPTION_SEED_LIMIT",
+              "value": "0"
+            },
+            {
+              "name": "TRANSCRIPTION_STALE_AFTER_MINUTES",
+              "value": "10"
+            },
+            {
+              "name": "TRANSCRIPTION_CHUNK_SECONDS",
+              "value": "600"
+            },
+            {
+              "name": "TRANSCRIPTION_CHUNK_OVERLAP_SECONDS",
+              "value": "2"
+            }
+          ],
+          "image": "geekonomyacrmkb5l5.azurecr.io/geekonomy-worker:20260112122343-04da826a",
+          "name": "worker",
+          "resources": {
+            "cpu": 0.25,
+            "ephemeralStorage": "1Gi",
+            "memory": "0.5Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "maxReplicas": 1,
+        "minReplicas": 0,
+        "rules": [
+          {
+            "http": {
+              "metadata": {
+                "concurrentRequests": "1000"
+              }
+            },
+            "name": "zero-scale"
+          }
+        ]
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": null
+  },
+  "resourceGroup": "geekonomy-prod",
+  "systemData": {
+    "createdAt": "2026-01-06T11:33:46.3211941",
+    "createdBy": "benihakak@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-02-09T13:38:05.6897741",
+    "lastModifiedBy": "benihakak@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}

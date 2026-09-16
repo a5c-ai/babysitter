@@ -1,0 +1,39 @@
+[
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.KeyVault/vaults/kv-personoi362519582270",
+    "location": "eastus",
+    "name": "kv-personoi362519582270",
+    "resourceGroup": "personoids_sponsorship",
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.KeyVault/vaults/kv-talai084044774586",
+    "location": "swedencentral",
+    "name": "kv-talai084044774586",
+    "resourceGroup": "personoids_sponsorship",
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.KeyVault/vaults/kv-tmuskal2530339506822",
+    "location": "swedencentral",
+    "name": "kv-tmuskal2530339506822",
+    "resourceGroup": "personoids_sponsorship",
+    "tags": {},
+    "type": "Microsoft.KeyVault/vaults"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.KeyVault/vaults/kv-hubdevelopmentwest3v2",
+    "location": "westus3",
+    "name": "kv-hubdevelopmentwest3v2",
+    "resourceGroup": "rg-hub-development-westus3",
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.KeyVault/vaults"
+  }
+]

@@ -1,0 +1,59 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.KeyVault/vaults/kv-hubdevelopmentwest3v2",
+  "location": "westus3",
+  "name": "kv-hubdevelopmentwest3v2",
+  "properties": {
+    "accessPolicies": [],
+    "createMode": null,
+    "enablePurgeProtection": true,
+    "enableRbacAuthorization": true,
+    "enableSoftDelete": true,
+    "enabledForDeployment": false,
+    "enabledForDiskEncryption": true,
+    "enabledForTemplateDeployment": false,
+    "hsmPoolResourceId": null,
+    "networkAcls": {
+      "bypass": "AzureServices",
+      "defaultAction": "Allow",
+      "ipRules": [],
+      "virtualNetworkRules": [
+        {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/rg-hub-development-westus3/providers/microsoft.network/virtualnetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-pe-subnet",
+          "ignoreMissingVnetServiceEndpoint": null,
+          "resourceGroup": "rg-hub-development-westus3"
+        },
+        {
+          "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/rg-hub-development-westus3/providers/microsoft.network/virtualnetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-aks-subnet",
+          "ignoreMissingVnetServiceEndpoint": null,
+          "resourceGroup": "rg-hub-development-westus3"
+        }
+      ]
+    },
+    "privateEndpointConnections": null,
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "sku": {
+      "family": "A",
+      "name": "standard"
+    },
+    "softDeleteRetentionInDays": 7,
+    "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b",
+    "vaultUri": "https://kv-hubdevelopmentwest3v2.vault.azure.net/"
+  },
+  "resourceGroup": "rg-hub-development-westus3",
+  "systemData": {
+    "createdAt": "2025-07-30T11:58:39.933000+00:00",
+    "createdBy": "4010e15d-da1c-44c1-9ad2-02d2d8291892",
+    "createdByType": "Application",
+    "lastModifiedAt": "2025-08-02T09:27:52.694000+00:00",
+    "lastModifiedBy": "4010e15d-da1c-44c1-9ad2-02d2d8291892",
+    "lastModifiedByType": "Application"
+  },
+  "tags": {
+    "Environment": "development",
+    "ManagedBy": "terraform",
+    "Owner": "hub-development-team",
+    "Project": "hub"
+  },
+  "type": "Microsoft.KeyVault/vaults"
+}

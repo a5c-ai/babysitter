@@ -1,0 +1,210 @@
+[
+  {
+    "changedTime": "2025-01-24T08:53:36.456151+00:00",
+    "createdTime": "2024-08-14T08:40:25.183659+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/personoids_ai",
+    "identity": null,
+    "kind": "Hub",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "personoids_ai",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Basic",
+      "size": null,
+      "tier": "Basic"
+    },
+    "systemData": {
+      "createdAt": "2024-08-14T08:40:25.2244862Z",
+      "createdBy": "tal@personoids.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2024-08-14T08:40:25.2244862Z",
+      "lastModifiedBy": "tal@personoids.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {},
+    "type": "Microsoft.MachineLearningServices/workspaces"
+  },
+  {
+    "changedTime": "2025-01-24T08:53:36.471778+00:00",
+    "createdTime": "2024-08-14T08:41:24.557476+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal-0653",
+    "identity": null,
+    "kind": "Project",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "tal-0653",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Basic",
+      "size": null,
+      "tier": "Basic"
+    },
+    "systemData": {
+      "createdAt": "2024-08-14T08:41:24.5825582Z",
+      "createdBy": "0736f41a-0425-4b46-bdb5-1563eff02385",
+      "createdByType": "Application",
+      "lastModifiedAt": "2024-08-14T08:41:24.5825582Z",
+      "lastModifiedBy": "0736f41a-0425-4b46-bdb5-1563eff02385",
+      "lastModifiedByType": "Application"
+    },
+    "tags": {},
+    "type": "Microsoft.MachineLearningServices/workspaces"
+  },
+  {
+    "changedTime": "2025-01-24T08:53:36.471778+00:00",
+    "createdTime": "2024-08-14T10:47:47.026189+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal_ai",
+    "identity": null,
+    "kind": "Hub",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tal_ai",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Basic",
+      "size": null,
+      "tier": "Basic"
+    },
+    "systemData": {
+      "createdAt": "2024-08-14T10:47:47.0529551Z",
+      "createdBy": "tal@personoids.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2024-08-14T10:47:47.0529551Z",
+      "lastModifiedBy": "tal@personoids.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {},
+    "type": "Microsoft.MachineLearningServices/workspaces"
+  },
+  {
+    "changedTime": "2025-01-24T08:53:36.471778+00:00",
+    "createdTime": "2024-08-14T10:48:27.323909+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tal-0301",
+    "identity": null,
+    "kind": "Project",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tal-0301",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Basic",
+      "size": null,
+      "tier": "Basic"
+    },
+    "systemData": {
+      "createdAt": "2024-08-14T10:48:27.5115672Z",
+      "createdBy": "0736f41a-0425-4b46-bdb5-1563eff02385",
+      "createdByType": "Application",
+      "lastModifiedAt": "2024-08-14T10:48:27.5115672Z",
+      "lastModifiedBy": "0736f41a-0425-4b46-bdb5-1563eff02385",
+      "lastModifiedByType": "Application"
+    },
+    "tags": {},
+    "type": "Microsoft.MachineLearningServices/workspaces"
+  },
+  {
+    "changedTime": "2025-02-09T10:56:12.053300+00:00",
+    "createdTime": "2025-02-09T10:45:26.116103+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tmuskal-2145_ai",
+    "identity": {
+      "principalId": "d8fba28a-1093-4e93-8eb1-e78a9a9b329a",
+      "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "kind": "Hub",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tmuskal-2145_ai",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Basic",
+      "size": null,
+      "tier": "Basic"
+    },
+    "systemData": {
+      "createdAt": "2025-02-09T10:45:26.1364576Z",
+      "createdBy": "tmuskal@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2025-02-09T10:45:26.1364576Z",
+      "lastModifiedBy": "tmuskal@gmail.com",
+      "lastModifiedByType": "User"
+    },
+    "tags": {},
+    "type": "Microsoft.MachineLearningServices/workspaces"
+  },
+  {
+    "changedTime": "2025-02-09T10:57:09.116275+00:00",
+    "createdTime": "2025-02-09T10:46:29.665243+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.MachineLearningServices/workspaces/tmuskal-2447",
+    "identity": {
+      "principalId": "912be4bf-1d0e-466c-ae9f-5ddeb1686957",
+      "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "kind": "Project",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "tmuskal-2447",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Basic",
+      "size": null,
+      "tier": "Basic"
+    },
+    "systemData": {
+      "createdAt": "2025-02-09T10:46:29.8322702Z",
+      "createdBy": "0736f41a-0425-4b46-bdb5-1563eff02385",
+      "createdByType": "Application",
+      "lastModifiedAt": "2025-02-09T10:46:29.8322702Z",
+      "lastModifiedBy": "0736f41a-0425-4b46-bdb5-1563eff02385",
+      "lastModifiedByType": "Application"
+    },
+    "tags": {},
+    "type": "Microsoft.MachineLearningServices/workspaces"
+  }
+]

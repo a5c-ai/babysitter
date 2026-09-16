@@ -1,0 +1,685 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-30T09:12:12Z",
+        "finalizers": [
+          "kubernetes.io/pv-protection"
+        ],
+        "labels": {
+          "app": "atlas-postgres"
+        },
+        "name": "atlas-atlas-postgres",
+        "resourceVersion": "157706608",
+        "uid": "76a3a7b6-d76f-4706-98e9-d88c11c8ec8e"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "8Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-atlas-postgres-0",
+          "namespace": "atlas",
+          "resourceVersion": "157706605",
+          "uid": "90e96212-e586-408a-a53a-bf47bb7dcd8b"
+        },
+        "csi": {
+          "driver": "file.csi.azure.com",
+          "nodeStageSecretRef": {
+            "name": "atlas-postgres-azure-file",
+            "namespace": "atlas"
+          },
+          "volumeAttributes": {
+            "shareName": "atlas-atlas-postgres"
+          },
+          "volumeHandle": "atlas-atlas-postgres-a5catlaspg794e33cd"
+        },
+        "mountOptions": [
+          "dir_mode=0700",
+          "file_mode=0600",
+          "uid=70",
+          "gid=70",
+          "mfsymlinks",
+          "cache=strict",
+          "nosharesock"
+        ],
+        "persistentVolumeReclaimPolicy": "Retain",
+        "storageClassName": "atlas-postgres-static",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2026-06-30T09:12:13Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-05-14T14:53:12Z",
+        "finalizers": [
+          "kubernetes.io/pv-protection"
+        ],
+        "labels": {
+          "app": "atlas-postgres"
+        },
+        "name": "atlas-staging-atlas-postgres",
+        "resourceVersion": "131202194",
+        "uid": "9a93656c-189a-4157-acab-716bc100ec41"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "8Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-atlas-postgres-0",
+          "namespace": "atlas-staging",
+          "resourceVersion": "131202191",
+          "uid": "0ab92538-79c0-4625-ac8b-7f523ad1553a"
+        },
+        "csi": {
+          "driver": "file.csi.azure.com",
+          "nodeStageSecretRef": {
+            "name": "atlas-postgres-azure-file",
+            "namespace": "atlas-staging"
+          },
+          "volumeAttributes": {
+            "shareName": "atlas-staging-atlas-postgres"
+          },
+          "volumeHandle": "atlas-staging-atlas-postgres-a5catlaspg794e33cd"
+        },
+        "mountOptions": [
+          "dir_mode=0700",
+          "file_mode=0600",
+          "uid=70",
+          "gid=70",
+          "mfsymlinks",
+          "cache=strict",
+          "nosharesock"
+        ],
+        "persistentVolumeReclaimPolicy": "Retain",
+        "storageClassName": "atlas-postgres-static",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2026-05-14T14:53:13Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-09T07:15:33Z",
+        "finalizers": [
+          "kubernetes.io/pv-protection"
+        ],
+        "labels": {
+          "app": "content-studio-postgres"
+        },
+        "name": "content-studio-postgres-pv",
+        "resourceVersion": "145451348",
+        "uid": "20529c6f-afa1-4d9f-90cc-4fd380893079"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "8Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-content-studio-postgres-0",
+          "namespace": "content-studio",
+          "resourceVersion": "145451345",
+          "uid": "b9234fb2-5ffa-464b-8eaf-44a75419cd22"
+        },
+        "csi": {
+          "driver": "file.csi.azure.com",
+          "nodeStageSecretRef": {
+            "name": "content-studio-azure-file",
+            "namespace": "content-studio"
+          },
+          "volumeAttributes": {
+            "shareName": "content-studio-postgres"
+          },
+          "volumeHandle": "content-studio-postgres-a5catlaspg794e33cd"
+        },
+        "mountOptions": [
+          "dir_mode=0700",
+          "file_mode=0600",
+          "uid=70",
+          "gid=70",
+          "mfsymlinks",
+          "cache=strict",
+          "nosharesock"
+        ],
+        "persistentVolumeReclaimPolicy": "Retain",
+        "storageClassName": "content-studio-postgres-static",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2026-06-09T07:15:35Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "disk.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-09-06T15:17:17Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection",
+          "external-attacher/disk-csi-azure-com"
+        ],
+        "name": "pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593",
+        "resourceVersion": "22502850",
+        "uid": "c37f25e0-ae9f-4813-9d20-01479bb3cb34"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "1Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-a5c-app-redis-0",
+          "namespace": "app",
+          "resourceVersion": "22502776",
+          "uid": "0dde3922-ab45-4d1c-a1d3-17a944b48593"
+        },
+        "csi": {
+          "driver": "disk.csi.azure.com",
+          "volumeAttributes": {
+            "csi.storage.k8s.io/pv/name": "pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593",
+            "csi.storage.k8s.io/pvc/name": "data-a5c-app-redis-0",
+            "csi.storage.k8s.io/pvc/namespace": "app",
+            "requestedsizegib": "1",
+            "skuname": "StandardSSD_LRS",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1755321772320-6157-disk.csi.azure.com"
+          },
+          "volumeHandle": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593"
+        },
+        "nodeAffinity": {
+          "required": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "topology.disk.csi.azure.com/zone",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "default",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-09-06T15:17:17Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "disk.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-09-06T07:44:41Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection",
+          "external-attacher/disk-csi-azure-com"
+        ],
+        "name": "pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4",
+        "resourceVersion": "22355750",
+        "uid": "3f2fa8d2-03ae-40e7-8582-3c57a23efb9a"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "1Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-a5c-app-redis-0",
+          "namespace": "app-staging",
+          "resourceVersion": "22355700",
+          "uid": "1cd94e10-b93d-42ab-9528-be25a83b52a4"
+        },
+        "csi": {
+          "driver": "disk.csi.azure.com",
+          "volumeAttributes": {
+            "csi.storage.k8s.io/pv/name": "pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4",
+            "csi.storage.k8s.io/pvc/name": "data-a5c-app-redis-0",
+            "csi.storage.k8s.io/pvc/namespace": "app-staging",
+            "requestedsizegib": "1",
+            "skuname": "StandardSSD_LRS",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1755321772320-6157-disk.csi.azure.com"
+          },
+          "volumeHandle": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4"
+        },
+        "nodeAffinity": {
+          "required": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "topology.disk.csi.azure.com/zone",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "default",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-09-06T07:44:41Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "disk.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-07-30T16:25:10Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection",
+          "external-attacher/disk-csi-azure-com"
+        ],
+        "name": "pvc-59ccf124-b094-45ef-8dd4-79f8bf381066",
+        "resourceVersion": "119639",
+        "uid": "9610859a-762c-4649-8969-a35cefbc580c"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "100Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "hub-database-pvc",
+          "namespace": "hub-development",
+          "resourceVersion": "119503",
+          "uid": "59ccf124-b094-45ef-8dd4-79f8bf381066"
+        },
+        "csi": {
+          "driver": "disk.csi.azure.com",
+          "volumeAttributes": {
+            "cachingmode": "ReadOnly",
+            "csi.storage.k8s.io/pv/name": "pvc-59ccf124-b094-45ef-8dd4-79f8bf381066",
+            "csi.storage.k8s.io/pvc/name": "hub-database-pvc",
+            "csi.storage.k8s.io/pvc/namespace": "hub-development",
+            "kind": "Managed",
+            "requestedsizegib": "100",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1753866658975-8289-disk.csi.azure.com",
+            "storageaccounttype": "Premium_LRS"
+          },
+          "volumeHandle": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-59ccf124-b094-45ef-8dd4-79f8bf381066"
+        },
+        "nodeAffinity": {
+          "required": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "topology.disk.csi.azure.com/zone",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "managed-premium",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-07-30T16:25:10Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "disk.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-08-21T06:02:46Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection",
+          "external-attacher/disk-csi-azure-com"
+        ],
+        "name": "pvc-66704332-aa3f-41fb-abe3-21e070780cae",
+        "resourceVersion": "12973206",
+        "uid": "7e94996e-a6ad-428a-9015-616ef9ce60ef"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "10Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-a5c-app-postgres-0",
+          "namespace": "app",
+          "resourceVersion": "12973164",
+          "uid": "66704332-aa3f-41fb-abe3-21e070780cae"
+        },
+        "csi": {
+          "driver": "disk.csi.azure.com",
+          "volumeAttributes": {
+            "csi.storage.k8s.io/pv/name": "pvc-66704332-aa3f-41fb-abe3-21e070780cae",
+            "csi.storage.k8s.io/pvc/name": "data-a5c-app-postgres-0",
+            "csi.storage.k8s.io/pvc/namespace": "app",
+            "requestedsizegib": "10",
+            "skuname": "StandardSSD_LRS",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1755321772320-6157-disk.csi.azure.com"
+          },
+          "volumeHandle": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-66704332-aa3f-41fb-abe3-21e070780cae"
+        },
+        "nodeAffinity": {
+          "required": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "topology.disk.csi.azure.com/zone",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "default",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-08-21T06:02:46Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "file.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-08-01T17:38:17Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection"
+        ],
+        "name": "pvc-7c8e1234-819a-44d7-8e77-0ab37e67bf86",
+        "resourceVersion": "939980",
+        "uid": "5ce79969-a92e-41a6-8e01-08c9e5dcfa97"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteMany"
+        ],
+        "capacity": {
+          "storage": "1Ti"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "hub-repositories-pvc",
+          "namespace": "hub-development",
+          "resourceVersion": "939865",
+          "uid": "7c8e1234-819a-44d7-8e77-0ab37e67bf86"
+        },
+        "csi": {
+          "driver": "file.csi.azure.com",
+          "volumeAttributes": {
+            "csi.storage.k8s.io/pv/name": "pvc-7c8e1234-819a-44d7-8e77-0ab37e67bf86",
+            "csi.storage.k8s.io/pvc/name": "hub-repositories-pvc",
+            "csi.storage.k8s.io/pvc/namespace": "hub-development",
+            "secretnamespace": "hub-development",
+            "skuName": "Standard_LRS",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1754025126437-7322-file.csi.azure.com"
+          },
+          "volumeHandle": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3#fc3e7eef89d6645fbae772d#pvc-7c8e1234-819a-44d7-8e77-0ab37e67bf86###hub-development"
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "azure-files",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-08-01T17:38:17Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "disk.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-09-02T16:40:21Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection",
+          "external-attacher/disk-csi-azure-com"
+        ],
+        "name": "pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94",
+        "resourceVersion": "20630402",
+        "uid": "79578565-6f91-4de5-9826-243ae0ea8b77"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "10Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "data-a5c-app-postgres-0",
+          "namespace": "app-staging",
+          "resourceVersion": "20630287",
+          "uid": "c3ee816e-2e39-456e-84d0-5d3adc7cfb94"
+        },
+        "csi": {
+          "driver": "disk.csi.azure.com",
+          "volumeAttributes": {
+            "csi.storage.k8s.io/pv/name": "pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94",
+            "csi.storage.k8s.io/pvc/name": "data-a5c-app-postgres-0",
+            "csi.storage.k8s.io/pvc/namespace": "app-staging",
+            "requestedsizegib": "10",
+            "skuname": "StandardSSD_LRS",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1755321772320-6157-disk.csi.azure.com"
+          },
+          "volumeHandle": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94"
+        },
+        "nodeAffinity": {
+          "required": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "topology.disk.csi.azure.com/zone",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "default",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-09-02T16:40:21Z",
+        "phase": "Bound"
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "PersistentVolume",
+      "metadata": {
+        "annotations": {
+          "pv.kubernetes.io/provisioned-by": "disk.csi.azure.com",
+          "volume.kubernetes.io/provisioner-deletion-secret-name": "",
+          "volume.kubernetes.io/provisioner-deletion-secret-namespace": ""
+        },
+        "creationTimestamp": "2025-07-30T16:25:11Z",
+        "finalizers": [
+          "external-provisioner.volume.kubernetes.io/finalizer",
+          "kubernetes.io/pv-protection",
+          "external-attacher/disk-csi-azure-com"
+        ],
+        "name": "pvc-f9e96cba-e872-48b9-b555-448ee38acaea",
+        "resourceVersion": "119647",
+        "uid": "3d2ceade-2a41-4889-ac30-c37d85dfff97"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "capacity": {
+          "storage": "10Gi"
+        },
+        "claimRef": {
+          "apiVersion": "v1",
+          "kind": "PersistentVolumeClaim",
+          "name": "hub-redis-pvc",
+          "namespace": "hub-development",
+          "resourceVersion": "119520",
+          "uid": "f9e96cba-e872-48b9-b555-448ee38acaea"
+        },
+        "csi": {
+          "driver": "disk.csi.azure.com",
+          "volumeAttributes": {
+            "cachingmode": "ReadOnly",
+            "csi.storage.k8s.io/pv/name": "pvc-f9e96cba-e872-48b9-b555-448ee38acaea",
+            "csi.storage.k8s.io/pvc/name": "hub-redis-pvc",
+            "csi.storage.k8s.io/pvc/namespace": "hub-development",
+            "kind": "Managed",
+            "requestedsizegib": "10",
+            "storage.kubernetes.io/csiProvisionerIdentity": "1753866658975-8289-disk.csi.azure.com",
+            "storageaccounttype": "Premium_LRS"
+          },
+          "volumeHandle": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/disks/pvc-f9e96cba-e872-48b9-b555-448ee38acaea"
+        },
+        "nodeAffinity": {
+          "required": {
+            "nodeSelectorTerms": [
+              {
+                "matchExpressions": [
+                  {
+                    "key": "topology.disk.csi.azure.com/zone",
+                    "operator": "In",
+                    "values": [
+                      ""
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "persistentVolumeReclaimPolicy": "Delete",
+        "storageClassName": "managed-premium",
+        "volumeMode": "Filesystem"
+      },
+      "status": {
+        "lastPhaseTransitionTime": "2025-07-30T16:25:11Z",
+        "phase": "Bound"
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "createdOn": "2025-05-26T07:09:42.552192+00:00",
+    "domainName": "a5c.ai",
+    "errorMessage": "The custom domain has not been resolving to your static web app and has expired.",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-website-rg/providers/Microsoft.Web/staticSites/a5c-website/customDomains/a5c.ai",
+    "kind": null,
+    "location": "East US 2",
+    "name": "a5c.ai",
+    "resourceGroup": "a5c-website-rg",
+    "status": "Failed",
+    "type": "Microsoft.Web/staticSites/customDomains",
+    "validationToken": null
+  }
+]

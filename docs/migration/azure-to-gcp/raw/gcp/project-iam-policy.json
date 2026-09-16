@@ -1,0 +1,42 @@
+{
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:vertex-express@boot-464019.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.expressUser"
+    },
+    {
+      "members": [
+        "serviceAccount:service-1024539647872@gcp-sa-aiplatform.iam.gserviceaccount.com"
+      ],
+      "role": "roles/aiplatform.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:1024539647872@cloudservices.gserviceaccount.com"
+      ],
+      "role": "roles/compute.instanceGroupManagerServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-1024539647872@compute-system.iam.gserviceaccount.com"
+      ],
+      "role": "roles/compute.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-1024539647872@gcp-sa-notebooks.iam.gserviceaccount.com"
+      ],
+      "role": "roles/notebooks.serviceAgent"
+    },
+    {
+      "members": [
+        "user:tal@a5c.ai"
+      ],
+      "role": "roles/owner"
+    }
+  ],
+  "etag": "BwZSghl93HY=",
+  "version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2025-09-04T08:15:45.8797954Z",
+  "imageName": "budgets",
+  "lastUpdateTime": "2026-08-27T10:00:17.5358122Z",
+  "manifestCount": 10,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

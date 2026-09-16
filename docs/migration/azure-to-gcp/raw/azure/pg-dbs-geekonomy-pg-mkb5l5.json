@@ -1,0 +1,38 @@
+[
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/databases/azure_maintenance",
+    "name": "azure_maintenance",
+    "resourceGroup": "geekonomy-prod",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  },
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/databases/postgres",
+    "name": "postgres",
+    "resourceGroup": "geekonomy-prod",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  },
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/databases/azure_sys",
+    "name": "azure_sys",
+    "resourceGroup": "geekonomy-prod",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  },
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.DBforPostgreSQL/flexibleServers/geekonomy-pg-mkb5l5/databases/geekonomy",
+    "name": "geekonomy",
+    "resourceGroup": "geekonomy-prod",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  }
+]

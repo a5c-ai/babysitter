@@ -1,0 +1,10 @@
+{
+  "accessibility": {
+    "screen_reader": "False"
+  },
+  "core": {
+    "account": "tal@a5c.ai",
+    "disable_usage_reporting": "False",
+    "project": "boot-464019"
+  }
+}

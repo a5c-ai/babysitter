@@ -1,0 +1,17 @@
+{
+  "release": "cert-manager/cert-manager",
+  "redactedShape": {
+    "global": {
+      "leaderElection": {
+        "namespace": "<string>"
+      }
+    },
+    "installCRDs": true,
+    "nodeSelector": {
+      "kubernetes.io/os": "<string>"
+    },
+    "securityContext": {
+      "runAsNonRoot": true
+    }
+  }
+}

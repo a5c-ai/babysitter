@@ -1,0 +1,2054 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-09-05T14:33:29Z",
+        "generation": 1,
+        "labels": {
+          "app": "atlas-webui-db-init",
+          "batch.kubernetes.io/controller-uid": "e58777e3-9629-41e2-a2f6-3ca7934038e9",
+          "batch.kubernetes.io/job-name": "atlas-webui-db-init",
+          "controller-uid": "e58777e3-9629-41e2-a2f6-3ca7934038e9",
+          "job-name": "atlas-webui-db-init"
+        },
+        "name": "atlas-webui-db-init",
+        "namespace": "atlas-staging",
+        "resourceVersion": "194303695",
+        "uid": "e58777e3-9629-41e2-a2f6-3ca7934038e9"
+      },
+      "spec": {
+        "backoffLimit": 2,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "e58777e3-9629-41e2-a2f6-3ca7934038e9"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "atlas-webui-db-init",
+              "batch.kubernetes.io/controller-uid": "e58777e3-9629-41e2-a2f6-3ca7934038e9",
+              "batch.kubernetes.io/job-name": "atlas-webui-db-init",
+              "controller-uid": "e58777e3-9629-41e2-a2f6-3ca7934038e9",
+              "job-name": "atlas-webui-db-init"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "db:init",
+                  "-w",
+                  "@a5c-ai/atlas-webui"
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "atlas-postgres"
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:57b13a4c535633fef005e1660996cfdb3629fbbd",
+                "imagePullPolicy": "Always",
+                "name": "db-init",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "imagePullSecrets": [
+              {
+                "name": "acr-pull"
+              }
+            ],
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-09-05T14:33:47Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-09-05T14:33:47Z",
+            "lastTransitionTime": "2026-09-05T14:33:47Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-09-05T14:33:29Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-08-13T21:38:56Z",
+        "generation": 1,
+        "labels": {
+          "app": "atlas-webui-db-init",
+          "batch.kubernetes.io/controller-uid": "327ee64d-d947-44a8-b3a4-4cdb89d2fe4f",
+          "batch.kubernetes.io/job-name": "atlas-webui-db-init",
+          "controller-uid": "327ee64d-d947-44a8-b3a4-4cdb89d2fe4f",
+          "job-name": "atlas-webui-db-init"
+        },
+        "name": "atlas-webui-db-init",
+        "namespace": "atlas",
+        "resourceVersion": "182124586",
+        "uid": "327ee64d-d947-44a8-b3a4-4cdb89d2fe4f"
+      },
+      "spec": {
+        "backoffLimit": 2,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "327ee64d-d947-44a8-b3a4-4cdb89d2fe4f"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "atlas-webui-db-init",
+              "batch.kubernetes.io/controller-uid": "327ee64d-d947-44a8-b3a4-4cdb89d2fe4f",
+              "batch.kubernetes.io/job-name": "atlas-webui-db-init",
+              "controller-uid": "327ee64d-d947-44a8-b3a4-4cdb89d2fe4f",
+              "job-name": "atlas-webui-db-init"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "npm",
+                  "run",
+                  "db:init",
+                  "-w",
+                  "@a5c-ai/atlas-webui"
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "atlas-postgres"
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/atlas-webui:b3c3cd9737c1646ec36bce6888cfd7a6a3b4d526",
+                "imagePullPolicy": "Always",
+                "name": "db-init",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "imagePullSecrets": [
+              {
+                "name": "acr-pull"
+              }
+            ],
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-08-13T21:39:28Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-08-13T21:39:28Z",
+            "lastTransitionTime": "2026-08-13T21:39:28Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-08-13T21:38:56Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-25T20:16:28Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782418588185",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782418588185",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155072861",
+        "uid": "5790798e-ca7a-41c7-8e1d-46559afa1145"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "5790798e-ca7a-41c7-8e1d-46559afa1145"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "5790798e-ca7a-41c7-8e1d-46559afa1145",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782418588185",
+              "controller-uid": "5790798e-ca7a-41c7-8e1d-46559afa1145",
+              "job-name": "kradle-agent-dispatch-1782418588185",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782418588185"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782418588185"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782418588185/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In the file math.js, add and export a function subtract(a, b) that returns a - b. Keep the existing add function. Make the minimal change and do not modify anything else."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_TOKEN",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:b41276f72c3a732affe8f318b6b7544400d7e6f0",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-25T20:17:38Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-25T20:17:38Z",
+            "lastTransitionTime": "2026-06-25T20:17:38Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-25T20:16:28Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-25T20:59:40Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782421179916",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782421179916",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155089873",
+        "uid": "f075cda9-5f08-415f-a751-373cc0486f22"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "f075cda9-5f08-415f-a751-373cc0486f22"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "f075cda9-5f08-415f-a751-373cc0486f22",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782421179916",
+              "controller-uid": "f075cda9-5f08-415f-a751-373cc0486f22",
+              "job-name": "kradle-agent-dispatch-1782421179916",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782421179916"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782421179916"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782421179916/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In the file math.js, add and export a function subtract(a, b) that returns a - b. Keep the existing add function. Make the minimal change and do not modify anything else."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_TOKEN",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:yolo-test",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-25T20:59:48Z",
+            "lastTransitionTime": "2026-06-25T20:59:48Z",
+            "message": "Job has reached the specified backoff limit",
+            "reason": "BackoffLimitExceeded",
+            "status": "True",
+            "type": "Failed"
+          }
+        ],
+        "failed": 1,
+        "ready": 0,
+        "startTime": "2026-06-25T20:59:40Z",
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-25T21:05:42Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782421542811",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782421542811",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155092433",
+        "uid": "8e683bdd-6f67-41b5-8994-dbf43b01f89a"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "8e683bdd-6f67-41b5-8994-dbf43b01f89a"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "8e683bdd-6f67-41b5-8994-dbf43b01f89a",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782421542811",
+              "controller-uid": "8e683bdd-6f67-41b5-8994-dbf43b01f89a",
+              "job-name": "kradle-agent-dispatch-1782421542811",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782421542811"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782421542811"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782421542811/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In the file math.js, add and export a function subtract(a, b) that returns a - b. Keep the existing add function. Make the minimal change and do not modify anything else."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_TOKEN",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:y2",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-25T21:06:06Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-25T21:06:06Z",
+            "lastTransitionTime": "2026-06-25T21:06:06Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-25T21:05:43Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-25T23:52:43Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782431563421",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782431563421",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155161459",
+        "uid": "91f9e480-be19-4d66-8a99-c27796bcef49"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "91f9e480-be19-4d66-8a99-c27796bcef49"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "91f9e480-be19-4d66-8a99-c27796bcef49",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782431563421",
+              "controller-uid": "91f9e480-be19-4d66-8a99-c27796bcef49",
+              "job-name": "kradle-agent-dispatch-1782431563421",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782431563421"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782431563421"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782431563421/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In math.js, add and export a function multiply(a, b) that returns a * b. Keep the existing functions. Minimal change only."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_USER",
+                    "value": "kradle-admin"
+                  },
+                  {
+                    "name": "KRADLE_GIT_PASSWORD",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:d6c8032725bc275093828ea2bcedaa949d007c17",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-25T23:53:52Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-25T23:53:52Z",
+            "lastTransitionTime": "2026-06-25T23:53:52Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-25T23:52:43Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-26T05:20:48Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782451248724",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782451248724",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155293874",
+        "uid": "cdd62b1d-3fcf-4878-91ec-d5c58be0a9f0"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "cdd62b1d-3fcf-4878-91ec-d5c58be0a9f0"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "cdd62b1d-3fcf-4878-91ec-d5c58be0a9f0",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782451248724",
+              "controller-uid": "cdd62b1d-3fcf-4878-91ec-d5c58be0a9f0",
+              "job-name": "kradle-agent-dispatch-1782451248724",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782451248724"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782451248724"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782451248724/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In math.js, add and export a function divide(a, b) that returns a / b. Keep the existing functions. Minimal change only."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_USER",
+                    "value": "kradle-admin"
+                  },
+                  {
+                    "name": "KRADLE_GIT_PASSWORD",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:d6c8032725bc275093828ea2bcedaa949d007c17",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-26T05:21:20Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-26T05:21:20Z",
+            "lastTransitionTime": "2026-06-26T05:21:20Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-26T05:20:48Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-26T05:26:59Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782451619375",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782451619375",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155296552",
+        "uid": "28eebcc3-e4df-4c18-8ff2-f5d320ad6a79"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "28eebcc3-e4df-4c18-8ff2-f5d320ad6a79"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "28eebcc3-e4df-4c18-8ff2-f5d320ad6a79",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782451619375",
+              "controller-uid": "28eebcc3-e4df-4c18-8ff2-f5d320ad6a79",
+              "job-name": "kradle-agent-dispatch-1782451619375",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782451619375"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782451619375"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782451619375/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In math.js, add and export a function modulo(a, b) that returns a % b. Keep existing functions. Minimal change."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_USER",
+                    "value": "kradle-admin"
+                  },
+                  {
+                    "name": "KRADLE_GIT_PASSWORD",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:d6c8032725bc275093828ea2bcedaa949d007c17",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-26T05:27:28Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-26T05:27:28Z",
+            "lastTransitionTime": "2026-06-26T05:27:28Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-26T05:26:59Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-26T09:00:06Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782464406344",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782464406344",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155385158",
+        "uid": "8a18640f-3de8-43bc-927a-9bc03e2c3ebf"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "8a18640f-3de8-43bc-927a-9bc03e2c3ebf"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "8a18640f-3de8-43bc-927a-9bc03e2c3ebf",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782464406344",
+              "controller-uid": "8a18640f-3de8-43bc-927a-9bc03e2c3ebf",
+              "job-name": "kradle-agent-dispatch-1782464406344",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782464406344"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782464406344"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782464406344/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In math.js, add and export a function power(a, b) that returns a ** b. Keep existing functions. Minimal change."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_USER",
+                    "value": "kradle-admin"
+                  },
+                  {
+                    "name": "KRADLE_GIT_PASSWORD",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:f8aae93c2dbcb86cf3eb81e2a4d87afb532d9c9a",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-26T09:01:40Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-26T09:01:40Z",
+            "lastTransitionTime": "2026-06-26T09:01:40Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-26T09:00:06Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-26T15:05:04Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782486304641",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782486304641",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "155537038",
+        "uid": "e3946445-adcc-4324-9181-f5e869c961df"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "e3946445-adcc-4324-9181-f5e869c961df"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "e3946445-adcc-4324-9181-f5e869c961df",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782486304641",
+              "controller-uid": "e3946445-adcc-4324-9181-f5e869c961df",
+              "job-name": "kradle-agent-dispatch-1782486304641",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782486304641"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782486304641"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782486304641/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "AGENT_TASK",
+                    "value": "In math.js add and export negate(a) returning -a. Keep existing functions. Minimal change."
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  },
+                  {
+                    "name": "KRADLE_REPO_OWNER",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_REPO_NAME",
+                    "value": "agent-sandbox"
+                  },
+                  {
+                    "name": "KRADLE_BASE_BRANCH",
+                    "value": "main"
+                  },
+                  {
+                    "name": "KRADLE_GIT_BASE_URL",
+                    "value": "http://kradle-kradle-gitea-http.kradle-staging.svc.cluster.local:3000"
+                  },
+                  {
+                    "name": "KRADLE_GIT_USER",
+                    "value": "kradle-admin"
+                  },
+                  {
+                    "name": "KRADLE_GIT_PASSWORD",
+                    "value": "<redacted>"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:cd822e2b006abf37798a466d5c5509d6d6d40829",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "completionTime": "2026-06-26T15:06:47Z",
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-26T15:06:47Z",
+            "lastTransitionTime": "2026-06-26T15:06:47Z",
+            "status": "True",
+            "type": "Complete"
+          }
+        ],
+        "ready": 0,
+        "startTime": "2026-06-26T15:05:04Z",
+        "succeeded": 1,
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-30T07:29:18Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1782804558074",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1782804558074",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "157689400",
+        "uid": "7c31c2fb-3689-41e2-9ad0-c880bf9d77f0"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "7c31c2fb-3689-41e2-9ad0-c880bf9d77f0"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "7c31c2fb-3689-41e2-9ad0-c880bf9d77f0",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1782804558074",
+              "controller-uid": "7c31c2fb-3689-41e2-9ad0-c880bf9d77f0",
+              "job-name": "kradle-agent-dispatch-1782804558074",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1782804558074"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1782804558074"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1782804558074/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:ec0a2182b658689b133555e5c979672d70bd46fb",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": "2026-06-30T08:29:18Z",
+            "lastTransitionTime": "2026-06-30T08:29:18Z",
+            "message": "Job was active longer than specified deadline",
+            "reason": "DeadlineExceeded",
+            "status": "True",
+            "type": "Failed"
+          }
+        ],
+        "failed": 1,
+        "ready": 0,
+        "startTime": "2026-06-30T07:29:18Z",
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    },
+    {
+      "apiVersion": "batch/v1",
+      "kind": "Job",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-07-19T06:26:46Z",
+        "generation": 1,
+        "labels": {
+          "kradle.a5c.ai/component": "agent-run",
+          "kradle.a5c.ai/org": "a5c-ai",
+          "kradle.a5c.ai/run": "dispatch-1784442405937",
+          "kradle.a5c.ai/stack": "assistant"
+        },
+        "name": "kradle-agent-dispatch-1784442405937",
+        "namespace": "kradle-org-a5c-ai",
+        "resourceVersion": "168619514",
+        "uid": "23daff8c-cc70-426b-ba50-33e56e2a43c3"
+      },
+      "spec": {
+        "activeDeadlineSeconds": 3600,
+        "backoffLimit": 0,
+        "completionMode": "NonIndexed",
+        "completions": 1,
+        "manualSelector": false,
+        "parallelism": 1,
+        "podReplacementPolicy": "TerminatingOrFailed",
+        "selector": {
+          "matchLabels": {
+            "batch.kubernetes.io/controller-uid": "23daff8c-cc70-426b-ba50-33e56e2a43c3"
+          }
+        },
+        "suspend": false,
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "batch.kubernetes.io/controller-uid": "23daff8c-cc70-426b-ba50-33e56e2a43c3",
+              "batch.kubernetes.io/job-name": "kradle-agent-dispatch-1784442405937",
+              "controller-uid": "23daff8c-cc70-426b-ba50-33e56e2a43c3",
+              "job-name": "kradle-agent-dispatch-1784442405937",
+              "kradle.a5c.ai/component": "agent-run",
+              "kradle.a5c.ai/run": "dispatch-1784442405937"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "command": [
+                  "node",
+                  "packages/adapters/cli/kradle-agent-entrypoint.mjs"
+                ],
+                "env": [
+                  {
+                    "name": "KRADLE_ORG",
+                    "value": "a5c-ai"
+                  },
+                  {
+                    "name": "KRADLE_RUN_ID",
+                    "value": "dispatch-1784442405937"
+                  },
+                  {
+                    "name": "KRADLE_WORKSPACE_PATH",
+                    "value": "/workspace"
+                  },
+                  {
+                    "name": "KRADLE_HARNESS",
+                    "value": "claude"
+                  },
+                  {
+                    "name": "KRADLE_PROVIDER",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_MODEL",
+                    "value": "gpt-5.5"
+                  },
+                  {
+                    "name": "AGENT_MUX_TRANSPORT",
+                    "value": "stdio"
+                  },
+                  {
+                    "name": "TRANSPORT_MUX_CODEC",
+                    "value": "openai"
+                  },
+                  {
+                    "name": "KRADLE_CALLBACK_URL",
+                    "value": "http://kradle-kradle-web.kradle-staging.svc.cluster.local/api/orgs/a5c-ai/agents/runs/dispatch-1784442405937/callback"
+                  },
+                  {
+                    "name": "AGENT_SYSTEM_PROMPT",
+                    "value": "You are the Kradle Assistant — an AI agent embedded in the Kradle platform.\nYou help users manage repositories, agent stacks, workspaces, deployments, and policies.\n"
+                  },
+                  {
+                    "name": "KRADLE_STACK_NAME",
+                    "value": "assistant"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "secretRef": {
+                      "name": "kradle-assistant-keys",
+                      "optional": false
+                    }
+                  }
+                ],
+                "image": "acrhubdevelopmentwestus3.azurecr.io/adapters-agent:36fed89b06c7ed5cde5151062a0c3c339e44a6e4",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "1500m",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "25m",
+                    "memory": "512Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/workspace",
+                    "name": "workspace"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Never",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kradle-kradle",
+            "serviceAccountName": "kradle-kradle",
+            "terminationGracePeriodSeconds": 30,
+            "volumes": [
+              {
+                "emptyDir": {},
+                "name": "workspace"
+              }
+            ]
+          }
+        }
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastProbeTime": "2026-07-19T07:26:46Z",
+            "lastTransitionTime": "2026-07-19T07:26:46Z",
+            "message": "Job was active longer than specified deadline",
+            "reason": "DeadlineExceeded",
+            "status": "True",
+            "type": "Failed"
+          }
+        ],
+        "failed": 1,
+        "ready": 0,
+        "startTime": "2026-07-19T06:26:46Z",
+        "terminating": 0,
+        "uncountedTerminatedPods": {}
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

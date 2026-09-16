@@ -1,0 +1,19 @@
+ERROR: The command failed with an unexpected error. Here is the traceback:
+ERROR: 'NoneType' object has no attribute '__name__'
+Traceback (most recent call last):
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\knack/cli.py", line 233, in invoke
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/__init__.py", line 666, in execute
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/__init__.py", line 734, in _run_jobs_serially
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/__init__.py", line 703, in _run_job
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/__init__.py", line 336, in __call__
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/command_operation.py", line 111, in handler
+  File "C:\Users\tmusk\.azure\cliextensions\aks-preview\azext_aks_preview\_client_factory.py", line 31, in cf_managed_clusters
+    return get_container_service_client(cli_ctx).managed_clusters
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tmusk\.azure\cliextensions\aks-preview\azext_aks_preview\_client_factory.py", line 23, in get_container_service_client
+    return get_mgmt_service_client(cli_ctx, CUSTOM_MGMT_AKS_PREVIEW, subscription_id=subscription_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/client_factory.py", line 83, in get_mgmt_service_client
+  File "D:\a\_work\1\s\build_scripts\windows\artifacts\cli\Lib\site-packages\azure/cli/core/commands/client_factory.py", line 222, in _get_mgmt_service_client
+AttributeError: 'NoneType' object has no attribute '__name__'. Did you mean: '__ne__'?
+To check existing issues, please visit: https://github.com/Azure/azure-cli/issues

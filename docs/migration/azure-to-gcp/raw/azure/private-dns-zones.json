@@ -1,0 +1,44 @@
+[
+  {
+    "etag": "c89834b9-b7e3-46de-b3e5-44471ce5e96c",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net",
+    "location": "global",
+    "maxNumberOfRecordSets": 25000,
+    "maxNumberOfVirtualNetworkLinks": 1000,
+    "maxNumberOfVirtualNetworkLinksWithRegistration": 100,
+    "name": "privatelink.blob.core.windows.net",
+    "numberOfRecordSets": 1,
+    "numberOfVirtualNetworkLinks": 1,
+    "numberOfVirtualNetworkLinksWithRegistration": 0,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Network/privateDnsZones"
+  },
+  {
+    "etag": "dd19b66e-181b-4bee-979c-72377f418c8b",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/privateDnsZones/privatelink.vaultcore.azure.net",
+    "location": "global",
+    "maxNumberOfRecordSets": 25000,
+    "maxNumberOfVirtualNetworkLinks": 1000,
+    "maxNumberOfVirtualNetworkLinksWithRegistration": 100,
+    "name": "privatelink.vaultcore.azure.net",
+    "numberOfRecordSets": 1,
+    "numberOfVirtualNetworkLinks": 1,
+    "numberOfVirtualNetworkLinksWithRegistration": 0,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "rg-hub-development-westus3",
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Network/privateDnsZones"
+  }
+]

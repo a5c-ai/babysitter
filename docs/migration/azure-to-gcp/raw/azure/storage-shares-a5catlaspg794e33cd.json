@@ -1,0 +1,44 @@
+[
+  {
+    "accessTier": "TransactionOptimized",
+    "accessTierChangeTime": "2026-06-30T09:12:10.0000000Z",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DED687AAD6230B\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Storage/storageAccounts/a5catlaspg794e33cd/fileServices/default/shares/atlas-atlas-postgres",
+    "lastModifiedTime": "2026-06-30T09:12:10.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "atlas-atlas-postgres",
+    "resourceGroup": "rg-hub-development-westus3",
+    "shareQuota": 8,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  },
+  {
+    "accessTier": "TransactionOptimized",
+    "accessTierChangeTime": "2026-05-14T14:37:41.0000000Z",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DEB1C65AA63935\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Storage/storageAccounts/a5catlaspg794e33cd/fileServices/default/shares/atlas-staging-atlas-postgres",
+    "lastModifiedTime": "2026-05-14T14:37:41.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "atlas-staging-atlas-postgres",
+    "resourceGroup": "rg-hub-development-westus3",
+    "shareQuota": 8,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  },
+  {
+    "accessTier": "TransactionOptimized",
+    "accessTierChangeTime": "2026-06-09T07:13:13.0000000Z",
+    "enabledProtocols": "SMB",
+    "etag": "\"0x8DEC5F691FF75D7\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Storage/storageAccounts/a5catlaspg794e33cd/fileServices/default/shares/content-studio-postgres",
+    "lastModifiedTime": "2026-06-09T07:13:13.0000000Z",
+    "leaseState": "available",
+    "leaseStatus": "unlocked",
+    "name": "content-studio-postgres",
+    "resourceGroup": "rg-hub-development-westus3",
+    "shareQuota": 8,
+    "type": "Microsoft.Storage/storageAccounts/fileServices/shares"
+  }
+]

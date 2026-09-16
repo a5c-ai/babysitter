@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-02-06T07:14:25.7634726Z",
+  "imageName": "claude-web-runner",
+  "lastUpdateTime": "2026-08-27T10:00:59.7728679Z",
+  "manifestCount": 16,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

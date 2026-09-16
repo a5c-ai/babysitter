@@ -1,0 +1,22 @@
+API [dns.googleapis.com] not enabled on project [boot-464019]. Would you like to
+ enable and retry (this will take a few minutes)? (y/N)?  
+ERROR: (gcloud.dns.managed-zones.list) User [tal@a5c.ai] does not have permission to access projects instance [boot-464019] (or it may not exist): Cloud DNS API has not been used in project boot-464019 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/dns.googleapis.com/overview?project=boot-464019 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.
+- '@type': type.googleapis.com/google.rpc.ErrorInfo
+  domain: googleapis.com
+  metadata:
+    activationUrl: https://console.developers.google.com/apis/api/dns.googleapis.com/overview?project=boot-464019
+    consumer: projects/boot-464019
+    containerInfo: boot-464019
+    service: dns.googleapis.com
+    serviceTitle: Cloud DNS API
+  reason: SERVICE_DISABLED
+- '@type': type.googleapis.com/google.rpc.LocalizedMessage
+  locale: en-US
+  message: Cloud DNS API has not been used in project boot-464019 before or it is
+    disabled. Enable it by visiting https://console.developers.google.com/apis/api/dns.googleapis.com/overview?project=boot-464019
+    then retry. If you enabled this API recently, wait a few minutes for the action
+    to propagate to our systems and retry.
+- '@type': type.googleapis.com/google.rpc.Help
+  links:
+  - description: Google developers console API activation
+    url: https://console.developers.google.com/apis/api/dns.googleapis.com/overview?project=boot-464019

@@ -1,0 +1,4279 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "12",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 12,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "app": "secrets-store-csi-driver",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "aks-secrets-store-csi-driver",
+        "namespace": "kube-system",
+        "resourceVersion": "193490490",
+        "uid": "605b6284-31f8-4adf-b13b-004aa9e69bf4"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "secrets-store-csi-driver"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "secrets-store-csi-driver",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--v=2",
+                  "--csi-address=/csi/csi.sock",
+                  "--kubelet-registration-path=/var/lib/kubelet/plugins/csi-secrets-store/csi.sock"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes-csi/csi-node-driver-registrar:v2.17.0-3",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/csi-node-driver-registrar",
+                      "--kubelet-registration-path=/var/lib/kubelet/plugins/csi-secrets-store/csi.sock",
+                      "--mode=kubelet-registration-probe"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 15
+                },
+                "name": "node-driver-registrar",
+                "resources": {
+                  "limits": {
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "5m",
+                    "memory": "10Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "plugin-dir"
+                  },
+                  {
+                    "mountPath": "/registration",
+                    "name": "registration-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "-v=2",
+                  "--log-format-json=false",
+                  "--endpoint=$(CSI_ENDPOINT)",
+                  "--nodeid=$(KUBE_NODE_NAME)",
+                  "--provider-volume=/var/run/secrets-store-csi-providers",
+                  "--additional-provider-volume-paths=/etc/kubernetes/secrets-store-csi-providers",
+                  "--enable-secret-rotation=true",
+                  "--rotation-poll-interval=2m",
+                  "--metrics-addr=:8095",
+                  "--max-call-recv-msg-size=4194304"
+                ],
+                "env": [
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix:///csi/csi.sock"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes-csi/secrets-store/driver:v1.5.6-2",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 5,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "healthz",
+                    "scheme": "HTTP"
+                  },
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 15,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 10
+                },
+                "name": "secrets-store",
+                "ports": [
+                  {
+                    "containerPort": 9808,
+                    "name": "healthz",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 8095,
+                    "name": "metrics",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "200m",
+                    "memory": "500Mi"
+                  },
+                  "requests": {
+                    "cpu": "23m",
+                    "memory": "88Mi"
+                  }
+                },
+                "securityContext": {
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "plugin-dir"
+                  },
+                  {
+                    "mountPath": "/var/lib/kubelet/pods",
+                    "mountPropagation": "Bidirectional",
+                    "name": "mountpoint-dir"
+                  },
+                  {
+                    "mountPath": "/var/run/secrets-store-csi-providers",
+                    "name": "providers-dir"
+                  },
+                  {
+                    "mountPath": "/etc/kubernetes/secrets-store-csi-providers",
+                    "name": "providers-dir-0"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "--csi-address=/csi/csi.sock",
+                  "--probe-timeout=3s",
+                  "--http-endpoint=0.0.0.0:9808",
+                  "-v=2"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes-csi/livenessprobe:v2.19.0-3",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "liveness-probe",
+                "resources": {
+                  "limits": {
+                    "cpu": "100m",
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "5m",
+                    "memory": "10Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "plugin-dir"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "Default",
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "aks-secrets-store-csi-driver",
+            "serviceAccountName": "aks-secrets-store-csi-driver",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/pods",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "mountpoint-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/plugins_registry/",
+                  "type": "Directory"
+                },
+                "name": "registration-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/plugins/csi-secrets-store/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "plugin-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/run/secrets-store-csi-providers",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "providers-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/kubernetes/secrets-store-csi-providers",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "providers-dir-0"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 12,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "11",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 11,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "app": "secrets-store-csi-driver",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "aks-secrets-store-csi-driver-windows",
+        "namespace": "kube-system",
+        "resourceVersion": "193489685",
+        "uid": "471fe9e3-7fb0-4fe7-afc3-b4d17c8b17fa"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "secrets-store-csi-driver"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "secrets-store-csi-driver",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--v=2",
+                  "--csi-address=unix://C:\\csi\\csi.sock",
+                  "--kubelet-registration-path=C:\\var\\lib\\kubelet\\plugins\\csi-secrets-store\\csi.sock"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes-csi/csi-node-driver-registrar:v2.17.0-3",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/csi-node-driver-registrar.exe",
+                      "--kubelet-registration-path=C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\csi-secrets-store\\\\csi.sock",
+                      "--mode=kubelet-registration-probe"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 15
+                },
+                "name": "node-driver-registrar",
+                "resources": {
+                  "limits": {
+                    "memory": "200Mi"
+                  },
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "100Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "C:\\csi",
+                    "name": "plugin-dir"
+                  },
+                  {
+                    "mountPath": "C:\\registration",
+                    "name": "registration-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "-v=2",
+                  "--log-format-json=false",
+                  "--endpoint=$(CSI_ENDPOINT)",
+                  "--nodeid=$(KUBE_NODE_NAME)",
+                  "--provider-volume=C:\\k\\secrets-store-csi-providers",
+                  "--enable-secret-rotation=true",
+                  "--rotation-poll-interval=2m",
+                  "--metrics-addr=:8095",
+                  "--max-call-recv-msg-size=4194304"
+                ],
+                "env": [
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix://C:\\\\csi\\\\csi.sock"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes-csi/secrets-store/driver:v1.5.6-2",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 5,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "healthz",
+                    "scheme": "HTTP"
+                  },
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 15,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 10
+                },
+                "name": "secrets-store",
+                "ports": [
+                  {
+                    "containerPort": 9808,
+                    "name": "healthz",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 8095,
+                    "name": "metrics",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "400m",
+                    "memory": "400Mi"
+                  },
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "100Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "C:\\csi",
+                    "name": "plugin-dir"
+                  },
+                  {
+                    "mountPath": "C:\\var\\lib\\kubelet\\pods",
+                    "name": "mountpoint-dir"
+                  },
+                  {
+                    "mountPath": "C:\\k\\secrets-store-csi-providers",
+                    "name": "providers-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "--csi-address=unix://C:\\csi\\csi.sock",
+                  "--probe-timeout=3s",
+                  "--http-endpoint=0.0.0.0:9808",
+                  "-v=2"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes-csi/livenessprobe:v2.19.0-3",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "liveness-probe",
+                "resources": {
+                  "limits": {
+                    "cpu": "200m",
+                    "memory": "200Mi"
+                  },
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "100Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "C:\\csi",
+                    "name": "plugin-dir"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "aks-secrets-store-csi-driver",
+            "serviceAccountName": "aks-secrets-store-csi-driver",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "C:\\var\\lib\\kubelet\\pods\\",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "mountpoint-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "C:\\var\\lib\\kubelet\\plugins_registry\\",
+                  "type": "Directory"
+                },
+                "name": "registration-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "C:\\var\\lib\\kubelet\\plugins\\csi-secrets-store\\",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "plugin-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "C:\\k\\secrets-store-csi-providers",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "providers-dir"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 11
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "8",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 8,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "app": "secrets-store-provider-azure",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "aks-secrets-store-provider-azure",
+        "namespace": "kube-system",
+        "resourceVersion": "193490361",
+        "uid": "861eaa7b-2e80-4e5b-94a9-d207c83d13a0"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "secrets-store-provider-azure"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "secrets-store-provider-azure",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--endpoint=unix:///provider/azure.sock",
+                  "--log-format-json=false",
+                  "-v=2",
+                  "--construct-pem-chain=true",
+                  "--custom-user-agent='kubernetes.azure.com/managedby: aks'",
+                  "--healthz-port=8989",
+                  "--healthz-path=/healthz",
+                  "--healthz-timeout=5s",
+                  "--write-cert-and-key-in-separate-files=true"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/azure/secrets-store/provider-azure:v1.8.2-5",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8989,
+                    "scheme": "HTTP"
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 30,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 10
+                },
+                "name": "provider-azure-installer",
+                "ports": [
+                  {
+                    "containerPort": 8898,
+                    "name": "metrics",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "100m",
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "16m",
+                    "memory": "50Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "readOnlyRootFilesystem": true,
+                  "runAsUser": 0
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/provider",
+                    "name": "provider-vol"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "nodeSelector": {
+              "kubernetes.io/os": "linux"
+            },
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "aks-secrets-store-provider-azure",
+            "serviceAccountName": "aks-secrets-store-provider-azure",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/run/secrets-store-csi-providers",
+                  "type": ""
+                },
+                "name": "provider-vol"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 8,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "7",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 7,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "app": "secrets-store-provider-azure",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "aks-secrets-store-provider-azure-windows",
+        "namespace": "kube-system",
+        "resourceVersion": "193489671",
+        "uid": "2a21ddd3-f6cc-4be4-b5db-a63af5fe5e61"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "secrets-store-provider-azure"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "secrets-store-provider-azure",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--endpoint=unix://C:\\provider\\azure.sock",
+                  "--log-format-json=false",
+                  "-v=2",
+                  "--construct-pem-chain=true",
+                  "--custom-user-agent='kubernetes.azure.com/managedby: aks'",
+                  "--healthz-port=8989",
+                  "--healthz-path=/healthz",
+                  "--healthz-timeout=5s",
+                  "--write-cert-and-key-in-separate-files=true"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/azure/secrets-store/provider-azure:v1.8.2-5",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": 8989,
+                    "scheme": "HTTP"
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 30,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 10
+                },
+                "name": "provider-azure-installer",
+                "ports": [
+                  {
+                    "containerPort": 8898,
+                    "name": "metrics",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "100m",
+                    "memory": "200Mi"
+                  },
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "200Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "C:\\provider",
+                    "name": "provider-vol"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "nodeSelector": {
+              "kubernetes.io/os": "windows"
+            },
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "aks-secrets-store-provider-azure",
+            "serviceAccountName": "aks-secrets-store-provider-azure",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "C:\\k\\secrets-store-csi-providers",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "provider-vol"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 7
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "10",
+          "meta.helm.sh/release-name": "aks-managed-azure-monitor-logs",
+          "meta.helm.sh/release-namespace": "kube-system"
+        },
+        "creationTimestamp": "2025-07-30T09:13:31Z",
+        "generation": 10,
+        "labels": {
+          "app.kubernetes.io/managed-by": "Helm",
+          "component": "ama-logs-agent",
+          "helm.toolkit.fluxcd.io/name": "azure-monitor-logs-adapter-helmrelease",
+          "helm.toolkit.fluxcd.io/namespace": "6889e147bca62d000117c884",
+          "kubernetes.azure.com/managedby": "aks",
+          "tier": "node"
+        },
+        "name": "ama-logs",
+        "namespace": "kube-system",
+        "resourceVersion": "135429776",
+        "uid": "d1534e4d-4ca3-49a4-baa9-6770864e7c25"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "component": "ama-logs-agent",
+            "tier": "node"
+          }
+        },
+        "template": {
+          "metadata": {
+            "annotations": {
+              "WSID": "YjBmZTZhMDktZTVhZC00NDJmLWI5ZjgtMDU1ZmQ1NDkzMzZh",
+              "agentVersion": "azure-mdsd-1.40.3",
+              "dockerProviderVersion": "18.0.1-0",
+              "kubernetes.azure.com/no-http-proxy-vars": "true",
+              "schema-versions": "v1"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "component": "ama-logs-agent",
+              "kubernetes.azure.com/managedby": "aks",
+              "tier": "node"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "NODE_IP",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "status.hostIP"
+                      }
+                    }
+                  },
+                  {
+                    "name": "CONTAINER_MEMORY_LIMIT_IN_BYTES",
+                    "valueFrom": {
+                      "resourceFieldRef": {
+                        "containerName": "ama-logs",
+                        "divisor": "0",
+                        "resource": "limits.memory"
+                      }
+                    }
+                  },
+                  {
+                    "name": "HOSTNAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  },
+                  {
+                    "name": "FBIT_SERVICE_FLUSH_INTERVAL",
+                    "value": "15"
+                  },
+                  {
+                    "name": "FBIT_TAIL_BUFFER_CHUNK_SIZE",
+                    "value": "1"
+                  },
+                  {
+                    "name": "FBIT_TAIL_BUFFER_MAX_SIZE",
+                    "value": "1"
+                  },
+                  {
+                    "name": "AKS_CLUSTER_NAME",
+                    "value": "aks-hub-development-westus3-v2"
+                  },
+                  {
+                    "name": "AKS_RESOURCE_ID",
+                    "value": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2"
+                  },
+                  {
+                    "name": "AKS_NODE_RESOURCE_GROUP",
+                    "value": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+                  },
+                  {
+                    "name": "AKS_REGION",
+                    "value": "westus3"
+                  },
+                  {
+                    "name": "CONTROLLER_TYPE",
+                    "value": "DaemonSet"
+                  },
+                  {
+                    "name": "USER_ASSIGNED_IDENTITY_CLIENT_ID",
+                    "value": "dc6e7d1a-368c-47fa-91d0-1c9b9f67fe7e"
+                  },
+                  {
+                    "name": "AZMON_CONTAINERLOGS_ONEAGENT_REGIONS",
+                    "value": "koreacentral,norwayeast,eastus2"
+                  },
+                  {
+                    "name": "APPMONITORING_AUTOINSTRUMENTATION_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "APPMONITORING_OPENTELEMETRYLOGS_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "APPMONITORING_OPENTELEMETRYLOGS_PORT",
+                    "value": "28331"
+                  },
+                  {
+                    "name": "APPMONITORING_OPENTELEMETRYLOGS_PORT_GRPC",
+                    "value": "28332"
+                  },
+                  {
+                    "name": "AZMON_OPENTELEMETRYLOGS_CONTAINER_PORT",
+                    "value": "4319"
+                  },
+                  {
+                    "name": "AZMON_OPENTELEMETRYLOGS_CONTAINER_PORT_GRPC",
+                    "value": "4320"
+                  },
+                  {
+                    "name": "PROMETHEUS_METRICS_SCRAPING_DISABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "USING_AAD_MSI_AUTH",
+                    "value": "false"
+                  },
+                  {
+                    "name": "SYSLOG_HOST_PORT",
+                    "value": "28330"
+                  },
+                  {
+                    "name": "AZMON_RETINA_FLOW_LOGS_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "AZMON_RESOURCE_OPTIMIZATION_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "AZMON_TELEGRAF_LIVENESSPROBE_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "CLUSTER_CLOUD_ENVIRONMENT",
+                    "value": "azurepubliccloud"
+                  },
+                  {
+                    "name": "AMCS_CLIENT_INSTALL_ID_OVERRIDE",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.uid"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/azuremonitor/containerinsights/ciprod:3.3.0",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/bin/bash",
+                      "-c",
+                      "/opt/livenessprobe.sh"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 60,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 15
+                },
+                "name": "ama-logs",
+                "ports": [
+                  {
+                    "containerPort": 25225,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 25224,
+                    "protocol": "UDP"
+                  },
+                  {
+                    "containerPort": 28330,
+                    "hostPort": 28330,
+                    "name": "syslog",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "1Gi"
+                  },
+                  "requests": {
+                    "cpu": "75m",
+                    "memory": "325Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "add": [
+                      "DAC_OVERRIDE"
+                    ],
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/hostfs",
+                    "mountPropagation": "HostToContainer",
+                    "name": "host-root",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/var/log",
+                    "name": "host-log"
+                  },
+                  {
+                    "mountPath": "/var/run/mdsd-ci",
+                    "name": "mdsd-sock"
+                  },
+                  {
+                    "mountPath": "/var/run/mdsd-PrometheusSidecar",
+                    "name": "mdsd-prometheus-sock"
+                  },
+                  {
+                    "mountPath": "/var/lib/docker/containers",
+                    "name": "containerlog-path",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/mnt/docker",
+                    "name": "containerlog-path-2",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/mnt/containers",
+                    "name": "containerlog-path-3",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/kubernetes/host",
+                    "name": "azure-json-path"
+                  },
+                  {
+                    "mountPath": "/etc/ama-logs-secret",
+                    "name": "ama-logs-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/omsagent-secret",
+                    "name": "ama-logs-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/config/settings",
+                    "name": "settings-vol-config",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/config/settings/adx",
+                    "name": "ama-logs-adx-secret",
+                    "readOnly": true
+                  }
+                ]
+              },
+              {
+                "env": [
+                  {
+                    "name": "NODE_IP",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "status.hostIP"
+                      }
+                    }
+                  },
+                  {
+                    "name": "CONTAINER_MEMORY_LIMIT_IN_BYTES",
+                    "valueFrom": {
+                      "resourceFieldRef": {
+                        "containerName": "ama-logs-prometheus",
+                        "divisor": "0",
+                        "resource": "limits.memory"
+                      }
+                    }
+                  },
+                  {
+                    "name": "HOSTNAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  },
+                  {
+                    "name": "AKS_CLUSTER_NAME",
+                    "value": "aks-hub-development-westus3-v2"
+                  },
+                  {
+                    "name": "AKS_RESOURCE_ID",
+                    "value": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2"
+                  },
+                  {
+                    "name": "AKS_NODE_RESOURCE_GROUP",
+                    "value": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+                  },
+                  {
+                    "name": "AKS_REGION",
+                    "value": "westus3"
+                  },
+                  {
+                    "name": "CONTROLLER_TYPE",
+                    "value": "DaemonSet"
+                  },
+                  {
+                    "name": "CONTAINER_TYPE",
+                    "value": "PrometheusSidecar"
+                  },
+                  {
+                    "name": "USER_ASSIGNED_IDENTITY_CLIENT_ID",
+                    "value": "dc6e7d1a-368c-47fa-91d0-1c9b9f67fe7e"
+                  },
+                  {
+                    "name": "USING_AAD_MSI_AUTH",
+                    "value": "false"
+                  },
+                  {
+                    "name": "SYSLOG_HOST_PORT",
+                    "value": "28330"
+                  },
+                  {
+                    "name": "AZMON_TELEGRAF_LIVENESSPROBE_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "CLUSTER_CLOUD_ENVIRONMENT",
+                    "value": "azurepubliccloud"
+                  },
+                  {
+                    "name": "AMCS_CLIENT_INSTALL_ID_OVERRIDE",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.uid"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/azuremonitor/containerinsights/ciprod:3.3.0",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/bin/bash",
+                      "-c",
+                      "/opt/livenessprobe.sh"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 60,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 15
+                },
+                "name": "ama-logs-prometheus",
+                "resources": {
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "1Gi"
+                  },
+                  "requests": {
+                    "cpu": "75m",
+                    "memory": "225Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "add": [
+                      "DAC_OVERRIDE"
+                    ],
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/etc/kubernetes/host",
+                    "name": "azure-json-path"
+                  },
+                  {
+                    "mountPath": "/etc/ama-logs-secret",
+                    "name": "ama-logs-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/omsagent-secret",
+                    "name": "ama-logs-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/config/settings",
+                    "name": "settings-vol-config",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/config/osm-settings",
+                    "name": "osm-settings-vol-config",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/var/run/mdsd-PrometheusSidecar",
+                    "name": "mdsd-prometheus-sock"
+                  },
+                  {
+                    "mountPath": "/var/run/mdsd-ci",
+                    "name": "mdsd-sock"
+                  }
+                ]
+              }
+            ],
+            "dnsConfig": {
+              "options": [
+                {
+                  "name": "ndots",
+                  "value": "3"
+                }
+              ]
+            },
+            "dnsPolicy": "ClusterFirst",
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "ama-logs",
+            "serviceAccountName": "ama-logs",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              },
+              {
+                "effect": "PreferNoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/",
+                  "type": ""
+                },
+                "name": "host-root"
+              },
+              {
+                "emptyDir": {},
+                "name": "mdsd-prometheus-sock"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/hostname",
+                  "type": ""
+                },
+                "name": "container-hostname"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/log",
+                  "type": ""
+                },
+                "name": "host-log"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/run/mdsd-ci",
+                  "type": ""
+                },
+                "name": "mdsd-sock"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/docker/containers",
+                  "type": ""
+                },
+                "name": "containerlog-path"
+              },
+              {
+                "hostPath": {
+                  "path": "/mnt/docker",
+                  "type": ""
+                },
+                "name": "containerlog-path-2"
+              },
+              {
+                "hostPath": {
+                  "path": "/mnt/containers",
+                  "type": ""
+                },
+                "name": "containerlog-path-3"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/kubernetes",
+                  "type": ""
+                },
+                "name": "azure-json-path"
+              },
+              {
+                "name": "ama-logs-secret",
+                "secret": {
+                  "defaultMode": 420,
+                  "secretName": "ama-logs-secret"
+                }
+              },
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "name": "container-azm-ms-agentconfig",
+                  "optional": true
+                },
+                "name": "settings-vol-config"
+              },
+              {
+                "name": "ama-logs-adx-secret",
+                "secret": {
+                  "defaultMode": 420,
+                  "optional": true,
+                  "secretName": "ama-logs-adx-secret"
+                }
+              },
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "name": "container-azm-ms-osmconfig",
+                  "optional": true
+                },
+                "name": "osm-settings-vol-config"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": "50%"
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 10,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "10",
+          "meta.helm.sh/release-name": "aks-managed-azure-monitor-logs",
+          "meta.helm.sh/release-namespace": "kube-system"
+        },
+        "creationTimestamp": "2025-07-30T09:13:31Z",
+        "generation": 10,
+        "labels": {
+          "app.kubernetes.io/managed-by": "Helm",
+          "component": "ama-logs-agent-windows",
+          "helm.toolkit.fluxcd.io/name": "azure-monitor-logs-adapter-helmrelease",
+          "helm.toolkit.fluxcd.io/namespace": "6889e147bca62d000117c884",
+          "kubernetes.azure.com/managedby": "aks",
+          "tier": "node-win"
+        },
+        "name": "ama-logs-windows",
+        "namespace": "kube-system",
+        "resourceVersion": "135429340",
+        "uid": "5f6c897e-238b-475d-8551-139a931a0a6e"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "component": "ama-logs-agent-windows",
+            "tier": "node-win"
+          }
+        },
+        "template": {
+          "metadata": {
+            "annotations": {
+              "WSID": "YjBmZTZhMDktZTVhZC00NDJmLWI5ZjgtMDU1ZmQ1NDkzMzZh",
+              "agentVersion": "47.7.1",
+              "dockerProviderVersion": "18.0.1-0",
+              "kubernetes.azure.com/no-http-proxy-vars": "true",
+              "schema-versions": "v1"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "component": "ama-logs-agent-windows",
+              "kubernetes.azure.com/managedby": "aks",
+              "tier": "node-win"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "FBIT_SERVICE_FLUSH_INTERVAL",
+                    "value": "15"
+                  },
+                  {
+                    "name": "FBIT_TAIL_BUFFER_CHUNK_SIZE",
+                    "value": "1"
+                  },
+                  {
+                    "name": "FBIT_TAIL_BUFFER_MAX_SIZE",
+                    "value": "1"
+                  },
+                  {
+                    "name": "AKS_RESOURCE_ID",
+                    "value": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2"
+                  },
+                  {
+                    "name": "AKS_REGION",
+                    "value": "westus3"
+                  },
+                  {
+                    "name": "CONTROLLER_TYPE",
+                    "value": "DaemonSet"
+                  },
+                  {
+                    "name": "USER_ASSIGNED_IDENTITY_CLIENT_ID",
+                    "value": "dc6e7d1a-368c-47fa-91d0-1c9b9f67fe7e"
+                  },
+                  {
+                    "name": "HOSTNAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  },
+                  {
+                    "name": "NODE_IP",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "status.hostIP"
+                      }
+                    }
+                  },
+                  {
+                    "name": "PODNAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.name"
+                      }
+                    }
+                  },
+                  {
+                    "name": "CONTAINER_MEMORY_LIMIT_IN_BYTES",
+                    "valueFrom": {
+                      "resourceFieldRef": {
+                        "containerName": "ama-logs-windows",
+                        "divisor": "0",
+                        "resource": "limits.memory"
+                      }
+                    }
+                  },
+                  {
+                    "name": "SIDECAR_SCRAPING_ENABLED",
+                    "value": "true"
+                  },
+                  {
+                    "name": "USING_AAD_MSI_AUTH",
+                    "value": "false"
+                  },
+                  {
+                    "name": "APPMONITORING_AUTOINSTRUMENTATION_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "APPMONITORING_OPENTELEMETRYLOGS_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "APPMONITORING_OPENTELEMETRYLOGS_PORT",
+                    "value": "28331"
+                  },
+                  {
+                    "name": "APPMONITORING_OPENTELEMETRYLOGS_PORT_GRPC",
+                    "value": "28332"
+                  },
+                  {
+                    "name": "PROMETHEUS_METRICS_SCRAPING_DISABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "AZMON_TELEGRAF_LIVENESSPROBE_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "AZMON_WINDOWS_FLUENT_BIT_ENABLED",
+                    "value": "false"
+                  },
+                  {
+                    "name": "CLUSTER_CLOUD_ENVIRONMENT",
+                    "value": "azurepubliccloud"
+                  },
+                  {
+                    "name": "AMCS_CLIENT_INSTALL_ID_OVERRIDE",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.uid"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/azuremonitor/containerinsights/ciprod:win-3.3.0",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "cmd",
+                      "/c",
+                      "C:\\opt\\amalogswindows\\scripts\\cmd\\livenessprobe.exe",
+                      "fluent-bit.exe",
+                      "fluentdwinaks",
+                      "C:\\etc\\amalogswindows\\filesystemwatcher.txt",
+                      "C:\\etc\\amalogswindows\\renewcertificate.txt"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 180,
+                  "periodSeconds": 60,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 15
+                },
+                "name": "ama-logs-windows",
+                "resources": {
+                  "limits": {
+                    "cpu": "2",
+                    "memory": "2Gi"
+                  },
+                  "requests": {
+                    "cpu": "100m",
+                    "memory": "150Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "add": [
+                      "DAC_OVERRIDE"
+                    ],
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "C:\\ProgramData\\docker\\containers",
+                    "name": "docker-windows-containers",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "C:\\var",
+                    "name": "docker-windows-kuberenetes-container-logs"
+                  },
+                  {
+                    "mountPath": "C:\\etc\\config\\settings",
+                    "name": "settings-vol-config",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "C:\\etc\\ama-logs-secret",
+                    "name": "ama-logs-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "C:\\etc\\omsagent-secret",
+                    "name": "ama-logs-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "C:\\etc\\config\\adx",
+                    "name": "ama-logs-adx-secret",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "C:\\etc\\kubernetes\\host",
+                    "name": "azure-json-path",
+                    "readOnly": true
+                  }
+                ]
+              }
+            ],
+            "dnsConfig": {
+              "options": [
+                {
+                  "name": "ndots",
+                  "value": "3"
+                }
+              ]
+            },
+            "dnsPolicy": "ClusterFirst",
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "ama-logs",
+            "serviceAccountName": "ama-logs",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              },
+              {
+                "effect": "PreferNoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "C:\\var",
+                  "type": ""
+                },
+                "name": "docker-windows-kuberenetes-container-logs"
+              },
+              {
+                "hostPath": {
+                  "path": "C:\\k",
+                  "type": ""
+                },
+                "name": "azure-json-path"
+              },
+              {
+                "hostPath": {
+                  "path": "C:\\ProgramData\\docker\\containers",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "docker-windows-containers"
+              },
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "name": "container-azm-ms-agentconfig",
+                  "optional": true
+                },
+                "name": "settings-vol-config"
+              },
+              {
+                "name": "ama-logs-secret",
+                "secret": {
+                  "defaultMode": 420,
+                  "secretName": "ama-logs-secret"
+                }
+              },
+              {
+                "name": "ama-logs-adx-secret",
+                "secret": {
+                  "defaultMode": 420,
+                  "optional": true,
+                  "secretName": "ama-logs-adx-secret"
+                }
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": "50%"
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 10
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "9"
+        },
+        "creationTimestamp": "2025-07-30T09:11:22Z",
+        "generation": 9,
+        "labels": {
+          "app.kubernetes.io/managed-by": "Eno",
+          "component": "azure-ip-masq-agent",
+          "kubernetes.azure.com/managedby": "aks",
+          "tier": "node"
+        },
+        "name": "azure-ip-masq-agent",
+        "namespace": "kube-system",
+        "resourceVersion": "194072745",
+        "uid": "f882e4d4-3029-4903-bdb5-1448bd250ad7"
+      },
+      "spec": {
+        "minReadySeconds": 60,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "k8s-app": "azure-ip-masq-agent",
+            "tier": "node"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/managed-by": "Eno",
+              "k8s-app": "azure-ip-masq-agent",
+              "kubernetes.azure.com/managedby": "aks",
+              "tier": "node"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "automountServiceAccountToken": false,
+            "containers": [
+              {
+                "args": [
+                  "--v=2",
+                  "--resync-interval=60"
+                ],
+                "image": "mcr.microsoft.com/oss/v2/azure/ip-masq-agent-v2:v0.1.16-16",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "azure-ip-masq-agent",
+                "resources": {
+                  "limits": {
+                    "cpu": "500m",
+                    "memory": "250Mi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "36Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "add": [
+                      "NET_ADMIN",
+                      "NET_RAW"
+                    ],
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/etc/config",
+                    "name": "azure-ip-masq-agent-config-volume"
+                  },
+                  {
+                    "mountPath": "/run/xtables.lock",
+                    "name": "iptableslock"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "name": "azure-ip-masq-agent-config-volume",
+                "projected": {
+                  "defaultMode": 420,
+                  "sources": [
+                    {
+                      "configMap": {
+                        "items": [
+                          {
+                            "key": "ip-masq-agent",
+                            "mode": 444,
+                            "path": "ip-masq-agent"
+                          }
+                        ],
+                        "name": "azure-ip-masq-agent-config",
+                        "optional": true
+                      }
+                    },
+                    {
+                      "configMap": {
+                        "items": [
+                          {
+                            "key": "ip-masq-agent-reconciled",
+                            "mode": 444,
+                            "path": "ip-masq-agent-reconciled"
+                          }
+                        ],
+                        "name": "azure-ip-masq-agent-config-reconciled",
+                        "optional": true
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "hostPath": {
+                  "path": "/run/xtables.lock",
+                  "type": "FileOrCreate"
+                },
+                "name": "iptableslock"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": "25%"
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 9,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "6"
+        },
+        "creationTimestamp": "2025-07-30T09:11:48Z",
+        "generation": 6,
+        "labels": {
+          "app": "azure-npm",
+          "app.kubernetes.io/managed-by": "eno",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "azure-npm",
+        "namespace": "kube-system",
+        "resourceVersion": "163978231",
+        "uid": "a97b1358-702a-425c-8f65-2148a5c64c0d"
+      },
+      "spec": {
+        "minReadySeconds": 10,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "k8s-app": "azure-npm"
+          }
+        },
+        "template": {
+          "metadata": {
+            "annotations": {
+              "azure.npm/scrapeable": "",
+              "prometheus.io/port": "10091"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/managed-by": "Eno",
+              "k8s-app": "azure-npm",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/ebpf-dataplane",
+                          "operator": "NotIn",
+                          "values": [
+                            "cilium"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/network-policy",
+                          "operator": "NotIn",
+                          "values": [
+                            "none"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "HOSTNAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  },
+                  {
+                    "name": "NPM_CONFIG",
+                    "value": "/etc/azure-npm/azure-npm.json"
+                  }
+                ],
+                "image": "mcr.microsoft.com/containernetworking/azure-npm:v1.6.42",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "azure-npm",
+                "ports": [
+                  {
+                    "containerPort": 10091,
+                    "name": "metrics",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "250m",
+                    "memory": "400Mi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "300Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "add": [
+                      "NET_ADMIN",
+                      "NET_RAW"
+                    ],
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "privileged": false,
+                  "readOnlyRootFilesystem": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/run/xtables.lock",
+                    "name": "xtables-lock"
+                  },
+                  {
+                    "mountPath": "/var/log",
+                    "name": "log"
+                  },
+                  {
+                    "mountPath": "/etc/protocols",
+                    "name": "protocols"
+                  },
+                  {
+                    "mountPath": "/etc/azure-npm",
+                    "name": "azure-npm-config"
+                  },
+                  {
+                    "mountPath": "/tmp",
+                    "name": "tmp"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "initContainers": [
+              {
+                "command": [
+                  "/bin/bash",
+                  "-cx",
+                  "installRuleIdempotent() {\n  rule=$1\n  if ! iptables-nft -t mangle -C $rule 2> /dev/null; then\n    echo \"installing iptables rule: $rule\"\n    iptables-nft -t mangle -I $rule || exit 1\n  else\n    echo \"iptables rule already installed: $rule\"\n  fi\n}\ninstallRuleIdempotent \"FORWARD -d 168.63.129.16 -p tcp --dport 80 -j DROP\"\ninstallRuleIdempotent \"FORWARD -d 168.63.129.16 -p tcp --dport 32526 -j DROP\"\n"
+                ],
+                "image": "mcr.microsoft.com/containernetworking/azure-npm:v1.6.42",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "block-wireserver",
+                "resources": {},
+                "securityContext": {
+                  "capabilities": {
+                    "add": [
+                      "NET_ADMIN"
+                    ],
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/run/xtables.lock",
+                    "name": "xtables-lock"
+                  }
+                ]
+              }
+            ],
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "azure-npm",
+            "serviceAccountName": "azure-npm",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/log",
+                  "type": "Directory"
+                },
+                "name": "log"
+              },
+              {
+                "hostPath": {
+                  "path": "/run/xtables.lock",
+                  "type": "File"
+                },
+                "name": "xtables-lock"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/protocols",
+                  "type": "File"
+                },
+                "name": "protocols"
+              },
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "name": "azure-npm-config"
+                },
+                "name": "azure-npm-config"
+              },
+              {
+                "emptyDir": {},
+                "name": "tmp"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": "2%"
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 6,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "7",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:48Z",
+        "generation": 7,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "k8s-app": "cloud-node-manager",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "cloud-node-manager",
+        "namespace": "kube-system",
+        "resourceVersion": "193490113",
+        "uid": "203b073f-f671-4925-975e-14134f3392f6"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "k8s-app": "cloud-node-manager"
+          }
+        },
+        "template": {
+          "metadata": {
+            "annotations": {
+              "cluster-autoscaler.kubernetes.io/daemonset-pod": "true"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "k8s-app": "cloud-node-manager",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "command": [
+                  "cloud-node-manager",
+                  "--node-name=$(NODE_NAME)",
+                  "--enable-deprecated-beta-topology-labels=true"
+                ],
+                "env": [
+                  {
+                    "name": "NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes/azure-cloud-node-manager:v1.30.18-1",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "cloud-node-manager",
+                "resources": {
+                  "limits": {
+                    "memory": "512Mi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "50Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "serviceAccount": "cloud-node-manager",
+            "serviceAccountName": "cloud-node-manager",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "key": "node-role.kubernetes.io/master",
+                "operator": "Equal",
+                "value": "true"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 7,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "6",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:48Z",
+        "generation": 6,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "k8s-app": "cloud-node-manager",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "cloud-node-manager-windows",
+        "namespace": "kube-system",
+        "resourceVersion": "193489567",
+        "uid": "63254436-0df2-4d67-a3a1-b21464fffe84"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "k8s-app": "cloud-node-manager-windows"
+          }
+        },
+        "template": {
+          "metadata": {
+            "annotations": {
+              "cluster-autoscaler.kubernetes.io/daemonset-pod": "true"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "k8s-app": "cloud-node-manager-windows",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "command": [
+                  "c:\\hpc\\cloud-node-manager.exe",
+                  "--node-name=$(NODE_NAME)"
+                ],
+                "env": [
+                  {
+                    "name": "NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/v2/kubernetes/azure-cloud-node-manager:v1.30.18-windows-hpc-1",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "cloud-node-manager",
+                "resources": {
+                  "limits": {
+                    "memory": "512Mi"
+                  },
+                  "requests": {
+                    "cpu": "50m",
+                    "memory": "50Mi"
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "windowsOptions": {
+                "hostProcess": true,
+                "runAsUserName": "NT AUTHORITY\\SYSTEM"
+              }
+            },
+            "serviceAccount": "cloud-node-manager",
+            "serviceAccountName": "cloud-node-manager",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "key": "node-role.kubernetes.io/master",
+                "operator": "Equal",
+                "value": "true"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 6
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "1",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "csi-azuredisk-node",
+        "namespace": "kube-system",
+        "resourceVersion": "81390391",
+        "uid": "d77db6c8-12db-4ac0-a892-c95f37181220"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "csi-azuredisk-node"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "csi-azuredisk-node",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--csi-address=/csi/csi.sock",
+                  "--probe-timeout=10s",
+                  "--health-port=29603",
+                  "--v=2"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/livenessprobe:v2.15.0",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "liveness-probe",
+                "resources": {
+                  "limits": {
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "20Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "socket-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "--csi-address=$(ADDRESS)",
+                  "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)",
+                  "--v=2"
+                ],
+                "env": [
+                  {
+                    "name": "ADDRESS",
+                    "value": "/csi/csi.sock"
+                  },
+                  {
+                    "name": "DRIVER_REG_SOCK_PATH",
+                    "value": "/var/lib/kubelet/plugins/disk.csi.azure.com/csi.sock"
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/csi-node-driver-registrar:v2.13.0",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/csi-node-driver-registrar",
+                      "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)",
+                      "--mode=kubelet-registration-probe"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 30
+                },
+                "name": "node-driver-registrar",
+                "resources": {
+                  "limits": {
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "20Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "socket-dir"
+                  },
+                  {
+                    "mountPath": "/registration",
+                    "name": "registration-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "--v=5",
+                  "--endpoint=$(CSI_ENDPOINT)",
+                  "--nodeid=$(KUBE_NODE_NAME)",
+                  "--enable-perf-optimization=true"
+                ],
+                "env": [
+                  {
+                    "name": "AZURE_CREDENTIAL_FILE",
+                    "value": "/etc/kubernetes/azure.json"
+                  },
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix:///csi/csi.sock"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/azuredisk-csi:v1.30.12",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 5,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "healthz",
+                    "scheme": "HTTP"
+                  },
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 30,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 30
+                },
+                "name": "azuredisk",
+                "ports": [
+                  {
+                    "containerPort": 29603,
+                    "name": "healthz",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "5600Mi"
+                  },
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "20Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "socket-dir"
+                  },
+                  {
+                    "mountPath": "/var/lib/kubelet/",
+                    "mountPropagation": "Bidirectional",
+                    "name": "mountpoint-dir"
+                  },
+                  {
+                    "mountPath": "/etc/kubernetes/",
+                    "name": "azure-cred"
+                  },
+                  {
+                    "mountPath": "/dev",
+                    "name": "device-dir"
+                  },
+                  {
+                    "mountPath": "/sys/bus/scsi/devices",
+                    "name": "sys-devices-dir"
+                  },
+                  {
+                    "mountPath": "/sys/class/scsi_host/",
+                    "name": "scsi-host-dir"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "Default",
+            "hostNetwork": true,
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "serviceAccount": "csi-azuredisk-node-sa",
+            "serviceAccountName": "csi-azuredisk-node-sa",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/plugins/disk.csi.azure.com",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "socket-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "mountpoint-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/plugins_registry/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "registration-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/kubernetes/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "azure-cred"
+              },
+              {
+                "hostPath": {
+                  "path": "/dev",
+                  "type": "Directory"
+                },
+                "name": "device-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/sys/bus/scsi/devices",
+                  "type": "Directory"
+                },
+                "name": "sys-devices-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/sys/class/scsi_host/",
+                  "type": "Directory"
+                },
+                "name": "scsi-host-dir"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 1,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "1",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "csi-azuredisk-node-win",
+        "namespace": "kube-system",
+        "resourceVersion": "515",
+        "uid": "e7c52dfc-4e06-4213-a4f5-9871acf9dd73"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "csi-azuredisk-node-win"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "csi-azuredisk-node-win",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--v=2",
+                  "--csi-address=$(CSI_ENDPOINT)",
+                  "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)",
+                  "--plugin-registration-path=$(PLUGIN_REG_DIR)"
+                ],
+                "command": [
+                  "csi-node-driver-registrar.exe"
+                ],
+                "env": [
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix://C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\disk.csi.azure.com\\\\csi.sock"
+                  },
+                  {
+                    "name": "DRIVER_REG_SOCK_PATH",
+                    "value": "C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\disk.csi.azure.com\\\\csi.sock"
+                  },
+                  {
+                    "name": "PLUGIN_REG_DIR",
+                    "value": "C:\\\\var\\\\lib\\\\kubelet\\\\plugins_registry\\\\"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/csi-node-driver-registrar:v2.13.0",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "node-driver-registrar",
+                "resources": {
+                  "limits": {
+                    "memory": "150Mi"
+                  },
+                  "requests": {
+                    "cpu": "40m",
+                    "memory": "40Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              },
+              {
+                "args": [
+                  "--v=5",
+                  "--endpoint=$(CSI_ENDPOINT)",
+                  "--nodeid=$(KUBE_NODE_NAME)",
+                  "--enable-windows-host-process=true"
+                ],
+                "command": [
+                  "azurediskplugin.exe"
+                ],
+                "env": [
+                  {
+                    "name": "AZURE_CREDENTIAL_FILE",
+                    "value": "C:\\k\\azure.json"
+                  },
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix://C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\disk.csi.azure.com\\\\csi.sock"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/azuredisk-csi:v1.30.12-windows-hp",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "azuredisk",
+                "resources": {},
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "initContainers": [
+              {
+                "command": [
+                  "powershell.exe",
+                  "-c",
+                  "New-Item -ItemType Directory -Path C:\\var\\lib\\kubelet\\plugins\\disk.csi.azure.com\\ -Force"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/azuredisk-csi:v1.30.12-windows-hp",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "init",
+                "resources": {},
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              },
+              "windowsOptions": {
+                "hostProcess": true,
+                "runAsUserName": "NT AUTHORITY\\SYSTEM"
+              }
+            },
+            "serviceAccount": "csi-azuredisk-node-sa",
+            "serviceAccountName": "csi-azuredisk-node-sa",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "1",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "csi-azurefile-node",
+        "namespace": "kube-system",
+        "resourceVersion": "81390382",
+        "uid": "ed720b00-e4b7-4b3d-a59d-32420eac506f"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "csi-azurefile-node"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "csi-azurefile-node",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--csi-address=/csi/csi.sock",
+                  "--probe-timeout=10s",
+                  "--health-port=29613",
+                  "--v=2"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/livenessprobe:v2.15.0",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "liveness-probe",
+                "resources": {
+                  "limits": {
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "20Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "socket-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "--csi-address=$(ADDRESS)",
+                  "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)",
+                  "--v=2"
+                ],
+                "env": [
+                  {
+                    "name": "ADDRESS",
+                    "value": "/csi/csi.sock"
+                  },
+                  {
+                    "name": "DRIVER_REG_SOCK_PATH",
+                    "value": "/var/lib/kubelet/plugins/file.csi.azure.com/csi.sock"
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/csi-node-driver-registrar:v2.13.0",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/csi-node-driver-registrar",
+                      "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)",
+                      "--mode=kubelet-registration-probe"
+                    ]
+                  },
+                  "failureThreshold": 3,
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 30
+                },
+                "name": "node-driver-registrar",
+                "resources": {
+                  "limits": {
+                    "memory": "100Mi"
+                  },
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "20Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "socket-dir"
+                  },
+                  {
+                    "mountPath": "/registration",
+                    "name": "registration-dir"
+                  }
+                ]
+              },
+              {
+                "args": [
+                  "--v=5",
+                  "--endpoint=$(CSI_ENDPOINT)",
+                  "--nodeid=$(KUBE_NODE_NAME)",
+                  "--enable-get-volume-stats=true",
+                  "--mount-permissions=0777",
+                  "--metrics-address=0.0.0.0:29615"
+                ],
+                "env": [
+                  {
+                    "name": "AZURE_CREDENTIAL_FILE",
+                    "value": "/etc/kubernetes/azure.json"
+                  },
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix:///csi/csi.sock"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/azurefile-csi:v1.30.10",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 5,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "healthz",
+                    "scheme": "HTTP"
+                  },
+                  "initialDelaySeconds": 30,
+                  "periodSeconds": 30,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 30
+                },
+                "name": "azurefile",
+                "ports": [
+                  {
+                    "containerPort": 29613,
+                    "name": "healthz",
+                    "protocol": "TCP"
+                  },
+                  {
+                    "containerPort": 29615,
+                    "name": "metrics",
+                    "protocol": "TCP"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "memory": "400Mi"
+                  },
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "20Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  },
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/csi",
+                    "name": "socket-dir"
+                  },
+                  {
+                    "mountPath": "/var/lib/kubelet/",
+                    "mountPropagation": "Bidirectional",
+                    "name": "mountpoint-dir"
+                  },
+                  {
+                    "mountPath": "/etc/kubernetes/",
+                    "name": "azure-cred"
+                  },
+                  {
+                    "mountPath": "/dev",
+                    "name": "device-dir"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "Default",
+            "hostNetwork": true,
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "serviceAccount": "csi-azurefile-node-sa",
+            "serviceAccountName": "csi-azurefile-node-sa",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/plugins/file.csi.azure.com",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "socket-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "mountpoint-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet/plugins_registry/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "registration-dir"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/kubernetes/",
+                  "type": "DirectoryOrCreate"
+                },
+                "name": "azure-cred"
+              },
+              {
+                "hostPath": {
+                  "path": "/dev",
+                  "type": "Directory"
+                },
+                "name": "device-dir"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 1,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "1",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "csi-azurefile-node-win",
+        "namespace": "kube-system",
+        "resourceVersion": "525",
+        "uid": "941a4ed1-7c16-4e82-8edc-1637e4c9284c"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app": "csi-azurefile-node-win"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app": "csi-azurefile-node-win",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "args": [
+                  "--csi-address=$(CSI_ENDPOINT)",
+                  "--kubelet-registration-path=$(DRIVER_REG_SOCK_PATH)",
+                  "--plugin-registration-path=$(PLUGIN_REG_DIR)",
+                  "--v=2"
+                ],
+                "command": [
+                  "csi-node-driver-registrar.exe"
+                ],
+                "env": [
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix://C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\file.csi.azure.com\\\\csi.sock"
+                  },
+                  {
+                    "name": "DRIVER_REG_SOCK_PATH",
+                    "value": "C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\file.csi.azure.com\\\\csi.sock"
+                  },
+                  {
+                    "name": "PLUGIN_REG_DIR",
+                    "value": "C:\\\\var\\\\lib\\\\kubelet\\\\plugins_registry\\\\"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/csi-node-driver-registrar:v2.13.0",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "node-driver-registrar",
+                "resources": {
+                  "limits": {
+                    "memory": "150Mi"
+                  },
+                  "requests": {
+                    "cpu": "40m",
+                    "memory": "40Mi"
+                  }
+                },
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              },
+              {
+                "args": [
+                  "--v=5",
+                  "--endpoint=$(CSI_ENDPOINT)",
+                  "--nodeid=$(KUBE_NODE_NAME)",
+                  "--enable-windows-host-process=true",
+                  "--remove-smb-mount-on-windows=false"
+                ],
+                "command": [
+                  "azurefileplugin.exe"
+                ],
+                "env": [
+                  {
+                    "name": "AZURE_CREDENTIAL_FILE",
+                    "value": "C:\\k\\azure.json"
+                  },
+                  {
+                    "name": "CSI_ENDPOINT",
+                    "value": "unix://C:\\\\var\\\\lib\\\\kubelet\\\\plugins\\\\file.csi.azure.com\\\\csi.sock"
+                  },
+                  {
+                    "name": "KUBE_NODE_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "spec.nodeName"
+                      }
+                    }
+                  }
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/azurefile-csi:v1.30.10-windows-hp",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "azurefile",
+                "resources": {},
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "initContainers": [
+              {
+                "command": [
+                  "powershell.exe",
+                  "-c",
+                  "New-Item -ItemType Directory -Path C:\\var\\lib\\kubelet\\plugins\\file.csi.azure.com\\ -Force"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes-csi/azurefile-csi:v1.30.10-windows-hp",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "init",
+                "resources": {},
+                "securityContext": {
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              },
+              "windowsOptions": {
+                "hostProcess": true,
+                "runAsUserName": "NT AUTHORITY\\SYSTEM"
+              }
+            },
+            "serviceAccount": "csi-azurefile-node-sa",
+            "serviceAccountName": "csi-azurefile-node-sa",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 1
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "2",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "generation": 2,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "component": "kube-proxy",
+          "kubernetes.azure.com/managedby": "aks",
+          "tier": "node"
+        },
+        "name": "kube-proxy",
+        "namespace": "kube-system",
+        "resourceVersion": "109871663",
+        "uid": "f3d886c1-b7fe-43e4-906b-67408a31922c"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "component": "kube-proxy",
+            "tier": "node"
+          }
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "component": "kube-proxy",
+              "kubernetes.azure.com/managedby": "aks",
+              "tier": "node"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "linux"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.azure.com/ebpf-dataplane",
+                          "operator": "NotIn",
+                          "values": [
+                            "cilium"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "command": [
+                  "kube-proxy",
+                  "--conntrack-max-per-core=0",
+                  "--metrics-bind-address=0.0.0.0:10249",
+                  "--cluster-cidr=10.0.1.0/24",
+                  "--detect-local-mode=InterfaceNamePrefix",
+                  "--pod-interface-name-prefix=azv",
+                  "--v=3"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes/kube-proxy:v1.30.12",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "kube-proxy",
+                "resources": {
+                  "requests": {
+                    "cpu": "100m"
+                  }
+                },
+                "securityContext": {
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/run/xtables.lock",
+                    "name": "iptableslock"
+                  },
+                  {
+                    "mountPath": "/lib/modules",
+                    "name": "modules"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "initContainers": [
+              {
+                "command": [
+                  "/bin/sh",
+                  "-c",
+                  "get_num_cpu() {\n  # format is comma-separated list of CPU IDs or ranges of CPU IDs (examples: \"0-3\", \"0,1,2\", \"0-3,4\")\n  # see https://www.kernel.org/doc/html/latest/admin-guide/cputopology.html\n  sys_cpu_online=$(cat /sys/devices/system/cpu/online)\n  result=0\n  OLD_IFS=\"$IFS\"; IFS=\",\"\n  for rng in \"$sys_cpu_online\"; do\n    if echo \"$rng\" | grep -q -- \"-\"; then\n      min=${rng%-*}; max=${rng#*-}\n      if [ \"$min\" -le \"$max\" ]; then\n        result=$((result + (max - min + 1)))\n      fi\n    else\n      result=$((result + 1))\n    fi\n  done\n  IFS=\"$OLD_IFS\"\n  echo $result\n}\n\nSYSCTL=/proc/sys/net/netfilter/nf_conntrack_max\necho \"Current net.netfilter.nf_conntrack_max: $(cat $SYSCTL)\"\nDESIRED=$(grep -m 1 'net.netfilter.nf_conntrack_max' /etc/sysctl.d/999-sysctl-aks.conf | grep -oP '(?<=net.netfilter.nf_conntrack_max=).*')\nif [ -z \"$DESIRED\" ]; then\n  NUM_CPU=$(get_num_cpu)\n  DESIRED=$((32768*$NUM_CPU))\n  if [ $DESIRED -lt 131072 ]; then\n    DESIRED=131072\n  fi\n\n  echo \"AKS custom config for net.netfilter.nf_conntrack_max not set.\"\n  echo \"Setting nf_conntrack_max to $DESIRED (32768 * $NUM_CPU cores, minimum 131072).\"\n  echo $DESIRED > $SYSCTL\nelse\n  echo \"AKS custom config for net.netfilter.nf_conntrack_max set to $DESIRED.\"\n  echo \"Setting nf_conntrack_max to $DESIRED.\"\n  echo $DESIRED > $SYSCTL\nfi\n"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes/kube-proxy:v1.30.12",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "kube-proxy-bootstrap",
+                "resources": {
+                  "requests": {
+                    "cpu": "100m"
+                  }
+                },
+                "securityContext": {
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/etc/sysctl.d",
+                    "name": "sysctls"
+                  },
+                  {
+                    "mountPath": "/lib/modules",
+                    "name": "modules"
+                  }
+                ]
+              }
+            ],
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kube-proxy",
+            "serviceAccountName": "kube-proxy",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/run/xtables.lock",
+                  "type": "FileOrCreate"
+                },
+                "name": "iptableslock"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/sysctl.d",
+                  "type": "Directory"
+                },
+                "name": "sysctls"
+              },
+              {
+                "hostPath": {
+                  "path": "/lib/modules",
+                  "type": "Directory"
+                },
+                "name": "modules"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 4,
+        "desiredNumberScheduled": 4,
+        "numberAvailable": 4,
+        "numberMisscheduled": 0,
+        "numberReady": 4,
+        "observedGeneration": 2,
+        "updatedNumberScheduled": 4
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "DaemonSet",
+      "metadata": {
+        "annotations": {
+          "deprecated.daemonset.template.generation": "2",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:50Z",
+        "generation": 2,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "k8s-app": "windows-kube-proxy-initializer",
+          "kubernetes.azure.com/managedby": "aks",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "windows-kube-proxy-initializer",
+        "namespace": "kube-system",
+        "resourceVersion": "48260573",
+        "uid": "3ecc0ba6-0b64-4603-a6cc-8d4ecb636763"
+      },
+      "spec": {
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "k8s-app": "windows-kube-proxy-initializer"
+          }
+        },
+        "template": {
+          "metadata": {
+            "annotations": {
+              "cluster-autoscaler.kubernetes.io/daemonset-pod": "true"
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "k8s-app": "windows-kube-proxy-initializer",
+              "kubernetes.azure.com/managedby": "aks"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        },
+                        {
+                          "key": "type",
+                          "operator": "NotIn",
+                          "values": [
+                            "virtual-kubelet"
+                          ]
+                        },
+                        {
+                          "key": "kubernetes.io/os",
+                          "operator": "In",
+                          "values": [
+                            "windows"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "image": "mcr.microsoft.com/oss/v2/kubernetes/pause:3.10.1",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "pause",
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File"
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "key": "node-role.kubernetes.io/master",
+                "operator": "Equal",
+                "value": "true"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ]
+          }
+        },
+        "updateStrategy": {
+          "rollingUpdate": {
+            "maxSurge": 0,
+            "maxUnavailable": 1
+          },
+          "type": "RollingUpdate"
+        }
+      },
+      "status": {
+        "currentNumberScheduled": 0,
+        "desiredNumberScheduled": 0,
+        "numberMisscheduled": 0,
+        "numberReady": 0,
+        "observedGeneration": 2
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

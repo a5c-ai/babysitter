@@ -1,0 +1,154 @@
+{
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/containerapps/geekonomy-transcriber",
+  "identity": {
+    "type": "None"
+  },
+  "location": "North Europe",
+  "name": "geekonomy-transcriber",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": false,
+        "fqdn": "geekonomy-transcriber.internal.yellowwater-3ed650dd.northeurope.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 8080,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": null,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "acr-password",
+          "server": "geekonomyacrmkb5l5.azurecr.io",
+          "username": "geekonomyacrmkb5l5"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "acr-password"
+        },
+        {
+          "name": "azure-openai-api-key"
+        }
+      ],
+      "service": null
+    },
+    "customDomainVerificationId": "C2B425A984517990227CB472406DA5C25A496FB24B772AC0B6E3BC4597F59A3F",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "eventStreamEndpoint": "https://northeurope.azurecontainerapps.dev/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/containerApps/geekonomy-transcriber/eventstream",
+    "latestReadyRevisionName": "geekonomy-transcriber--0000016",
+    "latestRevisionFqdn": "geekonomy-transcriber--0000016.internal.yellowwater-3ed650dd.northeurope.azurecontainerapps.io",
+    "latestRevisionName": "geekonomy-transcriber--0000016",
+    "managedEnvironmentId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod/providers/Microsoft.App/managedEnvironments/geekonomy-cae-mkb5l5",
+    "outboundIpAddresses": [
+      "4.209.31.224"
+    ],
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "PORT",
+              "value": "8080"
+            },
+            {
+              "name": "WHISPER_MODEL",
+              "value": "small"
+            },
+            {
+              "name": "WHISPER_DEVICE",
+              "value": "cpu"
+            },
+            {
+              "name": "WHISPER_COMPUTE_TYPE",
+              "value": "int8"
+            },
+            {
+              "name": "WHISPER_VAD_FILTER",
+              "value": "1"
+            },
+            {
+              "name": "WHISPER_BEAM_SIZE",
+              "value": "1"
+            },
+            {
+              "name": "TRANSCRIBER_PROVIDER",
+              "value": "local-faster-whisper"
+            },
+            {
+              "name": "AZURE_OPENAI_ENDPOINT",
+              "value": ""
+            },
+            {
+              "name": "AZURE_OPENAI_API_VERSION",
+              "value": "2024-02-01"
+            },
+            {
+              "name": "AZURE_OPENAI_AUDIO_DEPLOYMENT",
+              "value": "gpt-4o-transcribe"
+            },
+            {
+              "name": "AZURE_OPENAI_API_KEY",
+              "secretRef": "azure-openai-api-key"
+            }
+          ],
+          "image": "geekonomyacrmkb5l5.azurecr.io/geekonomy-transcriber:20260112122343-04da826a",
+          "name": "transcriber",
+          "resources": {
+            "cpu": 1.0,
+            "ephemeralStorage": "4Gi",
+            "memory": "2Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "maxReplicas": 1,
+        "minReplicas": 0,
+        "rules": [
+          {
+            "http": {
+              "metadata": {
+                "concurrentRequests": "1000"
+              }
+            },
+            "name": "zero-scale"
+          }
+        ]
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": null
+  },
+  "resourceGroup": "geekonomy-prod",
+  "systemData": {
+    "createdAt": "2026-01-06T12:26:35.663452",
+    "createdBy": "benihakak@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2026-02-09T13:38:27.6859014",
+    "lastModifiedBy": "benihakak@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}

@@ -1,0 +1,11 @@
+[
+  {
+    "endIpAddress": "0.0.0.0",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb2/firewallRules/AllowAllAzureServicesAndResourcesWithinAzureIps_2026-8-5_11-2-21",
+    "name": "AllowAllAzureServicesAndResourcesWithinAzureIps_2026-8-5_11-2-21",
+    "resourceGroup": "rg-litellm-proxy",
+    "startIpAddress": "0.0.0.0",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules"
+  }
+]

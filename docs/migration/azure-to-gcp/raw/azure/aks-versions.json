@@ -1,0 +1,58 @@
+{
+  "agentPoolProfiles": null,
+  "controlPlaneProfile": {
+    "kubernetesVersion": "1.30.12",
+    "name": null,
+    "osType": "Linux",
+    "upgrades": [
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.10"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.9"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.8"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.7"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.6"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.5"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.4"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.3"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.2"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.1"
+      },
+      {
+        "isPreview": null,
+        "kubernetesVersion": "1.34.0"
+      }
+    ]
+  },
+  "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2/upgradeprofiles/default",
+  "name": "default",
+  "resourceGroup": "rg-hub-development-westus3",
+  "type": "Microsoft.ContainerService/managedClusters/upgradeprofiles"
+}

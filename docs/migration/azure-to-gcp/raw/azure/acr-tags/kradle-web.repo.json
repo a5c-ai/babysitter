@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-06-03T18:34:24.8363334Z",
+  "imageName": "kradle-web",
+  "lastUpdateTime": "2026-09-05T14:36:14.8168569Z",
+  "manifestCount": 74,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 21
+}

@@ -1,0 +1,289 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-01T17:37:52Z",
+        "name": "azure-files",
+        "resourceVersion": "939860",
+        "uid": "5b3a3404-63b9-4b24-8877-b33d56289bd6"
+      },
+      "parameters": {
+        "skuName": "Standard_LRS"
+      },
+      "provisioner": "file.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "azurefile",
+        "resourceVersion": "397",
+        "uid": "105bd425-05b3-459e-8618-e8e382a92e6a"
+      },
+      "mountOptions": [
+        "mfsymlinks",
+        "actimeo=30",
+        "nosharesock"
+      ],
+      "parameters": {
+        "skuName": "Standard_LRS"
+      },
+      "provisioner": "file.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "Immediate"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "azurefile-csi",
+        "resourceVersion": "399",
+        "uid": "0ef1d414-7c73-4ce2-a6de-c91a750dfa79"
+      },
+      "mountOptions": [
+        "mfsymlinks",
+        "actimeo=30",
+        "nosharesock"
+      ],
+      "parameters": {
+        "skuName": "Standard_LRS"
+      },
+      "provisioner": "file.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "Immediate"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "azurefile-csi-premium",
+        "resourceVersion": "400",
+        "uid": "88297a47-1a29-40ff-a598-be41755ba9e8"
+      },
+      "mountOptions": [
+        "mfsymlinks",
+        "actimeo=30",
+        "nosharesock"
+      ],
+      "parameters": {
+        "skuName": "Premium_LRS"
+      },
+      "provisioner": "file.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "Immediate"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "azurefile-premium",
+        "resourceVersion": "398",
+        "uid": "c4e71219-ae1c-4b52-902f-554e25f9eba6"
+      },
+      "mountOptions": [
+        "mfsymlinks",
+        "actimeo=30",
+        "nosharesock"
+      ],
+      "parameters": {
+        "skuName": "Premium_LRS"
+      },
+      "provisioner": "file.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "Immediate"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-09T07:08:27Z",
+        "name": "content-studio-azurefile",
+        "resourceVersion": "145448337",
+        "uid": "17ac9d76-9640-4a25-9b96-aa5d6ee6b35e"
+      },
+      "mountOptions": [
+        "dir_mode=0700",
+        "file_mode=0600",
+        "uid=70",
+        "gid=70",
+        "mfsymlinks",
+        "cache=strict",
+        "nosharesock"
+      ],
+      "parameters": {
+        "skuName": "Standard_LRS"
+      },
+      "provisioner": "file.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "Immediate"
+    },
+    {
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-09T07:15:33Z",
+        "name": "content-studio-postgres-static",
+        "resourceVersion": "145451321",
+        "uid": "a7bf072f-efe5-48e9-97d2-c798d3aad9c5"
+      },
+      "provisioner": "kubernetes.io/no-provisioner",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "Immediate"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "annotations": {
+          "storageclass.kubernetes.io/is-default-class": "true"
+        },
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "default",
+        "resourceVersion": "394",
+        "uid": "8dbc5876-4f46-4eab-ad2d-b9c4acdeaf49"
+      },
+      "parameters": {
+        "skuname": "StandardSSD_LRS"
+      },
+      "provisioner": "disk.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:37Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "managed",
+        "resourceVersion": "392",
+        "uid": "13acbbcb-1496-4cb4-b6ba-91d7f5144cfe"
+      },
+      "parameters": {
+        "cachingmode": "ReadOnly",
+        "kind": "Managed",
+        "storageaccounttype": "StandardSSD_LRS"
+      },
+      "provisioner": "disk.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "managed-csi",
+        "resourceVersion": "395",
+        "uid": "1b686563-8b0d-492b-994f-f1c67c1cfc44"
+      },
+      "parameters": {
+        "skuname": "StandardSSD_LRS"
+      },
+      "provisioner": "disk.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "managed-csi-premium",
+        "resourceVersion": "396",
+        "uid": "0ad280f2-8df5-4b4a-b52d-7e2d3cd04c6b"
+      },
+      "parameters": {
+        "skuname": "Premium_LRS"
+      },
+      "provisioner": "disk.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    },
+    {
+      "allowVolumeExpansion": true,
+      "apiVersion": "storage.k8s.io/v1",
+      "kind": "StorageClass",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:38Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "EnsureExists",
+          "kubernetes.io/cluster-service": "true"
+        },
+        "name": "managed-premium",
+        "resourceVersion": "393",
+        "uid": "48f21976-9248-41e8-a982-19ae56519b10"
+      },
+      "parameters": {
+        "cachingmode": "ReadOnly",
+        "kind": "Managed",
+        "storageaccounttype": "Premium_LRS"
+      },
+      "provisioner": "disk.csi.azure.com",
+      "reclaimPolicy": "Delete",
+      "volumeBindingMode": "WaitForFirstConsumer"
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

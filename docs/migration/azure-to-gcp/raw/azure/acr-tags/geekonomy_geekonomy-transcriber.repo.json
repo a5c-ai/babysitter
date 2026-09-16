@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-01-06T12:25:55.0161129Z",
+  "imageName": "geekonomy-transcriber",
+  "lastUpdateTime": "2026-01-12T12:30:41.0805773Z",
+  "manifestCount": 13,
+  "registry": "geekonomyacrmkb5l5.azurecr.io",
+  "tagCount": 13
+}

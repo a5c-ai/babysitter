@@ -1,0 +1,20 @@
+[
+  {
+    "buildId": "default",
+    "createdTimeUtc": "2025-04-03T07:19:57.422801",
+    "databaseConnections": [],
+    "hostname": "agreeable-cliff-05289750f.6.azurestaticapps.net",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/intuitive-website-rg/providers/Microsoft.Web/staticSites/intuitive-website-new/builds/default",
+    "kind": null,
+    "lastUpdatedOn": "2025-04-03T07:19:57.422801",
+    "linkedBackends": [],
+    "location": "East US 2",
+    "name": "default",
+    "pullRequestTitle": null,
+    "resourceGroup": "intuitive-website-rg",
+    "sourceBranch": "main",
+    "status": "WaitingForDeployment",
+    "type": "Microsoft.Web/staticSitesbuilds",
+    "userProvidedFunctionApps": null
+  }
+]

@@ -1,0 +1,788 @@
+[
+  {
+    "LastOwnershipUpdateTime": "2026-08-27T09:14:36.9422959+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202601310"
+      }
+    },
+    "diskIOPSReadWrite": 1100,
+    "diskMBpsReadWrite": 125,
+    "diskSizeBytes": 274877906944,
+    "diskSizeGB": 256,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/disks/a5c-dev-vm-2_OsDisk_1_b289f1270aae4f858d1b343d437f12d5",
+    "location": "eastus2",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/virtualMachines/a5c-dev-vm-2",
+    "name": "a5c-dev-vm-2_OsDisk_1_b289f1270aae4f858d1b343d437f12d5",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "A5C-DEV-RG",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {},
+    "tier": "P15",
+    "timeCreated": "2026-02-26T12:49:07.0925671+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "b289f127-0aae-4f85-8d1b-343d437f12d5"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-27T09:13:55.9093573+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202601300"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Compute/disks/a5c-dev-vm_OsDisk_1_cc25ac13e9b04615bb7bc312ecac96c8",
+    "location": "eastus2",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Compute/virtualMachines/a5c-dev-vm",
+    "name": "a5c-dev-vm_OsDisk_1_cc25ac13e9b04615bb7bc312ecac96c8",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "A5C-DEV-RG",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {},
+    "tier": "P10",
+    "timeCreated": "2026-02-21T19:33:34.5130769+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "cc25ac13-e9b0-4615-bb7b-c312ecac96c8"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-27T09:14:56.8581925+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202606060"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-MANTIS-ODOO-VALIDATION-EASTUS2/providers/Microsoft.Compute/disks/vm-odoo-validation_OsDisk_1_32e949e117d04ddba88a72760a36525a",
+    "location": "eastus2",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2/providers/Microsoft.Compute/virtualMachines/vm-odoo-validation",
+    "name": "vm-odoo-validation_OsDisk_1_32e949e117d04ddba88a72760a36525a",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-MANTIS-ODOO-VALIDATION-EASTUS2",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "auto-delete-after": "2026-07-16",
+      "managed-by": "codex",
+      "purpose": "defensive-research",
+      "workload": "odoo-validation"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-07-12T21:18:38.3252537+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "32e949e1-17d0-4ddb-a88a-72760a36525a"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-27T09:15:34.2228141+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/eastus2/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608070"
+      }
+    },
+    "diskIOPSReadWrite": 240,
+    "diskMBpsReadWrite": 50,
+    "diskSizeBytes": 68719476736,
+    "diskSizeGB": 64,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-UBUNTU-SSH-20260806/providers/Microsoft.Compute/disks/ubuntu-large-02_OsDisk_1_97a1876ad0f84c83aa13499b095ca9de",
+    "location": "eastus2",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Compute/virtualMachines/ubuntu-large-02",
+    "name": "ubuntu-large-02_OsDisk_1_97a1876ad0f84c83aa13499b095ca9de",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-UBUNTU-SSH-20260806",
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {},
+    "tier": "P6",
+    "timeCreated": "2026-08-08T12:23:32.0951551+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "97a1876a-d0f8-4c83-aa13-499b095ca9de"
+  },
+  {
+    "LastOwnershipUpdateTime": "2025-11-09T00:24:12.5786343+00:00",
+    "creationData": {
+      "createOption": "Empty"
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 1073741824,
+    "diskSizeGB": 1,
+    "diskState": "Attached",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/providers/Microsoft.Compute/disks/pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/aks-default-28513622-vmss_5",
+    "name": "pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593",
+    "networkAccessPolicy": "AllowAll",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3",
+    "sku": {
+      "name": "StandardSSD_LRS",
+      "tier": "Standard"
+    },
+    "tags": {
+      "k8s-azure-created-by": "kubernetes-azure-dd",
+      "kubernetes.io-created-for-pv-name": "pvc-0dde3922-ab45-4d1c-a1d3-17a944b48593",
+      "kubernetes.io-created-for-pvc-name": "data-a5c-app-redis-0",
+      "kubernetes.io-created-for-pvc-namespace": "app"
+    },
+    "timeCreated": "2025-09-06T15:17:14.9095996+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "10409845-e5be-46d5-8c76-7bd49cdc6361"
+  },
+  {
+    "LastOwnershipUpdateTime": "2025-11-09T00:24:12.5786343+00:00",
+    "creationData": {
+      "createOption": "Empty"
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 1073741824,
+    "diskSizeGB": 1,
+    "diskState": "Attached",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/providers/Microsoft.Compute/disks/pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/aks-default-28513622-vmss_5",
+    "name": "pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4",
+    "networkAccessPolicy": "AllowAll",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3",
+    "sku": {
+      "name": "StandardSSD_LRS",
+      "tier": "Standard"
+    },
+    "tags": {
+      "k8s-azure-created-by": "kubernetes-azure-dd",
+      "kubernetes.io-created-for-pv-name": "pvc-1cd94e10-b93d-42ab-9528-be25a83b52a4",
+      "kubernetes.io-created-for-pvc-name": "data-a5c-app-redis-0",
+      "kubernetes.io-created-for-pvc-namespace": "app-staging"
+    },
+    "timeCreated": "2025-09-06T07:44:39.0519843+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "284eae48-e7b7-4f15-ada1-faf3deee528c"
+  },
+  {
+    "LastOwnershipUpdateTime": "2025-11-09T00:19:36.0114479+00:00",
+    "creationData": {
+      "createOption": "Empty"
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 107374182400,
+    "diskSizeGB": 100,
+    "diskState": "Attached",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/providers/Microsoft.Compute/disks/pvc-59ccf124-b094-45ef-8dd4-79f8bf381066",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/aks-default-28513622-vmss_1",
+    "name": "pvc-59ccf124-b094-45ef-8dd4-79f8bf381066",
+    "networkAccessPolicy": "AllowAll",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3",
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "tags": {
+      "k8s-azure-created-by": "kubernetes-azure-dd",
+      "kubernetes.io-created-for-pv-name": "pvc-59ccf124-b094-45ef-8dd4-79f8bf381066",
+      "kubernetes.io-created-for-pvc-name": "hub-database-pvc",
+      "kubernetes.io-created-for-pvc-namespace": "hub-development"
+    },
+    "tier": "P10",
+    "timeCreated": "2025-07-30T16:25:07.7405195+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "c698c6a7-e1b4-4b9a-8397-8492e1e47c7a"
+  },
+  {
+    "LastOwnershipUpdateTime": "2025-11-09T00:24:12.5786343+00:00",
+    "creationData": {
+      "createOption": "Empty"
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 10737418240,
+    "diskSizeGB": 10,
+    "diskState": "Attached",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/providers/Microsoft.Compute/disks/pvc-66704332-aa3f-41fb-abe3-21e070780cae",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/aks-default-28513622-vmss_5",
+    "name": "pvc-66704332-aa3f-41fb-abe3-21e070780cae",
+    "networkAccessPolicy": "AllowAll",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3",
+    "sku": {
+      "name": "StandardSSD_LRS",
+      "tier": "Standard"
+    },
+    "tags": {
+      "k8s-azure-created-by": "kubernetes-azure-dd",
+      "kubernetes.io-created-for-pv-name": "pvc-66704332-aa3f-41fb-abe3-21e070780cae",
+      "kubernetes.io-created-for-pvc-name": "data-a5c-app-postgres-0",
+      "kubernetes.io-created-for-pvc-namespace": "app"
+    },
+    "timeCreated": "2025-08-21T06:02:43.144759+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "7ca5fcd1-0391-48a0-ae3c-bc1e488ac465"
+  },
+  {
+    "LastOwnershipUpdateTime": "2025-11-09T00:09:36.6728153+00:00",
+    "creationData": {
+      "createOption": "Empty"
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 10737418240,
+    "diskSizeGB": 10,
+    "diskState": "Attached",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/providers/Microsoft.Compute/disks/pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/aks-default-28513622-vmss_0",
+    "name": "pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94",
+    "networkAccessPolicy": "AllowAll",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3",
+    "sku": {
+      "name": "StandardSSD_LRS",
+      "tier": "Standard"
+    },
+    "tags": {
+      "k8s-azure-created-by": "kubernetes-azure-dd",
+      "kubernetes.io-created-for-pv-name": "pvc-c3ee816e-2e39-456e-84d0-5d3adc7cfb94",
+      "kubernetes.io-created-for-pvc-name": "data-a5c-app-postgres-0",
+      "kubernetes.io-created-for-pvc-namespace": "app-staging"
+    },
+    "timeCreated": "2025-09-02T16:40:18.9281771+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "f783791c-b05b-46de-8875-9f12fdc55927"
+  },
+  {
+    "LastOwnershipUpdateTime": "2025-11-09T00:19:35.823944+00:00",
+    "creationData": {
+      "createOption": "Empty"
+    },
+    "diskIOPSReadWrite": 120,
+    "diskMBpsReadWrite": 25,
+    "diskSizeBytes": 10737418240,
+    "diskSizeGB": 10,
+    "diskState": "Attached",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3/providers/Microsoft.Compute/disks/pvc-f9e96cba-e872-48b9-b555-448ee38acaea",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Compute/virtualMachineScaleSets/aks-default-28513622-vmss/virtualMachines/aks-default-28513622-vmss_2",
+    "name": "pvc-f9e96cba-e872-48b9-b555-448ee38acaea",
+    "networkAccessPolicy": "AllowAll",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "MC_RG-HUB-DEVELOPMENT-WESTUS3_AKS-HUB-DEVELOPMENT-WESTUS3-V2_WESTUS3",
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "tags": {
+      "k8s-azure-created-by": "kubernetes-azure-dd",
+      "kubernetes.io-created-for-pv-name": "pvc-f9e96cba-e872-48b9-b555-448ee38acaea",
+      "kubernetes.io-created-for-pvc-name": "hub-redis-pvc",
+      "kubernetes.io-created-for-pvc-namespace": "hub-development"
+    },
+    "tier": "P3",
+    "timeCreated": "2025-07-30T16:25:08.4123989+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "7cc354b6-70e0-4821-bd41-8578768a8546"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:06:45.8565365+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-0/providers/Microsoft.Compute/disks/tb-fleet-0-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Compute/virtualMachines/tb-fleet-0",
+    "name": "tb-fleet-0-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-0",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T07:18:17.329258+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "69280b96-e3b4-4db2-b172-ded01eb4dc0a"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:07:18.1979754+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/0f28f72f-3700-4a71-92f7-2d809552aae9/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-1/providers/Microsoft.Compute/disks/tb-fleet-1-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Compute/virtualMachines/tb-fleet-1",
+    "name": "tb-fleet-1-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-1",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T10:05:14.1185329+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "6c230c6f-3a4b-4df0-ab92-36e5eda64d41"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:07:50.2924601+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-2/providers/Microsoft.Compute/disks/tb-fleet-2-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Compute/virtualMachines/tb-fleet-2",
+    "name": "tb-fleet-2-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-2",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T10:05:22.3026409+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "c7c7834f-9496-4169-8561-09ed94b204e5"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:08:23.239742+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-4/providers/Microsoft.Compute/disks/tb-fleet-4-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Compute/virtualMachines/tb-fleet-4",
+    "name": "tb-fleet-4-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-4",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T10:05:36.0372263+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "b55deab6-e0ce-4be2-80f6-43230694bcce"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:08:56.8714515+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-5/providers/Microsoft.Compute/disks/tb-fleet-5-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Compute/virtualMachines/tb-fleet-5",
+    "name": "tb-fleet-5-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-5",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T10:05:25.1705365+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "67eaf2f0-0357-4d02-9598-ece90c7b3787"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:09:28.956152+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/55c4696f-5fc2-45c3-aaca-4f5ac6342e74/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-6/providers/Microsoft.Compute/disks/tb-fleet-6-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Compute/virtualMachines/tb-fleet-6",
+    "name": "tb-fleet-6-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-6",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T09:47:26.2678852+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "45d2f727-47ce-4aeb-a96d-03191d77d541"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:10:01.0231578+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/Canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-7/providers/Microsoft.Compute/disks/tb-fleet-7-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Compute/virtualMachines/tb-fleet-7",
+    "name": "tb-fleet-7-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-7",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T10:05:24.3890735+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "d45ba167-6830-4cab-ae15-5c31d89900a3"
+  },
+  {
+    "LastOwnershipUpdateTime": "2026-08-20T12:10:33.370684+00:00",
+    "creationData": {
+      "createOption": "FromImage",
+      "imageReference": {
+        "id": "/Subscriptions/691c82cc-6ace-4a0e-a443-f4225991bcbc/Providers/Microsoft.Compute/Locations/SwedenCentral/Publishers/canonical/ArtifactTypes/VMImage/Offers/ubuntu-24_04-lts/Skus/server/Versions/24.04.202608020"
+      }
+    },
+    "diskIOPSReadWrite": 500,
+    "diskMBpsReadWrite": 100,
+    "diskSizeBytes": 137438953472,
+    "diskSizeGB": 128,
+    "diskState": "Reserved",
+    "encryption": {
+      "type": "EncryptionAtRestWithPlatformKey"
+    },
+    "hyperVGeneration": "V2",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/RG-TB-FLEET-8/providers/Microsoft.Compute/disks/tb-fleet-8-os",
+    "location": "swedencentral",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Compute/virtualMachines/tb-fleet-8",
+    "name": "tb-fleet-8-os",
+    "networkAccessPolicy": "AllowAll",
+    "osType": "Linux",
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "resourceGroup": "RG-TB-FLEET-8",
+    "securityProfile": {
+      "securityType": "TrustedLaunch"
+    },
+    "sku": {
+      "name": "Premium_LRS",
+      "tier": "Premium"
+    },
+    "supportedCapabilities": {
+      "acceleratedNetwork": true,
+      "architecture": "x64",
+      "diskControllerTypes": "SCSI, NVMe"
+    },
+    "supportsHibernation": true,
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "tier": "P10",
+    "timeCreated": "2026-08-11T10:15:57.2680378+00:00",
+    "type": "Microsoft.Compute/disks",
+    "uniqueId": "eb97a65f-0e9d-47b4-b766-bcecaace8825"
+  }
+]

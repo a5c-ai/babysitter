@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2025-07-31T20:14:01.8508373Z",
+  "imageName": "hub/frontend",
+  "lastUpdateTime": "2026-08-27T10:03:21.5079049Z",
+  "manifestCount": 10,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 5
+}

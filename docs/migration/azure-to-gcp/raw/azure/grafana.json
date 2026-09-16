@@ -1,0 +1,40 @@
+[
+  {
+    "changedTime": "2026-09-15T04:29:40.226991+00:00",
+    "createdTime": "2025-01-26T09:02:00.205221+00:00",
+    "extendedLocation": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/microsoft.dashboard/grafana/grafana-20250126104729",
+    "identity": {
+      "principalId": "6462a569-0fb7-42bc-a4fd-e7c3db217944",
+      "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+      "type": "SystemAssigned",
+      "userAssignedIdentities": null
+    },
+    "kind": null,
+    "location": "westus2",
+    "managedBy": null,
+    "name": "grafana-20250126104729",
+    "plan": null,
+    "properties": null,
+    "provisioningState": "Succeeded",
+    "resourceGroup": "personoids_sponsorship",
+    "sku": {
+      "capacity": null,
+      "family": null,
+      "model": null,
+      "name": "Standard",
+      "size": "X1",
+      "tier": null
+    },
+    "systemData": {
+      "createdAt": "2025-01-26T09:02:00.2304956Z",
+      "createdBy": "tmuskal@gmail.com",
+      "createdByType": "User",
+      "lastModifiedAt": "2026-09-15T04:19:39.5505907Z",
+      "lastModifiedBy": "ce34e7e5-485f-4d76-964f-b3d2b16d1e4f",
+      "lastModifiedByType": "Application"
+    },
+    "tags": {},
+    "type": "microsoft.dashboard/grafana"
+  }
+]

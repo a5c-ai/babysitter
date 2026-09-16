@@ -1,0 +1,21 @@
+-- askExpertQuestion/deploy.yml: main failure 2026-08-08 main failure 2026-08-08 
+-- askExpertQuestion/terraform.yml: main failure 2026-03-24 main failure 2026-03-24 
+-- company/content-studio-deploy.yml: main success 2026-07-01 main success 2026-06-30 
+-- osb/cd.yml: master success 2026-02-22 master success 2026-02-21 
+-- hub/infrastructure.yml: main success 2025-08-22 main failure 2025-08-22 
+-- hub/deploy.yml: HTTP 404: workflow deploy.yml not found on the default branch (https://api.github.com/repos/a5c-ai/hub/actions/workflows/deploy.yml) 
+-- claude-web/publish.yml: HTTP 404: workflow publish.yml not found on the default branch (https://api.github.com/repos/a5c-ai/claude-web/actions/workflows/publish.yml) 
+-- claude-web/deploy.yml: HTTP 404: workflow deploy.yml not found on the default branch (https://api.github.com/repos/a5c-ai/claude-web/actions/workflows/deploy.yml) 
+-- a5c/deploy.yml: a5c/main success 2025-09-13 a5c/main success 2025-09-13 
+-- a5c-website/azure-static-web-apps-agreeable-sea-01b46490f.yml: HTTP 404: workflow azure-static-web-apps-agreeable-sea-01b46490f.yml not found on the default branch (https://api.github.com/repos/a5c-ai/a5c-website/actions/workflows/azure-static-web-apps-agreeable-
+-- site/deploy.yml: HTTP 404: workflow deploy.yml not found on the default branch (https://api.github.com/repos/a5c-ai/site/actions/workflows/deploy.yml) 
+-- website-a5c/deploy.yml: HTTP 404: workflow deploy.yml not found on the default branch (https://api.github.com/repos/a5c-ai/website-a5c/actions/workflows/deploy.yml) 
+-- claude-web/deploy-staging.yml: main failure 2026-04-12 main failure 2026-04-12 
+-- claude-web/deploy-production.yml: main success 2026-04-12 main failure 2026-04-12 
+-- hub/main.yml: main success 2025-08-22 main success 2025-08-22 
+-- hub/release.yml: 
+-- a5c-website/azure-static-web-apps.yml: 
+-- infra/apply-azure.yml: main failure 2025-09-30 main failure 2025-09-30 
+-- infra-seed/deploy.yml: main failure 2025-12-16 main failure 2025-12-10 
+-- website-a5c/folkware-landing-deploy-cli.yml: main success 2026-07-09 main failure 2026-06-30 
+-- osb/build-images.yml: master success 2026-02-20 master failure 2026-02-20 

@@ -1,0 +1,14 @@
+{
+  "changeableAttributes": {
+    "deleteEnabled": true,
+    "listEnabled": true,
+    "readEnabled": true,
+    "writeEnabled": true
+  },
+  "createdTime": "2026-05-06T16:40:15.1525108Z",
+  "imageName": "atlas-webui",
+  "lastUpdateTime": "2026-09-05T14:33:11.7426018Z",
+  "manifestCount": 77,
+  "registry": "acrhubdevelopmentwestus3.azurecr.io",
+  "tagCount": 22
+}

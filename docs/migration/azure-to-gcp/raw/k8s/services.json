@@ -1,0 +1,3040 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-03-15T10:45:10Z",
+        "labels": {
+          "app": "aeq-dashboard"
+        },
+        "name": "aeq-dashboard",
+        "namespace": "aeq",
+        "resourceVersion": "106291811",
+        "uid": "b7a034d3-6030-484c-b971-e56e5a65d40f"
+      },
+      "spec": {
+        "clusterIP": "10.1.79.120",
+        "clusterIPs": [
+          "10.1.79.120"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 3000,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app": "aeq-dashboard"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-03-26T08:24:03Z",
+        "name": "aeq-mcp",
+        "namespace": "aeq",
+        "resourceVersion": "110740942",
+        "uid": "e36b70d2-afe5-4534-80b5-268d34829c5f"
+      },
+      "spec": {
+        "clusterIP": "10.1.179.248",
+        "clusterIPs": [
+          "10.1.179.248"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 3848,
+            "protocol": "TCP",
+            "targetPort": 3848
+          }
+        ],
+        "selector": {
+          "app": "aeq-mcp"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-03-15T10:45:10Z",
+        "labels": {
+          "app": "aeq-server"
+        },
+        "name": "aeq-server",
+        "namespace": "aeq",
+        "resourceVersion": "106291821",
+        "uid": "3719e86a-1c6f-4bf6-9633-eee81c18f323"
+      },
+      "spec": {
+        "clusterIP": "10.1.160.142",
+        "clusterIPs": [
+          "10.1.160.142"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 3847,
+            "protocol": "TCP",
+            "targetPort": 3847
+          }
+        ],
+        "selector": {
+          "app": "aeq-server"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-04-21T11:46:03Z",
+        "labels": {
+          "app": "bmux-server"
+        },
+        "name": "bmux-server",
+        "namespace": "aeq",
+        "resourceVersion": "121528379",
+        "uid": "7bf36929-528e-4d9f-aba1-a2ac8d6f3d02"
+      },
+      "spec": {
+        "clusterIP": "10.1.243.87",
+        "clusterIPs": [
+          "10.1.243.87"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 3847,
+            "protocol": "TCP",
+            "targetPort": 3847
+          }
+        ],
+        "selector": {
+          "app": "bmux-server"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "creationTimestamp": "2025-08-04T22:09:50Z",
+        "finalizers": [
+          "service.kubernetes.io/load-balancer-cleanup"
+        ],
+        "labels": {
+          "app.kubernetes.io/component": "ingress-controller",
+          "app.kubernetes.io/managed-by": "aks-app-routing-operator",
+          "app.kubernetes.io/name": "nginx",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "nginx",
+        "namespace": "app-routing-system",
+        "ownerReferences": [
+          {
+            "apiVersion": "approuting.kubernetes.azure.com/v1alpha1",
+            "controller": true,
+            "kind": "NginxIngressController",
+            "name": "default",
+            "uid": "b27f7012-3953-493b-bb72-7a0c749a9a82"
+          }
+        ],
+        "resourceVersion": "2302261",
+        "uid": "92fa7678-04c1-424a-983f-3aa36c99dd54"
+      },
+      "spec": {
+        "allocateLoadBalancerNodePorts": true,
+        "clusterIP": "10.1.158.39",
+        "clusterIPs": [
+          "10.1.158.39"
+        ],
+        "externalTrafficPolicy": "Local",
+        "healthCheckNodePort": 30150,
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "nodePort": 30507,
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          },
+          {
+            "name": "https",
+            "nodePort": 30310,
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "https"
+          }
+        ],
+        "selector": {
+          "app": "nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "134.33.26.182",
+              "ipMode": "VIP"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "prometheus.io/port": "10254",
+          "prometheus.io/scrape": "true"
+        },
+        "creationTimestamp": "2025-08-04T22:09:50Z",
+        "labels": {
+          "app.kubernetes.io/component": "ingress-controller",
+          "app.kubernetes.io/managed-by": "aks-app-routing-operator",
+          "app.kubernetes.io/name": "nginx",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "nginx-metrics",
+        "namespace": "app-routing-system",
+        "ownerReferences": [
+          {
+            "apiVersion": "approuting.kubernetes.azure.com/v1alpha1",
+            "controller": true,
+            "kind": "NginxIngressController",
+            "name": "default",
+            "uid": "b27f7012-3953-493b-bb72-7a0c749a9a82"
+          }
+        ],
+        "resourceVersion": "2301907",
+        "uid": "6738dd17-6578-406b-a059-5371fcc879f1"
+      },
+      "spec": {
+        "clusterIP": "10.1.128.39",
+        "clusterIPs": [
+          "10.1.128.39"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "prometheus",
+            "port": 10254,
+            "protocol": "TCP",
+            "targetPort": "prometheus"
+          }
+        ],
+        "selector": {
+          "app": "nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-02T16:40:19Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app"
+        },
+        "name": "a5c-app",
+        "namespace": "app-staging",
+        "resourceVersion": "20630316",
+        "uid": "7fd4383b-3b0e-426c-84a7-597218ef7916"
+      },
+      "spec": {
+        "clusterIP": "10.1.98.20",
+        "clusterIPs": [
+          "10.1.98.20"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-03T11:11:19Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "name": "a5c-app-jaeger",
+        "namespace": "app-staging",
+        "resourceVersion": "22303495",
+        "uid": "87b2925c-5a29-4da2-b451-bded903ba9af"
+      },
+      "spec": {
+        "clusterIP": "10.1.155.100",
+        "clusterIPs": [
+          "10.1.155.100"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "ui",
+            "port": 16686,
+            "protocol": "TCP",
+            "targetPort": 16686
+          },
+          {
+            "name": "otlp-grpc",
+            "port": 4317,
+            "protocol": "TCP",
+            "targetPort": 4317
+          },
+          {
+            "name": "otlp-http",
+            "port": 4318,
+            "protocol": "TCP",
+            "targetPort": 4318
+          },
+          {
+            "name": "metrics",
+            "port": 14269,
+            "protocol": "TCP",
+            "targetPort": 14269
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-03T11:11:19Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "name": "a5c-app-jaeger-collector",
+        "namespace": "app-staging",
+        "resourceVersion": "20995642",
+        "uid": "9d1fcf40-515a-4b70-a7fd-7d35ff941c06"
+      },
+      "spec": {
+        "clusterIP": "10.1.110.87",
+        "clusterIPs": [
+          "10.1.110.87"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "jaeger-grpc",
+            "port": 14250,
+            "protocol": "TCP",
+            "targetPort": 14250
+          },
+          {
+            "name": "jaeger-http",
+            "port": 14268,
+            "protocol": "TCP",
+            "targetPort": 14268
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-03T11:11:19Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-otel-collector"
+        },
+        "name": "a5c-app-otel-collector",
+        "namespace": "app-staging",
+        "resourceVersion": "22303472",
+        "uid": "0423cbf0-99bd-4bd2-83c1-c6c55d243b74"
+      },
+      "spec": {
+        "clusterIP": "10.1.88.73",
+        "clusterIPs": [
+          "10.1.88.73"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "otlp-grpc",
+            "port": 4317,
+            "protocol": "TCP",
+            "targetPort": 4317
+          },
+          {
+            "name": "otlp-http",
+            "port": 4318,
+            "protocol": "TCP",
+            "targetPort": 4318
+          },
+          {
+            "name": "metrics",
+            "port": 8888,
+            "protocol": "TCP",
+            "targetPort": 8888
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-otel-collector"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-02T16:40:17Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "name": "a5c-app-postgres",
+        "namespace": "app-staging",
+        "resourceVersion": "20630272",
+        "uid": "6918338a-2402-455b-9425-04312e66c791"
+      },
+      "spec": {
+        "clusterIP": "10.1.144.21",
+        "clusterIPs": [
+          "10.1.144.21"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-06T07:44:37Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "name": "a5c-app-redis",
+        "namespace": "app-staging",
+        "resourceVersion": "22355687",
+        "uid": "78ceb512-3fa8-4250-bb77-73b3e22624bf"
+      },
+      "spec": {
+        "clusterIP": "10.1.185.198",
+        "clusterIPs": [
+          "10.1.185.198"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "redis",
+            "port": 6379,
+            "protocol": "TCP",
+            "targetPort": 6379
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-13T10:17:24Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-install"
+        },
+        "name": "a5c-install",
+        "namespace": "app-staging",
+        "resourceVersion": "25711313",
+        "uid": "42dcc64e-4197-41ab-9c43-b7c5973a89c5"
+      },
+      "spec": {
+        "clusterIP": "10.1.94.37",
+        "clusterIPs": [
+          "10.1.94.37"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 4002
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-install"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-19T20:31:26Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app"
+        },
+        "name": "a5c-app",
+        "namespace": "app",
+        "resourceVersion": "11991439",
+        "uid": "f13462a4-64a1-4b5b-a4dd-87f906a9f6e9"
+      },
+      "spec": {
+        "clusterIP": "10.1.26.233",
+        "clusterIPs": [
+          "10.1.26.233"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-04T08:33:03Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "name": "a5c-app-jaeger",
+        "namespace": "app",
+        "resourceVersion": "22314541",
+        "uid": "76a12bc7-8379-4e2d-805b-5fe33abd5d20"
+      },
+      "spec": {
+        "clusterIP": "10.1.62.77",
+        "clusterIPs": [
+          "10.1.62.77"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "ui",
+            "port": 16686,
+            "protocol": "TCP",
+            "targetPort": 16686
+          },
+          {
+            "name": "otlp-grpc",
+            "port": 4317,
+            "protocol": "TCP",
+            "targetPort": 4317
+          },
+          {
+            "name": "otlp-http",
+            "port": 4318,
+            "protocol": "TCP",
+            "targetPort": 4318
+          },
+          {
+            "name": "metrics",
+            "port": 14269,
+            "protocol": "TCP",
+            "targetPort": 14269
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-04T08:33:03Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "name": "a5c-app-jaeger-collector",
+        "namespace": "app",
+        "resourceVersion": "21418591",
+        "uid": "853c83ea-90cb-4953-8696-e50efc2b8549"
+      },
+      "spec": {
+        "clusterIP": "10.1.146.19",
+        "clusterIPs": [
+          "10.1.146.19"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "jaeger-grpc",
+            "port": 14250,
+            "protocol": "TCP",
+            "targetPort": 14250
+          },
+          {
+            "name": "jaeger-http",
+            "port": 14268,
+            "protocol": "TCP",
+            "targetPort": 14268
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-jaeger"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-04T08:33:02Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-otel-collector"
+        },
+        "name": "a5c-app-otel-collector",
+        "namespace": "app",
+        "resourceVersion": "22314516",
+        "uid": "04ba4d64-78dd-41f0-bdac-b8e5bb084911"
+      },
+      "spec": {
+        "clusterIP": "10.1.181.124",
+        "clusterIPs": [
+          "10.1.181.124"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "otlp-grpc",
+            "port": 4317,
+            "protocol": "TCP",
+            "targetPort": 4317
+          },
+          {
+            "name": "otlp-http",
+            "port": 4318,
+            "protocol": "TCP",
+            "targetPort": 4318
+          },
+          {
+            "name": "metrics",
+            "port": 8888,
+            "protocol": "TCP",
+            "targetPort": 8888
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-otel-collector"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-21T06:02:41Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "name": "a5c-app-postgres",
+        "namespace": "app",
+        "resourceVersion": "12973147",
+        "uid": "b7301414-7954-4f7b-92f5-6c6c45b3b9a5"
+      },
+      "spec": {
+        "clusterIP": "10.1.201.26",
+        "clusterIPs": [
+          "10.1.201.26"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-postgres"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-09-06T15:17:13Z",
+        "labels": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "name": "a5c-app-redis",
+        "namespace": "app",
+        "resourceVersion": "22502763",
+        "uid": "2cc5909d-e204-4511-bd81-cd412aa9d5d4"
+      },
+      "spec": {
+        "clusterIP": "10.1.231.14",
+        "clusterIPs": [
+          "10.1.231.14"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "redis",
+            "port": 6379,
+            "protocol": "TCP",
+            "targetPort": 6379
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/name": "a5c-app-redis"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-05-14T12:32:52Z",
+        "name": "atlas-postgres",
+        "namespace": "atlas-staging",
+        "resourceVersion": "131158825",
+        "uid": "8cfb0109-35bc-47d7-9db4-1f3c098d6ec0"
+      },
+      "spec": {
+        "clusterIP": "10.1.53.247",
+        "clusterIPs": [
+          "10.1.53.247"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app": "atlas-postgres"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-05-06T16:40:19Z",
+        "name": "atlas-webui",
+        "namespace": "atlas-staging",
+        "resourceVersion": "127870313",
+        "uid": "a3e37c69-b3ba-4e72-a632-024983d0dc19"
+      },
+      "spec": {
+        "clusterIP": "10.1.213.15",
+        "clusterIPs": [
+          "10.1.213.15"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app": "atlas-webui"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-30T09:12:12Z",
+        "name": "atlas-postgres",
+        "namespace": "atlas",
+        "resourceVersion": "157706599",
+        "uid": "eebd6751-351f-4fb3-bcb4-f952ec5b3096"
+      },
+      "spec": {
+        "clusterIP": "10.1.86.50",
+        "clusterIPs": [
+          "10.1.86.50"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "postgres",
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app": "atlas-postgres"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-30T09:13:32Z",
+        "name": "atlas-webui",
+        "namespace": "atlas",
+        "resourceVersion": "157707190",
+        "uid": "efa75502-7b29-481d-b536-62bf6e07e56e"
+      },
+      "spec": {
+        "clusterIP": "10.1.73.67",
+        "clusterIPs": [
+          "10.1.73.67"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app": "atlas-webui"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "cert-manager",
+          "meta.helm.sh/release-namespace": "cert-manager"
+        },
+        "creationTimestamp": "2025-08-03T20:52:35Z",
+        "labels": {
+          "app": "cert-manager",
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "cert-manager",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "cert-manager",
+          "app.kubernetes.io/version": "v1.15.3",
+          "helm.sh/chart": "cert-manager-v1.15.3"
+        },
+        "name": "cert-manager",
+        "namespace": "cert-manager",
+        "resourceVersion": "1845557",
+        "uid": "e96c9cbd-4431-459a-a449-eba86929bd51"
+      },
+      "spec": {
+        "clusterIP": "10.1.73.17",
+        "clusterIPs": [
+          "10.1.73.17"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "tcp-prometheus-servicemonitor",
+            "port": 9402,
+            "protocol": "TCP",
+            "targetPort": 9402
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "cert-manager",
+          "app.kubernetes.io/name": "cert-manager"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "cert-manager",
+          "meta.helm.sh/release-namespace": "cert-manager"
+        },
+        "creationTimestamp": "2025-08-03T20:52:36Z",
+        "labels": {
+          "app": "webhook",
+          "app.kubernetes.io/component": "webhook",
+          "app.kubernetes.io/instance": "cert-manager",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "webhook",
+          "app.kubernetes.io/version": "v1.15.3",
+          "helm.sh/chart": "cert-manager-v1.15.3"
+        },
+        "name": "cert-manager-webhook",
+        "namespace": "cert-manager",
+        "resourceVersion": "1845561",
+        "uid": "890af909-ddf1-48c6-94ad-f9290a866880"
+      },
+      "spec": {
+        "clusterIP": "10.1.53.148",
+        "clusterIPs": [
+          "10.1.53.148"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "https",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "https"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "webhook",
+          "app.kubernetes.io/instance": "cert-manager",
+          "app.kubernetes.io/name": "webhook"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-09T07:02:00Z",
+        "name": "content-studio",
+        "namespace": "content-studio",
+        "resourceVersion": "145445610",
+        "uid": "c6c6e532-4a37-4b94-ab14-0b0bba270464"
+      },
+      "spec": {
+        "clusterIP": "10.1.241.231",
+        "clusterIPs": [
+          "10.1.241.231"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app": "content-studio"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2026-06-09T07:01:57Z",
+        "labels": {
+          "app": "content-studio-postgres"
+        },
+        "name": "content-studio-postgres",
+        "namespace": "content-studio",
+        "resourceVersion": "145445560",
+        "uid": "18f154a1-6e2e-419f-b915-8279bf08c914"
+      },
+      "spec": {
+        "clusterIP": "10.1.54.99",
+        "clusterIPs": [
+          "10.1.54.99"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app": "content-studio-postgres"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:16Z",
+        "labels": {
+          "component": "apiserver",
+          "provider": "kubernetes"
+        },
+        "name": "kubernetes",
+        "namespace": "default",
+        "resourceVersion": "227",
+        "uid": "6e83fd3f-1a16-4b73-ae36-923eee2287aa"
+      },
+      "spec": {
+        "clusterIP": "10.1.0.1",
+        "clusterIPs": [
+          "10.1.0.1"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "https",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": 443
+          }
+        ],
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:54Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "gatekeeper.sh/system": "yes"
+        },
+        "name": "gatekeeper-webhook-service",
+        "namespace": "gatekeeper-system",
+        "resourceVersion": "800",
+        "uid": "6faf8776-7403-4316-9701-6a9f7cdb2281"
+      },
+      "spec": {
+        "clusterIP": "10.1.167.226",
+        "clusterIPs": [
+          "10.1.167.226"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "https-webhook-server",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "webhook-server"
+          }
+        ],
+        "selector": {
+          "control-plane": "controller-manager",
+          "gatekeeper.sh/operation": "webhook",
+          "gatekeeper.sh/system": "yes"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-interval": "5",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-num-of-probe": "2",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-protocol": "http",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path": "/health"
+        },
+        "creationTimestamp": "2025-07-30T16:25:08Z",
+        "labels": {
+          "app": "hub-backend",
+          "app.kubernetes.io/component": "backend",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-backend-service",
+        "namespace": "hub-development",
+        "resourceVersion": "3460681",
+        "uid": "56879b5b-f835-44de-ae49-f791d9a59745"
+      },
+      "spec": {
+        "clusterIP": "10.1.142.60",
+        "clusterIPs": [
+          "10.1.142.60"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 8080,
+            "protocol": "TCP",
+            "targetPort": 8080
+          },
+          {
+            "name": "ssh",
+            "port": 2222,
+            "protocol": "TCP",
+            "targetPort": 2222
+          }
+        ],
+        "selector": {
+          "app": "hub-backend"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-interval": "5",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-num-of-probe": "2",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-protocol": "http",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path": "/api/health"
+        },
+        "creationTimestamp": "2025-07-30T16:25:08Z",
+        "labels": {
+          "app": "hub-frontend",
+          "app.kubernetes.io/component": "frontend",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-frontend-service",
+        "namespace": "hub-development",
+        "resourceVersion": "1306003",
+        "uid": "cc1d990d-3a82-4de0-a990-f9a67bde4dd2"
+      },
+      "spec": {
+        "clusterIP": "10.1.108.88",
+        "clusterIPs": [
+          "10.1.108.88"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 3000,
+            "protocol": "TCP",
+            "targetPort": 3000
+          }
+        ],
+        "selector": {
+          "app": "hub-frontend"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T16:25:08Z",
+        "labels": {
+          "app": "postgresql",
+          "app.kubernetes.io/component": "database",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "postgresql",
+        "namespace": "hub-development",
+        "resourceVersion": "119582",
+        "uid": "0801c1e3-c51e-4158-887d-86bc8df2f750"
+      },
+      "spec": {
+        "clusterIP": "10.1.254.190",
+        "clusterIPs": [
+          "10.1.254.190"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "postgresql",
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app": "postgresql"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T16:25:09Z",
+        "labels": {
+          "app": "redis",
+          "app.kubernetes.io/component": "cache",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "redis",
+        "namespace": "hub-development",
+        "resourceVersion": "119588",
+        "uid": "323f6990-d8f3-49a2-9d39-395e951d1253"
+      },
+      "spec": {
+        "clusterIP": "10.1.144.145",
+        "clusterIPs": [
+          "10.1.144.145"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "redis",
+            "port": 6379,
+            "protocol": "TCP",
+            "targetPort": 6379
+          }
+        ],
+        "selector": {
+          "app": "redis"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "ingress-nginx",
+          "meta.helm.sh/release-namespace": "ingress-nginx",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-port": "10254",
+          "service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path": "/healthz"
+        },
+        "creationTimestamp": "2025-08-04T14:11:00Z",
+        "finalizers": [
+          "service.kubernetes.io/load-balancer-cleanup"
+        ],
+        "labels": {
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "ingress-nginx",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "ingress-nginx",
+          "app.kubernetes.io/part-of": "ingress-nginx",
+          "app.kubernetes.io/version": "1.13.1",
+          "helm.sh/chart": "ingress-nginx-4.13.1"
+        },
+        "name": "ingress-nginx-controller",
+        "namespace": "ingress-nginx",
+        "resourceVersion": "7185993",
+        "uid": "77bc5809-9d65-4cca-998d-dc8832f3dbf3"
+      },
+      "spec": {
+        "allocateLoadBalancerNodePorts": true,
+        "clusterIP": "10.1.199.251",
+        "clusterIPs": [
+          "10.1.199.251"
+        ],
+        "externalTrafficPolicy": "Cluster",
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "appProtocol": "http",
+            "name": "http",
+            "nodePort": 30110,
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          },
+          {
+            "appProtocol": "https",
+            "name": "https",
+            "nodePort": 31336,
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "https"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "ingress-nginx",
+          "app.kubernetes.io/name": "ingress-nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214",
+              "ipMode": "VIP"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "ingress-nginx",
+          "meta.helm.sh/release-namespace": "ingress-nginx"
+        },
+        "creationTimestamp": "2025-08-04T14:11:00Z",
+        "labels": {
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "ingress-nginx",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "ingress-nginx",
+          "app.kubernetes.io/part-of": "ingress-nginx",
+          "app.kubernetes.io/version": "1.13.1",
+          "helm.sh/chart": "ingress-nginx-4.13.1"
+        },
+        "name": "ingress-nginx-controller-admission",
+        "namespace": "ingress-nginx",
+        "resourceVersion": "7185988",
+        "uid": "67a20dd0-e957-4b0f-8841-8987d855842b"
+      },
+      "spec": {
+        "clusterIP": "10.1.116.192",
+        "clusterIPs": [
+          "10.1.116.192"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "appProtocol": "https",
+            "name": "https-webhook",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "webhook"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "ingress-nginx",
+          "app.kubernetes.io/name": "ingress-nginx"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:02Z",
+        "labels": {
+          "app.kubernetes.io/component": "jvb",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "jitsi-subchart",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "jitsi-subchart-1.5.2"
+        },
+        "name": "kradle-jitsi-subchart-jvb",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305663",
+        "uid": "5d38ad30-e57f-4ff7-abaf-531edde4e2b0"
+      },
+      "spec": {
+        "clusterIP": "10.1.141.190",
+        "clusterIPs": [
+          "10.1.141.190"
+        ],
+        "externalTrafficPolicy": "Cluster",
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "rtp-udp",
+            "nodePort": 32201,
+            "port": 10000,
+            "protocol": "UDP",
+            "targetPort": 10000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "jvb",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "jitsi-subchart"
+        },
+        "sessionAffinity": "None",
+        "type": "NodePort"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:02Z",
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "jitsi-subchart",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "jitsi-subchart-1.5.2"
+        },
+        "name": "kradle-jitsi-subchart-web",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305670",
+        "uid": "48f979ef-c925-4fbe-8eb9-a2b75f8115b9"
+      },
+      "spec": {
+        "clusterIP": "10.1.205.58",
+        "clusterIPs": [
+          "10.1.205.58"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 80
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "jitsi-subchart"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:02Z",
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-api",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305683",
+        "uid": "44133ddd-ce15-4424-9bf0-685f04d003de"
+      },
+      "spec": {
+        "clusterIP": "10.1.177.72",
+        "clusterIPs": [
+          "10.1.177.72"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "api",
+          "app.kubernetes.io/instance": "kradle"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:02Z",
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-gitea-http",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305678",
+        "uid": "a598e779-0422-47d4-b88d-3a74e9461186"
+      },
+      "spec": {
+        "clusterIP": "10.1.162.100",
+        "clusterIPs": [
+          "10.1.162.100"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 3000,
+            "protocol": "TCP",
+            "targetPort": "http"
+          },
+          {
+            "name": "ssh",
+            "port": 22,
+            "protocol": "TCP",
+            "targetPort": "ssh"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "gitea-backend",
+          "app.kubernetes.io/instance": "kradle"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:02Z",
+        "labels": {
+          "app.kubernetes.io/managed-by": "Helm"
+        },
+        "name": "kradle-kradle-web",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305688",
+        "uid": "ccf0f041-9b15-499a-be80-e44ce23ab086"
+      },
+      "spec": {
+        "clusterIP": "10.1.5.81",
+        "clusterIPs": [
+          "10.1.5.81"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "kradle.a5c.ai/service": "web"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:02Z",
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "prosody",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "prosody-1.5.2"
+        },
+        "name": "kradle-prosody",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305657",
+        "uid": "37d60dfb-70df-4a46-b7a5-3a03800149b4"
+      },
+      "spec": {
+        "clusterIP": "10.1.192.207",
+        "clusterIPs": [
+          "10.1.192.207"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "tcp-bosh-insecure",
+            "port": 5280,
+            "protocol": "TCP",
+            "targetPort": 5280
+          },
+          {
+            "name": "tcp-bosh-secure",
+            "port": 5281,
+            "protocol": "TCP",
+            "targetPort": 5281
+          },
+          {
+            "name": "tcp-xmpp-component",
+            "port": 5347,
+            "protocol": "TCP",
+            "targetPort": 5347
+          },
+          {
+            "name": "tcp-xmpp-c2",
+            "port": 5222,
+            "protocol": "TCP",
+            "targetPort": 5222
+          },
+          {
+            "name": "tcp-xmpp-s2",
+            "port": 5269,
+            "protocol": "TCP",
+            "targetPort": 5269
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "prosody"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:54Z",
+        "labels": {
+          "app.kubernetes.io/component": "jvb",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "jitsi-subchart",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "jitsi-subchart-1.5.2"
+        },
+        "name": "kradle-jitsi-subchart-jvb",
+        "namespace": "kradle",
+        "resourceVersion": "182095115",
+        "uid": "c6defec3-6c0b-41d5-a8f8-468e35feb844"
+      },
+      "spec": {
+        "clusterIP": "10.1.181.180",
+        "clusterIPs": [
+          "10.1.181.180"
+        ],
+        "externalTrafficPolicy": "Cluster",
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "rtp-udp",
+            "nodePort": 32283,
+            "port": 10000,
+            "protocol": "UDP",
+            "targetPort": 10000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "jvb",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "jitsi-subchart"
+        },
+        "sessionAffinity": "None",
+        "type": "NodePort"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:54Z",
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "jitsi-subchart",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "jitsi-subchart-1.5.2"
+        },
+        "name": "kradle-jitsi-subchart-web",
+        "namespace": "kradle",
+        "resourceVersion": "182095120",
+        "uid": "688a1016-6b4a-4766-adf7-20b5659bfb1e"
+      },
+      "spec": {
+        "clusterIP": "10.1.73.100",
+        "clusterIPs": [
+          "10.1.73.100"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": 80
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "jitsi-subchart"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:54Z",
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-api",
+        "namespace": "kradle",
+        "resourceVersion": "182095129",
+        "uid": "b75a6e59-97e3-4409-96cf-108b431f918d"
+      },
+      "spec": {
+        "clusterIP": "10.1.112.18",
+        "clusterIPs": [
+          "10.1.112.18"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "api",
+          "app.kubernetes.io/instance": "kradle"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:54Z",
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-gitea-http",
+        "namespace": "kradle",
+        "resourceVersion": "182095124",
+        "uid": "00038c1a-7dc9-434e-a963-ffd77e62dd24"
+      },
+      "spec": {
+        "clusterIP": "10.1.132.231",
+        "clusterIPs": [
+          "10.1.132.231"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 3000,
+            "protocol": "TCP",
+            "targetPort": "http"
+          },
+          {
+            "name": "ssh",
+            "port": 22,
+            "protocol": "TCP",
+            "targetPort": "ssh"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "gitea-backend",
+          "app.kubernetes.io/instance": "kradle"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:54Z",
+        "labels": {
+          "app.kubernetes.io/managed-by": "Helm"
+        },
+        "name": "kradle-kradle-web",
+        "namespace": "kradle",
+        "resourceVersion": "182095134",
+        "uid": "d6879d65-6afa-4270-abbe-35c873497edf"
+      },
+      "spec": {
+        "clusterIP": "10.1.174.159",
+        "clusterIPs": [
+          "10.1.174.159"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "kradle.a5c.ai/service": "web"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:54Z",
+        "labels": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "prosody",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "prosody-1.5.2"
+        },
+        "name": "kradle-prosody",
+        "namespace": "kradle",
+        "resourceVersion": "182095108",
+        "uid": "b5bf8011-3907-4348-80ba-b47a0e64abdf"
+      },
+      "spec": {
+        "clusterIP": "10.1.107.206",
+        "clusterIPs": [
+          "10.1.107.206"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "tcp-bosh-insecure",
+            "port": 5280,
+            "protocol": "TCP",
+            "targetPort": 5280
+          },
+          {
+            "name": "tcp-bosh-secure",
+            "port": 5281,
+            "protocol": "TCP",
+            "targetPort": 5281
+          },
+          {
+            "name": "tcp-xmpp-component",
+            "port": 5347,
+            "protocol": "TCP",
+            "targetPort": 5347
+          },
+          {
+            "name": "tcp-xmpp-c2",
+            "port": 5222,
+            "protocol": "TCP",
+            "targetPort": 5222
+          },
+          {
+            "name": "tcp-xmpp-s2",
+            "port": 5269,
+            "protocol": "TCP",
+            "targetPort": 5269
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/name": "prosody"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:53Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile"
+        },
+        "name": "azure-policy-webhook-service",
+        "namespace": "kube-system",
+        "resourceVersion": "709",
+        "uid": "a5b71246-0d4b-409b-a086-4e72faab089a"
+      },
+      "spec": {
+        "clusterIP": "10.1.6.93",
+        "clusterIPs": [
+          "10.1.6.93"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "webhook",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": 9449
+          }
+        ],
+        "selector": {
+          "app": "azure-policy-webhook"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:48Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "k8s-app": "kube-dns",
+          "kubernetes.io/cluster-service": "true",
+          "kubernetes.io/name": "CoreDNS"
+        },
+        "name": "kube-dns",
+        "namespace": "kube-system",
+        "resourceVersion": "490",
+        "uid": "dbaad20a-7ec7-4616-88a7-33faf7fc098f"
+      },
+      "spec": {
+        "clusterIP": "10.1.0.10",
+        "clusterIPs": [
+          "10.1.0.10"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "dns",
+            "port": 53,
+            "protocol": "UDP",
+            "targetPort": 53
+          },
+          {
+            "name": "dns-tcp",
+            "port": 53,
+            "protocol": "TCP",
+            "targetPort": 53
+          }
+        ],
+        "selector": {
+          "k8s-app": "kube-dns"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-07-30T09:11:49Z",
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "kubernetes.io/cluster-service": "true",
+          "kubernetes.io/name": "Metrics-server"
+        },
+        "name": "metrics-server",
+        "namespace": "kube-system",
+        "resourceVersion": "571",
+        "uid": "63bad350-2235-4950-b66b-9eb75cf3ef07"
+      },
+      "spec": {
+        "clusterIP": "10.1.189.205",
+        "clusterIPs": [
+          "10.1.189.205"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "ms-https"
+          }
+        ],
+        "selector": {
+          "k8s-app": "metrics-server"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "creationTimestamp": "2025-07-30T09:11:48Z",
+        "labels": {
+          "app": "npm-metrics",
+          "app.kubernetes.io/managed-by": "eno"
+        },
+        "name": "npm-metrics-cluster-service",
+        "namespace": "kube-system",
+        "resourceVersion": "163977648",
+        "uid": "9e5d819e-6cee-44d9-b0e0-10d55f7c3eba"
+      },
+      "spec": {
+        "clusterIP": "10.1.28.54",
+        "clusterIPs": [
+          "10.1.28.54"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 9000,
+            "protocol": "TCP",
+            "targetPort": 10091
+          }
+        ],
+        "selector": {
+          "k8s-app": "azure-npm"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kyverno",
+          "meta.helm.sh/release-namespace": "kyverno"
+        },
+        "creationTimestamp": "2026-05-18T16:53:39Z",
+        "labels": {
+          "app.kubernetes.io/component": "background-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kyverno-background-controller",
+          "app.kubernetes.io/part-of": "kyverno",
+          "app.kubernetes.io/version": "3.8.1",
+          "helm.sh/chart": "kyverno-3.8.1"
+        },
+        "name": "kyverno-background-controller-metrics",
+        "namespace": "kyverno",
+        "resourceVersion": "132942036",
+        "uid": "db0924f9-e06d-4391-91d0-6abc12adb082"
+      },
+      "spec": {
+        "clusterIP": "10.1.225.197",
+        "clusterIPs": [
+          "10.1.225.197"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "metrics-port",
+            "port": 8000,
+            "protocol": "TCP",
+            "targetPort": 8000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "background-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/part-of": "kyverno"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kyverno",
+          "meta.helm.sh/release-namespace": "kyverno"
+        },
+        "creationTimestamp": "2026-05-18T16:53:39Z",
+        "labels": {
+          "app.kubernetes.io/component": "cleanup-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kyverno-cleanup-controller",
+          "app.kubernetes.io/part-of": "kyverno",
+          "app.kubernetes.io/version": "3.8.1",
+          "helm.sh/chart": "kyverno-3.8.1"
+        },
+        "name": "kyverno-cleanup-controller",
+        "namespace": "kyverno",
+        "resourceVersion": "132942022",
+        "uid": "348ac61f-00f1-4d1a-8165-c5af2c2ff288"
+      },
+      "spec": {
+        "clusterIP": "10.1.87.87",
+        "clusterIPs": [
+          "10.1.87.87"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "appProtocol": "https",
+            "name": "https",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "https"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "cleanup-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/part-of": "kyverno"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kyverno",
+          "meta.helm.sh/release-namespace": "kyverno"
+        },
+        "creationTimestamp": "2026-05-18T16:53:39Z",
+        "labels": {
+          "app.kubernetes.io/component": "cleanup-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kyverno-cleanup-controller",
+          "app.kubernetes.io/part-of": "kyverno",
+          "app.kubernetes.io/version": "3.8.1",
+          "helm.sh/chart": "kyverno-3.8.1"
+        },
+        "name": "kyverno-cleanup-controller-metrics",
+        "namespace": "kyverno",
+        "resourceVersion": "132942024",
+        "uid": "24b70482-4a89-42e1-98f8-27ddef25ff6d"
+      },
+      "spec": {
+        "clusterIP": "10.1.146.24",
+        "clusterIPs": [
+          "10.1.146.24"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "metrics-port",
+            "port": 8000,
+            "protocol": "TCP",
+            "targetPort": 8000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "cleanup-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/part-of": "kyverno"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kyverno",
+          "meta.helm.sh/release-namespace": "kyverno"
+        },
+        "creationTimestamp": "2026-05-18T16:53:39Z",
+        "labels": {
+          "app.kubernetes.io/component": "reports-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kyverno-reports-controller",
+          "app.kubernetes.io/part-of": "kyverno",
+          "app.kubernetes.io/version": "3.8.1",
+          "helm.sh/chart": "kyverno-3.8.1"
+        },
+        "name": "kyverno-reports-controller-metrics",
+        "namespace": "kyverno",
+        "resourceVersion": "132942025",
+        "uid": "707a6b37-425b-427a-9d6d-00bbbd5cbec5"
+      },
+      "spec": {
+        "clusterIP": "10.1.65.12",
+        "clusterIPs": [
+          "10.1.65.12"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "metrics-port",
+            "port": 8000,
+            "protocol": "TCP",
+            "targetPort": 8000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "reports-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/part-of": "kyverno"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kyverno",
+          "meta.helm.sh/release-namespace": "kyverno"
+        },
+        "creationTimestamp": "2026-05-18T16:53:39Z",
+        "labels": {
+          "app.kubernetes.io/component": "admission-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kyverno-admission-controller",
+          "app.kubernetes.io/part-of": "kyverno",
+          "app.kubernetes.io/version": "3.8.1",
+          "helm.sh/chart": "kyverno-3.8.1"
+        },
+        "name": "kyverno-svc",
+        "namespace": "kyverno",
+        "resourceVersion": "132942038",
+        "uid": "df040f29-b143-4055-9e7d-ea8a19c25bcb"
+      },
+      "spec": {
+        "clusterIP": "10.1.239.226",
+        "clusterIPs": [
+          "10.1.239.226"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "appProtocol": "https",
+            "name": "https",
+            "port": 443,
+            "protocol": "TCP",
+            "targetPort": "https"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "admission-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/part-of": "kyverno"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kyverno",
+          "meta.helm.sh/release-namespace": "kyverno"
+        },
+        "creationTimestamp": "2026-05-18T16:53:39Z",
+        "labels": {
+          "app.kubernetes.io/component": "admission-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kyverno-admission-controller",
+          "app.kubernetes.io/part-of": "kyverno",
+          "app.kubernetes.io/version": "3.8.1",
+          "helm.sh/chart": "kyverno-3.8.1"
+        },
+        "name": "kyverno-svc-metrics",
+        "namespace": "kyverno",
+        "resourceVersion": "132942034",
+        "uid": "4cededfe-07b7-4f5a-8308-f05867221de3"
+      },
+      "spec": {
+        "clusterIP": "10.1.53.109",
+        "clusterIPs": [
+          "10.1.53.109"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "metrics-port",
+            "port": 8000,
+            "protocol": "TCP",
+            "targetPort": 8000
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "admission-controller",
+          "app.kubernetes.io/instance": "kyverno",
+          "app.kubernetes.io/part-of": "kyverno"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "babysitter-web-staging",
+          "meta.helm.sh/release-namespace": "staging"
+        },
+        "creationTimestamp": "2026-02-21T14:51:58Z",
+        "labels": {
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging",
+        "namespace": "staging",
+        "resourceVersion": "97390547",
+        "uid": "cb739b30-aa7a-409a-824a-60470f5c09a9"
+      },
+      "spec": {
+        "clusterIP": "10.1.112.83",
+        "clusterIPs": [
+          "10.1.112.83"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "port": 80,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/name": "babysitter-web"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "babysitter-web-staging",
+          "meta.helm.sh/release-namespace": "staging"
+        },
+        "creationTimestamp": "2026-02-21T14:51:58Z",
+        "labels": {
+          "app.kubernetes.io/component": "postgresql",
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging-postgresql",
+        "namespace": "staging",
+        "resourceVersion": "97390544",
+        "uid": "3b652359-fd12-4ef1-bd8c-b2c9653fa1dd"
+      },
+      "spec": {
+        "clusterIP": "10.1.226.138",
+        "clusterIPs": [
+          "10.1.226.138"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 5432,
+            "protocol": "TCP",
+            "targetPort": 5432
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "postgresql",
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/name": "babysitter-web"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "babysitter-web-staging",
+          "meta.helm.sh/release-namespace": "staging"
+        },
+        "creationTimestamp": "2026-02-21T14:51:58Z",
+        "labels": {
+          "app.kubernetes.io/component": "redis",
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging-redis-master",
+        "namespace": "staging",
+        "resourceVersion": "97390546",
+        "uid": "6c589c69-73a1-4475-8df9-b8a65f85a2fd"
+      },
+      "spec": {
+        "clusterIP": "10.1.87.124",
+        "clusterIPs": [
+          "10.1.87.124"
+        ],
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "port": 6379,
+            "protocol": "TCP",
+            "targetPort": 6379
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "redis",
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/name": "babysitter-web"
+        },
+        "sessionAffinity": "None",
+        "type": "ClusterIP"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

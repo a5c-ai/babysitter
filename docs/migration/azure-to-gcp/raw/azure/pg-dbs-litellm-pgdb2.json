@@ -1,0 +1,38 @@
+[
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb2/databases/azure_maintenance",
+    "name": "azure_maintenance",
+    "resourceGroup": "rg-litellm-proxy",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  },
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb2/databases/postgres",
+    "name": "postgres",
+    "resourceGroup": "rg-litellm-proxy",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  },
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb2/databases/azure_sys",
+    "name": "azure_sys",
+    "resourceGroup": "rg-litellm-proxy",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  },
+  {
+    "charset": "UTF8",
+    "collation": "en_US.utf8",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy/providers/Microsoft.DBforPostgreSQL/flexibleServers/litellm-pgdb2/databases/litellm",
+    "name": "litellm",
+    "resourceGroup": "rg-litellm-proxy",
+    "systemData": null,
+    "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases"
+  }
+]

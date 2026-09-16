@@ -1,0 +1,86 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "IngressClass",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>"
+        },
+        "creationTimestamp": "2025-08-02T13:57:07Z",
+        "generation": 1,
+        "labels": {
+          "addonmanager.kubernetes.io/mode": "Reconcile",
+          "app": "ingress-appgw",
+          "app.kubernetes.io/component": "controller"
+        },
+        "name": "azure-application-gateway",
+        "resourceVersion": "1296166",
+        "uid": "4d48be0b-1861-44b5-aec2-8a82b61b6f5c"
+      },
+      "spec": {
+        "controller": "azure/application-gateway"
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "IngressClass",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "ingress-nginx",
+          "meta.helm.sh/release-namespace": "ingress-nginx"
+        },
+        "creationTimestamp": "2025-08-04T14:11:00Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "controller",
+          "app.kubernetes.io/instance": "ingress-nginx",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "ingress-nginx",
+          "app.kubernetes.io/part-of": "ingress-nginx",
+          "app.kubernetes.io/version": "1.13.1",
+          "helm.sh/chart": "ingress-nginx-4.13.1"
+        },
+        "name": "nginx",
+        "resourceVersion": "7186009",
+        "uid": "4aec928a-3ab2-422e-b785-d9b87d734654"
+      },
+      "spec": {
+        "controller": "k8s.io/ingress-nginx"
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "IngressClass",
+      "metadata": {
+        "creationTimestamp": "2025-08-04T22:09:50Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/managed-by": "aks-app-routing-operator",
+          "app.kubernetes.io/name": "nginx",
+          "kubernetes.azure.com/managedby": "aks"
+        },
+        "name": "webapprouting.kubernetes.azure.com",
+        "ownerReferences": [
+          {
+            "apiVersion": "approuting.kubernetes.azure.com/v1alpha1",
+            "controller": true,
+            "kind": "NginxIngressController",
+            "name": "default",
+            "uid": "b27f7012-3953-493b-bb72-7a0c749a9a82"
+          }
+        ],
+        "resourceVersion": "2301890",
+        "uid": "8ed19f4c-b57c-4363-a25e-c92f9891b1ff"
+      },
+      "spec": {
+        "controller": "webapprouting.kubernetes.azure.com/nginx"
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

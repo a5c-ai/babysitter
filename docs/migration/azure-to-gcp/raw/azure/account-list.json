@@ -1,0 +1,30 @@
+[
+  {
+    "cloudName": "AzureCloud",
+    "homeTenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+    "id": "794e33cd-48ba-4654-8cd9-b6cf2715e097",
+    "isDefault": true,
+    "managedByTenants": [],
+    "name": "Microsoft Azure Sponsorship",
+    "state": "Enabled",
+    "tenantId": "5aa70b65-9fac-4895-9de8-8523652ff49e",
+    "user": {
+      "name": "tmuskal@gmail.com",
+      "type": "user"
+    }
+  },
+  {
+    "cloudName": "AzureCloud",
+    "homeTenantId": "85f6b733-81c9-4249-b305-5fb7292db22b",
+    "id": "1a6a4872-f78f-41f9-882d-7e8be2d8395b",
+    "isDefault": false,
+    "managedByTenants": [],
+    "name": "Azure subscription 1",
+    "state": "Enabled",
+    "tenantId": "85f6b733-81c9-4249-b305-5fb7292db22b",
+    "user": {
+      "name": "tmuskal@gmail.com",
+      "type": "user"
+    }
+  }
+]

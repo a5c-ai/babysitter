@@ -1,0 +1,72 @@
+[
+  {
+    "actions": [
+      {
+        "actionGroupId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Insights/ActionGroups/RecommendedAlertRules-AG-1",
+        "webHookProperties": {}
+      }
+    ],
+    "criteria": {
+      "allOf": [
+        {
+          "criterionType": "StaticThresholdCriterion",
+          "metricName": "node_cpu_usage_percentage",
+          "metricNamespace": "Microsoft.ContainerService/managedClusters",
+          "name": "Metric1",
+          "operator": "GreaterThan",
+          "threshold": 95.0,
+          "timeAggregation": "Average"
+        }
+      ],
+      "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+    },
+    "enabled": false,
+    "evaluationFrequency": "PT5M",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/personoids_sponsorship/providers/microsoft.insights/metricAlerts/CPU Usage Percentage - personoids",
+    "location": "Global",
+    "name": "CPU Usage Percentage - personoids",
+    "resourceGroup": "personoids_sponsorship",
+    "scopes": [
+      "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/personoids_sponsorship/providers/Microsoft.ContainerService/managedClusters/personoids"
+    ],
+    "severity": 3,
+    "targetResourceType": "Microsoft.ContainerService/managedClusters",
+    "type": "Microsoft.Insights/metricAlerts",
+    "windowSize": "PT5M"
+  },
+  {
+    "actions": [
+      {
+        "actionGroupId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship/providers/Microsoft.Insights/ActionGroups/RecommendedAlertRules-AG-1",
+        "webHookProperties": {}
+      }
+    ],
+    "criteria": {
+      "allOf": [
+        {
+          "criterionType": "StaticThresholdCriterion",
+          "metricName": "node_memory_working_set_percentage",
+          "metricNamespace": "Microsoft.ContainerService/managedClusters",
+          "name": "Metric1",
+          "operator": "GreaterThan",
+          "threshold": 100.0,
+          "timeAggregation": "Average"
+        }
+      ],
+      "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+    },
+    "enabled": false,
+    "evaluationFrequency": "PT5M",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/personoids_sponsorship/providers/microsoft.insights/metricAlerts/Memory Working Set Percentage - personoids",
+    "location": "Global",
+    "name": "Memory Working Set Percentage - personoids",
+    "resourceGroup": "personoids_sponsorship",
+    "scopes": [
+      "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/personoids_sponsorship/providers/Microsoft.ContainerService/managedClusters/personoids"
+    ],
+    "severity": 3,
+    "targetResourceType": "Microsoft.ContainerService/managedClusters",
+    "type": "Microsoft.Insights/metricAlerts",
+    "windowSize": "PT5M"
+  }
+]

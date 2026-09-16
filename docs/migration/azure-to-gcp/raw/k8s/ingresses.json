@@ -1,0 +1,1176 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "bmux.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/proxy-buffering": "off",
+          "nginx.ingress.kubernetes.io/proxy-read-timeout": "3600",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-03-15T10:45:13Z",
+        "generation": 5,
+        "name": "aeq-ingress",
+        "namespace": "aeq",
+        "resourceVersion": "121528448",
+        "uid": "6c90cc5e-b9ed-4687-90ce-95ecd4d22024"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "bmux.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "bmux-server",
+                      "port": {
+                        "number": 3847
+                      }
+                    }
+                  },
+                  "path": "/.well-known",
+                  "pathType": "ImplementationSpecific"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "bmux-server",
+                      "port": {
+                        "number": 3847
+                      }
+                    }
+                  },
+                  "path": "/authorize",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "bmux-server",
+                      "port": {
+                        "number": 3847
+                      }
+                    }
+                  },
+                  "path": "/token",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "bmux-server",
+                      "port": {
+                        "number": 3847
+                      }
+                    }
+                  },
+                  "path": "/register",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "bmux-server",
+                      "port": {
+                        "number": 3847
+                      }
+                    }
+                  },
+                  "path": "/revoke",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "aeq-mcp",
+                      "port": {
+                        "number": 3848
+                      }
+                    }
+                  },
+                  "path": "/mcp",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "bmux-server",
+                      "port": {
+                        "number": 3847
+                      }
+                    }
+                  },
+                  "path": "/api",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "aeq-dashboard",
+                      "port": {
+                        "number": 3000
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "bmux.a5c.ai"
+            ],
+            "secretName": "aeq-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "app-staging.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "50m",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2025-09-02T16:40:20Z",
+        "generation": 1,
+        "name": "a5c-app",
+        "namespace": "app-staging",
+        "resourceVersion": "51803034",
+        "uid": "96011fac-2c96-462b-907a-72dc7bb4c4e9"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "app-staging.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "a5c-app",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "app-staging.a5c.ai"
+            ],
+            "secretName": "app-azure-ssl-certificate"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "app-jaeger-staging.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "50m",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2025-09-04T08:35:08Z",
+        "generation": 4,
+        "name": "a5c-app-jaeger-ingress",
+        "namespace": "app-staging",
+        "resourceVersion": "51803048",
+        "uid": "bbe4aee0-97a5-4b92-96ed-9caafed149c8"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "app-jaeger-staging.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "a5c-app-jaeger",
+                      "port": {
+                        "number": 16686
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "app-jaeger-staging.a5c.ai"
+            ],
+            "secretName": "app-azure-ssl-certificate"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "kubernetes.io/ingress.class": "nginx"
+        },
+        "creationTimestamp": "2025-09-13T10:17:25Z",
+        "generation": 1,
+        "name": "a5c-install",
+        "namespace": "app-staging",
+        "resourceVersion": "51803053",
+        "uid": "a62d9c5e-0bdf-4eb9-b2c7-d4f4fd56e6d8"
+      },
+      "spec": {
+        "rules": [
+          {
+            "host": "install-staging.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "a5c-install",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "app.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "50m",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2025-08-19T20:31:27Z",
+        "generation": 3,
+        "name": "a5c-app",
+        "namespace": "app",
+        "resourceVersion": "51803036",
+        "uid": "6ab22249-e7b1-4192-9a83-e59089b792b8"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "app.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "a5c-app",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "app.a5c.ai"
+            ],
+            "secretName": "app-azure-ssl-certificate"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "app-jaeger.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "50m",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2025-09-04T08:33:03Z",
+        "generation": 2,
+        "name": "a5c-app-jaeger-ingress",
+        "namespace": "app",
+        "resourceVersion": "51803055",
+        "uid": "239a95ef-7cf7-4e0f-af58-94d7ea2e9297"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "app-jaeger.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "a5c-app-jaeger",
+                      "port": {
+                        "number": 16686
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "app-jaeger.a5c.ai"
+            ],
+            "secretName": "app-azure-ssl-certificate"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "atlas-staging.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-05-06T16:40:19Z",
+        "generation": 1,
+        "name": "atlas-webui",
+        "namespace": "atlas-staging",
+        "resourceVersion": "127870456",
+        "uid": "8e7358fa-75de-4858-86d3-1c46ed99725a"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "atlas-staging.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "atlas-webui",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "atlas-staging.a5c.ai"
+            ],
+            "secretName": "atlas-webui-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "atlas.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-06-30T09:13:32Z",
+        "generation": 1,
+        "name": "atlas-webui",
+        "namespace": "atlas",
+        "resourceVersion": "157707362",
+        "uid": "b624f4dc-573d-404c-b80f-f448258e5c9e"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "atlas.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "atlas-webui",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "atlas.a5c.ai"
+            ],
+            "secretName": "atlas-webui-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "studio.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-06-09T07:02:01Z",
+        "generation": 1,
+        "name": "content-studio",
+        "namespace": "content-studio",
+        "resourceVersion": "145446048",
+        "uid": "021289f3-f237-4d6c-9fe4-c34d05d69a74"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "studio.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "content-studio",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "studio.a5c.ai"
+            ],
+            "secretName": "content-studio-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "external-dns.alpha.kubernetes.io/hostname": "hub.a5c.ai",
+          "kubectl.kubernetes.io/last-applied-configuration": "<removed: may embed literal env values>",
+          "kubernetes.io/ingress.class": "nginx",
+          "nginx.ingress.kubernetes.io/backend-protocol": "HTTP",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true",
+          "nginx.ingress.kubernetes.io/use-regex": "true"
+        },
+        "creationTimestamp": "2025-07-30T16:25:09Z",
+        "generation": 7,
+        "labels": {
+          "app.kubernetes.io/component": "ingress",
+          "app.kubernetes.io/name": "hub"
+        },
+        "name": "hub-ingress",
+        "namespace": "hub-development",
+        "resourceVersion": "51803045",
+        "uid": "60cf7202-6800-46cd-9bff-cf95582710da"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "hub.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "hub-backend-service",
+                      "port": {
+                        "number": 8080
+                      }
+                    }
+                  },
+                  "path": "/api",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "hub-backend-service",
+                      "port": {
+                        "number": 8080
+                      }
+                    }
+                  },
+                  "path": "/api/health",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "hub-backend-service",
+                      "port": {
+                        "number": 8080
+                      }
+                    }
+                  },
+                  "path": "/ready",
+                  "pathType": "Prefix"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "hub-backend-service",
+                      "port": {
+                        "number": 8080
+                      }
+                    }
+                  },
+                  "path": "/([^/]+)/([^/]+)\\.git(/.*)?",
+                  "pathType": "ImplementationSpecific"
+                },
+                {
+                  "backend": {
+                    "service": {
+                      "name": "hub-frontend-service",
+                      "port": {
+                        "number": 3000
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "hub.a5c.ai"
+            ],
+            "secretName": "hub-azure-ssl-certificate"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging"
+        },
+        "creationTimestamp": "2026-09-05T14:38:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "jitsi-subchart",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "jitsi-subchart-1.5.2"
+        },
+        "name": "kradle-jitsi-subchart-web",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194305827",
+        "uid": "cd598594-667a-4946-a770-0b1f687c61de"
+      },
+      "spec": {
+        "rules": [
+          {
+            "host": "meet.kradle.local",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "kradle-jitsi-subchart-web",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "gitea.kradle-staging.a5c.ai",
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "512m",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-09-05T14:38:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "gitea-backend",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-gitea",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194306336",
+        "uid": "cdbdc174-c3f9-42f1-8570-825d43fc4986"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "gitea.kradle-staging.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "kradle-kradle-gitea-http",
+                      "port": {
+                        "number": 3000
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "gitea.kradle-staging.a5c.ai"
+            ],
+            "secretName": "kradle-gitea-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "kradle-staging.a5c.ai",
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle-staging",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-09-05T14:38:04Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-web",
+        "namespace": "kradle-staging",
+        "resourceVersion": "194306337",
+        "uid": "a9c5e311-9cbc-4885-a626-ed6da51b4d44"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "kradle-staging.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "kradle-kradle-web",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "kradle-staging.a5c.ai"
+            ],
+            "secretName": "kradle-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle"
+        },
+        "creationTimestamp": "2026-08-13T20:18:56Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "jitsi-subchart",
+          "app.kubernetes.io/version": "stable-10590",
+          "helm.sh/chart": "jitsi-subchart-1.5.2"
+        },
+        "name": "kradle-jitsi-subchart-web",
+        "namespace": "kradle",
+        "resourceVersion": "182095269",
+        "uid": "f2b6fda4-113d-43e7-8da2-a6e5030d7222"
+      },
+      "spec": {
+        "rules": [
+          {
+            "host": "meet.kradle.local",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "kradle-jitsi-subchart-web",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "gitea.kradle.a5c.ai",
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "512m",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-08-13T20:18:56Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "gitea-backend",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-gitea",
+        "namespace": "kradle",
+        "resourceVersion": "182095645",
+        "uid": "af543018-074a-48e8-baea-e27ae6595a37"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "gitea.kradle.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "kradle-kradle-gitea-http",
+                      "port": {
+                        "number": 3000
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "gitea.kradle.a5c.ai"
+            ],
+            "secretName": "kradle-gitea-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "cert-manager.io/cluster-issuer": "letsencrypt-production",
+          "external-dns.alpha.kubernetes.io/hostname": "kradle.a5c.ai",
+          "meta.helm.sh/release-name": "kradle",
+          "meta.helm.sh/release-namespace": "kradle",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-08-13T20:18:56Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "web",
+          "app.kubernetes.io/instance": "kradle",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "kradle",
+          "app.kubernetes.io/version": "0.1.0",
+          "kradle.a5c.ai/surface": "mvp-package"
+        },
+        "name": "kradle-kradle-web",
+        "namespace": "kradle",
+        "resourceVersion": "182095644",
+        "uid": "95e6a586-26d3-4499-a9d4-a4329befba7c"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "kradle.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "kradle-kradle-web",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "kradle.a5c.ai"
+            ],
+            "secretName": "kradle-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "Ingress",
+      "metadata": {
+        "annotations": {
+          "acme.cert-manager.io/http01-edit-in-place": "true",
+          "cert-manager.io/cluster-issuer": "letsencrypt-prod",
+          "meta.helm.sh/release-name": "babysitter-web-staging",
+          "meta.helm.sh/release-namespace": "staging",
+          "nginx.ingress.kubernetes.io/proxy-body-size": "50m",
+          "nginx.ingress.kubernetes.io/proxy-read-timeout": "300",
+          "nginx.ingress.kubernetes.io/proxy-send-timeout": "300",
+          "nginx.ingress.kubernetes.io/ssl-redirect": "true"
+        },
+        "creationTimestamp": "2026-02-21T15:02:58Z",
+        "generation": 7,
+        "labels": {
+          "app.kubernetes.io/instance": "babysitter-web-staging",
+          "app.kubernetes.io/managed-by": "Helm",
+          "app.kubernetes.io/name": "babysitter-web",
+          "app.kubernetes.io/version": "1.0.0",
+          "helm.sh/chart": "babysitter-web-1.1.0"
+        },
+        "name": "babysitter-web-staging",
+        "namespace": "staging",
+        "resourceVersion": "185580673",
+        "uid": "f69215f9-b654-4290-ba47-84ff5c509c38"
+      },
+      "spec": {
+        "ingressClassName": "nginx",
+        "rules": [
+          {
+            "host": "staging.web.a5c.ai",
+            "http": {
+              "paths": [
+                {
+                  "backend": {
+                    "service": {
+                      "name": "babysitter-web-staging",
+                      "port": {
+                        "number": 80
+                      }
+                    }
+                  },
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          }
+        ],
+        "tls": [
+          {
+            "hosts": [
+              "staging.web.a5c.ai"
+            ],
+            "secretName": "babysitter-web-staging-tls"
+          }
+        ]
+      },
+      "status": {
+        "loadBalancer": {
+          "ingress": [
+            {
+              "ip": "135.234.117.214"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

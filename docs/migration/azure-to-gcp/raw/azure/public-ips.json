@@ -1,0 +1,512 @@
+[
+  {
+    "etag": "W/\"9292e39e-9bbb-407a-90be-a08a206704be\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/publicIPAddresses/a5c-dev-vm-2PublicIP",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "20.94.74.76",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/A5C-DEV-RG/providers/Microsoft.Network/networkInterfaces/a5c-dev-vm-2VMNic/ipConfigurations/ipconfiga5c-dev-vm-2",
+      "resourceGroup": "A5C-DEV-RG"
+    },
+    "ipTags": [],
+    "location": "eastus2",
+    "name": "a5c-dev-vm-2PublicIP",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "A5C-DEV-RG",
+    "resourceGuid": "518d55ef-a3a9-42c5-bd2b-2bf79910aa28",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {},
+    "type": "Microsoft.Network/publicIPAddresses"
+  },
+  {
+    "etag": "W/\"59d0d37e-efba-4370-b51f-e85350d920c2\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/publicIPAddresses/a5c-dev-vmPublicIP",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "20.110.38.197",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg/providers/Microsoft.Network/networkInterfaces/a5c-dev-vmVMNic/ipConfigurations/ipconfiga5c-dev-vm",
+      "resourceGroup": "a5c-dev-rg"
+    },
+    "ipTags": [],
+    "location": "eastus2",
+    "name": "a5c-dev-vmPublicIP",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "a5c-dev-rg",
+    "resourceGuid": "b3a8edb4-0a81-4231-a392-562b2dfbbf71",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {},
+    "type": "Microsoft.Network/publicIPAddresses"
+  },
+  {
+    "etag": "W/\"14318bdc-04d9-44ac-81c3-f67c3dc4435a\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/publicIPAddresses/ubuntu-large-02PublicIP",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "20.110.105.86",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806/providers/Microsoft.Network/networkInterfaces/ubuntu-large-02VMNic/ipConfigurations/ipconfigubuntu-large-02",
+      "resourceGroup": "rg-ubuntu-ssh-20260806"
+    },
+    "ipTags": [],
+    "location": "eastus2",
+    "name": "ubuntu-large-02PublicIP",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-ubuntu-ssh-20260806",
+    "resourceGuid": "085e97d6-142b-4717-bd4c-0dca1435d429",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {},
+    "type": "Microsoft.Network/publicIPAddresses"
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"284ae8a9-069b-4eff-8208-0f748b51a300\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/f964f80d-c985-48f4-9e03-14d7bed85be9",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "20.14.43.47",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/f964f80d-c985-48f4-9e03-14d7bed85be9",
+      "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+    },
+    "ipTags": [],
+    "location": "westus3",
+    "name": "f964f80d-c985-48f4-9e03-14d7bed85be9",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "resourceGuid": "9ada791f-2f0e-44bc-b08f-0bd605cf10e1",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub",
+      "aks-managed-cluster-name": "aks-hub-development-westus3-v2",
+      "aks-managed-cluster-rg": "rg-hub-development-westus3",
+      "aks-managed-type": "aks-slb-managed-outbound-ip"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "2",
+      "1",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"6a827833-1550-4783-9588-c75fc2cf7fae\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/kubernetes-a77bc58099d654cca998ddc8832f3dbf",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "135.234.117.214",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a77bc58099d654cca998ddc8832f3dbf",
+      "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+    },
+    "ipTags": [],
+    "location": "westus3",
+    "name": "kubernetes-a77bc58099d654cca998ddc8832f3dbf",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "resourceGuid": "ba68263e-cf6b-49bd-95af-9ef886a223ff",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub",
+      "aks-managed-cluster-name": "aks-hub-development-westus3-v2",
+      "aks-managed-cluster-rg": "rg-hub-development-westus3",
+      "k8s-azure-cluster-name": "kubernetes",
+      "k8s-azure-service": "ingress-nginx/ingress-nginx-controller"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "2",
+      "1",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"b61b7fa4-dc41-448c-99df-b08b3b0f48d9\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/publicIPAddresses/kubernetes-a92fa767804c1424a983f3aa36c99dd5",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "134.33.26.182",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3/providers/Microsoft.Network/loadBalancers/kubernetes/frontendIPConfigurations/a92fa767804c1424a983f3aa36c99dd5",
+      "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3"
+    },
+    "ipTags": [],
+    "location": "westus3",
+    "name": "kubernetes-a92fa767804c1424a983f3aa36c99dd5",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "mc_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "resourceGuid": "9319c223-9683-44e4-b3a9-b6e19df55f55",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub",
+      "aks-managed-cluster-name": "aks-hub-development-westus3-v2",
+      "aks-managed-cluster-rg": "rg-hub-development-westus3",
+      "k8s-azure-cluster-name": "kubernetes",
+      "k8s-azure-service": "app-routing-system/nginx"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "2",
+      "1",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"18b4d736-3d8d-46c2-8953-20bd3e1aa0b5\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/publicIPAddresses/appgw-hub-development-westus3-v2-pip",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "4.242.238.192",
+    "ipTags": [],
+    "location": "westus3",
+    "name": "appgw-hub-development-westus3-v2-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-hub-development-westus3",
+    "resourceGuid": "1b113ffe-195e-449b-a462-9824762fc51b",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Network/publicIPAddresses"
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"40544888-f81b-44ec-87ef-43652c6f7da9\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/publicIPAddresses/tb-fleet-0-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "4.166.96.109",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0/providers/Microsoft.Network/networkInterfaces/tb-fleet-0-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-0"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-0-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-0",
+    "resourceGuid": "c0e1754e-ee91-4a13-81c0-e49c8af70428",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"cc8ae0c7-6ecc-44bd-abae-795ef36b7593\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/publicIPAddresses/tb-fleet-1-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "4.166.169.82",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1/providers/Microsoft.Network/networkInterfaces/tb-fleet-1-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-1"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-1-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-1",
+    "resourceGuid": "be783d37-31cb-4342-ae3a-7a09889c18e5",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"d7d0e4c8-6d07-472b-bbea-e2c243631d41\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/publicIPAddresses/tb-fleet-2-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "172.160.103.190",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2/providers/Microsoft.Network/networkInterfaces/tb-fleet-2-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-2"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-2-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-2",
+    "resourceGuid": "d09ec3f8-bcfa-43f8-b1c4-3d68096f41f9",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"aa9af192-6f29-4f1f-8007-282c70d54100\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/publicIPAddresses/tb-fleet-4-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "172.160.55.157",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4/providers/Microsoft.Network/networkInterfaces/tb-fleet-4-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-4"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-4-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-4",
+    "resourceGuid": "2874866f-51e9-48d3-acd9-90e7da4364e2",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"94190f6c-fd76-4ca1-87ab-f5239cc93fdc\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/publicIPAddresses/tb-fleet-5-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "172.160.103.193",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5/providers/Microsoft.Network/networkInterfaces/tb-fleet-5-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-5"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-5-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-5",
+    "resourceGuid": "441d6eac-1088-414d-bd5a-3dc99bb5cfa2",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"915109d1-c2cd-41a2-b59f-62a8c0a4ed9f\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/publicIPAddresses/tb-fleet-6-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "4.166.122.134",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6/providers/Microsoft.Network/networkInterfaces/tb-fleet-6-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-6"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-6-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-6",
+    "resourceGuid": "47b41573-0e98-4b3e-b171-76d0b2b4aeef",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"33b5cc63-e375-4ccd-a604-69daf64287db\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/publicIPAddresses/tb-fleet-7-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "4.166.138.3",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7/providers/Microsoft.Network/networkInterfaces/tb-fleet-7-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-7"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-7-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-7",
+    "resourceGuid": "23dcc805-5e51-4532-b68a-87796099c75d",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"e8a4f711-b2ff-416e-82f1-606f6c63d18b\"",
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/publicIPAddresses/tb-fleet-8-pip",
+    "idleTimeoutInMinutes": 30,
+    "ipAddress": "4.166.93.232",
+    "ipConfiguration": {
+      "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8/providers/Microsoft.Network/networkInterfaces/tb-fleet-8-nic/ipConfigurations/ipconfig1",
+      "resourceGroup": "rg-tb-fleet-8"
+    },
+    "ipTags": [],
+    "location": "swedencentral",
+    "name": "tb-fleet-8-pip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "rg-tb-fleet-8",
+    "resourceGuid": "fafbc96c-1aa1-410c-87ec-3e5bbf0b4db2",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Network/publicIPAddresses",
+    "zones": [
+      "1",
+      "2",
+      "3"
+    ]
+  }
+]

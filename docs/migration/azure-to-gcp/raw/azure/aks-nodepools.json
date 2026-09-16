@@ -1,0 +1,69 @@
+[
+  {
+    "availabilityZones": null,
+    "capacityReservationGroupId": null,
+    "count": 4,
+    "creationData": null,
+    "currentOrchestratorVersion": "1.30.12",
+    "eTag": null,
+    "enableAutoScaling": true,
+    "enableEncryptionAtHost": false,
+    "enableFips": false,
+    "enableNodePublicIp": false,
+    "enableUltraSsd": false,
+    "gpuInstanceProfile": null,
+    "hostGroupId": null,
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2/agentPools/default",
+    "kubeletConfig": null,
+    "kubeletDiskType": "OS",
+    "linuxOsConfig": null,
+    "maxCount": 6,
+    "maxPods": 30,
+    "messageOfTheDay": null,
+    "minCount": 1,
+    "mode": "System",
+    "name": "default",
+    "networkProfile": null,
+    "nodeImageVersion": "AKSUbuntu-2204gen2containerd-202510.19.1",
+    "nodeLabels": null,
+    "nodePublicIpPrefixId": null,
+    "nodeTaints": null,
+    "orchestratorVersion": "1.30",
+    "osDiskSizeGb": 128,
+    "osDiskType": "Managed",
+    "osSku": "Ubuntu",
+    "osType": "Linux",
+    "podSubnetId": null,
+    "powerState": {
+      "code": "Running"
+    },
+    "provisioningState": "Succeeded",
+    "proximityPlacementGroupId": null,
+    "resourceGroup": "rg-hub-development-westus3",
+    "scaleDownMode": "Delete",
+    "scaleSetEvictionPolicy": null,
+    "scaleSetPriority": null,
+    "securityProfile": {
+      "enableSecureBoot": false,
+      "enableVtpm": false
+    },
+    "spotMaxPrice": null,
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.ContainerService/managedClusters/agentPools",
+    "typePropertiesType": "VirtualMachineScaleSets",
+    "upgradeSettings": {
+      "drainTimeoutInMinutes": null,
+      "maxSurge": "10%",
+      "nodeSoakDurationInMinutes": 0
+    },
+    "vmSize": "Standard_D2s_v5",
+    "vnetSubnetId": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3/providers/Microsoft.Network/virtualNetworks/vnet-hub-development-westus3/subnets/vnet-hub-development-westus3-aks-subnet",
+    "windowsProfile": null,
+    "workloadRuntime": null
+  }
+]

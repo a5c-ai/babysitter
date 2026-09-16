@@ -1,0 +1,428 @@
+[
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/personoids_sponsorship",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "personoids_sponsorship",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/PersonoidsClusterDnsResourceGroup",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "PersonoidsClusterDnsResourceGroup",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/intuitive-website-rg",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "intuitive-website-rg",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-website-rg",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "a5c-website-rg",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5ctf-rg",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "a5ctf-rg",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-promoted-idle",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "rg-promoted-idle",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-album",
+    "location": "eastus",
+    "managedBy": null,
+    "name": "rg-mantis-album",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/DefaultResourceGroup-WUS2",
+    "location": "westus2",
+    "managedBy": null,
+    "name": "DefaultResourceGroup-WUS2",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {},
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/NetworkWatcherRG",
+    "location": "westus2",
+    "managedBy": null,
+    "name": "NetworkWatcherRG",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MA_defaultazuremonitorworkspace-wus2_westus2_managed",
+    "location": "westus2",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/personoids_sponsorship/providers/microsoft.monitor/accounts/defaultazuremonitorworkspace-wus2",
+    "name": "MA_defaultazuremonitorworkspace-wus2_westus2_managed",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {},
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/DefaultResourceGroup-westus2",
+    "location": "westus2",
+    "managedBy": null,
+    "name": "DefaultResourceGroup-westus2",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MA_defaultazuremonitorworkspace-westus2_westus2_managed",
+    "location": "westus2",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/defaultresourcegroup-westus2/providers/microsoft.monitor/accounts/defaultazuremonitorworkspace-westus2",
+    "name": "MA_defaultazuremonitorworkspace-westus2_westus2_managed",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tmuskal-7935",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tmuskal-7935",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-litellm-proxy",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-litellm-proxy",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-0",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-0",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "298a7eb611bd572404cacf8859a0d527",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-3",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-3",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "05879ff3fb7a7017642ff8ad9b42d660",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-6",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-6",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "eba0c6cfc35075b8350f784d0876a287",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-1",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-1",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "fef57504ea1bdae0156d81ee85b625b0",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-2",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-2",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "9d275ce333ebb3eb0c07ebcb0764c61b",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-5",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-5",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "2fdaeb1fe7b1d49d78adb3eb276480e4",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-7",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-7",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "e4bc8bcec79fb162ec58125b506810da",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-4",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-4",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "db2b279b68198bcdfb3d32808a63b0fa",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tb-fleet-8",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-tb-fleet-8",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "lifecycle": "persistent-manual",
+      "terminal-bench-owner": "b6ed09e32e2ff8f3d34a107f61339bdd",
+      "workload": "terminal-bench"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-babysitter-archive",
+    "location": "swedencentral",
+    "managedBy": null,
+    "name": "rg-babysitter-archive",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "do-not-delete": "true",
+      "lifecycle": "permanent-archive",
+      "purpose": "only copy of Terminal-Bench trial telemetry",
+      "workload": "babysitter-archive"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-hub-development-westus3",
+    "location": "westus3",
+    "managedBy": null,
+    "name": "rg-hub-development-westus3",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "location": "westus3",
+    "managedBy": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourcegroups/rg-hub-development-westus3/providers/Microsoft.ContainerService/managedClusters/aks-hub-development-westus3-v2",
+    "name": "MC_rg-hub-development-westus3_aks-hub-development-westus3-v2_westus3",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "Environment": "development",
+      "ManagedBy": "terraform",
+      "Owner": "hub-development-team",
+      "Project": "hub",
+      "aks-managed-cluster-name": "aks-hub-development-westus3-v2",
+      "aks-managed-cluster-rg": "rg-hub-development-westus3"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/geekonomy-prod",
+    "location": "northeurope",
+    "managedBy": null,
+    "name": "geekonomy-prod",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-tmuskal-9340",
+    "location": "eastus2",
+    "managedBy": null,
+    "name": "rg-tmuskal-9340",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-dev-rg",
+    "location": "eastus2",
+    "managedBy": null,
+    "name": "a5c-dev-rg",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-mantis-odoo-validation-eastus2",
+    "location": "eastus2",
+    "managedBy": null,
+    "name": "rg-mantis-odoo-validation-eastus2",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "auto-delete-after": "2026-07-16",
+      "managed-by": "codex",
+      "purpose": "defensive-research",
+      "workload": "odoo-validation"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-ubuntu-ssh-20260806",
+    "location": "eastus2",
+    "managedBy": null,
+    "name": "rg-ubuntu-ssh-20260806",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/a5c-mantis-workshop",
+    "location": "eastus2",
+    "managedBy": null,
+    "name": "a5c-mantis-workshop",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": null,
+    "type": "Microsoft.Resources/resourceGroups"
+  },
+  {
+    "id": "/subscriptions/794e33cd-48ba-4654-8cd9-b6cf2715e097/resourceGroups/rg-babysitter-portal",
+    "location": "eastus2",
+    "managedBy": null,
+    "name": "rg-babysitter-portal",
+    "properties": {
+      "provisioningState": "Succeeded"
+    },
+    "tags": {
+      "data-classification": "internal",
+      "managedBy": "scripts/deploy-portal.sh",
+      "purpose": "benchmark results portal, GitHub sign-in required",
+      "workload": "babysitter-portal"
+    },
+    "type": "Microsoft.Resources/resourceGroups"
+  }
+]
