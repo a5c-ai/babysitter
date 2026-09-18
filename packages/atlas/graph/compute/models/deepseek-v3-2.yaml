@@ -1,0 +1,69 @@
+nodeKind: ModelVersion
+id: model:deepseek-v3-2@current
+attributes:
+  displayName: "DeepSeek V3.2"
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:deepseek
+  versionRange: '>=3.2.0 <4.0.0'
+  kind: reasoning
+  contextWindowTokens: 163840
+  modalities:
+    - text
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2025-12-01'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2025-12-01'
+  modelCardUrl: https://huggingface.co/deepseek-ai/DeepSeek-V3.2
+  supportsFineTuning: false
+  providerModelIds:
+    deepseekApi: deepseek-v3.2
+    deepseekVersion: DeepSeek-V3.2
+  regions:
+    - global
+edges:
+  belongs_to_family:
+    - target: model-family:deepseek
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:deepseek
+  supersedes:
+    - target: model:deepseek-v3@current
+  served_by:
+    - provider:deepseek
+    - provider:bedrock
+  speaks:
+    - model-transport:openai-compat
+    - model-transport:bedrock-invoke
+  supports:
+    - target: capability:streaming
+      versionRange: '>=3.2.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v3-2-release
+    - target: capability:supports-tool-use
+      versionRange: '>=3.2.0 <4.0.0'
+      level: full
+      notes: "DeepSeek describes V3.2 as supporting thinking in tool-use."
+      evidenceSourceIds:
+        - evidence:deepseek-v3-2-release
+    - target: capability:supports-thinking
+      versionRange: '>=3.2.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v3-2-release
+    - target: capability:extended-thinking
+      versionRange: '>=3.2.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v3-2-release
+    - target: capability:can-multi-turn
+      versionRange: '>=3.2.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:deepseek-v3-2-bedrock
