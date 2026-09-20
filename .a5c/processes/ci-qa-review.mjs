@@ -1,4 +1,5 @@
 import { defineTask } from '@a5c-ai/babysitter-sdk';
+import { correlateExactHeadQa, normalizeLiveQaResult } from './ci-qa-review-contract.mjs';
 
 /**
  * @process ci/qa-review
@@ -11,14 +12,19 @@ export async function process(inputs, ctx) {
   const pr = await ctx.task(readPrTask, { prNumber: inputs.prNumber });
   const guide = await ctx.task(readQaGuideTask, {});
   const matrix = await ctx.task(selectMatrixTask, { pr, guide, instructions: inputs.instructions });
-  const dispatch = await ctx.task(dispatchLiveStackTask, { branch: inputs.branch, matrix });
+  const dispatchEvidence = await ctx.task(dispatchLiveStackTask, { prNumber: inputs.prNumber, branch: inputs.branch, matrix });
+  const dispatch = correlateExactHeadQa(dispatchEvidence);
 
   if (!dispatch.runId) {
     await ctx.task(reportBlockedTask, { prNumber: inputs.prNumber, reason: dispatch.reason });
     return { dispatched: false, passed: false, reportPosted: true };
   }
 
-  const results = await ctx.task(waitForResultsTask, { runId: dispatch.runId });
+  const rawResults = await ctx.task(waitForResultsTask, {
+    runId: dispatch.runId,
+    expectedHeadSha: dispatchEvidence.expectedHeadSha,
+  });
+  const results = normalizeLiveQaResult(rawResults);
   await ctx.task(postResultsTask, { prNumber: inputs.prNumber, runId: dispatch.runId, results, matrix });
 
   return { dispatched: true, passed: results.allPassed, reportPosted: true };
@@ -71,11 +77,13 @@ ${args.instructions ? `Custom instructions: ${args.instructions}` : ''}
 
 Choose a focused set of test combinations — not the full cross-product, but enough to cover the affected paths.
 The JSON format is: [{"agent":"...","model":"...","mode":"...","install":"...","live":true,"process_mode":"..."}]
-- agent: codex, claude, pi, gemini, copilot, hermes
-- model: foundry-gpt55, google-gemini31, anthropic-claude-sonnet
-- mode: interactive, non-interactive, bridged-interactive, bridged-hooks
+- agent: codex, claude, pi, gemini, copilot, hermes, omp
+- model: foundry-gpt55, google-gemini31, google-gemini31pro, anthropic-sonnet46
+- mode: ni, interactive, bridged-interactive, bridged-hooks
 - install: vanilla, bp
 - process_mode: predefined, create
+
+OMP requires Bun at runtime and supports only ni mode in this non-TTY CI workflow. Do not select interactive, bridged-interactive, or bridged-hooks for OMP because the runner converts non-TTY interactive execution to bridge-hooks and OMP's cataloged bridge capability is false.
 
 Return { matrix: <JSON array>, reasoning: string }.`,
     },
@@ -88,10 +96,13 @@ const dispatchLiveStackTask = defineTask('dispatch-live-stack', async (args, ctx
     title: 'Dispatch live-stack workflow',
     labels: ['qa', 'dispatch'],
     io: {
-      instruction: `Dispatch the live-stack workflow with the selected matrix.
-Run: gh workflow run live-stack.yml --ref ${args.branch || 'staging'} -f matrix='${JSON.stringify(args.matrix)}'
-Then get the run ID: gh run list --workflow=live-stack.yml --limit=1 --json databaseId --jq '.[0].databaseId'
-Return { runId: number | null, reason: string | null }.`,
+      instruction: `Dispatch the trusted staging live-stack workflow with its existing ref input set to the upstream pull-request ref refs/pull/${args.prNumber}/head.
+Resolve the pushed fork PR head SHA with: gh pr view ${args.prNumber} --repo a5c-ai/babysitter --json headRefOid --jq '.headRefOid'. Require a full 40-hex SHA.
+Resolve upstream refs/pull/${args.prNumber}/head immediately before dispatch with: gh api repos/a5c-ai/babysitter/git/ref/pull/${args.prNumber}/head --jq '.object.sha'. Require exactly one full 40-hex SHA and require it to equal the pushed fork PR head SHA. Do not dispatch on a missing, ambiguous, malformed, or mismatched resolution.
+Resolve and retain the current trusted staging SHA with: gh api repos/a5c-ai/babysitter/git/ref/heads/staging --jq '.object.sha'.
+Immediately before dispatch, snapshot run IDs with: gh run list --repo a5c-ai/babysitter --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId. Then run: gh workflow run live-stack.yml --repo a5c-ai/babysitter --ref staging -f ref="refs/pull/${args.prNumber}/head" -f matrix='${JSON.stringify(args.matrix)}'
+Do not pass repository, request_id, or any other input absent from the trusted staging workflow. Poll briefly for registration, then return { prNumber: ${args.prNumber}, upstreamPrRef: "refs/pull/${args.prNumber}/head", resolvedUpstreamPrHeadSha, trustedStagingSha, expectedHeadSha, beforeRunIds: number[], candidates: [{ databaseId, event, headBranch, headSha }] }, where expectedHeadSha is the pushed fork PR head SHA. candidates must be the unfiltered post-dispatch result of: gh run list --repo a5c-ai/babysitter --workflow=live-stack.yml --event=workflow_dispatch --branch=staging --limit=100 --json databaseId,event,headBranch,headSha.
+Do not select a run ID yourself. The process verifies the required upstream PR ref and its exact fork-head resolution, then compares the before/after snapshots and accepts exactly one new workflow_dispatch run whose branch is staging and whose workflow-definition head SHA equals the captured trusted staging SHA. Any ref/SHA mismatch, zero or multiple runs, a moving staging ref, or invalid evidence fails closed.`,
     },
   };
 });
@@ -102,11 +113,11 @@ const waitForResultsTask = defineTask('wait-for-results', async (args, ctx) => {
     title: 'Wait for live-stack results',
     labels: ['qa', 'poll'],
     io: {
-      instruction: `Poll the live-stack run until completion.
-Run: gh run view ${args.runId} --json status,conclusion --jq '{status, conclusion}'
-Check every 60 seconds. Timeout after 20 minutes.
-Once complete, get job results: gh run view ${args.runId} --json jobs --jq '.jobs[] | {name: .name, conclusion: .conclusion}'
-Return { allPassed: boolean, jobs: [{name, conclusion}], conclusion: string }.`,
+      instruction: `Poll live-stack run ${args.runId} until completion.
+Run: gh run view ${args.runId} --repo a5c-ai/babysitter --json status,conclusion. Check every 60 seconds and timeout after 120 minutes so the workflow's 90-minute scenario budget can finish.
+After completion, fetch every job with databaseId, name, conclusion, and steps. Return jobs as [{ name, conclusion }]; an empty list is failure evidence, never green.
+For every job containing a step named "Checkout repository", require that step to conclude success and download that job's raw log. Accept a head SHA only when the log contains exactly one actions/checkout command marker ending in git log -1 --format=%H and its immediately following log line ends in one full 40-hex commit. This is the checkout action's observed HEAD even when gh labels raw action lines UNKNOWN STEP. Do not infer it from the branch, dispatch input, expected SHA, another command, or a shortened "HEAD is now at" line. Missing or ambiguous checkout evidence yields headSha: null.
+Return { jobs, checkouts: [{ jobName, conclusion, headSha }], conclusion, expectedHeadSha: "${args.expectedHeadSha}" }. The process independently requires a successful workflow, non-empty successful jobs including at least one Live Stack scenario job, successful checkout steps, and every observed checkout SHA equal to the immutable expected head.`,
     },
   };
 });

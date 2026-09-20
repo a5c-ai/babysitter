@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_BP_EFFECT_001",
+  "taskId": "approve-deployment",
+  "invocationKey": "test/pending-breakpoint:S000002:approve-deployment",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "Approval: Approve deployment to staging",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_BP_EFFECT_001/input.json",
+    "outputJsonPath": "tasks/01KTEST_BP_EFFECT_001/result.json"
+  },
+  "inputs": {
+    "question": "Approve deployment to staging?",
+    "title": "Approval: Approve deployment to staging",
+    "context": {
+      "files": [
+        {
+          "path": "reports/deploy-preview.md",
+          "format": "markdown",
+          "language": "markdown"
+        }
+      ],
+      "metadata": {
+        "requestedBy": "system",
+        "priority": "high"
+      }
+    }
+  }
+}

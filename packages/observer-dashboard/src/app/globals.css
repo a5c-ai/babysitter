@@ -1,256 +1,350 @@
 @import "tailwindcss";
-@import "@a5c-ai/compendium/css";
 
 /* ============================================
-   BABYSITTER OBSERVER — Compendium Edition
-   Preserve behavior, migrate the design system
-   from neon/glass to vellum/brass/void.
+   BABYSITTER OBSERVER — Design System
+   a5c.ai Brand Identity
+   Neon cyberpunk with professional restraint
+   Dark-mode-first premium developer tool
    ============================================ */
 
+/* Dark theme (default) */
 :root {
-  --font-display-ui: var(--font-display);
-  --font-body-ui: var(--font-body);
-  --font-mono-ui: var(--font-mono);
+  /* Backgrounds - deep dark, not pure black */
+  --background: #0a0a0b;
+  --background-secondary: #141417;
+  --background-tertiary: #1c1c21;
+  --foreground: #e4e4e7;
+  --foreground-secondary: #a1a1aa;
+  --foreground-muted: #71717a;
 
-  --background: var(--ground-void);
-  --background-secondary: color-mix(in srgb, var(--ground-void) 82%, var(--mahogany));
-  --background-tertiary: color-mix(in srgb, var(--ground-void) 72%, var(--leather));
-  --foreground: var(--glyph-bone);
-  --foreground-secondary: var(--glyph-fade);
-  --foreground-muted: color-mix(in srgb, var(--glyph-fade) 72%, black);
+  /* Card - subtle glass effect */
+  --card: rgba(15, 15, 20, 0.8);
+  --card-foreground: #e4e4e7;
+  --card-border: rgba(255, 0, 224, 0.08);
+  --card-hover: rgba(255, 0, 224, 0.04);
 
-  --card: rgba(27, 22, 17, 0.88);
-  --card-foreground: var(--glyph-bone);
-  --card-border: rgba(242, 200, 143, 0.22);
-  --card-hover: rgba(242, 200, 143, 0.08);
+  /* Primary - Magenta */
+  --primary: #FF00E0;
+  --primary-foreground: #ffffff;
+  --primary-hover: #ff33e6;
+  --primary-muted: rgba(255, 0, 224, 0.15);
 
-  --primary: var(--accent-cinnabar);
-  --primary-foreground: var(--glyph-bone);
-  --primary-hover: #d25748;
-  --primary-muted: rgba(192, 58, 43, 0.18);
+  /* ACTION — indigo-violet primary-CTA hue. UX-R3 §14.2 option (a), owner gate
+     2026-07-06 ruling. This is the ONE "pressable" hue (the answer submit /
+     any future single primary CTA); brand magenta is now brand-ONLY.
+     FILL-ONLY CONSTRAINT: as text/outline on the dark card (#0e0e12) --action
+     is only 4.20:1 → it FAILS AA as ink. It must therefore be used *exclusively*
+     as a filled button surface with a white/near-white label (never as border
+     or text on dark). Label contrast --action-foreground on --action = 5.14:1
+     (dark) / 7.04:1 (light), both ≥4.5:1. ΔE2000 ≥25 from every --status-* hue
+     and ≈24 from brand --primary → never a status/brand collision.
+     -muted (tint) and -border are non-text; -border is used only on option
+     hover, never as a resolved text/fill color equal to --action. */
+  --action: #6355F0;
+  --action-hover: #5544E8;
+  --action-foreground: #ffffff;
+  --action-muted: rgba(99, 85, 240, 0.16);
+  --action-border: rgba(99, 85, 240, 0.35);
 
-  --secondary: color-mix(in srgb, var(--brass-light) 16%, var(--ground-void));
-  --secondary-foreground: var(--glyph-bone);
-  --secondary-muted: rgba(242, 200, 143, 0.12);
+  /* Secondary - Neon Cyan */
+  --secondary: #00F0FF;
+  --secondary-foreground: #0a0a0b;
+  --secondary-muted: rgba(0, 240, 255, 0.12);
 
-  --muted: rgba(240, 230, 209, 0.06);
-  --muted-foreground: var(--glyph-fade);
+  /* Muted */
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
 
-  --accent: var(--brass-light);
-  --accent-foreground: var(--mahogany);
+  /* Accent - Magenta */
+  --accent: #FF00E0;
+  --accent-foreground: #ffffff;
 
-  --destructive: var(--gem-ruby);
-  --destructive-foreground: var(--glyph-bone);
+  /* Destructive */
+  --destructive: #FF3366;
+  --destructive-foreground: #ffffff;
 
-  --success: var(--gem-emerald);
-  --success-muted: rgba(62, 166, 118, 0.14);
-  --warning: var(--gem-amber);
-  --warning-muted: rgba(224, 166, 58, 0.14);
-  --error: var(--gem-ruby);
-  --error-muted: rgba(216, 31, 61, 0.14);
-  --info: var(--gem-cyan);
-  --info-muted: rgba(22, 215, 230, 0.14);
-  --pending: color-mix(in srgb, var(--glyph-fade) 78%, white);
-  --pending-muted: rgba(168, 153, 128, 0.14);
+  /* Semantic - Status colors (neon palette) */
+  --success: #00FF88;
+  --success-muted: rgba(0, 255, 136, 0.15);
+  --warning: #FFD700;
+  --warning-muted: rgba(255, 215, 0, 0.15);
+  /* Text-on-background alarm label (design-QA: neon gold is fine on dark,
+     but needs a darker ink in light mode to clear WCAG 4.5:1). */
+  --warning-label: #FFD700;
+  --error: #FF3366;
+  --error-muted: rgba(255, 51, 102, 0.18);
+  --info: #00F0FF;
+  --info-muted: rgba(0, 240, 255, 0.12);
+  --pending: #a1a1aa;
+  --pending-muted: rgba(161, 161, 170, 0.15);
 
-  --border: rgba(242, 200, 143, 0.18);
-  --border-hover: rgba(242, 200, 143, 0.34);
-  --input: rgba(242, 200, 143, 0.2);
-  --ring: rgba(201, 138, 62, 0.55);
-  --background-muted: color-mix(in srgb, var(--ground-void) 74%, var(--mahogany));
+  /* Semantic STATUS tokens — UX-R2 §13.3 "one hue, one meaning" (owner gate
+     2026-07-05 run 01KWRR8XAHFCDEGCRBRFHFF44W). Label tokens are verified
+     >=4.5:1 on #0a0a0b (and >=4.4:1 on the #0e0e12 card); -muted tints are
+     non-text backgrounds. Brand magenta is NOT a status; red is terminal-only. */
+  --status-attention: #FFD700;  --status-attention-muted: rgba(255, 215, 0, 0.15);
+  --status-alive:     #00F0FF;  --status-alive-muted:     rgba(0, 240, 255, 0.12);
+  --status-stalled:   #C9A86A;  --status-stalled-muted:   rgba(201, 168, 106, 0.14);
+  --status-failed:    #FF3366;  --status-failed-muted:    rgba(255, 51, 102, 0.18);
+  --status-ok:        #00FF88;  --status-ok-muted:        rgba(0, 255, 136, 0.15);
+  --status-aged:      #9A9AA3;  --status-aged-muted:      rgba(154, 154, 163, 0.12);
 
-  --glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.26), 0 10px 28px rgba(192, 58, 43, 0.12);
-  --glow-success: 0 0 0 1px rgba(62, 166, 118, 0.22), 0 10px 24px rgba(62, 166, 118, 0.1);
-  --glow-error: 0 0 0 1px rgba(216, 31, 61, 0.24), 0 10px 24px rgba(216, 31, 61, 0.1);
-  --glow-cyan: 0 0 0 1px rgba(22, 215, 230, 0.2), 0 10px 24px rgba(22, 215, 230, 0.1);
-  --glow-warning: 0 0 0 1px rgba(224, 166, 58, 0.24), 0 10px 24px rgba(224, 166, 58, 0.1);
+  /* Border - subtle magenta tint */
+  --border: rgba(255, 0, 224, 0.08);
+  --border-hover: rgba(255, 0, 224, 0.15);
+  --input: rgba(255, 0, 224, 0.08);
+  --ring: #FF00E0;
 
-  --drop-glow-primary: 0 0 3px rgba(192, 58, 43, 0.34);
-  --drop-glow-primary-sm: 0 0 2px rgba(192, 58, 43, 0.24);
-  --drop-glow-success: 0 0 3px rgba(62, 166, 118, 0.36);
-  --drop-glow-success-sm: 0 0 2px rgba(62, 166, 118, 0.24);
-  --drop-glow-error: 0 0 3px rgba(216, 31, 61, 0.34);
-  --drop-glow-error-sm: 0 0 2px rgba(216, 31, 61, 0.24);
-  --drop-glow-warning: 0 0 3px rgba(224, 166, 58, 0.36);
-  --drop-glow-warning-sm: 0 0 2px rgba(224, 166, 58, 0.24);
-  --drop-glow-cyan: 0 0 3px rgba(22, 215, 230, 0.34);
-  --drop-glow-cyan-sm: 0 0 2px rgba(22, 215, 230, 0.22);
-  --drop-glow-pending: 0 0 2px rgba(168, 153, 128, 0.22);
+  /* Subtle backgrounds */
+  --background-muted: #1a1a1f;
 
-  --neon-inset-primary: inset 0 0 0 1px rgba(192, 58, 43, 0.18);
-  --neon-inset-success: inset 0 0 0 1px rgba(62, 166, 118, 0.16);
-  --neon-inset-error: inset 0 0 0 1px rgba(216, 31, 61, 0.16);
-  --neon-inset-warning: inset 0 0 0 1px rgba(224, 166, 58, 0.18);
-  --neon-inset-cyan: inset 0 0 0 1px rgba(22, 215, 230, 0.16);
+  /* Neon glow effects */
+  --glow-primary: 0 0 20px rgba(255, 0, 224, 0.3), 0 0 40px rgba(255, 0, 224, 0.1);
+  --glow-success: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+  --glow-error: 0 0 20px rgba(255, 51, 102, 0.3), 0 0 40px rgba(255, 51, 102, 0.1);
+  --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(0, 240, 255, 0.1);
+  --glow-warning: 0 0 20px rgba(255, 215, 0, 0.3), 0 0 40px rgba(255, 215, 0, 0.1);
 
-  --neon-glow-success-sm: 0 8px 20px rgba(62, 166, 118, 0.12);
-  --neon-glow-error-sm: 0 8px 20px rgba(216, 31, 61, 0.12);
-  --neon-glow-warning-sm: 0 8px 20px rgba(224, 166, 58, 0.12);
-  --neon-glow-cyan-sm: 0 8px 20px rgba(22, 215, 230, 0.12);
-  --neon-glow-primary-sm: 0 8px 20px rgba(192, 58, 43, 0.12);
-  --neon-glow-primary-xs: 0 4px 12px rgba(192, 58, 43, 0.12);
-  --neon-glow-warning-xs: 0 4px 12px rgba(224, 166, 58, 0.12);
-  --neon-glow-error-xs: 0 4px 12px rgba(216, 31, 61, 0.12);
-  --neon-glow-primary-ring: 0 0 0 1px rgba(192, 58, 43, 0.24), 0 0 0 4px rgba(192, 58, 43, 0.12);
-  --neon-glow-primary-focus: 0 0 0 1px rgba(192, 58, 43, 0.22), 0 0 0 3px rgba(192, 58, 43, 0.1);
-  --neon-glow-warning-badge: 0 6px 18px rgba(224, 166, 58, 0.14);
+  /* Neon drop-shadow tokens */
+  --drop-glow-primary: 0 0 4px rgba(255, 0, 224, 0.4);
+  --drop-glow-primary-sm: 0 0 3px rgba(255, 0, 224, 0.3);
+  --drop-glow-success: 0 0 4px rgba(0, 255, 136, 0.5);
+  --drop-glow-success-sm: 0 0 3px rgba(0, 255, 136, 0.3);
+  --drop-glow-error: 0 0 4px rgba(255, 51, 102, 0.5);
+  --drop-glow-error-sm: 0 0 3px rgba(255, 51, 102, 0.3);
+  --drop-glow-warning: 0 0 4px rgba(255, 215, 0, 0.5);
+  --drop-glow-warning-sm: 0 0 3px rgba(255, 215, 0, 0.3);
+  --drop-glow-cyan: 0 0 4px rgba(0, 240, 255, 0.5);
+  --drop-glow-cyan-sm: 0 0 3px rgba(0, 240, 255, 0.3);
+  --drop-glow-pending: 0 0 4px rgba(128, 128, 128, 0.3);
 
-  --glass-bg: rgba(24, 18, 15, 0.88);
-  --glass-bg-heavy: rgba(24, 18, 15, 0.94);
-  --glass-border: rgba(242, 200, 143, 0.2);
-  --glass-border-subtle: rgba(242, 200, 143, 0.14);
-  --glass-border-faint: rgba(242, 200, 143, 0.08);
-  --glass-card-bg: rgba(36, 28, 23, 0.72);
-  --glass-shadow: 0 18px 42px rgba(8, 5, 3, 0.42);
-  --glass-shadow-toast: 0 14px 32px rgba(8, 5, 3, 0.32);
+  /* Neon box-shadow tokens for inset/hover glows */
+  --neon-inset-primary: inset 0 0 12px rgba(255, 0, 224, 0.06);
+  --neon-inset-success: inset 0 0 12px rgba(0, 255, 136, 0.06);
+  --neon-inset-error: inset 0 0 12px rgba(255, 51, 102, 0.06);
+  --neon-inset-warning: inset 0 0 12px rgba(255, 215, 0, 0.06);
+  --neon-inset-cyan: inset 0 0 12px rgba(0, 240, 255, 0.06);
 
-  --kbd-shadow: 0 1px 0 rgba(242, 200, 143, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.34);
-  --kbd-border: rgba(242, 200, 143, 0.24);
+  /* Neon accent box-shadow tokens (status badge / button glows) */
+  --neon-glow-success-sm: 0 0 8px rgba(0, 255, 136, 0.15);
+  --neon-glow-error-sm: 0 0 8px rgba(255, 51, 102, 0.15);
+  --neon-glow-warning-sm: 0 0 8px rgba(255, 215, 0, 0.15);
+  --neon-glow-cyan-sm: 0 0 8px rgba(0, 240, 255, 0.15);
+  --neon-glow-primary-sm: 0 0 8px rgba(255, 0, 224, 0.15);
+  --neon-glow-primary-xs: 0 0 10px rgba(255, 0, 224, 0.1);
+  --neon-glow-warning-xs: 0 0 8px rgba(255, 215, 0, 0.1);
+  --neon-glow-error-xs: 0 0 8px rgba(255, 51, 102, 0.1);
+  --neon-glow-primary-ring: 0 0 12px rgba(255, 0, 224, 0.15);
+  --neon-glow-primary-focus: 0 0 12px rgba(255, 0, 224, 0.1);
+  --neon-glow-warning-badge: 0 0 12px rgba(255, 215, 0, 0.15);
 
-  --step-inset-warning: inset 3px 0 0 rgba(224, 166, 58, 0.45);
-  --step-inset-cyan: inset 3px 0 0 rgba(22, 215, 230, 0.34);
-  --step-selected-shadow: inset 3px 0 0 rgba(192, 58, 43, 0.6), 0 12px 24px rgba(0, 0, 0, 0.26);
-  --step-running-dot: 0 0 0 2px rgba(22, 215, 230, 0.18), 0 0 10px rgba(22, 215, 230, 0.18);
+  /* Glass background tokens */
+  --glass-bg: rgba(10, 10, 11, 0.85);
+  --glass-bg-heavy: rgba(10, 10, 11, 0.9);
+  --glass-border: rgba(255, 0, 224, 0.12);
+  --glass-border-subtle: rgba(255, 0, 224, 0.1);
+  --glass-border-faint: rgba(255, 0, 224, 0.06);
+  --glass-card-bg: rgba(20, 20, 23, 0.6);
+  --glass-shadow: 0 0 30px rgba(255, 0, 224, 0.08), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --glass-shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.3);
 
-  --progress-glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.24), 0 4px 14px rgba(192, 58, 43, 0.16);
-  --progress-glow-success: 0 0 0 1px rgba(62, 166, 118, 0.24), 0 4px 14px rgba(62, 166, 118, 0.16);
-  --progress-glow-error: 0 0 0 1px rgba(216, 31, 61, 0.24), 0 4px 14px rgba(216, 31, 61, 0.16);
-  --progress-glow-warning: 0 0 0 1px rgba(224, 166, 58, 0.24), 0 4px 14px rgba(224, 166, 58, 0.16);
+  /* Kbd shadow tokens */
+  --kbd-shadow: 0 1px 0 rgba(255, 0, 224, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  --kbd-border: rgba(255, 0, 224, 0.15);
 
-  --toast-glow-success: 0 12px 24px rgba(62, 166, 118, 0.12);
-  --toast-glow-error: 0 12px 24px rgba(216, 31, 61, 0.12);
-  --toast-glow-warning: 0 12px 24px rgba(224, 166, 58, 0.12);
-  --toast-glow-cyan: 0 12px 24px rgba(22, 215, 230, 0.12);
+  /* Step card composite shadows */
+  --step-inset-warning: inset 3px 0 8px rgba(255, 215, 0, 0.12);
+  --step-inset-cyan: inset 3px 0 8px rgba(0, 240, 255, 0.10);
+  --step-selected-shadow: inset 3px 0 12px rgba(255, 0, 224, 0.15), 0 0 12px rgba(255, 0, 224, 0.08);
+  --step-running-dot: 0 0 6px rgba(0, 240, 255, 0.6), 0 0 12px rgba(0, 240, 255, 0.3);
 
-  --event-filter-active: 0 0 0 1px rgba(192, 58, 43, 0.22), 0 8px 20px rgba(192, 58, 43, 0.08);
-  --breakpoint-glow: 0 0 0 1px rgba(224, 166, 58, 0.3), 0 18px 30px rgba(224, 166, 58, 0.14);
+  /* Progress bar glow tokens */
+  --progress-glow-primary: 0 0 10px rgba(255, 0, 224, 0.4), inset 0 1px 2px rgba(255, 0, 224, 0.3);
+  --progress-glow-success: 0 0 10px rgba(0, 255, 136, 0.4), inset 0 1px 2px rgba(0, 255, 136, 0.3);
+  --progress-glow-error: 0 0 10px rgba(255, 51, 102, 0.4), inset 0 1px 2px rgba(255, 51, 102, 0.3);
+  --progress-glow-warning: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 1px 2px rgba(255, 215, 0, 0.3);
 
-  --shadow-sm: 0 6px 14px rgba(8, 5, 3, 0.18);
-  --shadow-md: 0 14px 28px rgba(8, 5, 3, 0.22);
-  --shadow-lg: 0 22px 40px rgba(8, 5, 3, 0.28);
-  --transition-fast: 160ms ease;
-  --transition-normal: 220ms ease;
-  --radius: 12px;
+  /* Toast border status shadows */
+  --toast-glow-success: 0 0 12px rgba(0, 255, 136, 0.1);
+  --toast-glow-error: 0 0 12px rgba(255, 51, 102, 0.1);
+  --toast-glow-warning: 0 0 12px rgba(255, 215, 0, 0.1);
+  --toast-glow-cyan: 0 0 12px rgba(0, 240, 255, 0.1);
+
+  /* Event stream filter shadow */
+  --event-filter-active: 0 0 8px rgba(255, 0, 224, 0.1);
+
+  /* Breakpoint panel glow */
+  --breakpoint-glow: 0 0 20px rgba(255, 215, 0, 0.15), 0 0 40px rgba(255, 215, 0, 0.05);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease-out;
+
+  /* Radius */
+  --radius: 8px;
 }
 
+/* Light theme */
 [data-theme="light"],
 .light {
-  --background: var(--tkc-paper);
-  --background-secondary: color-mix(in srgb, var(--tkc-paper-2) 82%, white);
-  --background-tertiary: color-mix(in srgb, var(--tkc-paper-3) 76%, white);
-  --foreground: var(--tkc-ink);
-  --foreground-secondary: var(--tkc-ink-soft);
-  --foreground-muted: var(--tkc-ink-quiet);
+  --background: #ffffff;
+  --background-secondary: #f4f4f5;
+  --background-tertiary: #e4e4e7;
+  --foreground: #18181b;
+  --foreground-secondary: #52525b;
+  --foreground-muted: #71717a;
 
-  --card: rgba(255, 251, 244, 0.94);
-  --card-foreground: var(--tkc-ink);
-  --card-border: var(--tkc-rule-m);
-  --card-hover: rgba(91, 56, 23, 0.05);
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --card-border: rgba(255, 0, 224, 0.15);
+  --card-hover: rgba(255, 0, 224, 0.06);
 
-  --primary: var(--tkc-cinnabar);
-  --primary-foreground: var(--tkc-danger-fg);
-  --primary-hover: var(--tkc-danger-hover);
-  --primary-muted: color-mix(in srgb, var(--tkc-cinnabar) 16%, white);
+  --primary: #D600C0;
+  --primary-foreground: #ffffff;
+  --primary-hover: #FF00E0;
+  --primary-muted: rgba(214, 0, 192, 0.1);
 
-  --secondary: color-mix(in srgb, var(--tkc-paper-2) 88%, white);
-  --secondary-foreground: var(--tkc-ink);
-  --secondary-muted: color-mix(in srgb, var(--tkc-brass) 12%, white);
+  /* ACTION (light) — UX-R3 §14.2 option (a). Same fill-only constraint as dark;
+     label --action-foreground on --action = 7.04:1. */
+  --action: #4B3FD6;
+  --action-hover: #3B30B8;
+  --action-foreground: #ffffff;
+  --action-muted: rgba(75, 63, 214, 0.10);
+  --action-border: rgba(75, 63, 214, 0.30);
 
-  --muted: rgba(91, 56, 23, 0.06);
-  --muted-foreground: var(--tkc-ink-quiet);
+  --secondary: #00C8D6;
+  --secondary-foreground: #ffffff;
+  --secondary-muted: rgba(0, 200, 214, 0.1);
 
-  --accent: var(--tkc-brass);
-  --accent-foreground: var(--tkc-ink);
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
 
-  --destructive: var(--tkc-ruby);
-  --destructive-foreground: var(--tkc-danger-fg);
+  --accent: #D600C0;
+  --accent-foreground: #ffffff;
 
-  --success: var(--tkc-emerald);
-  --success-muted: color-mix(in srgb, var(--tkc-emerald) 16%, white);
-  --warning: var(--tkc-amber);
-  --warning-muted: color-mix(in srgb, var(--tkc-amber) 16%, white);
-  --error: var(--tkc-ruby);
-  --error-muted: color-mix(in srgb, var(--tkc-ruby) 14%, white);
-  --info: var(--tkc-cyan);
-  --info-muted: color-mix(in srgb, var(--tkc-cyan) 16%, white);
-  --pending: color-mix(in srgb, var(--tkc-ink-quiet) 72%, white);
-  --pending-muted: rgba(138, 123, 100, 0.12);
+  --destructive: #E6295A;
+  --destructive-foreground: #ffffff;
 
-  --border: var(--tkc-rule-m);
-  --border-hover: color-mix(in srgb, var(--tkc-rule) 68%, white);
-  --input: var(--tkc-rule-m);
-  --ring: rgba(192, 58, 43, 0.34);
-  --background-muted: color-mix(in srgb, var(--tkc-paper-2) 85%, white);
+  --success: #00CC6E;
+  --success-muted: rgba(0, 204, 110, 0.12);
+  --warning: #D4AF00;
+  --warning-muted: rgba(212, 175, 0, 0.12);
+  /* Darkened alarm-label gold: #8a6d00 on near-white ≈ 4.9:1 (≥ 4.5:1). */
+  --warning-label: #8a6d00;
+  --error: #E6295A;
+  --error-muted: rgba(230, 41, 90, 0.12);
+  --info: #00C8D6;
+  --info-muted: rgba(0, 200, 214, 0.1);
+  --pending: #a1a1aa;
+  --pending-muted: rgba(161, 161, 170, 0.1);
 
-  --glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 10px 20px rgba(192, 58, 43, 0.08);
-  --glow-success: 0 0 0 1px rgba(62, 166, 118, 0.14), 0 10px 20px rgba(62, 166, 118, 0.08);
-  --glow-error: 0 0 0 1px rgba(142, 27, 27, 0.14), 0 10px 20px rgba(142, 27, 27, 0.08);
-  --glow-cyan: 0 0 0 1px rgba(46, 124, 138, 0.14), 0 10px 20px rgba(46, 124, 138, 0.08);
-  --glow-warning: 0 0 0 1px rgba(179, 126, 62, 0.14), 0 10px 20px rgba(179, 126, 62, 0.08);
+  /* Semantic STATUS tokens (light) — UX-R2 §13.3: labels verified >=4.5:1 on
+     #ffffff AND on every muted tint they sit on (live-verify 2026-07-05:
+     attention must clear the composited error-muted banner rgb(252,229,235),
+     where the old #8a6d00 measured only 4.12:1). #7e6400 = 4.73:1 there,
+     5.66:1 on white, same 47.6deg gold hue. */
+  --status-attention: #7e6400;  --status-attention-muted: rgba(212, 175, 0, 0.12);
+  --status-alive:     #006E7A;  --status-alive-muted:     rgba(0, 200, 214, 0.10);
+  /* UX-R3 §14.4 (owner gate 2026-07-06): nudged from #7A6431 → #6B5B47 (cooler
+     grey-taupe). ΔE2000 vs light attention gold 8.5 → 17.6 (parity with dark);
+     AA on #ffffff = 6.54:1. Dark stays #C9A86A. */
+  --status-stalled:   #6B5B47;  --status-stalled-muted:   rgba(122, 100, 49, 0.10);
+  --status-failed:    #B01C47;  --status-failed-muted:    rgba(230, 41, 90, 0.12);
+  --status-ok:        #00784A;  --status-ok-muted:        rgba(0, 204, 110, 0.12);
+  --status-aged:      #63636C;  --status-aged-muted:      rgba(161, 161, 170, 0.10);
 
-  --drop-glow-primary: 0 0 2px rgba(192, 58, 43, 0.24);
-  --drop-glow-primary-sm: 0 0 1px rgba(192, 58, 43, 0.18);
-  --drop-glow-success: 0 0 2px rgba(62, 166, 118, 0.26);
-  --drop-glow-success-sm: 0 0 1px rgba(62, 166, 118, 0.18);
-  --drop-glow-error: 0 0 2px rgba(142, 27, 27, 0.24);
-  --drop-glow-error-sm: 0 0 1px rgba(142, 27, 27, 0.18);
-  --drop-glow-warning: 0 0 2px rgba(179, 126, 62, 0.26);
-  --drop-glow-warning-sm: 0 0 1px rgba(179, 126, 62, 0.18);
-  --drop-glow-cyan: 0 0 2px rgba(46, 124, 138, 0.24);
-  --drop-glow-cyan-sm: 0 0 1px rgba(46, 124, 138, 0.18);
-  --drop-glow-pending: 0 0 1px rgba(138, 123, 100, 0.14);
+  --border: rgba(255, 0, 224, 0.15);
+  --border-hover: rgba(255, 0, 224, 0.25);
+  --input: rgba(255, 0, 224, 0.12);
+  --ring: #D600C0;
 
-  --neon-inset-primary: inset 0 0 0 1px rgba(192, 58, 43, 0.1);
-  --neon-inset-success: inset 0 0 0 1px rgba(62, 166, 118, 0.1);
-  --neon-inset-error: inset 0 0 0 1px rgba(142, 27, 27, 0.1);
-  --neon-inset-warning: inset 0 0 0 1px rgba(179, 126, 62, 0.1);
-  --neon-inset-cyan: inset 0 0 0 1px rgba(46, 124, 138, 0.1);
+  --background-muted: #e8e8ec;
 
-  --neon-glow-success-sm: 0 8px 18px rgba(62, 166, 118, 0.08);
-  --neon-glow-error-sm: 0 8px 18px rgba(142, 27, 27, 0.08);
-  --neon-glow-warning-sm: 0 8px 18px rgba(179, 126, 62, 0.08);
-  --neon-glow-cyan-sm: 0 8px 18px rgba(46, 124, 138, 0.08);
-  --neon-glow-primary-sm: 0 8px 18px rgba(192, 58, 43, 0.08);
-  --neon-glow-primary-xs: 0 4px 10px rgba(192, 58, 43, 0.08);
-  --neon-glow-warning-xs: 0 4px 10px rgba(179, 126, 62, 0.08);
-  --neon-glow-error-xs: 0 4px 10px rgba(142, 27, 27, 0.08);
-  --neon-glow-primary-ring: 0 0 0 1px rgba(192, 58, 43, 0.16), 0 0 0 4px rgba(192, 58, 43, 0.08);
-  --neon-glow-primary-focus: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 0 0 3px rgba(192, 58, 43, 0.08);
-  --neon-glow-warning-badge: 0 6px 16px rgba(179, 126, 62, 0.1);
+  --glow-primary: 0 0 20px rgba(214, 0, 192, 0.2), 0 0 40px rgba(214, 0, 192, 0.06);
+  --glow-success: 0 0 20px rgba(0, 204, 110, 0.2), 0 0 40px rgba(0, 204, 110, 0.06);
+  --glow-error: 0 0 20px rgba(230, 41, 90, 0.2), 0 0 40px rgba(230, 41, 90, 0.06);
+  --glow-cyan: 0 0 20px rgba(0, 200, 214, 0.2), 0 0 40px rgba(0, 200, 214, 0.06);
+  --glow-warning: 0 0 20px rgba(212, 175, 0, 0.2), 0 0 40px rgba(212, 175, 0, 0.06);
 
-  --glass-bg: rgba(255, 251, 244, 0.92);
-  --glass-bg-heavy: rgba(245, 236, 221, 0.98);
-  --glass-border: var(--tkc-rule-m);
-  --glass-border-subtle: var(--tkc-rule-q);
-  --glass-border-faint: rgba(91, 56, 23, 0.08);
-  --glass-card-bg: rgba(255, 251, 244, 0.86);
-  --glass-shadow: 0 16px 32px rgba(39, 25, 12, 0.18);
-  --glass-shadow-toast: 0 12px 24px rgba(39, 25, 12, 0.12);
+  /* Neon drop-shadow tokens (light) */
+  --drop-glow-primary: 0 0 3px rgba(214, 0, 192, 0.25);
+  --drop-glow-primary-sm: 0 0 2px rgba(214, 0, 192, 0.2);
+  --drop-glow-success: 0 0 3px rgba(0, 204, 110, 0.3);
+  --drop-glow-success-sm: 0 0 2px rgba(0, 204, 110, 0.2);
+  --drop-glow-error: 0 0 3px rgba(230, 41, 90, 0.3);
+  --drop-glow-error-sm: 0 0 2px rgba(230, 41, 90, 0.2);
+  --drop-glow-warning: 0 0 3px rgba(212, 175, 0, 0.3);
+  --drop-glow-warning-sm: 0 0 2px rgba(212, 175, 0, 0.2);
+  --drop-glow-cyan: 0 0 3px rgba(0, 200, 214, 0.3);
+  --drop-glow-cyan-sm: 0 0 2px rgba(0, 200, 214, 0.2);
+  --drop-glow-pending: 0 0 3px rgba(128, 128, 128, 0.2);
 
-  --kbd-shadow: 0 1px 0 rgba(91, 56, 23, 0.08), inset 0 -1px 0 rgba(91, 56, 23, 0.12);
-  --kbd-border: rgba(91, 56, 23, 0.18);
+  /* Neon box-shadow tokens (light) */
+  --neon-inset-primary: inset 0 0 10px rgba(214, 0, 192, 0.04);
+  --neon-inset-success: inset 0 0 10px rgba(0, 204, 110, 0.04);
+  --neon-inset-error: inset 0 0 10px rgba(230, 41, 90, 0.04);
+  --neon-inset-warning: inset 0 0 10px rgba(212, 175, 0, 0.04);
+  --neon-inset-cyan: inset 0 0 10px rgba(0, 200, 214, 0.04);
 
-  --step-inset-warning: inset 3px 0 0 rgba(179, 126, 62, 0.38);
-  --step-inset-cyan: inset 3px 0 0 rgba(46, 124, 138, 0.28);
-  --step-selected-shadow: inset 3px 0 0 rgba(192, 58, 43, 0.45), 0 10px 22px rgba(39, 25, 12, 0.12);
-  --step-running-dot: 0 0 0 2px rgba(46, 124, 138, 0.12), 0 0 8px rgba(46, 124, 138, 0.14);
+  /* Neon accent box-shadow tokens (light) */
+  --neon-glow-success-sm: 0 0 6px rgba(0, 204, 110, 0.1);
+  --neon-glow-error-sm: 0 0 6px rgba(230, 41, 90, 0.1);
+  --neon-glow-warning-sm: 0 0 6px rgba(212, 175, 0, 0.1);
+  --neon-glow-cyan-sm: 0 0 6px rgba(0, 200, 214, 0.1);
+  --neon-glow-primary-sm: 0 0 6px rgba(214, 0, 192, 0.1);
+  --neon-glow-primary-xs: 0 0 8px rgba(214, 0, 192, 0.06);
+  --neon-glow-warning-xs: 0 0 6px rgba(212, 175, 0, 0.06);
+  --neon-glow-error-xs: 0 0 6px rgba(230, 41, 90, 0.06);
+  --neon-glow-primary-ring: 0 0 10px rgba(214, 0, 192, 0.1);
+  --neon-glow-primary-focus: 0 0 10px rgba(214, 0, 192, 0.06);
+  --neon-glow-warning-badge: 0 0 10px rgba(212, 175, 0, 0.1);
 
-  --progress-glow-primary: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 4px 12px rgba(192, 58, 43, 0.12);
-  --progress-glow-success: 0 0 0 1px rgba(62, 166, 118, 0.14), 0 4px 12px rgba(62, 166, 118, 0.12);
-  --progress-glow-error: 0 0 0 1px rgba(142, 27, 27, 0.14), 0 4px 12px rgba(142, 27, 27, 0.12);
-  --progress-glow-warning: 0 0 0 1px rgba(179, 126, 62, 0.14), 0 4px 12px rgba(179, 126, 62, 0.12);
+  /* Glass background tokens (light) */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(214, 0, 192, 0.1);
+  --glass-border-subtle: rgba(214, 0, 192, 0.08);
+  --glass-border-faint: rgba(214, 0, 192, 0.04);
+  --glass-card-bg: rgba(244, 244, 245, 0.7);
+  --glass-shadow: 0 0 20px rgba(214, 0, 192, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --glass-shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.1);
 
-  --toast-glow-success: 0 10px 20px rgba(62, 166, 118, 0.08);
-  --toast-glow-error: 0 10px 20px rgba(142, 27, 27, 0.08);
-  --toast-glow-warning: 0 10px 20px rgba(179, 126, 62, 0.08);
-  --toast-glow-cyan: 0 10px 20px rgba(46, 124, 138, 0.08);
+  /* Kbd shadow tokens (light) */
+  --kbd-shadow: 0 1px 0 rgba(214, 0, 192, 0.06), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --kbd-border: rgba(214, 0, 192, 0.12);
 
-  --event-filter-active: 0 0 0 1px rgba(192, 58, 43, 0.14), 0 8px 16px rgba(192, 58, 43, 0.06);
-  --breakpoint-glow: 0 0 0 1px rgba(179, 126, 62, 0.2), 0 14px 24px rgba(179, 126, 62, 0.1);
+  /* Step card composite shadows (light) */
+  --step-inset-warning: inset 3px 0 8px rgba(212, 175, 0, 0.08);
+  --step-inset-cyan: inset 3px 0 8px rgba(0, 200, 214, 0.06);
+  --step-selected-shadow: inset 3px 0 12px rgba(214, 0, 192, 0.1), 0 0 10px rgba(214, 0, 192, 0.05);
+  --step-running-dot: 0 0 4px rgba(0, 200, 214, 0.4), 0 0 8px rgba(0, 200, 214, 0.2);
 
-  --shadow-sm: 0 6px 14px rgba(39, 25, 12, 0.08);
-  --shadow-md: 0 14px 28px rgba(39, 25, 12, 0.12);
-  --shadow-lg: 0 22px 40px rgba(39, 25, 12, 0.16);
+  /* Progress bar glow tokens (light) */
+  --progress-glow-primary: 0 0 8px rgba(214, 0, 192, 0.25), inset 0 1px 2px rgba(214, 0, 192, 0.2);
+  --progress-glow-success: 0 0 8px rgba(0, 204, 110, 0.25), inset 0 1px 2px rgba(0, 204, 110, 0.2);
+  --progress-glow-error: 0 0 8px rgba(230, 41, 90, 0.25), inset 0 1px 2px rgba(230, 41, 90, 0.2);
+  --progress-glow-warning: 0 0 8px rgba(212, 175, 0, 0.25), inset 0 1px 2px rgba(212, 175, 0, 0.2);
+
+  /* Toast border status shadows (light) */
+  --toast-glow-success: 0 0 8px rgba(0, 204, 110, 0.06);
+  --toast-glow-error: 0 0 8px rgba(230, 41, 90, 0.06);
+  --toast-glow-warning: 0 0 8px rgba(212, 175, 0, 0.06);
+  --toast-glow-cyan: 0 0 8px rgba(0, 200, 214, 0.06);
+
+  /* Event stream filter shadow (light) */
+  --event-filter-active: 0 0 6px rgba(214, 0, 192, 0.06);
+
+  /* Breakpoint panel glow (light) */
+  --breakpoint-glow: 0 0 16px rgba(212, 175, 0, 0.1), 0 0 30px rgba(212, 175, 0, 0.03);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
 }
 
 /* Tailwind v4 theme */
@@ -269,6 +363,12 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-primary-muted: var(--primary-muted);
+  /* UX-R3 §14.2 action hue (bg-action, text-action-foreground, ...). */
+  --color-action: var(--action);
+  --color-action-hover: var(--action-hover);
+  --color-action-foreground: var(--action-foreground);
+  --color-action-muted: var(--action-muted);
+  --color-action-border: var(--action-border);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary-muted: var(--secondary-muted);
@@ -286,12 +386,26 @@
   --color-success-muted: var(--success-muted);
   --color-warning: var(--warning);
   --color-warning-muted: var(--warning-muted);
+  --color-warning-label: var(--warning-label);
   --color-error: var(--error);
   --color-error-muted: var(--error-muted);
   --color-info: var(--info);
   --color-info-muted: var(--info-muted);
   --color-pending: var(--pending);
   --color-pending-muted: var(--pending-muted);
+  /* UX-R2 §13.3 status tokens (text-status-*, bg-status-*-muted, ...). */
+  --color-status-attention: var(--status-attention);
+  --color-status-attention-muted: var(--status-attention-muted);
+  --color-status-alive: var(--status-alive);
+  --color-status-alive-muted: var(--status-alive-muted);
+  --color-status-stalled: var(--status-stalled);
+  --color-status-stalled-muted: var(--status-stalled-muted);
+  --color-status-failed: var(--status-failed);
+  --color-status-failed-muted: var(--status-failed-muted);
+  --color-status-ok: var(--status-ok);
+  --color-status-ok-muted: var(--status-ok-muted);
+  --color-status-aged: var(--status-aged);
+  --color-status-aged-muted: var(--status-aged-muted);
   --color-background-muted: var(--background-muted);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
@@ -338,120 +452,82 @@
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 4px);
   --radius-xl: calc(var(--radius) + 8px);
-  --font-sans: var(--font-body-ui), "EB Garamond", serif;
-  --font-serif: var(--font-display-ui), "Cormorant Garamond", serif;
-  --font-mono: var(--font-mono-ui), "JetBrains Mono", monospace;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 }
 
-/* Base */
-* {
-  border-color: var(--border);
-}
-
-html {
-  background: var(--background);
+/* Base — layered so Tailwind border-color utilities (@layer utilities) can
+   override the reset; an unlayered `*` rule would defeat border-error/30,
+   border-status-stalled/30 etc. site-wide. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 body {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 20%, transparent), transparent 36%),
-    linear-gradient(180deg, var(--background), var(--background-secondary));
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans, "EB Garamond", serif);
-  line-height: 1.6;
+  font-family: var(--font-sans, "Inter", ui-sans-serif, system-ui, sans-serif);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background:
-    linear-gradient(90deg, transparent 0, rgba(201, 138, 62, 0.05) 48%, transparent 100%),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 26px,
-      rgba(201, 138, 62, 0.045) 27px
-    );
-}
-
-body > div {
-  position: relative;
-  z-index: 1;
-}
-
+/* Scrollbar - thin, magenta-tinted */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: color-mix(in srgb, var(--background-secondary) 86%, transparent);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--accent) 72%, var(--background));
-  border: 2px solid color-mix(in srgb, var(--background-secondary) 86%, transparent);
-  border-radius: 999px;
+  background: rgba(255, 0, 224, 0.15);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--accent) 84%, var(--background));
+  background: rgba(255, 0, 224, 0.3);
 }
 
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(214, 0, 192, 0.12);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(214, 0, 192, 0.22);
+}
+
+/* Focus */
 *:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 1.5px color-mix(in srgb, var(--background) 85%, white),
-    0 0 0 4px var(--ring);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
+/* Monospace data elements */
 .font-mono {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-feature-settings: "liga" 1;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: var(--foreground);
-  font-family: var(--font-serif, "Cormorant Garamond", serif);
-  letter-spacing: -0.02em;
-}
-
-a {
-  color: var(--primary);
-  text-decoration: none;
-}
-
-a:hover {
-  color: var(--primary-hover);
-}
-
+/* Neon text utilities */
 .neon-text {
-  text-shadow: 0 2px 10px rgba(201, 138, 62, 0.18);
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
 }
 
 .neon-text-subtle {
-  text-shadow: 0 1px 6px rgba(201, 138, 62, 0.14);
+  text-shadow: 0 0 8px rgba(255, 0, 224, 0.4);
 }
 
 .glow-border {
   box-shadow: var(--glow-primary);
 }
 
+/* Brand gradient background */
 .bg-gradient-brand {
-  background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--accent) 14%, transparent), transparent 40%),
-    linear-gradient(180deg, transparent, color-mix(in srgb, var(--background-secondary) 84%, transparent));
+  background: linear-gradient(135deg, rgba(255, 0, 224, 0.03) 0%, rgba(0, 240, 255, 0.02) 100%);
 }
 
 /* Status pulse animation */
@@ -484,9 +560,10 @@ a:hover {
   animation: slide-in-right 0.2s ease-out;
 }
 
+/* Breakpoint glow - magenta/warning neon pulse for pending breakpoints */
 @keyframes breakpoint-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 166, 58, 0.08), 0 0 0 0 rgba(201, 138, 62, 0.04); }
-  50% { box-shadow: 0 0 0 1px rgba(224, 166, 58, 0.18), 0 10px 24px rgba(224, 166, 58, 0.18); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 224, 0.04), 0 0 0 0 rgba(255, 215, 0, 0.02); }
+  50% { box-shadow: 0 0 14px 4px rgba(255, 0, 224, 0.12), 0 0 8px 2px rgba(255, 215, 0, 0.08); }
 }
 
 .animate-breakpoint-glow {
@@ -512,7 +589,7 @@ a:hover {
   box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.25));
 }
 
-/* Timeline bar gradient */
+/* Timeline bar gradient — uses brand CSS vars */
 .bg-gradient-timeline {
   background: linear-gradient(90deg, var(--primary-muted) 0%, var(--secondary-muted) 100%);
 }
@@ -549,7 +626,8 @@ a:hover {
     transition: none;
   }
 
+  /* Keep breakpoint glow visible but static */
   .animate-breakpoint-glow {
-    box-shadow: 0 0 0 1px rgba(224, 166, 58, 0.18), 0 10px 24px rgba(224, 166, 58, 0.18);
+    box-shadow: 0 0 14px 4px rgba(255, 0, 224, 0.12), 0 0 8px 2px rgba(255, 215, 0, 0.08);
   }
 }

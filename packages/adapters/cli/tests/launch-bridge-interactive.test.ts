@@ -291,6 +291,7 @@ describe('bridge-interactive spawn', () => {
 
   it('preseeds first-run trust state for CI harness launches', async () => {
     const { launchCommand, LAUNCH_FLAGS, parseArgs } = await importModules();
+    const restorePlatform = withMockPlatform('linux');
     const home = await fs.mkdtemp(path.join(os.tmpdir(), 'adapters-launch-home-'));
     const originalHome = process.env['HOME'];
     const originalUserProfile = process.env['USERPROFILE'];
@@ -337,6 +338,7 @@ describe('bridge-interactive spawn', () => {
       expect(codexConfig).toContain(`[projects.${JSON.stringify(path.resolve(process.cwd()))}]`);
       expect(codexConfig).toContain('trust_level = "trusted"');
     } finally {
+      restorePlatform();
       if (originalHome === undefined) delete process.env['HOME']; else process.env['HOME'] = originalHome;
       if (originalUserProfile === undefined) delete process.env['USERPROFILE']; else process.env['USERPROFILE'] = originalUserProfile;
       if (originalCi === undefined) delete process.env['CI']; else process.env['CI'] = originalCi;

@@ -18,6 +18,22 @@ describe('Tooltip', () => {
     expect(screen.getByText('Hover me')).toBeInTheDocument();
   });
 
+  it('never nests buttons: a button child becomes the trigger itself (asChild by construction)', () => {
+    const { container } = render(
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <button>Nested check</button>
+          </TooltipTrigger>
+          <TooltipContent>Tooltip text</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>,
+    );
+    // Exactly one button in the tree and no button-inside-button wrapper.
+    expect(container.querySelectorAll('button')).toHaveLength(1);
+    expect(container.querySelector('button button')).toBeNull();
+  });
+
   it('renders trigger as child when asChild is set', () => {
     render(
       <TooltipProvider>

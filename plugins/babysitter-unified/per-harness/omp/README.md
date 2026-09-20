@@ -2,11 +2,13 @@
 
 Babysitter package for `oh-my-pi`.
 
-This is a thin oh-my-pi package:
+This oh-my-pi package combines native skill entrypoints with a deterministic
+Babysitter effects driver:
 
 - `skills/` exposes Babysitter workflows through oh-my-pi's skill system
-- `extensions/index.ts` adds lightweight slash-command aliases that forward to those skills
-- the SDK remains responsible for orchestration, runs, tasks, and state
+- `extensions/index.ts` binds real oh-my-pi sessions and registers the driver
+- `extensions/driver.ts` checkpoints, executes, posts, and continues effects
+- `agents/babysitter-task.md` owns one blocking native task dispatch per agent effect
 
 ## Installation
 
@@ -53,7 +55,7 @@ omp plugin uninstall @a5c-ai/babysitter-omp
 
 ## Using Babysitter
 
-Start oh-my-pi, then use the thin Babysitter entrypoints exposed by the plugin:
+Start oh-my-pi, then use one of the Babysitter entrypoints:
 
 - `/babysit` or `/babysitter`
 - `/call`
@@ -62,19 +64,21 @@ Start oh-my-pi, then use the thin Babysitter entrypoints exposed by the plugin:
 - `/doctor`
 - `/yolo`
 
-Each command forwards into oh-my-pi's native `/skill:<name>` flow. The
-orchestration contract lives in the skills; the extension only provides
-convenient aliases.
+Each command forwards into oh-my-pi's native `/skill:<name>` flow. After a skill
+creates or resumes a run, call `babysitter_drive` with its absolute run
+directory. For an `agent` result, dispatch the returned one-item payload through
+oh-my-pi's native `task` tool exactly once; the extension retains ownership,
+posts the durable result, and returns the deterministic continuation.
 
-## Commands And Skills
+Native oh-my-pi todos are ordinary session planning state. They are distinct
+from Babysitter process effects and are never intercepted or rewritten.
+Babysitter progress may be projected alongside native todos on compatible hosts,
+without mutating canonical todo state.
 
-The package mirrors the canonical Babysitter command docs and exposes the core
-`babysit` skill plus command-backed skills such as `call`, `doctor`, `plan`,
-`resume`, and `yolo`.
-
-The extension layer is intentionally thin. It only forwards slash commands to
-oh-my-pi's built-in `/skill:<name>` flow; it does not implement a custom loop
-driver, custom tools, or direct run mutation logic.
+Loading the extension does not create or resume a run. Session setup begins only
+when oh-my-pi emits a lifecycle event with a real session ID. Setup failures are
+reported as sanitized non-fatal diagnostics rather than falling back to a
+session-less run.
 
 ## Plugin Layout
 
@@ -82,11 +86,14 @@ driver, custom tools, or direct run mutation logic.
 artifacts/generated-plugins/oh-my-pi/
 |-- package.json
 |-- versions.json
+|-- agents/
+|   `-- babysitter-task.md
 |-- extensions/
-|   `-- index.ts
+|   |-- index.ts
+|   `-- driver.ts
+|-- hooks/
 |-- commands/
 |-- skills/
-|-- bin/
 `-- scripts/
 ```
 

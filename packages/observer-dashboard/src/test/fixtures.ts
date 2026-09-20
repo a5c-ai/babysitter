@@ -53,6 +53,7 @@ export interface CreateMockTaskEffectOptions {
   error?: { name: string; message: string; stack?: string };
   breakpointQuestion?: string;
   agent?: { name: string; prompt?: { role: string; task: string; instructions: string[] } };
+  babysitterCheckpoint?: TaskEffect["babysitterCheckpoint"];
 }
 
 export function createMockTaskEffect(overrides: CreateMockTaskEffectOptions = {}): TaskEffect {
@@ -79,6 +80,7 @@ export function createMockTaskEffect(overrides: CreateMockTaskEffectOptions = {}
     error: overrides.error,
     breakpointQuestion: overrides.breakpointQuestion,
     agent: overrides.agent,
+    babysitterCheckpoint: overrides.babysitterCheckpoint,
   };
 }
 
@@ -130,6 +132,7 @@ export interface CreateMockRunOptions {
   projectName?: string;
   isStale?: boolean;
   waitingKind?: 'breakpoint' | 'task';
+  driver?: 'live' | 'orphaned' | 'none';
 }
 
 export function createMockRun(overrides: CreateMockRunOptions = {}): Run {
@@ -168,6 +171,7 @@ export function createMockRun(overrides: CreateMockRunOptions = {}): Run {
     projectName: overrides.projectName ?? 'my-project',
     isStale: overrides.isStale,
     waitingKind: overrides.waitingKind,
+    driver: overrides.driver,
   };
 }
 
@@ -212,6 +216,10 @@ export interface CreateMockProjectSummaryOptions {
   totalTasks?: number;
   completedTasksAggregate?: number;
   latestUpdate?: string;
+  pendingBreakpoints?: number;
+  orphanedRuns?: number;
+  breakpointRuns?: ProjectSummary['breakpointRuns'];
+  hidden?: boolean;
 }
 
 export function createMockProjectSummary(
@@ -227,8 +235,10 @@ export function createMockProjectSummary(
     totalTasks: overrides.totalTasks ?? 50,
     completedTasksAggregate: overrides.completedTasksAggregate ?? 45,
     latestUpdate: overrides.latestUpdate ?? isoNow(),
-    pendingBreakpoints: 0,
-    breakpointRuns: [],
+    pendingBreakpoints: overrides.pendingBreakpoints ?? 0,
+    orphanedRuns: overrides.orphanedRuns ?? 0,
+    breakpointRuns: overrides.breakpointRuns ?? [],
+    ...(overrides.hidden !== undefined ? { hidden: overrides.hidden } : {}),
   };
 }
 

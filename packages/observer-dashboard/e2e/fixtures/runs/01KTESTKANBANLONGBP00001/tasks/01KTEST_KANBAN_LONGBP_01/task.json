@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_LONGBP_01",
+  "taskId": "approve-staging-rollout",
+  "invocationKey": "kanban/long-breakpoint:S000002:approve-staging-rollout",
+  "stepId": "S000002",
+  "kind": "breakpoint",
+  "title": "Approval: staging deploy rollout",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_LONGBP_01/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_LONGBP_01/result.json"
+  },
+  "inputs": {
+    "question": "The staging deploy changes the database schema, rotates two service credentials, and restarts the ingest workers — do you approve rolling this out to the shared staging environment now?",
+    "title": "Approval: staging deploy rollout",
+    "options": [
+      "approve",
+      "reject",
+      "defer to tomorrow"
+    ]
+  }
+}

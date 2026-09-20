@@ -15,9 +15,17 @@ export interface ExecutiveSummaryMetrics {
 
 type SeverityLevel = "healthy" | "amber" | "red";
 
+/**
+ * §13.3 one-hue-one-meaning: each issue segment carries its OWN semantic
+ * tone. Red (--status-failed) is terminal failure only — it must never
+ * bleed onto the approvals/stale segments of a combined sentence.
+ */
+type IssueTone = "failed" | "attention" | "stalled";
+
 interface SummaryIssue {
   text: string;
   filter: RunStatus | "stale" | null;
+  tone?: IssueTone;
 }
 
 interface SummaryResult {
@@ -35,6 +43,7 @@ function deriveSummary(m: ExecutiveSummaryMetrics): SummaryResult {
     issues.push({
       text: `${m.failedRuns} run${m.failedRuns !== 1 ? "s" : ""} failing`,
       filter: "failed",
+      tone: "failed",
     });
     severity = "red";
   }
@@ -44,6 +53,7 @@ function deriveSummary(m: ExecutiveSummaryMetrics): SummaryResult {
     issues.push({
       text: `${m.pendingBreakpoints} approval${m.pendingBreakpoints !== 1 ? "s" : ""} need${m.pendingBreakpoints === 1 ? "s" : ""} your attention`,
       filter: "waiting",
+      tone: "attention",
     });
     if (severity !== "red") severity = "amber";
   }
@@ -52,6 +62,7 @@ function deriveSummary(m: ExecutiveSummaryMetrics): SummaryResult {
     issues.push({
       text: `${m.staleRuns} stale run${m.staleRuns !== 1 ? "s" : ""}`,
       filter: "stale",
+      tone: "stalled",
     });
     if (severity !== "red") severity = "amber";
   }
@@ -79,6 +90,17 @@ function deriveSummary(m: ExecutiveSummaryMetrics): SummaryResult {
 
   return { severity, issues, icon };
 }
+
+/**
+ * §13.3 per-segment text tones. The failed segment is the ONLY one allowed
+ * to wear red; approvals wear the attention gold and stale runs the
+ * amber-gray stalled token, whatever the banner-level severity is.
+ */
+const toneStyles: Record<IssueTone, string> = {
+  failed: "text-status-failed",
+  attention: "text-status-attention",
+  stalled: "text-status-stalled",
+};
 
 const severityStyles: Record<
   SeverityLevel,
@@ -128,7 +150,8 @@ export function ExecutiveSummaryBanner({
       aria-atomic="true"
       data-testid="executive-summary-banner"
       className={cn(
-        "flex items-center gap-2.5 rounded-xl border px-4 py-3 mb-6 shadow-sm transition-all duration-300",
+        "flex items-center gap-2.5 rounded-lg border px-4 py-2.5 mb-6",
+        "backdrop-blur-sm transition-all duration-300",
         styles.container
       )}
     >
@@ -136,22 +159,32 @@ export function ExecutiveSummaryBanner({
       <p
         className={cn(
           "text-sm font-medium leading-snug flex-1",
-          styles.text
+          // §13.3: issue sentences are NEVER painted wholesale in the
+          // severity hue — each segment carries its own semantic tone below
+          // (red = terminal failure only). The healthy sentence has a single
+          // meaning, so it keeps the banner-level success color.
+          summary.severity === "healthy" ? styles.text : "text-foreground"
         )}
       >
         {summary.issues.map((issue, i) => (
           <span key={i}>
+            {/* Neutral separator — it belongs to no segment's meaning. */}
             {i > 0 && ", "}
-            {issue.filter && onFilterChange ? (
-              <button
-                onClick={() => onFilterChange(issue.filter!)}
-                className="underline decoration-dotted underline-offset-2 hover:decoration-solid transition-all"
-              >
-                {issue.text}
-              </button>
-            ) : (
-              issue.text
-            )}
+            <span
+              className={issue.tone && toneStyles[issue.tone]}
+              data-testid={issue.tone ? `summary-segment-${issue.tone}` : undefined}
+            >
+              {issue.filter && onFilterChange ? (
+                <button
+                  onClick={() => onFilterChange(issue.filter!)}
+                  className="underline decoration-dotted underline-offset-2 hover:decoration-solid transition-all"
+                >
+                  {issue.text}
+                </button>
+              ) : (
+                issue.text
+              )}
+            </span>
           </span>
         ))}
       </p>

@@ -999,6 +999,19 @@ Whether proving theorems in abstract algebra, developing new statistical methodo
 
 ---
 
+## Process and Skill Catalog
+
+### Proof quality convergence
+
+- **Process:** [`proof-quality-convergence.js`](./proof-quality-convergence.js) builds a profile-bound proof-obligation registry, validates immutable artifacts with fail-closed shell gates, runs four isolated adversarial lenses, and permits at most three fresh repair rounds before bounded failure.
+- **Profile:** [`profiles/submodular-optimization.json`](./profiles/submodular-optimization.json) covers multilinear extensions, matroid maximization, density reductions, exact arithmetic, and explicit boundary dispositions.
+- **Skills:** [`proof-obligation-registry`](./skills/proof-obligation-registry/SKILL.md), [`adversarial-proof-audit`](./skills/adversarial-proof-audit/SKILL.md), and [`mathematical-artifact-validation`](./skills/mathematical-artifact-validation/SKILL.md).
+- **Composed assets:** the process references the existing proof structure, counterexample, LaTeX, notation, proof-strategy, theorem-proving, discrete-optimization, and mathematics-writing resources rather than duplicating them.
+- **Examples:** [`examples/proof-quality-convergence`](./examples/proof-quality-convergence) contains original matroid-maximization and density-minimization inputs.
+- **Validation:** run `bash library/specializations/domains/science/mathematics/validators/run_fixture_gates.sh` and `node --test library/proof-quality-convergence.test-runner.mjs` from the repository root.
+
+The deterministic validators establish schema, source, document, binding, and publication invariants. They do not establish the truth of informal mathematics; consequential publication still requires artifact-hash-bound external review as described by the audit skill and rubric.
+
 ## See Also
 
 - **references.md**: Comprehensive list of mathematical resources, software, textbooks, journals, and learning materials

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "2026.01.results-v1",
+  "effectId": "01KTEST_AGENT_EFFECT_001",
+  "taskId": "generate-report",
+  "invocationKey": "test/pending-breakpoint:S000001:generate-report",
+  "status": "ok",
+  "startedAt": "2026-02-17T10:00:01.500Z",
+  "finishedAt": "2026-02-17T10:00:04.500Z",
+  "result": {
+    "summary": "Test report generated successfully",
+    "sections": 3,
+    "wordCount": 500
+  },
+  "value": {
+    "summary": "Test report generated successfully",
+    "sections": 3,
+    "wordCount": 500
+  }
+}

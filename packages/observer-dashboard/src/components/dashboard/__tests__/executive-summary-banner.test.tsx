@@ -115,6 +115,63 @@ describe('ExecutiveSummaryBanner', () => {
     expect(banner.className).toMatch(/border-success/);
   });
 
+  // --- §13.3 per-segment tones (one hue = one meaning; red = terminal failure ONLY) ---
+  describe('per-segment issue coloring (§13.3)', () => {
+    it('colors only the failed segment red; approvals and stale keep their own tones', () => {
+      render(
+        <ExecutiveSummaryBanner
+          metrics={makeMetrics({ failedRuns: 1, pendingBreakpoints: 2, staleRuns: 3 })}
+        />
+      );
+
+      const failedSegment = screen.getByTestId('summary-segment-failed');
+      expect(failedSegment.className).toMatch(/text-status-failed/);
+      expect(failedSegment).toHaveTextContent('1 run failing');
+
+      const attentionSegment = screen.getByTestId('summary-segment-attention');
+      expect(attentionSegment.className).toMatch(/text-status-attention/);
+      expect(attentionSegment.className).not.toMatch(/text-status-failed|text-error/);
+      expect(attentionSegment).toHaveTextContent('2 approvals need your attention');
+
+      const stalledSegment = screen.getByTestId('summary-segment-stalled');
+      expect(stalledSegment.className).toMatch(/text-status-stalled/);
+      expect(stalledSegment.className).not.toMatch(/text-status-failed|text-error/);
+      expect(stalledSegment).toHaveTextContent('3 stale runs');
+    });
+
+    it('does not paint the whole issue sentence in the error hue when a failure exists', () => {
+      render(
+        <ExecutiveSummaryBanner
+          metrics={makeMetrics({ failedRuns: 1, pendingBreakpoints: 2 })}
+        />
+      );
+      const sentence = screen.getByText(/1 run failing/).closest('p');
+      expect(sentence).not.toBeNull();
+      expect(sentence!.className).not.toMatch(/text-error/);
+    });
+
+    it('amber-only issues use their own semantic tones, not a blanket warning text', () => {
+      render(
+        <ExecutiveSummaryBanner
+          metrics={makeMetrics({ pendingBreakpoints: 1, staleRuns: 1 })}
+        />
+      );
+      expect(screen.getByTestId('summary-segment-attention').className).toMatch(
+        /text-status-attention/
+      );
+      expect(screen.getByTestId('summary-segment-stalled').className).toMatch(
+        /text-status-stalled/
+      );
+      expect(screen.queryByTestId('summary-segment-failed')).not.toBeInTheDocument();
+    });
+
+    it('healthy sentence keeps the single success tone (single meaning)', () => {
+      render(<ExecutiveSummaryBanner metrics={makeMetrics()} />);
+      const sentence = screen.getByText('All 5 projects healthy').closest('p');
+      expect(sentence!.className).toMatch(/text-success/);
+    });
+  });
+
   // --- Dismissed state ---
   it('returns null when dismissed is true', () => {
     const { container } = render(

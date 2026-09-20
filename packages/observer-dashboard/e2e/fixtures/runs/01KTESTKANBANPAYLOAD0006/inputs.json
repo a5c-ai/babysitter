@@ -1,0 +1,4 @@
+{
+  "scope": "kanban/payload-gate",
+  "description": "UX-R2 §13.1 fixture: v6 ctx.breakpoint shape — question/title only under task.json metadata.payload (no input.json, no question in inputs)"
+}

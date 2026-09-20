@@ -45,7 +45,7 @@ export function PaginationControls({
   return (
     <div className={cn('flex items-center justify-between border-t border-border pt-3', className)}>
       <span className="text-xs text-foreground-muted tabular-nums">
-        {startItem}–{endItem} of {totalItems}
+        {startItem}-{endItem} of {totalItems}
       </span>
       <div className="flex items-center gap-0.5">
         <button

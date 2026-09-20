@@ -1,0 +1,815 @@
+{
+    "contractVersion":  "1.0.0",
+    "profileId":  "submodular-optimization",
+    "profileVersion":  "1.0.0",
+    "artifactSha256":  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "profileCoverageRequired":  true,
+    "semanticDetailsRequired":  true,
+    "obligations":  [
+                        {
+                            "id":  "OB-PRODUCT-DISTRIBUTION",
+                            "templateId":  "OB-PRODUCT-DISTRIBUTION",
+                            "kind":  "definition",
+                            "required":  true,
+                            "statement":  "Define product random sets, exclusions, and marginals.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-FIRST-PARTIAL",
+                            "templateId":  "OB-FIRST-PARTIAL",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Derive first derivative by conditioning.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-MIXED-PARTIAL",
+                            "templateId":  "OB-MIXED-PARTIAL",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Express mixed derivative as expected second difference and prove sign.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-DR-ANTITONE",
+                            "templateId":  "OB-DR-ANTITONE",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove coordinate derivative antitonicity on the cube.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-PATH-TUPLE",
+                            "templateId":  "OB-PATH-TUPLE",
+                            "kind":  "use-site",
+                            "required":  true,
+                            "statement":  "Record domain, formula, endpoints, membership, derivative, and FTC bounds.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ],
+                            "pathTuple":  {
+                                              "parameterDomain":  "t in [0,1]",
+                                              "formula":  "x(t)",
+                                              "startEndpoint":  "x(0)",
+                                              "endEndpoint":  "x(1)",
+                                              "ambientMembership":  "x(t) in cube",
+                                              "derivative":  "dx/dt",
+                                              "ftcBounds":  "0 to 1"
+                                          },
+                            "displayedEndpoint":  "WRONG"
+                        },
+                        {
+                            "id":  "OB-POSITIVE-PART",
+                            "templateId":  "OB-POSITIVE-PART",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove the positive-part inequality with sign checks.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-RADIAL",
+                            "templateId":  "OB-RADIAL",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove the radial gradient inequality with endpoint checks.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-NORMALIZATION",
+                            "templateId":  "OB-NORMALIZATION",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Source or derive normalization at the origin.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-IMPROPER-CONVERGENCE",
+                            "templateId":  "OB-IMPROPER-CONVERGENCE",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove truncated integral convergence and interchange hypotheses.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-MATROID-COMPARATOR",
+                            "templateId":  "OB-MATROID-COMPARATOR",
+                            "kind":  "use-site",
+                            "required":  true,
+                            "statement":  "Prove comparator feasibility before local-optimum substitution.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ],
+                            "pathTuple":  {
+                                              "parameterDomain":  "t in [0,1]",
+                                              "formula":  "x(t)",
+                                              "startEndpoint":  "x(0)",
+                                              "endEndpoint":  "x(1)",
+                                              "ambientMembership":  "x(t) in cube",
+                                              "derivative":  "dx/dt",
+                                              "ftcBounds":  "0 to 1"
+                                          },
+                            "displayedEndpoint":  "x(1)"
+                        },
+                        {
+                            "id":  "OB-DERIVATIVE-TELESCOPE",
+                            "templateId":  "OB-DERIVATIVE-TELESCOPE",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Audit weighting, product derivative, factors, and endpoints.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-MODULAR-CLOSURE",
+                            "templateId":  "OB-MODULAR-CLOSURE",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove modular addition preserves submodularity.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-CONTRACTION-CLOSURE",
+                            "templateId":  "OB-CONTRACTION-CLOSURE",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove contraction preserves submodularity.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-REDUCTION-SOUNDNESS",
+                            "templateId":  "OB-REDUCTION-SOUNDNESS",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove every returned witness is valid.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-REDUCTION-COMPLETENESS",
+                            "templateId":  "OB-REDUCTION-COMPLETENESS",
+                            "kind":  "lemma",
+                            "required":  true,
+                            "statement":  "Prove every valid witness is represented.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-NONEMPTY-ENFORCEMENT",
+                            "templateId":  "OB-NONEMPTY-ENFORCEMENT",
+                            "kind":  "boundary",
+                            "required":  true,
+                            "statement":  "Handle empty set, singleton witnesses, and V empty.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-EXACT-BIT-COMPLEXITY",
+                            "templateId":  "OB-EXACT-BIT-COMPLEXITY",
+                            "kind":  "complexity",
+                            "required":  true,
+                            "statement":  "Record encoding, scaling, calls, magnitude, bit length, and comparisons.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-CANDIDATE-COMPLETENESS",
+                            "templateId":  "OB-CANDIDATE-COMPLETENESS",
+                            "kind":  "complexity",
+                            "required":  true,
+                            "statement":  "Prove candidate set count, size, and completeness.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "OB-THEOREM-REFERENCES",
+                            "templateId":  "OB-THEOREM-REFERENCES",
+                            "kind":  "document",
+                            "required":  true,
+                            "statement":  "Resolve references to numbered compatible targets.",
+                            "status":  "verified",
+                            "evidence":  [
+                                             {
+                                                 "type":  "artifact-location",
+                                                 "path":  "proof.tex"
+                                             }
+                                         ],
+                            "verificationMethod":  "fixture-review",
+                            "history":  [
+                                            {
+                                                "event":  "created"
+                                            }
+                                        ]
+                        }
+                    ],
+    "hypotheses":  [
+                       {
+                           "id":  "H-FINITE",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ]
+                       }
+                   ],
+    "useSites":  [
+                     {
+                         "id":  "USE-KEY",
+                         "required":  true,
+                         "status":  "verified",
+                         "evidence":  [
+                                          {
+                                              "type":  "audit",
+                                              "path":  "proof.tex"
+                                          }
+                                      ],
+                         "history":  [
+                                         {
+                                             "event":  "created"
+                                         }
+                                     ],
+                         "obligationIds":  [
+                                               "OB-PATH-TUPLE"
+                                           ],
+                         "lowerObject":  "x",
+                         "upperObject":  "y",
+                         "sideConditions":  "x\u003c=y",
+                         "substitution":  "coordinates as declared"
+                     }
+                 ],
+    "boundaries":  [
+                       {
+                           "id":  "EDGE-CUBE-ORIGIN",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-CUBE-FACES",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-ZERO-INCREMENT",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-IMPROPER-ENDPOINT",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-EMPTY-GROUND",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-SINGLETON-WITNESS",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-NONEMPTY-DOMAIN",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-RATIONAL-ENCODING",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-THEOREM-TARGET",
+                           "required":  true,
+                           "status":  "verified",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-ALL-ZERO-OBJECTIVE",
+                           "required":  true,
+                           "status":  "verified",
+                           "reason":  "fixture coverage",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-ZERO-NEGATIVE-THRESHOLD",
+                           "required":  true,
+                           "status":  "verified",
+                           "reason":  "fixture coverage",
+                           "evidence":  [
+                                            {
+                                                "type":  "audit",
+                                                "path":  "proof.tex"
+                                            }
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       },
+                       {
+                           "id":  "EDGE-GRAPH-LOOP-PARALLEL",
+                           "required":  true,
+                           "status":  "not-applicable",
+                           "reason":  "fixture is not a graphical specialization",
+                           "evidence":  [
+
+                                        ],
+                           "history":  [
+                                           {
+                                               "event":  "created"
+                                           }
+                                       ],
+                           "obligationIds":  [
+                                                 "OB-NONEMPTY-ENFORCEMENT"
+                                             ]
+                       }
+                   ],
+    "randomDistributions":  [
+                                {
+                                    "id":  "RAND-FINITE",
+                                    "required":  true,
+                                    "status":  "verified",
+                                    "evidence":  [
+                                                     {
+                                                         "type":  "audit",
+                                                         "path":  "proof.tex"
+                                                     }
+                                                 ],
+                                    "history":  [
+                                                    {
+                                                        "event":  "created"
+                                                    }
+                                                ],
+                                    "obligationIds":  [
+                                                          "OB-PRODUCT-DISTRIBUTION"
+                                                      ],
+                                    "support":  "2^V",
+                                    "coordinateProbabilities":  "independent x_i",
+                                    "exclusions":  "none",
+                                    "couplingOrConditioning":  "product law",
+                                    "interchangeJustification":  "finite sum"
+                                }
+                            ],
+    "convergenceChecks":  [
+                              {
+                                  "id":  "CONV-FINITE",
+                                  "required":  true,
+                                  "status":  "verified",
+                                  "evidence":  [
+                                                   {
+                                                       "type":  "audit",
+                                                       "path":  "proof.tex"
+                                                   }
+                                               ],
+                                  "history":  [
+                                                  {
+                                                      "event":  "created"
+                                                  }
+                                              ],
+                                  "obligationIds":  [
+                                                        "OB-IMPROPER-CONVERGENCE"
+                                                    ],
+                                  "truncation":  "epsilon",
+                                  "uniformBound":  "finite bound",
+                                  "limitingTheorem":  "dominated convergence",
+                                  "hypotheses":  "finite ground set"
+                              }
+                          ],
+    "exactArithmetic":  [
+                            {
+                                "id":  "ARITH-KEY",
+                                "required":  true,
+                                "status":  "verified",
+                                "evidence":  [
+                                                 {
+                                                     "type":  "audit",
+                                                     "path":  "proof.tex"
+                                                 }
+                                             ],
+                                "history":  [
+                                                {
+                                                    "event":  "created"
+                                                }
+                                            ],
+                                "obligationIds":  [
+                                                      "OB-EXACT-BIT-COMPLEXITY"
+                                                  ],
+                                "inputEncoding":  "binary rationals",
+                                "integerScaling":  "common denominator",
+                                "oracleCalls":  "polynomial",
+                                "maximumMagnitude":  "polynomial bits",
+                                "signedBitLength":  "sign plus magnitude",
+                                "exactComparisons":  "cross multiplication",
+                                "soundness":  "proved",
+                                "completeness":  "proved",
+                                "candidateCompleteness":  "proved"
+                            }
+                        ],
+    "theoremReferences":  [
+                              {
+                                  "id":  "REF-KEY",
+                                  "required":  true,
+                                  "status":  "verified",
+                                  "evidence":  [
+                                                   {
+                                                       "type":  "audit",
+                                                       "path":  "proof.tex"
+                                                   }
+                                               ],
+                                  "history":  [
+                                                  {
+                                                      "event":  "created"
+                                                  }
+                                              ],
+                                  "obligationIds":  [
+                                                        "OB-THEOREM-REFERENCES"
+                                                    ],
+                                  "sourceLabel":  "thm:main",
+                                  "referenceCommand":  "ref",
+                                  "targetEnvironment":  "theorem",
+                                  "numbered":  true,
+                                  "compatibleKind":  true
+                              }
+                          ],
+    "waivers":  [
+
+                ],
+    "applicableModules":  [
+                              {
+                                  "applicable":  true,
+                                  "id":  "multilinear-extension",
+                                  "rationale":  "fixture exercises multilinear extension"
+                              },
+                              {
+                                  "applicable":  true,
+                                  "id":  "matroid-maximization",
+                                  "rationale":  "fixture exercises matroid maximization"
+                              },
+                              {
+                                  "applicable":  true,
+                                  "id":  "density-reduction",
+                                  "rationale":  "fixture exercises density reduction"
+                              },
+                              {
+                                  "applicable":  false,
+                                  "id":  "graphical-specialization",
+                                  "rationale":  "fixture is not a graphical specialization"
+                              }
+                          ]
+}

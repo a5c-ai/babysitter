@@ -18,7 +18,9 @@ function buildConfig(): AdapterConfig {
     pluginRootEnvVars: ["PI_PLUGIN_ROOT"],
     sessionIdEnvVars: ["PI_SESSION_ID", "AGENT_SESSION_ID"],
     pluginRootVar: "${PI_PLUGIN_ROOT}",
-    interactiveToolName: "AskUserQuestion",
+    // No agent-callable question tool; verified against the installed CLI.
+    // Interactive asks are plain-text turn endings. See issue #1758.
+    interactiveToolName: "",
     sessionEnvVars: "PI_SESSION_ID and AGENT_SESSION_ID",
     hasIntentFidelityChecks: false,
     hasNonNegotiables: false,

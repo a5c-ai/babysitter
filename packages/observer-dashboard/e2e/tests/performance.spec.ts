@@ -1,10 +1,18 @@
 import { test, expect } from "@playwright/test";
+import { seedListView } from "../helpers";
 
 // Run performance tests serially so the first test warms up the dev server
 test.describe.configure({ mode: "serial" });
 
 // Give each test plenty of time (dev server compile can be slow)
 test.use({ actionTimeout: 60_000 });
+
+// These tests measure and assert against the legacy list view (project grid,
+// DOM-size budget). The board is now the default view at "/", so seed the
+// persisted list view before each test's navigation.
+test.beforeEach(async ({ page }) => {
+  await seedListView(page);
+});
 
 test.describe("Performance Tests", () => {
   test("dashboard loads and renders content", async ({ page }) => {
@@ -26,13 +34,13 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Now measure a reload (server is warm)
     const startTime = Date.now();
     await page.reload({ waitUntil: "domcontentloaded", timeout: 60_000 });
     await expect(heading).toBeVisible({ timeout: 60_000 });
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     const reloadTime = Date.now() - startTime;
     console.log(`Dashboard reload time (warm): ${reloadTime}ms`);
@@ -72,7 +80,7 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Count DOM nodes
     const nodeCount = await page.evaluate(() => {
@@ -102,7 +110,7 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Try expanding a project card to reveal run links
     const projectCard = projectGrid.locator("> *").first();
@@ -156,7 +164,7 @@ test.describe("Performance Tests", () => {
     const projectGrid = page.getByTestId("project-grid-active")
       .or(page.getByTestId("project-grid-filtered"))
       .or(page.getByTestId("project-grid-history"));
-    await expect(projectGrid).toBeVisible({ timeout: 60_000 });
+    await expect(projectGrid.first()).toBeVisible({ timeout: 60_000 });
 
     // Wait a bit for any async errors to surface
     await page.waitForTimeout(2_000);

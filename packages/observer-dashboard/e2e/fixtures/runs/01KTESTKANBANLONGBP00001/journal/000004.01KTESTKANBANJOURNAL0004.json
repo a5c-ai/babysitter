@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-25T09:00:04.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_LONGBP_01",
+    "invocationKey": "kanban/long-breakpoint:S000002:approve-staging-rollout",
+    "invocationHash": "hash-approve-staging-rollout",
+    "stepId": "S000002",
+    "taskId": "approve-staging-rollout",
+    "kind": "breakpoint",
+    "label": "The staging deploy changes the database schema, rotates two service credentials, and restarts the ingest workers — do you approve rolling this out to the shared staging environment now?",
+    "taskDefRef": "tasks/01KTEST_KANBAN_LONGBP_01/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0001-4"
+}

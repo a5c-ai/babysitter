@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-02-17T10:00:00.000Z",
+  "data": {
+    "runId": "01KTESTPENDINGBPFIXTURE0",
+    "processId": "test/pending-breakpoint",
+    "entrypoint": {
+      "importPath": "../../processes/test-pending-breakpoint.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "a1b2c3d4"
+}

@@ -1,0 +1,4 @@
+{
+  "scope": "test-pending-breakpoint",
+  "description": "Fixture run for E2E testing of pending breakpoint banner"
+}

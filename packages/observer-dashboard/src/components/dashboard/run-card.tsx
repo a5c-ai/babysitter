@@ -94,7 +94,7 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
     <Link href={`/runs/${run.runId}`}>
       <Card className={cn(
         "cursor-pointer p-4 transition-all card-hover-lift",
-        "hover:shadow-md",
+        "hover:shadow-glow-primary/30",
         selected && "ring-1 ring-primary shadow-glow-primary",
         isActive && !isStale && !hasActiveBreakpoint && "border-[var(--border-hover)]",
         hasActiveBreakpoint && "border-warning/40 shadow-glow-warning ring-1 ring-warning/20 animate-breakpoint-glow",
@@ -114,11 +114,11 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
                     run.status === "waiting" ? "bg-warning shadow-[0_0_6px_var(--warning)] animate-pulse-dot" :
                     "bg-pending"
               )} />
-              <span className="text-lg font-semibold italic font-serif text-foreground truncate">
+              <span className="text-base font-medium text-foreground truncate">
                 {friendlyProcessName(run.processId)}
               </span>
               {hasActiveBreakpoint && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 border border-warning/30 px-2.5 py-1 text-[11px] leading-tight font-bold text-warning uppercase tracking-[0.12em] shrink-0 animate-pulse-dot">
+                <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 border border-warning/30 px-2 py-0.5 text-xs leading-tight font-bold text-warning uppercase tracking-wider shrink-0 animate-pulse-dot">
                   <Hand className="h-2.5 w-2.5" />
                   Approval Required
                 </span>
@@ -134,6 +134,24 @@ export const RunCard = memo(function RunCard({ run, selected }: RunCardProps) {
               {isStale && (
                 <span className="inline-flex items-center rounded-full bg-zinc-500/10 border border-zinc-500/20 px-2 py-0.5 text-xs leading-tight font-medium text-zinc-500 shrink-0">
                   {formatStaleTime(run.updatedAt)}
+                </span>
+              )}
+              {/* Liveness: is an orchestrator attached? (read from run.lock). This is what
+                  distinguishes a dead run from one that's merely idle. */}
+              {run.driver === "orphaned" && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-error/10 border border-error/30 px-2 py-0.5 text-xs leading-tight font-medium text-error shrink-0"
+                  title="No live orchestrator attached (run.lock pid is dead). Abandoned; resume or clean up"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-error" /> orphaned
+                </span>
+              )}
+              {run.driver === "live" && isActive && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-success/10 border border-success/30 px-2 py-0.5 text-xs leading-tight font-medium text-success shrink-0"
+                  title="An orchestrator is actively attached to this run"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse-dot" /> live
                 </span>
               )}
               <TruncatedId id={run.runId} chars={4} className="text-foreground-secondary" />

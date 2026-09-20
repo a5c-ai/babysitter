@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Run, ProjectSummary } from "@/types";
 import type { ObserverConfig, WatchSource } from "@/lib/config-loader";
 import type { DiscoveredRun } from "@/lib/source-discovery";
+import type { CachedRunDigest } from "@/lib/run-cache";
 import {
   RunQueryService,
   runSortPriority,
@@ -43,6 +44,21 @@ function makeRun(overrides: Partial<Run> = {}): Run {
   };
 }
 
+/** A light cached digest — what listAllRuns now reads (getDigestCached). */
+function makeDigest(overrides: Partial<CachedRunDigest> = {}): CachedRunDigest {
+  return {
+    runId: "run-001",
+    processId: "data-pipeline",
+    status: "completed",
+    latestSeq: 2,
+    taskCount: 3,
+    completedTasks: 3,
+    updatedAt: RECENT_DATE_PLUS,
+    sourceLabel: "test",
+    ...overrides,
+  };
+}
+
 function makeDiscoveredRun(
   runDir: string,
   projectName: string,
@@ -77,6 +93,7 @@ function makeSummary(overrides: Partial<ProjectSummary> = {}): ProjectSummary {
     completedTasksAggregate: 18,
     latestUpdate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     pendingBreakpoints: 0,
+    orphanedRuns: 0,
     breakpointRuns: [],
     ...overrides,
   };
@@ -88,6 +105,7 @@ function makeMockDeps(overrides: Partial<RunQueryDeps> = {}): RunQueryDeps {
     discoverAllRunDirs: vi.fn().mockResolvedValue([]),
     getProjectSummaries: vi.fn().mockReturnValue([]),
     getRunCached: vi.fn().mockResolvedValue(makeRun()),
+    getDigestCached: vi.fn().mockResolvedValue(makeDigest()),
     discoverAndCacheAll: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
@@ -247,61 +265,28 @@ describe("filterBySearch", () => {
     expect(result[0].status).toBe("failed");
   });
 
-  it("filters by task title", () => {
+  // Search-regression mitigation (perf slimming): the list payload no longer
+  // carries tasks[], so per-task title/error search is dropped. The digest
+  // fields the list DOES carry stay searchable — including the breakpoint
+  // question and the derived failure text.
+  it("filters by breakpoint question (digest field)", () => {
     const runs = [
-      makeRun({
-        runId: "r1",
-        tasks: [
-          {
-            effectId: "e1", kind: "node", title: "Deploy service",
-            label: "deploy", status: "resolved", invocationKey: "k1",
-            stepId: "s1", taskId: "t1", requestedAt: "2024-01-15T10:00:00Z",
-          },
-        ],
-      }),
-      makeRun({ runId: "r2", tasks: [] }),
+      makeRun({ runId: "r1", breakpointQuestion: "Approve production deploy?" }),
+      makeRun({ runId: "r2" }),
     ];
-    const result = filterBySearch(runs, "Deploy");
+    const result = filterBySearch(runs, "production deploy");
     expect(result).toHaveLength(1);
     expect(result[0].runId).toBe("r1");
   });
 
-  it("filters by task error message", () => {
+  it("filters by failure message / failed step (digest fields)", () => {
     const runs = [
-      makeRun({
-        runId: "r1",
-        tasks: [
-          {
-            effectId: "e1", kind: "node", title: "step1",
-            label: "step1", status: "error", invocationKey: "k1",
-            stepId: "s1", taskId: "t1", requestedAt: "2024-01-15T10:00:00Z",
-            error: { name: "TimeoutError", message: "Connection timed out" },
-          },
-        ],
-      }),
-      makeRun({ runId: "r2", tasks: [] }),
+      makeRun({ runId: "r1", failureMessage: "Connection timed out" }),
+      makeRun({ runId: "r2", failedStep: "deploy-service" }),
+      makeRun({ runId: "r3" }),
     ];
-    const result = filterBySearch(runs, "timed out");
-    expect(result).toHaveLength(1);
-    expect(result[0].runId).toBe("r1");
-  });
-
-  it("filters by task error name", () => {
-    const runs = [
-      makeRun({
-        runId: "r1",
-        tasks: [
-          {
-            effectId: "e1", kind: "node", title: "step1",
-            label: "step1", status: "error", invocationKey: "k1",
-            stepId: "s1", taskId: "t1", requestedAt: "2024-01-15T10:00:00Z",
-            error: { name: "TimeoutError", message: "Connection timed out" },
-          },
-        ],
-      }),
-    ];
-    const result = filterBySearch(runs, "timeouterror");
-    expect(result).toHaveLength(1);
+    expect(filterBySearch(runs, "timed out").map((r) => r.runId)).toEqual(["r1"]);
+    expect(filterBySearch(runs, "deploy-service").map((r) => r.runId)).toEqual(["r2"]);
   });
 });
 
@@ -331,6 +316,90 @@ describe("filterByStatus", () => {
     const result = filterByStatus(runs, "waiting");
     expect(result).toHaveLength(2);
     expect(result.map((r) => r.runId)).toEqual(["a", "b"]);
+  });
+
+  it("filters 'needsyou' by pendingBreakpoints count (matches the badge)", () => {
+    const runs = [
+      makeRun({ runId: "answerable", status: "waiting", waitingKind: "breakpoint", pendingBreakpoints: 1 }),
+      // Parked at a breakpoint but already answered (count 0) — must NOT match.
+      makeRun({ runId: "answered", status: "waiting", waitingKind: "breakpoint", pendingBreakpoints: 0 }),
+      makeRun({ runId: "task", status: "waiting", waitingKind: "task", pendingBreakpoints: 0 }),
+      makeRun({ runId: "done", status: "completed", pendingBreakpoints: 0 }),
+    ];
+    const result = filterByStatus(runs, "needsyou");
+    expect(result).toHaveLength(1);
+    expect(result[0].runId).toBe("answerable");
+  });
+
+  it("filters 'needsyou' via waitingKind fallback when pendingBreakpoints is undefined", () => {
+    // Older cached run shapes predate pendingBreakpoints.
+    const runs = [
+      makeRun({ runId: "bp", status: "waiting", waitingKind: "breakpoint" }),
+      makeRun({ runId: "task", status: "waiting", waitingKind: "task" }),
+      makeRun({ runId: "done", status: "completed" }),
+    ];
+    const result = filterByStatus(runs, "needsyou");
+    expect(result).toHaveLength(1);
+    expect(result[0].runId).toBe("bp");
+  });
+
+  it("filters 'orphaned' to non-terminal runs with no live driver (driver 'orphaned' OR 'none')", () => {
+    // DC-3: the canonical orphaned predicate is (driver 'orphaned' || 'none') &&
+    // non-terminal. Both driver states render as the "orphaned" chip in the UI,
+    // so a driverless ('none') waiting run must read as orphaned here too — this
+    // deliberately replaces the earlier definition that excluded 'none'.
+    const runs = [
+      makeRun({ runId: "orphan", status: "waiting", driver: "orphaned" }),
+      makeRun({ runId: "live", status: "waiting", driver: "live" }),
+      makeRun({ runId: "none", status: "waiting", driver: "none" }),
+      // Terminal run with a dead driver must NOT read as orphaned.
+      makeRun({ runId: "done-orphan", status: "completed", driver: "orphaned" }),
+      // Terminal run with no lock ('none') must NOT read as orphaned either.
+      makeRun({ runId: "done-none", status: "completed", driver: "none" }),
+    ];
+    const result = filterByStatus(runs, "orphaned");
+    expect(result).toHaveLength(2);
+    expect(result.map((r) => r.runId).sort()).toEqual(["none", "orphan"]);
+  });
+
+  it("DC-4: excludes terminal runs with residual pendingBreakpoints from 'needsyou'", () => {
+    // The non-terminal guard prevents a completed/failed run that still reports
+    // pendingBreakpoints > 0 (stale residual) from leaking into the needs-you list.
+    const runs = [
+      makeRun({ runId: "waiting-bp", status: "waiting", pendingBreakpoints: 1 }),
+      makeRun({ runId: "done-bp", status: "completed", pendingBreakpoints: 1 }),
+      makeRun({ runId: "failed-bp", status: "failed", pendingBreakpoints: 2 }),
+    ];
+    const result = filterByStatus(runs, "needsyou");
+    expect(result).toHaveLength(1);
+    expect(result[0].runId).toBe("waiting-bp");
+  });
+
+  it("waiting-badge-vs-list-mismatch: 'waiting' filter excludes stale runs", () => {
+    // The Waiting badge counts non-stale active runs (metrics.activeRuns); stale
+    // runs live under the 'stale' filter. The list must agree, so stale runs are
+    // excluded here even though they are waiting/pending.
+    const runs = [
+      makeRun({ runId: "active", status: "waiting", isStale: false }),
+      makeRun({ runId: "pending", status: "pending" }),
+      makeRun({ runId: "stale", status: "waiting", isStale: true }),
+    ];
+    const waiting = filterByStatus(runs, "waiting");
+    expect(waiting.map((r) => r.runId).sort()).toEqual(["active", "pending"]);
+    // The stale run is still reachable under the 'stale' filter (no run is lost).
+    const stale = filterByStatus(runs, "stale");
+    expect(stale.map((r) => r.runId)).toEqual(["stale"]);
+  });
+
+  it("filters 'stale' to runs flagged as stale", () => {
+    const runs = [
+      makeRun({ runId: "stale", isStale: true }),
+      makeRun({ runId: "fresh", isStale: false }),
+      makeRun({ runId: "unset" }),
+    ];
+    const result = filterByStatus(runs, "stale");
+    expect(result).toHaveLength(1);
+    expect(result[0].runId).toBe("stale");
   });
 });
 
@@ -383,7 +452,7 @@ describe("paginate", () => {
 });
 
 describe("toLightRuns", () => {
-  it("strips events and adds totalEvents count", () => {
+  it("drops the events key and exposes totalEvents count", () => {
     const runs = [
       makeRun({
         runId: "r1",
@@ -398,11 +467,12 @@ describe("toLightRuns", () => {
 
     expect(light).toHaveLength(1);
     expect(light[0].runId).toBe("r1");
-    expect(light[0].events).toEqual([]);
+    // The heavy events[] array is not carried; only its count.
+    expect(light[0]).not.toHaveProperty("events");
     expect(light[0].totalEvents).toBe(2);
   });
 
-  it("preserves all other run fields", () => {
+  it("preserves all other run fields (grid RunCard needs tasks/duration/session)", () => {
     const run = makeRun({ runId: "r1", processId: "proc", status: "failed" });
     const [light] = toLightRuns([run]);
 
@@ -445,19 +515,25 @@ describe("RunQueryService", () => {
       expect(result.recentCompletionWindowMs).toBe(14400000);
     });
 
-    it("filters out hidden projects", async () => {
+    it("annotates hidden projects with hidden:true instead of dropping them (QA F4)", async () => {
       (deps.getConfig as ReturnType<typeof vi.fn>).mockResolvedValue(
         makeConfig({ hiddenProjects: ["secret"] })
       );
       (deps.getProjectSummaries as ReturnType<typeof vi.fn>).mockReturnValue([
-        makeSummary({ projectName: "visible" }),
-        makeSummary({ projectName: "secret" }),
+        makeSummary({ projectName: "visible", pendingBreakpoints: 0 }),
+        makeSummary({ projectName: "secret", pendingBreakpoints: 1 }),
       ]);
 
       const result = await service.listProjects();
 
-      expect(result.projects).toHaveLength(1);
-      expect(result.projects[0].projectName).toBe("visible");
+      // Both projects are returned: hiding is a grid concern; the alarm
+      // surface (needs-you banner/counts) must still see "secret"'s breakpoint.
+      expect(result.projects).toHaveLength(2);
+      const visible = result.projects.find((p) => p.projectName === "visible");
+      const hidden = result.projects.find((p) => p.projectName === "secret");
+      expect(visible?.hidden).toBeUndefined();
+      expect(hidden?.hidden).toBe(true);
+      expect(hidden?.pendingBreakpoints).toBe(1);
     });
 
     it("applies retention filter on projects", async () => {
@@ -695,7 +771,7 @@ describe("RunQueryService", () => {
         limit: 0, offset: 0, search: "", status: "", sort: "status",
       });
 
-      expect(result.runs[0].events).toEqual([]);
+      expect(result.runs[0]).not.toHaveProperty("events");
       expect(result.runs[0].totalEvents).toBe(2);
     });
   });
@@ -704,16 +780,16 @@ describe("RunQueryService", () => {
   // listAllRuns
   // -----------------------------------------------------------------------
   describe("listAllRuns", () => {
-    it("returns all runs from all projects", async () => {
+    it("returns all runs from all projects (served from digests)", async () => {
       (deps.discoverAllRunDirs as ReturnType<typeof vi.fn>).mockResolvedValue([
         makeDiscoveredRun("/runs/r1", "proj-a"),
         makeDiscoveredRun("/runs/r2", "proj-b"),
       ]);
 
-      (deps.getRunCached as ReturnType<typeof vi.fn>).mockImplementation(
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockImplementation(
         async (runDir: string) => {
-          if (runDir === "/runs/r1") return makeRun({ runId: "r1", projectName: "proj-a" });
-          return makeRun({ runId: "r2", projectName: "proj-b" });
+          if (runDir === "/runs/r1") return makeDigest({ runId: "r1", projectName: "proj-a" });
+          return makeDigest({ runId: "r2", projectName: "proj-b" });
         }
       );
 
@@ -724,6 +800,8 @@ describe("RunQueryService", () => {
       expect(result.runs).toHaveLength(2);
       expect(result.totalCount).toBe(2);
       expect(result.project).toBeUndefined();
+      // The full-run reader must NOT be used on the default list path.
+      expect(deps.getRunCached).not.toHaveBeenCalled();
     });
 
     it("applies search filter", async () => {
@@ -732,10 +810,10 @@ describe("RunQueryService", () => {
         makeDiscoveredRun("/runs/r2", "proj-b"),
       ]);
 
-      (deps.getRunCached as ReturnType<typeof vi.fn>).mockImplementation(
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockImplementation(
         async (runDir: string) => {
-          if (runDir === "/runs/r1") return makeRun({ runId: "deploy-001" });
-          return makeRun({ runId: "test-002" });
+          if (runDir === "/runs/r1") return makeDigest({ runId: "deploy-001" });
+          return makeDigest({ runId: "test-002" });
         }
       );
 
@@ -747,17 +825,38 @@ describe("RunQueryService", () => {
       expect(result.runs[0].runId).toBe("test-002");
     });
 
+    it("applies status filter (regression: listAllRuns must honor status)", async () => {
+      (deps.discoverAllRunDirs as ReturnType<typeof vi.fn>).mockResolvedValue([
+        makeDiscoveredRun("/runs/r1", "proj-a"),
+        makeDiscoveredRun("/runs/r2", "proj-b"),
+      ]);
+
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockImplementation(
+        async (runDir: string) => {
+          if (runDir === "/runs/r1") return makeDigest({ runId: "r1", status: "completed" });
+          return makeDigest({ runId: "r2", status: "failed" });
+        }
+      );
+
+      const result = await service.listAllRuns({
+        limit: 0, offset: 0, search: "", status: "failed", sort: "status",
+      });
+
+      expect(result.runs).toHaveLength(1);
+      expect(result.runs[0].runId).toBe("r2");
+    });
+
     it("applies sort in activity mode", async () => {
       (deps.discoverAllRunDirs as ReturnType<typeof vi.fn>).mockResolvedValue([
         makeDiscoveredRun("/runs/r1", "proj"),
         makeDiscoveredRun("/runs/r2", "proj"),
       ]);
 
-      (deps.getRunCached as ReturnType<typeof vi.fn>).mockImplementation(
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockImplementation(
         async (runDir: string) => {
           if (runDir === "/runs/r1")
-            return makeRun({ runId: "old", updatedAt: "2024-01-01T00:00:00Z" });
-          return makeRun({ runId: "new", updatedAt: "2024-01-15T00:00:00Z" });
+            return makeDigest({ runId: "old", updatedAt: "2024-01-01T00:00:00Z" });
+          return makeDigest({ runId: "new", updatedAt: "2024-01-15T00:00:00Z" });
         }
       );
 
@@ -776,11 +875,11 @@ describe("RunQueryService", () => {
         makeDiscoveredRun("/runs/r3", "proj"),
       ]);
 
-      (deps.getRunCached as ReturnType<typeof vi.fn>).mockImplementation(
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockImplementation(
         async (runDir: string) => {
-          if (runDir === "/runs/r1") return makeRun({ runId: "r1", updatedAt: "2024-01-01T00:00:00Z" });
-          if (runDir === "/runs/r2") return makeRun({ runId: "r2", updatedAt: "2024-01-10T00:00:00Z" });
-          return makeRun({ runId: "r3", updatedAt: "2024-01-15T00:00:00Z" });
+          if (runDir === "/runs/r1") return makeDigest({ runId: "r1", updatedAt: "2024-01-01T00:00:00Z" });
+          if (runDir === "/runs/r2") return makeDigest({ runId: "r2", updatedAt: "2024-01-10T00:00:00Z" });
+          return makeDigest({ runId: "r3", updatedAt: "2024-01-15T00:00:00Z" });
         }
       );
 
@@ -794,26 +893,71 @@ describe("RunQueryService", () => {
       expect(result.runs[1].runId).toBe("r2");
     });
 
-    it("strips events from runs in response", async () => {
+    it("returns digest cards with card-name aliases and no tasks/events keys", async () => {
       (deps.discoverAllRunDirs as ReturnType<typeof vi.fn>).mockResolvedValue([
         makeDiscoveredRun("/runs/r1", "proj"),
       ]);
 
-      (deps.getRunCached as ReturnType<typeof vi.fn>).mockResolvedValue(
-        makeRun({
-          runId: "r1",
-          events: [
-            { seq: 1, id: "e1", ts: "2024-01-15T10:00:00Z", type: "RUN_CREATED", payload: {} },
-          ],
-        })
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockResolvedValue(
+        makeDigest({ runId: "r1", latestSeq: 7, taskCount: 4, completedTasks: 2 })
       );
 
       const result = await service.listAllRuns({
         limit: 0, offset: 0, search: "", status: "", sort: "status",
       });
 
-      expect(result.runs[0].events).toEqual([]);
-      expect(result.runs[0].totalEvents).toBe(1);
+      const [card] = result.runs;
+      expect(card).not.toHaveProperty("events");
+      expect(card).not.toHaveProperty("tasks");
+      // Server-side aliases keep kanban-card.tsx / run-list.tsx unchanged.
+      expect(card.totalEvents).toBe(7); // <- latestSeq
+      expect(card.totalTasks).toBe(4); // <- taskCount
+      expect(card.completedTasks).toBe(2);
+    });
+
+    // -------------------------------------------------------------------------
+    // GUARDRAIL (perf): the default /api/runs list must stay slim. If anyone
+    // re-wires it back to full runs (tasks[]/events[]) this fails loudly on
+    // BOTH the no-heavy-keys assertion and the byte budget.
+    // -------------------------------------------------------------------------
+    it("payload guardrail: 500-run response has no tasks/events keys and stays < 3MB", async () => {
+      const RUN_COUNT = 500;
+      // A fat, realistic-ish question/failure string per run — even so, digests
+      // are tiny. Full runs (with per-task prompt/stack) would blow the budget.
+      const fatText = "x".repeat(1500);
+
+      const discovered = Array.from({ length: RUN_COUNT }, (_, i) =>
+        makeDiscoveredRun(`/runs/run-${i}`, `proj-${i % 20}`)
+      );
+      (deps.discoverAllRunDirs as ReturnType<typeof vi.fn>).mockResolvedValue(discovered);
+      (deps.getDigestCached as ReturnType<typeof vi.fn>).mockImplementation(
+        async (runDir: string) => {
+          const i = Number(runDir.split("-").pop());
+          return makeDigest({
+            runId: `01RUN${String(i).padStart(19, "0")}`,
+            status: i % 3 === 0 ? "waiting" : "completed",
+            taskCount: 40,
+            completedTasks: 20,
+            latestSeq: 120,
+            breakpointQuestion: fatText,
+            failureMessage: fatText,
+          });
+        }
+      );
+
+      const result = await service.listAllRuns({
+        limit: RUN_COUNT, offset: 0, search: "", status: "", sort: "status",
+      });
+
+      expect(result.runs).toHaveLength(RUN_COUNT);
+      // (a) NO heavy keys on any returned run.
+      for (const run of result.runs) {
+        expect(run).not.toHaveProperty("tasks");
+        expect(run).not.toHaveProperty("events");
+      }
+      // (b) hard byte budget.
+      const bytes = Buffer.byteLength(JSON.stringify(result));
+      expect(bytes).toBeLessThan(3 * 1024 * 1024);
     });
   });
 });

@@ -1,0 +1,32 @@
+{
+  "kind": "breakpoint",
+  "title": "Gate 2 — Accept the release cut (nothing is pushed)",
+  "schemaVersion": "2026.01.tasks-v1",
+  "sdkVersion": "6.0.2",
+  "effectId": "01KTEST_KANBAN_TASKDEF_1",
+  "taskId": "release-accept",
+  "invocationKey": "kanban/taskdef-gate:release-accept.default.e2efixture08.0:release-accept",
+  "stepId": "release-accept.default.e2efixture08.0",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_TASKDEF_1/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_TASKDEF_1/result.json"
+  },
+  "inputs": {
+    "attempt": 1,
+    "previousFeedback": null
+  },
+  "metadata": null,
+  "breakpoint": {
+    "breakpointId": "kanban.taskdef-gate.release-accept",
+    "expert": "owner",
+    "options": [
+      "Accept",
+      "Request changes"
+    ],
+    "question": "TASKDEF GATE — accept the release cut? The branch, runbooks and verification report are staged locally; nothing was pushed, and the hand-off (push/PR) plus the live rollout steps remain owner actions listed in the report.",
+    "tags": [
+      "approval-gate",
+      "final"
+    ]
+  }
+}

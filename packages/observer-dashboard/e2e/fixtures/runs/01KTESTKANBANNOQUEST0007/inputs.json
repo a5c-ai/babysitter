@@ -1,0 +1,4 @@
+{
+  "scope": "kanban/no-question",
+  "description": "UX-R2 §13.1 fixture: breakpoint with NO question in any on-disk source (AC-34 honest fallback)"
+}

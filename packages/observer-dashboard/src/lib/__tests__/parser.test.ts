@@ -346,82 +346,58 @@ describe('parser', () => {
       expect(run.failedTasks).toBe(0);
     });
 
-    it('computes run duration from task execution windows', async () => {
-      setupCompleteRun();
-
-      const run = await parseRunDir('/runs/run-123');
-
-      // EFFECT_RESOLVED carries startedAt 10:00:01Z and finishedAt 10:00:05Z
-      expect(run.duration).toBe(4000);
-    });
-
-    it('excludes idle gaps from run duration', async () => {
+    it('§15.1 AC-83: a run whose newest event is an unresolved sleep effect parses as driver "scheduled", never stale, with the wake time', async () => {
+      // Real shape: RUN_CREATED then an unresolved sleep EFFECT_REQUESTED whose
+      // label carries `sleep:<ISO>` (wc26 nightly-finalize). recordedAt is very
+      // old so, absent the scheduled guard, it WOULD be flagged stale.
+      mockReadFile.mockImplementation(async (filePath: any) => {
+        const p = filePath.toString();
+        if (p.endsWith('run.json')) return JSON.stringify({ processId: 'nightly-finalize' });
+        if (p.includes('000001')) {
+          return JSON.stringify(
+            makeRunCreatedRaw('run-sleep', 'nightly-finalize', '2024-01-15T10:00:00Z'),
+          );
+        }
+        if (p.includes('000002')) {
+          return JSON.stringify(
+            makeEffectRequestedRaw(
+              'sleep-1',
+              'sleep',
+              'sleep:2024-01-15T11:00:00.000Z',
+              '2024-01-15T10:00:01Z',
+            ),
+          );
+        }
+        if (p.includes(path.join('tasks', 'sleep-1', 'task.json'))) {
+          return JSON.stringify({ title: 'sleep', kind: 'sleep' });
+        }
+        throw new Error('ENOENT');
+      });
       mockAccess.mockImplementation(async (p: any) => {
         if (p.toString().includes('journal')) return undefined;
         throw new Error('ENOENT');
       });
-
       mockReaddir.mockImplementation(async (dir: any) => {
-        if (dir.toString().includes('journal')) {
-          return [
-            '000001.A.json',
-            '000002.B.json',
-            '000003.C.json',
-            '000004.D.json',
-            '000005.E.json',
-            '000006.F.json',
-          ] as any;
-        }
+        const d = typeof dir === 'string' ? dir : dir.toString();
+        if (d.includes('journal')) return ['000001.A.json', '000002.B.json'] as any;
         return [];
       });
 
-      mockReadFile.mockImplementation(async (filePath: any) => {
-        const p = filePath.toString();
-        if (p.endsWith('run.json')) return JSON.stringify({ processId: 'proc' });
-        if (p.includes('000001')) {
-          return JSON.stringify(makeRunCreatedRaw('run-gap', 'proc', '2024-01-15T10:00:00Z'));
-        }
-        if (p.includes('000002')) {
-          return JSON.stringify(
-            makeEffectRequestedRaw('eff-1', 'agent', 'phase-1', '2024-01-15T10:00:01Z'),
-          );
-        }
-        if (p.includes('000003')) {
-          return JSON.stringify(
-            makeEffectResolvedRaw('eff-1', 'ok', '2024-01-15T10:00:10Z', {
-              startedAt: '2024-01-15T10:00:02Z',
-              finishedAt: '2024-01-15T10:00:04Z',
-            }),
-          );
-        }
-        if (p.includes('000004')) {
-          return JSON.stringify(
-            makeEffectRequestedRaw('eff-2', 'agent', 'phase-2', '2024-01-15T10:01:00Z'),
-          );
-        }
-        if (p.includes('000005')) {
-          return JSON.stringify(
-            makeEffectResolvedRaw('eff-2', 'ok', '2024-01-15T10:01:20Z', {
-              startedAt: '2024-01-15T10:01:05Z',
-              finishedAt: '2024-01-15T10:01:08Z',
-            }),
-          );
-        }
-        if (p.includes('000006')) {
-          return JSON.stringify(makeRunCompletedRaw('2024-01-15T10:01:25Z'));
-        }
-        if (p.includes(path.join('tasks', 'eff-1', 'task.json'))) {
-          return JSON.stringify({ title: 'Phase 1', kind: 'agent' });
-        }
-        if (p.includes(path.join('tasks', 'eff-2', 'task.json'))) {
-          return JSON.stringify({ title: 'Phase 2', kind: 'agent' });
-        }
-        throw new Error('ENOENT');
-      });
+      const run = await parseRunDir('/runs/run-sleep');
 
-      const run = await parseRunDir('/runs/run-gap');
+      expect(run.status).toBe('waiting');
+      expect(run.driver).toBe('scheduled');
+      expect(run.isStale).toBeFalsy();
+      expect(run.sleepWakeAt).toBe('2024-01-15T11:00:00.000Z');
+    });
 
-      expect(run.duration).toBe(5000);
+    it('computes duration from created to completed event', async () => {
+      setupCompleteRun();
+
+      const run = await parseRunDir('/runs/run-123');
+
+      // 2024-01-15T10:00:00Z to 2024-01-15T10:00:06Z = 6000ms
+      expect(run.duration).toBe(6000);
     });
 
     it('sets status to failed when RUN_FAILED event exists', async () => {
@@ -591,6 +567,9 @@ describe('parser', () => {
 
       expect(run.status).toBe('waiting');
       expect(run.breakpointQuestion).toBe('Proceed with deployment?');
+      // The unresolved breakpoint (no result.json) is counted as pending, so the
+      // flat "needs you" list can align with the badge/banner.
+      expect(run.pendingBreakpoints).toBe(1);
     });
 
     it('falls back to path.basename for runId when no RUN_CREATED event', async () => {
@@ -738,6 +717,71 @@ describe('parser', () => {
         name: 'analyst',
         prompt: { role: 'analyzer', task: 'analyze data', instructions: ['be thorough'] },
       });
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // UX-R3 wave 3 — in-progress liveness derivation (journal-activity freshness)
+  // Root cause: 0 of 308 real run dirs carry a run.lock, so getDriverLiveness is
+  // always "none" and every non-terminal run classifies as Orphaned (WORKING is
+  // structurally 0). parseRunDir/getRunDigest now promote a non-terminal run with
+  // FRESH journal activity (no lock) to driver "live" so it lands in Working.
+  // -----------------------------------------------------------------------
+  describe('in-progress liveness (UX-R3 wave 3)', () => {
+    // Wire a lock-less waiting run whose newest journal event is `msAgo` old.
+    function setupWaitingRun(msAgo: number) {
+      const requestedAt = new Date(Date.now() - msAgo).toISOString();
+      mockAccess.mockImplementation(async (p: any) => {
+        if (p.toString().includes('journal')) return undefined;
+        throw new Error('ENOENT'); // no run.lock, no other files
+      });
+      mockReaddir.mockImplementation(async (dir: any) => {
+        if (dir.toString().includes('journal')) {
+          return ['000001.A.json', '000002.B.json'] as any;
+        }
+        return [];
+      });
+      mockReadFile.mockImplementation(async (filePath: any) => {
+        const p = filePath.toString();
+        if (p.endsWith('run.json')) return JSON.stringify({});
+        if (p.includes('000001')) {
+          return JSON.stringify(makeRunCreatedRaw('run-live', 'proc', requestedAt));
+        }
+        if (p.includes('000002')) {
+          return JSON.stringify(
+            makeEffectRequestedRaw('eff-live', 'agent', 'working-step', requestedAt),
+          );
+        }
+        throw new Error('ENOENT'); // run.lock read → getDriverLiveness "none"
+      });
+    }
+
+    it('parseRunDir promotes a lock-less run with FRESH activity to driver "live" (not stale)', async () => {
+      setupWaitingRun(30_000); // 30s ago — well within the 1h stale window
+      const run = await parseRunDir('/runs/run-live');
+      expect(run.status).toBe('waiting');
+      expect(run.isStale).toBeUndefined();
+      expect(run.driver).toBe('live');
+    });
+
+    it('parseRunDir keeps a lock-less run with STALE activity as driver "none" (reads as Stalled)', async () => {
+      setupWaitingRun(2 * 3_600_000); // 2h ago — past the stale window
+      const run = await parseRunDir('/runs/run-stale');
+      expect(run.status).toBe('waiting');
+      expect(run.isStale).toBe(true);
+      expect(run.driver).toBe('none');
+    });
+
+    it('getRunDigest mirrors the derivation: fresh → "live", stale → "none"', async () => {
+      setupWaitingRun(30_000);
+      const freshDigest = await getRunDigest('/runs/run-live');
+      expect(freshDigest.status).toBe('waiting');
+      expect(freshDigest.driver).toBe('live');
+
+      setupWaitingRun(2 * 3_600_000);
+      const staleDigest = await getRunDigest('/runs/run-stale');
+      expect(staleDigest.isStale).toBe(true);
+      expect(staleDigest.driver).toBe('none');
     });
   });
 
@@ -988,7 +1032,7 @@ describe('parser', () => {
       expect(detail!.input).toEqual({ key: 'value' });
     });
 
-    it('keeps zero execution duration when result timestamps are equal', async () => {
+    it('falls back to journal wall-clock for duration when result timestamps are equal', async () => {
       mockAccess.mockResolvedValue(undefined);
 
       mockReaddir.mockImplementation(async (dir: any) => {
@@ -1032,54 +1076,8 @@ describe('parser', () => {
       const detail = await parseTaskDetail('/run', 'eff-dur');
 
       expect(detail).not.toBeNull();
-      expect(detail!.duration).toBe(0);
-    });
-
-    it('falls back to request/resolve timing when execution timestamps are absent', async () => {
-      mockAccess.mockResolvedValue(undefined);
-
-      mockReaddir.mockImplementation(async (dir: any) => {
-        if (dir.toString().includes('journal')) {
-          return ['000001.A.json', '000002.B.json', '000003.C.json'] as any;
-        }
-        return [];
-      });
-
-      mockReadFile.mockImplementation(async (filePath: any) => {
-        const p = filePath.toString();
-        if (p.includes('task.json')) {
-          return JSON.stringify({ title: 'Task', kind: 'node' });
-        }
-        if (p.includes('input.json')) throw new Error('ENOENT');
-        if (p.includes('result.json')) {
-          return JSON.stringify({
-            status: 'ok',
-          });
-        }
-        if (p.includes('stdout.log')) throw new Error('ENOENT');
-        if (p.includes('stderr.log')) throw new Error('ENOENT');
-        if (p.includes('000001')) {
-          return JSON.stringify(makeRunCreatedRaw('r', 'p', '2024-01-15T10:00:00Z'));
-        }
-        if (p.includes('000002')) {
-          return JSON.stringify(
-            makeEffectRequestedRaw('eff-wall', 'node', 'step', '2024-01-15T10:00:01Z'),
-          );
-        }
-        if (p.includes('000003')) {
-          return JSON.stringify(
-            makeEffectResolvedRaw('eff-wall', 'ok', '2024-01-15T10:00:05Z', {
-              startedAt: undefined,
-              finishedAt: undefined,
-            }),
-          );
-        }
-        throw new Error('ENOENT');
-      });
-
-      const detail = await parseTaskDetail('/run', 'eff-wall');
-
-      expect(detail).not.toBeNull();
+      // Since startedAt == finishedAt (0ms), it should fall back to journal timestamps
+      // requestedAt: 10:00:01, resolvedAt: 10:00:05 => 4000ms
       expect(detail!.duration).toBe(4000);
     });
   });
@@ -1527,6 +1525,251 @@ describe('parser', () => {
 
       expect(result.events).toEqual([]);
       expect(result.fileCount).toBe(0);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // UX-R2 §13.1 — breakpoint question from task.json metadata.payload
+  // (AC-30, AC-31, AC-32). Evidence run: demo-client-project/
+  // 01KWE8RYQEHJ7BATR3V88AQVSD — v6 ctx.breakpoint writes the question/title/
+  // context ONLY into task.json → metadata.payload.* (mirrored under
+  // inputs.payload); inputs carries NO direct question/title keys and no
+  // input.json exists on disk.
+  // -----------------------------------------------------------------------
+  describe('breakpoint metadata.payload extraction (UX-R2 §13.1)', () => {
+    // Multi-line question, asserted verbatim (AC-30) — same shape as the
+    // evidence payload ("COORDINATION GATE — …" with embedded newlines).
+    const EVIDENCE_QUESTION =
+      'COORDINATION GATE — confirm the table partition + reconcile decisions BEFORE writing code.\n\n' +
+      'Dana already pushed: 1655ec3 surgical-writehole (deployed); d9f2231 lockdown (abandoned, excluded)\n\n' +
+      'Approve this partition + reconcile plan? (Confirm the boundary is agreed with Dana.)';
+
+    // AC-32 honest last-resort copy — frozen verbatim here on purpose (the
+    // test must not import the constant it is meant to pin down).
+    const HONEST_FALLBACK =
+      // owner 2026-07-08: de-AI copy (no em-dashes) + answer-flow clarity
+      'Approval required: this breakpoint has no question text on disk.';
+
+    // metadata.payload keys byte-replicate the evidence run:
+    // [context, expert, question, tags, title].
+    const EVIDENCE_PAYLOAD = {
+      context: {
+        fresh: {
+          collision: false,
+          note: 'depp-dev unchanged since rebase; no new Dana pushes into scope',
+        },
+      },
+      expert: 'owner',
+      question: EVIDENCE_QUESTION,
+      tags: ['approval-gate', 'destructive-git'],
+      title: 'Gate 1 — Coordinate partition with Dana',
+    };
+
+    /** task.json exactly as the v6 SDK writes it for ctx.breakpoint. */
+    function makeEvidenceTaskJson(effectId: string) {
+      return {
+        kind: 'breakpoint',
+        metadata: {
+          label: 'breakpoint',
+          payload: EVIDENCE_PAYLOAD,
+          requestedAt: '2026-07-01T11:45:43.573Z',
+        },
+        title: 'breakpoint',
+        schemaVersion: '2026.01.tasks-v1',
+        effectId,
+        taskId: '__sdk.breakpoint',
+        invocationKey: `proc:S000008:__sdk.breakpoint`,
+        stepId: 'S000008',
+        // NO question/title directly under inputs — only the mirrored payload.
+        inputs: { label: 'breakpoint', payload: EVIDENCE_PAYLOAD },
+      };
+    }
+
+    /** Wire up a run with one pending breakpoint whose task.json is `taskJson`.
+     *  `inputJson` (optional) is served as tasks/<effectId>/input.json. */
+    function setupBreakpointRun(
+      effectId: string,
+      taskJson: Record<string, unknown>,
+      inputJson?: Record<string, unknown>,
+    ) {
+      mockAccess.mockImplementation(async (p: any) => {
+        const s = p.toString();
+        if (s.includes('journal') || s.includes(path.join('tasks', effectId))) return undefined;
+        throw new Error('ENOENT');
+      });
+
+      mockReaddir.mockImplementation(async (dir: any) => {
+        if (dir.toString().includes('journal')) {
+          return ['000001.A.json', '000002.B.json'] as any;
+        }
+        return [];
+      });
+
+      mockReadFile.mockImplementation(async (filePath: any) => {
+        const p = filePath.toString();
+        if (p.endsWith('run.json')) return JSON.stringify({});
+        if (p.includes('000001')) {
+          return JSON.stringify(makeRunCreatedRaw('run-uxr2', 'proc', '2024-01-15T10:00:00Z'));
+        }
+        if (p.includes('000002')) {
+          return JSON.stringify(
+            makeEffectRequestedRaw(effectId, 'breakpoint', 'breakpoint', '2024-01-15T10:00:01Z'),
+          );
+        }
+        if (p.includes(path.join('tasks', effectId, 'task.json'))) {
+          return JSON.stringify(taskJson);
+        }
+        if (inputJson && p.includes(path.join('tasks', effectId, 'input.json'))) {
+          return JSON.stringify(inputJson);
+        }
+        throw new Error('ENOENT');
+      });
+    }
+
+    // ---------------------------------------------------------------------
+    // AC-30 — evidence shape resolves the payload question at ALL THREE
+    // extraction sites (multi-line preserved, asserted verbatim).
+    // ---------------------------------------------------------------------
+    it('AC-30: parseRunDir reads the breakpoint question from metadata.payload (evidence shape)', async () => {
+      setupBreakpointRun('eff-uxr2', makeEvidenceTaskJson('eff-uxr2'));
+
+      const run = await parseRunDir('/runs/run-uxr2');
+
+      expect(run.status).toBe('waiting');
+      expect(run.breakpointQuestion).toBe(EVIDENCE_QUESTION);
+      expect(run.tasks[0].breakpointQuestion).toBe(EVIDENCE_QUESTION);
+    });
+
+    it('AC-30: parseTaskDetail reads question/title from metadata.payload (evidence shape)', async () => {
+      setupBreakpointRun('eff-uxr2', makeEvidenceTaskJson('eff-uxr2'));
+
+      const detail = await parseTaskDetail('/runs/run-uxr2', 'eff-uxr2');
+
+      expect(detail).not.toBeNull();
+      expect(detail!.breakpoint).toBeDefined();
+      expect(detail!.breakpoint!.question).toBe(EVIDENCE_QUESTION);
+      expect(detail!.breakpoint!.title).toBe('Gate 1 — Coordinate partition with Dana');
+      expect(detail!.breakpointQuestion).toBe(EVIDENCE_QUESTION);
+      // A real on-disk question is flagged with its source (AC-32 flag).
+      expect(detail!.breakpoint!.questionSource).toBe('metadataPayload');
+    });
+
+    it('AC-30: getRunDigest reads the breakpoint question from metadata.payload (evidence shape)', async () => {
+      setupBreakpointRun('eff-uxr2', makeEvidenceTaskJson('eff-uxr2'));
+
+      const digest = await getRunDigest('/runs/run-uxr2');
+
+      expect(digest.status).toBe('waiting');
+      expect(digest.breakpointQuestion).toBe(EVIDENCE_QUESTION);
+      expect(digest.breakpointEffectId).toBe('eff-uxr2');
+    });
+
+    // ---------------------------------------------------------------------
+    // AC-31 — precedence per field: input.json > taskDef.inputs >
+    // metadata.payload; fields resolve independently.
+    // ---------------------------------------------------------------------
+    it('AC-31: input.json wins over taskDef.inputs and metadata.payload for every field', async () => {
+      const taskJson = {
+        ...makeEvidenceTaskJson('eff-prec'),
+        inputs: {
+          question: 'inputs question?',
+          title: 'inputs title',
+          options: ['inputs-opt'],
+          context: { files: [{ path: 'inputs.md', format: 'markdown' }] },
+        },
+      };
+      setupBreakpointRun('eff-prec', taskJson, {
+        question: 'input.json question?',
+        title: 'input.json title',
+        options: ['input-json-opt'],
+        context: { files: [{ path: 'input-json.md', format: 'markdown' }] },
+      });
+
+      const detail = await parseTaskDetail('/runs/run-uxr2', 'eff-prec');
+
+      expect(detail!.breakpoint!.question).toBe('input.json question?');
+      expect(detail!.breakpoint!.title).toBe('input.json title');
+      expect(detail!.breakpoint!.options).toEqual(['input-json-opt']);
+      expect(detail!.breakpoint!.context).toEqual({
+        files: [{ path: 'input-json.md', format: 'markdown' }],
+      });
+    });
+
+    it('AC-31: taskDef.inputs wins over metadata.payload when input.json is absent', async () => {
+      const taskJson = {
+        ...makeEvidenceTaskJson('eff-prec2'),
+        inputs: {
+          question: 'inputs question?',
+          title: 'inputs title',
+          options: ['inputs-opt'],
+        },
+      };
+      setupBreakpointRun('eff-prec2', taskJson);
+
+      const detail = await parseTaskDetail('/runs/run-uxr2', 'eff-prec2');
+
+      expect(detail!.breakpoint!.question).toBe('inputs question?');
+      expect(detail!.breakpoint!.title).toBe('inputs title');
+      expect(detail!.breakpoint!.options).toEqual(['inputs-opt']);
+      // context exists ONLY in metadata.payload — fields resolve independently.
+      expect(detail!.breakpoint!.context).toEqual(EVIDENCE_PAYLOAD.context);
+    });
+
+    it('AC-31: fields resolve independently (title from payload may accompany a question from inputs)', async () => {
+      const taskJson = {
+        ...makeEvidenceTaskJson('eff-mix'),
+        inputs: { question: 'inputs question?' }, // no title/options/context here
+      };
+      setupBreakpointRun('eff-mix', taskJson);
+
+      const detail = await parseTaskDetail('/runs/run-uxr2', 'eff-mix');
+
+      expect(detail!.breakpoint!.question).toBe('inputs question?');
+      expect(detail!.breakpoint!.title).toBe('Gate 1 — Coordinate partition with Dana');
+    });
+
+    it('AC-31: input.json question wins at the parseRunDir and getRunDigest sites too', async () => {
+      setupBreakpointRun('eff-prec3', makeEvidenceTaskJson('eff-prec3'), {
+        question: 'input.json question?',
+      });
+
+      const run = await parseRunDir('/runs/run-uxr2');
+      expect(run.breakpointQuestion).toBe('input.json question?');
+
+      const digest = await getRunDigest('/runs/run-uxr2');
+      expect(digest.breakpointQuestion).toBe('input.json question?');
+    });
+
+    // ---------------------------------------------------------------------
+    // AC-32 — honest last resort: no question anywhere.
+    // ---------------------------------------------------------------------
+    it('AC-32: with no question in any source the resolved question is the honest fallback, flagged', async () => {
+      const questionless = {
+        kind: 'breakpoint',
+        metadata: { label: 'breakpoint' }, // no payload
+        title: 'breakpoint',
+        schemaVersion: '2026.01.tasks-v1',
+        effectId: 'eff-noq',
+        taskId: '__sdk.breakpoint',
+        invocationKey: 'proc:S000009:__sdk.breakpoint',
+        stepId: 'S000009',
+        inputs: { label: 'breakpoint' }, // no question/title
+      };
+      setupBreakpointRun('eff-noq', questionless);
+
+      const detail = await parseTaskDetail('/runs/run-uxr2', 'eff-noq');
+
+      expect(detail!.breakpoint).toBeDefined();
+      expect(detail!.breakpoint!.question).toBe(HONEST_FALLBACK);
+      expect(detail!.breakpoint!.questionSource).toBe('fallback');
+      // Run-level extraction stays honest too: no fabricated question.
+      const run = await parseRunDir('/runs/run-uxr2');
+      expect(run.breakpointQuestion).toBeUndefined();
+      const digest = await getRunDigest('/runs/run-uxr2');
+      expect(digest.breakpointQuestion).toBeUndefined();
+      // The pending breakpoint is still surfaced as answerable.
+      expect(digest.breakpointEffectId).toBe('eff-noq');
+      expect(digest.pendingBreakpoints).toBe(1);
     });
   });
 });

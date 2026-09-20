@@ -100,17 +100,17 @@ jobs:
         run: |
           set -euo pipefail
           # Use root build scripts that know the current package layout
-          npm run build:sdk || true
-          npm run build:hooks-adapter || true
-          npm run build:adapters-extensions || true
-          npm run build:adapters || true
-          npm run build:runtime || true
-          npm run build --workspace=@a5c-ai/genty || true
+          npm run build:sdk
+          npm run build:hooks-adapter
+          npm run build:adapters-extensions
+          npm run build:adapters
+          npm run build:runtime
+          npm run build --workspace=@a5c-ai/genty
           if [[ "$RUNNER_OS" != "Windows" ]]; then
-            npm run build:observer || true
-            npm run build:cloud || true
-            npm run build:kradle || true
-            npm run build:kradle-web || true
+            npm run build:observer
+            npm run build:cloud
+            npm run build:kradle
+            npm run build:kradle-web
           fi
 
       - name: Package dist directories

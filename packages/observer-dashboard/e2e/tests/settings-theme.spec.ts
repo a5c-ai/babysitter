@@ -20,10 +20,10 @@ test.describe("Settings Modal", () => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // Open settings
-    await dashboardPage.settingsButton.click();
+    // Open settings (deterministic re-click helper — settings-flake class)
+    await dashboardPage.openSettings();
     const modal = page.getByTestId("settings-modal");
-    await expect(modal).toBeVisible({ timeout: 30_000 });
+    await expect(modal).toBeVisible();
 
     // Close via X button (the Dialog.Close button inside the modal header)
     const closeButton = modal.locator("button").filter({ has: page.locator("svg.lucide-x") });
@@ -38,10 +38,10 @@ test.describe("Settings Modal", () => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    // Open settings
-    await dashboardPage.settingsButton.click();
+    // Open settings (deterministic re-click helper — settings-flake class)
+    await dashboardPage.openSettings();
     const modal = page.getByTestId("settings-modal");
-    await expect(modal).toBeVisible({ timeout: 30_000 });
+    await expect(modal).toBeVisible();
 
     // Close via Escape key
     await page.keyboard.press("Escape");
@@ -55,9 +55,10 @@ test.describe("Settings Modal", () => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    await dashboardPage.settingsButton.click();
+    // Deterministic open (settings-flake class — see DashboardPage.openSettings)
+    await dashboardPage.openSettings();
     const modal = page.getByTestId("settings-modal");
-    await expect(modal).toBeVisible({ timeout: 30_000 });
+    await expect(modal).toBeVisible();
 
     // Wait for config to load (loading spinner should disappear)
     await expect(modal.locator("text=Loading configuration...")).toBeHidden({ timeout: 30_000 });
@@ -76,9 +77,10 @@ test.describe("Settings Modal", () => {
     await dashboardPage.goto();
     await dashboardPage.waitForData();
 
-    await dashboardPage.settingsButton.click();
+    // Deterministic open (settings-flake class — see DashboardPage.openSettings)
+    await dashboardPage.openSettings();
     const modal = page.getByTestId("settings-modal");
-    await expect(modal).toBeVisible({ timeout: 30_000 });
+    await expect(modal).toBeVisible();
 
     // Wait for config to load
     await expect(modal.locator("text=Loading configuration...")).toBeHidden({ timeout: 30_000 });

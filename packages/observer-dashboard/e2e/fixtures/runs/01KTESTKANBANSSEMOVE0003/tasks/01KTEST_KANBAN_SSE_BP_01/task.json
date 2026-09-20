@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_SSE_BP_01",
+  "taskId": "approve-sse-move",
+  "invocationKey": "kanban/sse-move:S000001:approve-sse-move",
+  "stepId": "S000001",
+  "kind": "breakpoint",
+  "title": "Approval: kanban SSE movement fixture",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_SSE_BP_01/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_SSE_BP_01/result.json"
+  },
+  "inputs": {
+    "question": "Approve the kanban SSE movement fixture step?",
+    "title": "Approval: kanban SSE movement fixture",
+    "options": [
+      "approve",
+      "reject"
+    ]
+  }
+}

@@ -106,4 +106,44 @@ describe('RunFilterBar', () => {
     expect(screen.getByTestId('filter-pill-all')).toHaveTextContent('20');
     expect(screen.getByTestId('filter-pill-failed')).toHaveTextContent('3');
   });
+
+  // QA F4: hidden projects must be visibly indicated near the filter pills.
+  describe('hidden-projects indicator', () => {
+    it('is absent when no projects are hidden', () => {
+      render(<RunFilterBar {...defaultProps} hiddenProjectCount={0} />);
+      expect(screen.queryByTestId('hidden-projects-indicator')).not.toBeInTheDocument();
+    });
+
+    it('shows "N hidden" when projects are hidden', () => {
+      render(<RunFilterBar {...defaultProps} hiddenProjectCount={2} />);
+      expect(screen.getByTestId('hidden-projects-indicator')).toHaveTextContent('2 hidden');
+    });
+
+    it('dispatches the open-settings event on click (reveal via Settings)', async () => {
+      const user = userEvent.setup();
+      const listener = vi.fn();
+      window.addEventListener('open-settings', listener);
+      try {
+        render(<RunFilterBar {...defaultProps} hiddenProjectCount={1} />);
+        await user.click(screen.getByTestId('hidden-projects-indicator'));
+        expect(listener).toHaveBeenCalledTimes(1);
+      } finally {
+        window.removeEventListener('open-settings', listener);
+      }
+    });
+  });
+  describe('board-view sort tooltip (SPEC-vibekanban §6.2)', () => {
+    it('says sorting applies within columns when boardView is set', () => {
+      render(<RunFilterBar {...defaultProps} boardView />);
+      const title = screen.getByTestId('sort-toggle').getAttribute('title') ?? '';
+      expect(title.toLowerCase()).toContain('sorting applies within columns');
+    });
+
+    it('keeps the list-mode status/activity tooltips when boardView is off', () => {
+      render(<RunFilterBar {...defaultProps} />);
+      const title = screen.getByTestId('sort-toggle').getAttribute('title') ?? '';
+      expect(title).toContain('status priority');
+      expect(title.toLowerCase()).not.toContain('within columns');
+    });
+  });
 });

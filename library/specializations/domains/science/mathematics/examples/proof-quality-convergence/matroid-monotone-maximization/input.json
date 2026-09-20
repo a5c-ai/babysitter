@@ -1,0 +1,45 @@
+{
+  "problemStatement": "Analyze continuous optimization and rounding for weighted probabilistic sensor coverage with at most two selected sites per district.",
+  "packageRoot": "../../..",
+  "sourceArtifacts": [
+    "README.md"
+  ],
+  "workspace": "run",
+  "domainProfile": "../../../profiles/submodular-optimization.json",
+  "requiredSections": [
+    "Definitions",
+    "DR property",
+    "Matroid feasibility",
+    "Rounding"
+  ],
+  "maxRevisionRounds": 2,
+  "requiredScore": 100,
+  "strictness": "publication",
+  "breakpointPolicy": "evidence-only",
+  "toolPolicy": {
+    "latexCompile": "optional",
+    "unavailable": "report"
+  },
+  "applicableModules": [
+    {
+      "id": "multilinear-extension",
+      "applicable": true,
+      "rationale": "used by the multilinear matroid proof"
+    },
+    {
+      "id": "matroid-maximization",
+      "applicable": true,
+      "rationale": "selected by the matroid example"
+    },
+    {
+      "id": "density-reduction",
+      "applicable": false,
+      "rationale": "matroid input has no density reduction"
+    },
+    {
+      "id": "graphical-specialization",
+      "applicable": false,
+      "rationale": "example is not a graphical specialization"
+    }
+  ]
+}

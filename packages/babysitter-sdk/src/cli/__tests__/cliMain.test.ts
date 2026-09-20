@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
+import { createHash } from "node:crypto";
 import path from "path";
 import os from "os";
 import { promises as fs } from "fs";
+import { Readable } from "node:stream";
 import { createBabysitterCli } from "../main";
 import { buildEffectIndex } from "../../runtime/replay/effectIndex";
 import { readRunMetadata } from "../../storage/runFiles";
@@ -24,11 +26,31 @@ vi.mock("../../runtime/commitEffectResult", () => ({
 
 const buildEffectIndexMock = buildEffectIndex as unknown as ReturnType<typeof vi.fn>;
 const readRunMetadataMock = readRunMetadata as unknown as ReturnType<typeof vi.fn>;
+const MAX_CHECKSUM_BOUND_FILE_BYTES = 1024 * 1024;
 const commitEffectResultMock = commitEffectResult as unknown as ReturnType<typeof vi.fn>;
 
+async function withStdin<T>(payload: string, run: () => Promise<T>): Promise<T> {
+  const originalStdin = process.stdin;
+  const stdin = Readable.from([payload], { encoding: "utf8" });
+  Object.defineProperty(process, "stdin", {
+    value: stdin,
+    writable: true,
+    configurable: true,
+  });
+  try {
+    return await run();
+  } finally {
+    Object.defineProperty(process, "stdin", {
+      value: originalStdin,
+      writable: true,
+      configurable: true,
+    });
+  }
+}
+
 describe("CLI main entry", () => {
-  let logSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
-  let errorSpy: MockInstance<[message?: any, ...optionalParams: any[]], void>;
+  let logSpy: MockInstance<typeof console.log>;
+  let errorSpy: MockInstance<typeof console.error>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -330,6 +352,405 @@ describe("CLI main entry", () => {
     );
   });
 
+  it.each([
+    {
+      status: "ok",
+      flag: "--value",
+      payload: '{"approved":true}',
+      exitCode: 0,
+      expected: { status: "ok", value: { approved: true } },
+    },
+    {
+      status: "error",
+      flag: "--error",
+      payload: '{"name":"Error","message":"bound failure","data":{"code":"BOUND"}}',
+      exitCode: 1,
+      expected: {
+        status: "error",
+        error: { name: "Error", message: "bound failure", data: { code: "BOUND" } },
+      },
+    },
+  ])("reads authoritative task:post $status JSON from stdin when the selector is '-'", async ({
+    status,
+    flag,
+    payload,
+    expected,
+    exitCode: expectedExitCode,
+  }) => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(`ef-stdin-${status}`)]));
+    const cli = createBabysitterCli();
+
+    const exitCode = await withStdin(payload, () => cli.run([
+      "task:post",
+      "runs/demo",
+      `ef-stdin-${status}`,
+      "--status",
+      status,
+      flag,
+      "-",
+      "--runs-dir",
+      ".",
+    ]));
+
+    expect(exitCode).toBe(expectedExitCode);
+    expect(commitEffectResultMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        effectId: `ef-stdin-${status}`,
+        result: expect.objectContaining(expected),
+      }),
+    );
+  });
+
+  it.each([
+    {
+      status: "ok",
+      fileFlag: "--value",
+      checksumFlag: "--value-sha256",
+      payload: Buffer.from('{"approved":true}\n'),
+      expected: { status: "ok", value: { approved: true } },
+      exitCode: 0,
+    },
+    {
+      status: "error",
+      fileFlag: "--error",
+      checksumFlag: "--error-sha256",
+      payload: Buffer.from('{"name":"BoundError","message":"exact failure","data":{"code":"BOUND"}}\n'),
+      expected: {
+        status: "error",
+        error: { name: "BoundError", message: "exact failure", data: { code: "BOUND" } },
+      },
+      exitCode: 1,
+    },
+  ])("verifies exact task:post $status file bytes before commit", async ({
+    status,
+    fileFlag,
+    checksumFlag,
+    payload,
+    expected,
+    exitCode: expectedExitCode,
+  }) => {
+    const effectId = `ef-checksum-${status}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-checksum-${status}-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    await fs.writeFile(inputPath, payload);
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        status,
+        fileFlag,
+        inputPath,
+        checksumFlag,
+        createHash("sha256").update(payload).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+
+      expect(exitCode).toBe(expectedExitCode);
+      expect(commitEffectResultMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          effectId,
+          result: expect.objectContaining(expected),
+        }),
+      );
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { status: "ok", fileFlag: "--value", checksumFlag: "--value-sha256", size: MAX_CHECKSUM_BOUND_FILE_BYTES - 1 },
+    { status: "error", fileFlag: "--error", checksumFlag: "--error-sha256", size: MAX_CHECKSUM_BOUND_FILE_BYTES },
+  ])("accepts checksum-bound $status files at $size bytes", async ({
+    status,
+    fileFlag,
+    checksumFlag,
+    size,
+  }) => {
+    const effectId = `ef-checksum-limit-${status}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-limit-${status}-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    const prefix = status === "ok" ? '{"padding":"' : '{"name":"Error","message":"';
+    const suffix = '"}\n';
+    const bytes = Buffer.from(prefix + "x".repeat(size - prefix.length - suffix.length) + suffix);
+    await fs.writeFile(inputPath, bytes);
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        status,
+        fileFlag,
+        inputPath,
+        checksumFlag,
+        createHash("sha256").update(bytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(status === "ok" ? 0 : 1);
+      expect(commitEffectResultMock).toHaveBeenCalledOnce();
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { label: "limit plus one", size: MAX_CHECKSUM_BOUND_FILE_BYTES + 1 },
+    { label: "huge sparse file", size: MAX_CHECKSUM_BOUND_FILE_BYTES * 1024 },
+  ])("rejects an oversized checksum-bound $label before commit", async ({ size }) => {
+    const effectId = `ef-checksum-oversize-${size}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-task-post-oversize-"));
+    const inputPath = path.join(tmpDir, "input.json");
+    const handle = await fs.open(inputPath, "w");
+    await handle.truncate(size);
+    await handle.close();
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        "ok",
+        "--value",
+        inputPath,
+        "--value-sha256",
+        "0".repeat(64),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/too large|maximum|bytes/i));
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { label: "final", ancestor: false },
+    { label: "ancestor", ancestor: true },
+  ])("rejects a checksum-bound $label symlink before commit", async ({ label, ancestor }) => {
+    const effectId = `ef-checksum-symlink-${label}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-${label}-symlink-`));
+    const realDir = path.join(tmpDir, "real");
+    const selectedDir = ancestor ? path.join(tmpDir, "selected") : realDir;
+    await fs.mkdir(realDir);
+    const realPath = path.join(realDir, "input.json");
+    const bytes = Buffer.from('{"safe":true}\n');
+    await fs.writeFile(realPath, bytes);
+    if (ancestor) await fs.symlink(realDir, selectedDir, "dir");
+    const inputPath = ancestor ? path.join(selectedDir, "input.json") : path.join(tmpDir, "input.json");
+    if (!ancestor) await fs.symlink(realPath, inputPath, "file");
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        "ok",
+        "--value",
+        inputPath,
+        "--value-sha256",
+        createHash("sha256").update(bytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/symbolic link/i));
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { label: "growth", mutation: "growth" },
+    { label: "replacement", mutation: "replacement" },
+    { label: "ancestor replacement", mutation: "ancestor" },
+  ])("rejects checksum-bound file $label during authenticated read", async ({ label, mutation }) => {
+    const effectId = `ef-checksum-race-${label}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-${label}-race-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    const initialBytes = Buffer.from('{"bound":"initial"}\n');
+    await fs.writeFile(inputPath, initialBytes);
+    const selectedPath = await fs.realpath(inputPath);
+    const originalOpen = fs.open.bind(fs);
+    const openSpy = vi.spyOn(fs, "open").mockImplementation(async (...args) => {
+      const handle = await originalOpen(...args);
+      if (path.resolve(String(args[0])) !== selectedPath) return handle;
+      const originalRead = handle.read.bind(handle);
+      let mutated = false;
+      handle.read = (async (...readArgs: Parameters<typeof handle.read>) => {
+        const result = await originalRead(...readArgs);
+        if (!mutated) {
+          mutated = true;
+          if (mutation === "replacement") {
+            const replacement = `${inputPath}.replacement`;
+            await fs.writeFile(replacement, initialBytes);
+            await fs.rename(replacement, inputPath);
+          } else if (mutation === "ancestor") {
+            const replacementDir = `${tmpDir}.replacement`;
+            await fs.mkdir(replacementDir);
+            await fs.writeFile(path.join(replacementDir, "input.json"), initialBytes);
+            await fs.rename(tmpDir, `${tmpDir}.original`);
+            await fs.rename(replacementDir, tmpDir);
+          } else {
+            await fs.appendFile(inputPath, " ");
+          }
+        }
+        return result;
+      }) as typeof handle.read;
+      return handle;
+    });
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        "ok",
+        "--value",
+        inputPath,
+        "--value-sha256",
+        createHash("sha256").update(initialBytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/changed/i));
+    } finally {
+      openSpy.mockRestore();
+      await fs.rm(tmpDir, { recursive: true, force: true });
+      await fs.rm(`${tmpDir}.original`, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { status: "ok", fileFlag: "--value", checksumFlag: "--value-sha256" },
+    { status: "error", fileFlag: "--error", checksumFlag: "--error-sha256" },
+  ])("rejects replaced task:post $status file bytes before commit", async ({
+    status,
+    fileFlag,
+    checksumFlag,
+  }) => {
+    const effectId = `ef-checksum-replaced-${status}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-replaced-${status}-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    const authenticatedBytes = Buffer.from('{"bound":"authenticated"}\n');
+    await fs.writeFile(inputPath, Buffer.from('{"attacker":"replacement"}\n'));
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        status,
+        fileFlag,
+        inputPath,
+        checksumFlag,
+        createHash("sha256").update(authenticatedBytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/checksum/i));
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    { status: "ok", fileFlag: "--value", checksumFlag: "--value-sha256" },
+    { status: "error", fileFlag: "--error", checksumFlag: "--error-sha256" },
+  ])("rejects malformed checksum-bound $status JSON before commit", async ({
+    status,
+    fileFlag,
+    checksumFlag,
+  }) => {
+    const effectId = `ef-checksum-malformed-${status}`;
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord(effectId)]));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `cli-task-post-malformed-${status}-`));
+    const inputPath = path.join(tmpDir, "input.json");
+    const bytes = Buffer.from("{not-json\n");
+    await fs.writeFile(inputPath, bytes);
+    try {
+      const exitCode = await createBabysitterCli().run([
+        "task:post",
+        "runs/demo",
+        effectId,
+        "--status",
+        status,
+        fileFlag,
+        inputPath,
+        checksumFlag,
+        createHash("sha256").update(bytes).digest("hex"),
+        "--runs-dir",
+        ".",
+      ]);
+
+      expect(exitCode).toBe(1);
+      expect(commitEffectResultMock).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(/json|unexpected|property/i));
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    {
+      name: "invalid checksum syntax",
+      args: ["--status", "ok", "--value", "value.json", "--value-sha256", "ABC"],
+      diagnostic: /sha-?256|checksum/i,
+    },
+    {
+      name: "value checksum without value file",
+      args: ["--status", "ok", "--value-inline", "{}", "--value-sha256", "0".repeat(64)],
+      diagnostic: /value-sha256.*value/i,
+    },
+    {
+      name: "error checksum without error file",
+      args: ["--status", "error", "--error-sha256", "0".repeat(64)],
+      diagnostic: /error-sha256.*error/i,
+    },
+    {
+      name: "value checksum with error status",
+      args: ["--status", "error", "--value", "value.json", "--value-sha256", "0".repeat(64)],
+      diagnostic: /status|value/i,
+    },
+    {
+      name: "error checksum with ok status",
+      args: ["--status", "ok", "--error", "error.json", "--error-sha256", "0".repeat(64)],
+      diagnostic: /status|error/i,
+    },
+  ])("rejects task:post checksum ambiguity: $name", async ({ args, diagnostic }) => {
+    buildEffectIndexMock.mockResolvedValue(mockEffectIndex([nodeEffectRecord("ef-checksum-invalid")]));
+
+    const exitCode = await createBabysitterCli().run([
+      "task:post",
+      "runs/demo",
+      "ef-checksum-invalid",
+      ...args,
+      "--runs-dir",
+      ".",
+    ]);
+
+    expect(exitCode).toBe(1);
+    expect(commitEffectResultMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringMatching(diagnostic));
+  });
+
   it("exits non-zero and reports structured validation errors from task:post", async () => {
     buildEffectIndexMock.mockResolvedValue(mockEffectIndex([shellEffectRecord("ef-schema")]));
     commitEffectResultMock.mockRejectedValue(
@@ -456,7 +877,7 @@ describe("CLI main entry", () => {
     );
   });
 
-  it("normalizes shell task error posts into success:false shell results", async () => {
+  it("preserves shell task error posts as failed effects", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "cli-task-post-shell-error-"));
     const errorPath = path.join(tmpDir, "error.json");
     await fs.writeFile(
@@ -482,18 +903,15 @@ describe("CLI main entry", () => {
       ".",
     ]);
 
-    expect(exitCode).toBe(0);
+    expect(exitCode).toBe(1);
     expect(commitEffectResultMock).toHaveBeenCalledWith(
       expect.objectContaining({
         effectId: "ef-shell-err",
         result: {
-          status: "ok",
-          value: {
-            success: false,
+          status: "error",
+          error: {
             exitCode: 2,
-            stdout: "",
             stderr: "tsc failed",
-            error: "Shell command exited with code 2",
           },
           stdout: undefined,
           stderr: undefined,
@@ -506,7 +924,7 @@ describe("CLI main entry", () => {
       }),
     );
     expect(logSpy).toHaveBeenCalledWith(
-      "[task:post] status=ok normalizedShellFailure=true stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
+      "[task:post] status=error stdoutRef=tasks/mock/stdout.log stderrRef=tasks/mock/stderr.log resultRef=tasks/mock/result.json"
     );
 
     await fs.rm(tmpDir, { recursive: true, force: true });

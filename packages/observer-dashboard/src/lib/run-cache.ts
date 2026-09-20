@@ -246,6 +246,7 @@ export function getProjectSummaries(): ProjectSummary[] {
     completedTasksAggregate: number;
     latestUpdate: string;
     pendingBreakpoints: number;
+    orphanedRuns: number;
     breakpointRuns: ProjectSummary["breakpointRuns"];
   }>();
 
@@ -261,6 +262,7 @@ export function getProjectSummaries(): ProjectSummary[] {
       completedTasksAggregate: 0,
       latestUpdate: "",
       pendingBreakpoints: 0,
+      orphanedRuns: 0,
       breakpointRuns: [],
     };
 
@@ -268,7 +270,13 @@ export function getProjectSummaries(): ProjectSummary[] {
     existing.totalTasks += entry.digest.taskCount || 0;
     existing.completedTasksAggregate += entry.digest.completedTasks || 0;
 
-    if ((entry.digest.status === "waiting" || entry.digest.status === "pending") && !entry.digest.isStale) {
+    if (
+      (entry.digest.status === "waiting" || entry.digest.status === "pending") &&
+      !entry.digest.isStale &&
+      // §15.1 (AC-84): a sleeping "scheduled" run is idle-healthy, not actively
+      // progressing — keep it out of the active-runs aggregate.
+      entry.digest.driver !== "scheduled"
+    ) {
       existing.activeRuns++;
     } else if (entry.digest.status === "completed") {
       existing.completedRuns++;
@@ -280,20 +288,50 @@ export function getProjectSummaries(): ProjectSummary[] {
       existing.staleRuns++;
     }
 
-    // Track pending breakpoints. Breakpoint state only changes when explicitly
+    // Count orphaned runs: non-terminal (waiting/pending) with no live driver —
+    // either a dead lock ("orphaned") or no lock at all ("none"). Both surface as
+    // the "orphaned" liveness chip in the UI, so this must match the flat orphaned
+    // LIST (filterByStatus "orphaned") and run-list isOrphaned()/rank() (DC-3), so
+    // the "Orphaned" badge equals the list length. Unlike breakpointRuns, this
+    // also captures task-wait runs whose orchestrator has detached.
+    if (
+      (entry.digest.status === "waiting" || entry.digest.status === "pending") &&
+      (entry.digest.driver === "orphaned" || entry.digest.driver === "none")
+    ) {
+      existing.orphanedRuns++;
+    }
+
+    // Track "needs you" runs. Breakpoint state only changes when explicitly
     // approved (which calls invalidateRun), so we always count cached breakpoints
     // regardless of cache TTL — the TTL controls when to re-fetch data from disk,
     // not whether the data is valid for display. Removing the isCacheValid check
     // prevents breakpoint banner flickering when discovery is debounced. (v0.12.3)
-    if (entry.digest.pendingBreakpoints && entry.digest.pendingBreakpoints > 0 &&
-        entry.digest.waitingKind === "breakpoint") {
-      existing.pendingBreakpoints += entry.digest.pendingBreakpoints;
+    //
+    // Canonical predicate: NON-terminal run with >= 1 unresolved breakpoint
+    // (pendingBreakpoints > 0). The old waitingKind === "breakpoint" guard is
+    // dropped so this matches the flat LIST (filterByStatus "needsyou"): waitingKind
+    // is derived only from the LAST pending effect and can diverge from
+    // pendingBreakpoints (DC-1). We increment pendingBreakpoints by 1 per RUN — not
+    // by the number of breakpoints — so the badge equals the one-row-per-run LIST
+    // and the approval BANNER length (breakpointRuns.length) (DC-2).
+    if (
+      (entry.digest.status === "waiting" || entry.digest.status === "pending") &&
+      entry.digest.pendingBreakpoints && entry.digest.pendingBreakpoints > 0
+    ) {
+      existing.pendingBreakpoints += 1;
       existing.breakpointRuns.push({
         runId: entry.digest.runId,
         effectId: entry.digest.breakpointEffectId || "",
         projectName,
         processId: entry.digest.processId || "unknown",
-        breakpointQuestion: entry.digest.breakpointQuestion || "Approval required",
+        // Pass the digest's question through UNCHANGED — possibly undefined.
+        // The data layer must never pre-fill the honest fallback copy: a
+        // truthy pre-fill here masked every downstream task-level fallback
+        // (e.g. the kanban panel's task?.breakpoint?.question chain). Display
+        // surfaces apply BREAKPOINT_NO_QUESTION_FALLBACK at render time
+        // (UX-R2 §13.1 AC-32).
+        breakpointQuestion: entry.digest.breakpointQuestion,
+        driver: entry.digest.driver,
       });
     }
 

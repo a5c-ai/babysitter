@@ -29,6 +29,9 @@ import {
   getCacheStats,
   forceRefreshBreakpointRuns,
 } from '../run-cache';
+// filterByStatus is the flat-LIST predicate; imported here to prove that the
+// badge (getProjectSummaries aggregates) counts exactly the same set of runs.
+import { filterByStatus } from '../services/run-query-service';
 
 const mockGetRunDigest = vi.mocked(getRunDigest);
 const mockParseRunDir = vi.mocked(parseRunDir);
@@ -327,6 +330,55 @@ describe('run-cache', () => {
       expect(summaries).toHaveLength(1);
     });
 
+    it('counts orphanedRuns: non-terminal runs with no live driver (driver "orphaned" OR "none")', async () => {
+      // DC-3: the canonical orphaned predicate is (driver 'orphaned' || 'none') &&
+      // non-terminal, matching filterByStatus "orphaned" and run-list. A driverless
+      // ('none') non-terminal run counts here too — this deliberately replaces the
+      // earlier definition that only counted 'orphaned'.
+      mockReadFile.mockResolvedValue(JSON.stringify({ processId: 'proc' }));
+
+      // Non-terminal + orphaned → counts (a waiting task-wait orphan).
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({ status: 'waiting', driver: 'orphaned', waitingKind: 'task', updatedAt: '2024-01-15T10:00:00Z' })
+      );
+      await getDigestCached('/runs/proj/orphan-1', defaultSource, 'proj');
+
+      // Pending + orphaned → counts.
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({ status: 'pending', driver: 'orphaned', updatedAt: '2024-01-15T10:01:00Z' })
+      );
+      await getDigestCached('/runs/proj/orphan-2', defaultSource, 'proj');
+
+      // Non-terminal + no lock ('none') → counts (DC-3).
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({ status: 'waiting', driver: 'none', updatedAt: '2024-01-15T10:01:30Z' })
+      );
+      await getDigestCached('/runs/proj/none-1', defaultSource, 'proj');
+
+      // Terminal + orphaned → must NOT count (liveness is meaningless).
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({ status: 'completed', driver: 'orphaned', updatedAt: '2024-01-15T10:02:00Z' })
+      );
+      await getDigestCached('/runs/proj/done-orphan', defaultSource, 'proj');
+
+      // Terminal + no lock ('none') → must NOT count (most completed runs are 'none').
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({ status: 'completed', driver: 'none', updatedAt: '2024-01-15T10:02:30Z' })
+      );
+      await getDigestCached('/runs/proj/done-none', defaultSource, 'proj');
+
+      // Non-terminal + live → must NOT count.
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({ status: 'waiting', driver: 'live', updatedAt: '2024-01-15T10:03:00Z' })
+      );
+      await getDigestCached('/runs/proj/live-1', defaultSource, 'proj');
+
+      const summaries = getProjectSummaries();
+      const proj = summaries.find((s) => s.projectName === 'proj');
+      expect(proj).toBeDefined();
+      expect(proj!.orphanedRuns).toBe(3);
+    });
+
     it('tracks latest update across all runs in a project', async () => {
       mockReadFile.mockResolvedValue(JSON.stringify({ processId: 'proc' }));
 
@@ -508,11 +560,14 @@ describe('run-cache', () => {
       );
       await getDigestCached('/runs/bp-persistent', defaultSource, 'proj');
 
-      // Within TTL_ACTIVE (5s) — should be counted
+      // Within TTL_ACTIVE (5s) — should be counted.
+      // DC-2: pendingBreakpoints is a per-RUN count (one per run with pending
+      // breakpoints), NOT the sum of breakpoints — so a run reporting 2 pending
+      // breakpoints contributes 1, matching the one-row-per-run list and banner.
       vi.advanceTimersByTime(4000);
       const fresh = getProjectSummaries();
       expect(fresh).toHaveLength(1);
-      expect(fresh[0].pendingBreakpoints).toBe(2);
+      expect(fresh[0].pendingBreakpoints).toBe(1);
 
       // Past TTL_ACTIVE (5s) — breakpoints STILL counted (v0.12.3 fix).
       // Breakpoint state only changes on explicit approval (invalidateRun),
@@ -520,9 +575,55 @@ describe('run-cache', () => {
       vi.advanceTimersByTime(2000); // now at 6s
       const afterTtl = getProjectSummaries();
       expect(afterTtl).toHaveLength(1);
-      expect(afterTtl[0].pendingBreakpoints).toBe(2);
+      expect(afterTtl[0].pendingBreakpoints).toBe(1);
       expect(afterTtl[0].breakpointRuns).toHaveLength(1);
       expect(afterTtl[0].totalRuns).toBe(1);
+    });
+
+    it('carries a REAL digest question into breakpointRuns verbatim', async () => {
+      mockReadFile.mockResolvedValue(JSON.stringify({ processId: 'proc' }));
+
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({
+          runId: 'bp-with-q',
+          status: 'waiting',
+          pendingBreakpoints: 1,
+          waitingKind: 'breakpoint',
+          breakpointQuestion: 'Accept the upgrade branch + runbooks + report?',
+          breakpointEffectId: 'eff-1',
+        })
+      );
+      await getDigestCached('/runs/bp-with-q', defaultSource, 'proj');
+
+      const [summary] = getProjectSummaries();
+      expect(summary.breakpointRuns).toHaveLength(1);
+      expect(summary.breakpointRuns[0].breakpointQuestion).toBe(
+        'Accept the upgrade branch + runbooks + report?'
+      );
+    });
+
+    it('leaves breakpointQuestion UNSET when the digest has none — never pre-fills the fallback copy', async () => {
+      mockReadFile.mockResolvedValue(JSON.stringify({ processId: 'proc' }));
+
+      // Digest with NO on-disk question (parser only stores real questions).
+      mockGetRunDigest.mockResolvedValue(
+        makeDigest({
+          runId: 'bp-no-q',
+          status: 'waiting',
+          pendingBreakpoints: 1,
+          waitingKind: 'breakpoint',
+          breakpointEffectId: 'eff-2',
+        })
+      );
+      await getDigestCached('/runs/bp-no-q', defaultSource, 'proj');
+
+      const [summary] = getProjectSummaries();
+      expect(summary.breakpointRuns).toHaveLength(1);
+      // A truthy pre-filled fallback at the DATA layer would forever mask
+      // downstream task-level fallbacks (e.g. the kanban panel's
+      // task?.breakpoint?.question chain). The honest last-resort copy is a
+      // DISPLAY concern — the data layer must report "no question" honestly.
+      expect(summary.breakpointRuns[0].breakpointQuestion).toBeUndefined();
     });
 
     it('preserves both breakpoint and non-breakpoint entries regardless of TTL', async () => {
@@ -586,6 +687,72 @@ describe('run-cache', () => {
       const stats = getCacheStats();
 
       expect(stats.entries[0].hasFullRun).toBe(true);
+    });
+  });
+
+  // -----------------------------------------------------------------------
+  // badge === list consistency (DC-1 / DC-2 / DC-3)
+  //
+  // The badge counts come from getProjectSummaries() (aggregated from cached
+  // digests); the flat LIST length comes from filterByStatus() over Run objects.
+  // These tests build ONE set of runs, feed it to BOTH paths, and assert the
+  // counts agree — proving both use the same canonical predicate.
+  // -----------------------------------------------------------------------
+  describe('badge === list consistency', () => {
+    // Shared scenario: identical field values expressed as both a digest (badge
+    // path) and a Run (list path). Fields that both predicates read: status,
+    // pendingBreakpoints, waitingKind, driver, isStale.
+    const scenario = [
+      // needs-you: paused at a breakpoint (last effect is the breakpoint).
+      { runId: 'nu-bp', status: 'waiting' as const, pendingBreakpoints: 1, waitingKind: 'breakpoint' as const, driver: 'live' as const },
+      // needs-you DC-1: has a pending breakpoint but the LAST pending effect is a
+      // task (waitingKind 'task'). Both badge and list must still include it, and
+      // DC-2: the 2 breakpoints count as ONE run.
+      { runId: 'nu-task-last', status: 'waiting' as const, pendingBreakpoints: 2, waitingKind: 'task' as const, driver: 'live' as const },
+      // not needs-you: breakpoint already answered.
+      { runId: 'answered', status: 'waiting' as const, pendingBreakpoints: 0, waitingKind: 'task' as const, driver: 'live' as const },
+      // not needs-you: terminal.
+      { runId: 'done', status: 'completed' as const, pendingBreakpoints: 0, driver: 'none' as const },
+      // orphaned: dead lock.
+      { runId: 'orph', status: 'waiting' as const, pendingBreakpoints: 0, driver: 'orphaned' as const },
+      // orphaned DC-3: no lock at all ('none') while non-terminal.
+      { runId: 'orph-none', status: 'pending' as const, pendingBreakpoints: 0, driver: 'none' as const },
+      // not orphaned: live driver.
+      { runId: 'live', status: 'waiting' as const, pendingBreakpoints: 0, driver: 'live' as const },
+    ];
+
+    async function cacheScenario(): Promise<void> {
+      mockReadFile.mockResolvedValue(JSON.stringify({ processId: 'proc' }));
+      let i = 0;
+      for (const s of scenario) {
+        mockGetRunDigest.mockResolvedValue(
+          makeDigest({ ...s, updatedAt: `2024-01-15T10:0${i}:00Z` })
+        );
+        await getDigestCached(`/runs/proj/${s.runId}`, defaultSource, 'proj');
+        i++;
+      }
+    }
+
+    const runs = scenario.map((s) => makeRun(s));
+
+    it('needsyou: badge (pendingBreakpoints) equals the flat list length', async () => {
+      await cacheScenario();
+      const proj = getProjectSummaries().find((p) => p.projectName === 'proj')!;
+      const list = filterByStatus(runs, 'needsyou');
+      // nu-bp + nu-task-last → 2 runs (DC-2: not 3 breakpoints).
+      expect(list).toHaveLength(2);
+      expect(proj.pendingBreakpoints).toBe(list.length);
+      // BANNER (breakpointRuns) shows one row per run → same set.
+      expect(proj.breakpointRuns).toHaveLength(list.length);
+    });
+
+    it('orphaned: badge (orphanedRuns) equals the flat list length', async () => {
+      await cacheScenario();
+      const proj = getProjectSummaries().find((p) => p.projectName === 'proj')!;
+      const list = filterByStatus(runs, 'orphaned');
+      // orph + orph-none → 2 runs (DC-3: 'none' counts when non-terminal).
+      expect(list).toHaveLength(2);
+      expect(proj.orphanedRuns).toBe(list.length);
     });
   });
 });

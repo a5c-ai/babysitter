@@ -63,7 +63,9 @@ attributes:
     - breakpoint-routing
   loopControlTerm: stop-hook
   hookDriven: true
-  interactiveToolName: "AskUserQuestion tool"
+  # No agent-callable question tool; verified against the installed CLI.
+  # Interactive asks are plain-text turn endings. See issue #1758.
+  interactiveToolName: ""
   sessionEnvVarsDescription: "conversation_id from hook stdin (authoritative per-request); PID-scoped session marker; AGENT_SESSION_ID fallback"
   hasIntentFidelityChecks: false
   hasNonNegotiables: false

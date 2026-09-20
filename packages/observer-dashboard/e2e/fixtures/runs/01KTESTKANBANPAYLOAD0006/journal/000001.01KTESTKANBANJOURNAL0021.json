@@ -1,0 +1,14 @@
+{
+  "type": "RUN_CREATED",
+  "recordedAt": "2026-01-30T09:00:01.000Z",
+  "data": {
+    "runId": "01KTESTKANBANPAYLOAD0006",
+    "processId": "kanban/payload-gate",
+    "entrypoint": {
+      "importPath": "../../processes/kanban-payload-gate.js",
+      "exportName": "process"
+    },
+    "inputsRef": "inputs.json"
+  },
+  "checksum": "e2e-kanban-fixture-0006-1"
+}

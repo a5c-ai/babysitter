@@ -1,0 +1,16 @@
+{
+  "kind": "breakpoint",
+  "metadata": {
+    "label": "breakpoint",
+    "requestedAt": "2026-01-31T10:00:02.000Z"
+  },
+  "title": "breakpoint",
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_NOQUEST_1",
+  "taskId": "__sdk.breakpoint",
+  "invocationKey": "kanban/no-question:S000001:__sdk.breakpoint",
+  "stepId": "S000001",
+  "inputs": {
+    "label": "breakpoint"
+  }
+}

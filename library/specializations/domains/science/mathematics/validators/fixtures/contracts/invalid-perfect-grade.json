@@ -1,0 +1,59 @@
+{
+    "roundId":  "round-1",
+    "artifactSha256":  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "lens":  "dependency-use-site",
+    "categoryScores":  {
+                           "coreMathematicalValidity":  35,
+                           "lemmaUseSiteClosure":  14,
+                           "domainEdgeCompleteness":  20,
+                           "exactReductionComplexity":  15,
+                           "expositionAmbiguity":  5,
+                           "deterministicArtifactSemantics":  10
+                       },
+    "totalScore":  100,
+    "deductions":  [
+
+                   ],
+    "findings":  [
+                     {
+                         "id":  "F-PATH",
+                         "obligationIds":  [
+                                               "OB-USE"
+                                           ],
+                         "category":  "lemmaUseSiteClosure",
+                         "severity":  "blocker",
+                         "location":  {
+                                          "path":  "proof.tex",
+                                          "locator":  "line 12"
+                                      },
+                         "failureScenario":  "The claimed endpoint does not equal the path formula at the lower bound.",
+                         "deduction":  1,
+                         "repair":  "Define the shifted path once."
+                     }
+                 ],
+    "blockingIssues":  [
+                           "Path endpoint mismatch"
+                       ],
+    "perfectScoreDefensible":  true,
+    "materialDisagreements":  [
+
+                              ],
+    "gateManifest":  {
+                         "gateResults":  [
+                                             {
+                                                 "gateId":  "artifact",
+                                                 "required":  true,
+                                                 "status":  "fail"
+                                             }
+                                         ]
+                     },
+    "edgeBinding":  {
+                        "edgeSha256":  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                        "profileId":  "submodular-optimization",
+                        "profileVersion":  "1.0.0",
+                        "strictness":  "review",
+                        "openRows":  [
+
+                                     ]
+                    }
+}

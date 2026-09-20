@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANAPPROVE0002",
+  "request": "kanban/approve-flow",
+  "processId": "kanban/approve-flow",
+  "projectName": "kanban-board-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-approve-flow.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-approve-flow.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-26T10:00:00.000Z",
+  "completionSecret": "e2ekanbanfixture00020000"
+}

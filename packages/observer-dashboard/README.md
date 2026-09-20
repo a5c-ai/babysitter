@@ -1,16 +1,13 @@
 # @a5c-ai/babysitter-observer-dashboard
 
+A read-only kanban board that answers one question: does any of my agent runs need me right now? Zero-config: `npx @a5c-ai/babysitter-observer-dashboard`.
+
 [![npm version](https://img.shields.io/npm/v/@a5c-ai/babysitter-observer-dashboard.svg)](https://www.npmjs.com/package/@a5c-ai/babysitter-observer-dashboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 
 Real-time observability dashboard for [babysitter](https://github.com/a5c-ai/babysitter) orchestration runs.
 
-<!-- docs-status:start -->
-> Status: Public package.
-> Canonical docs home: [Package and Plugin Docs Map](../../docs/package-and-plugin-map.md).
-> This README is the canonical operator guide for the observer dashboard package.
-<!-- docs-status:end -->
 
 ## What is Babysitter Observer Dashboard?
 
@@ -25,6 +22,7 @@ Babysitter Observer Dashboard is a real-time browser-based monitoring UI for [ba
 ## Features
 
 - **Multi-project dashboard** -- auto-discovers `.a5c/runs/` directories across multiple projects and groups runs by project
+- **Board view (default)** -- a kanban-style command center on the dashboard root: one column per triage bucket (Needs you / Orphaned / Working / Stale / Failed / Completed), cards moving between columns live as run state changes, and the full breakpoint question + answer flow directly on Needs-you cards. Strictly a *view*: columns are derived from run state and never assignable, there is no drag-and-drop, and the only write path remains the existing breakpoint approve action. Toggle Board/List per browser (persisted); full keyboard navigation -- arrow keys move between cards and columns, Enter opens the run
 - **Smart layout** -- active runs shown prominently; recently completed projects stay visible for a configurable recency window before moving to collapsible "Recent History"
 - **Health cards** -- at-a-glance status cards showing active, completed, and failed runs per project with KPI metrics
 - **Expanded project mini-dashboard** -- drill into any project to see runs organized into Active, Failed, and Completed sections with mini KPI pills
@@ -46,7 +44,7 @@ Babysitter Observer Dashboard is a real-time browser-based monitoring UI for [ba
 - **Sort and filter tabs** -- filter by All, Active, Completed, or Failed runs; sort by most recent activity
 - **Project visibility** -- hide/show projects from the settings panel without removing watch sources
 - **WCAG AA accessibility** -- minimum 12px text sizes, 4.5:1+ contrast ratios in both light and dark themes
-- **Breakpoint visibility** -- view pending breakpoints with full context directly in the dashboard banner (approval is handled by the babysitter CLI or stop-hook)
+- **Inline breakpoint approval** -- approve breakpoints directly from the dashboard banner without switching to the CLI; writes `result.json` via server action (no POST endpoint needed)
 - **Stale breakpoint dismiss** -- dismiss breakpoints that have been waiting too long with a single click; persisted in localStorage
 - **Catch-up banner** -- overnight summary showing failed/completed/pending counts when revisiting after extended absence
 - **Orphaned run detection** -- automatically detects runs where all tasks completed but the process crashed before writing `RUN_COMPLETED`; shows "Interrupted" badge
@@ -90,7 +88,7 @@ Or run it directly with npx without adding a script:
 npx babysitter-observer-dashboard --watch-dir .
 ```
 
-The dashboard opens at [http://localhost:4800](http://localhost:4800) by default, and the CLI prints the exact local URL when it starts.
+The dashboard opens at [http://localhost:4800](http://localhost:4800) by default.
 
 ### Updating
 
@@ -246,7 +244,7 @@ The observer persists user-configured settings to `~/.a5c/observer.json`. This f
 1. **Watch** -- A file-system watcher monitors configured directories for `.a5c/runs/` folders. It recursively scans up to a configurable depth (default 2 levels).
 2. **Parse** -- When journal files change, the parser reads NDJSON journal entries and constructs run/task state in an in-memory cache.
 3. **Serve** -- A Next.js 14 App Router application exposes both REST endpoints and an SSE stream.
-4. **Display** -- The React dashboard connects via SSE for instant push updates and falls back to adaptive polling. Runs are grouped by project, with health cards, pipeline visualization, and breakpoint visibility built in.
+4. **Display** -- The React dashboard connects via SSE for instant push updates and falls back to adaptive polling. Runs are grouped by project, with health cards, pipeline visualization, and breakpoint approval built in.
 
 ## API Reference
 
@@ -254,7 +252,6 @@ All endpoints include `Cache-Control: no-cache, no-store` headers and return JSO
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/test` | Health check. Returns `"test"` with status 200. |
 | `GET` | `/api/config` | Returns the current merged configuration (sources, port, pollInterval, theme). |
 | `POST` | `/api/config` | Updates the registry file with new sources, pollInterval, and/or theme. |
 | `GET` | `/api/digest` | Lightweight run digests for all discovered runs. Returns `{ runs: RunDigest[] }`. |
@@ -384,6 +381,18 @@ npx playwright show-report
 
 The Playwright configuration (`playwright.config.ts`) automatically starts a dev server pointed at `e2e/fixtures/runs/` so tests run against deterministic data.
 
+#### Hosts where Playwright's bundled Chromium can't install
+
+On some hosts `npx playwright install` fails with an error like `Playwright does not support chromium on <platform>` (seen e.g. on ubuntu26.04-x64 before Playwright ships builds for it). You can still run the e2e suite with a browser you already have — both options are supported out of the box by `playwright.config.ts`:
+
+```bash
+# Use the system-installed Google Chrome (recommended)
+PLAYWRIGHT_CHROME_CHANNEL=chrome npx playwright test
+
+# Or point at an explicit Chromium/Chrome binary
+OBSERVER_CHROMIUM_PATH=/usr/bin/chromium npx playwright test
+```
+
 ## Troubleshooting
 
 ### Port already in use
@@ -460,14 +469,30 @@ The observer reads and writes `~/.a5c/observer.json`. If this file or directory 
 mkdir -p ~/.a5c
 ```
 
-### Release channel ownership
+### Safe Chain blocks newly published versions
 
-`@a5c-ai/babysitter-observer-dashboard` is published from the monorepo release workflows:
+If you have [Aikido Safe Chain](https://www.aikido.dev/) installed, you may see the following error when running `npx -y @a5c-ai/babysitter-observer-dashboard@latest`:
 
-- `main` publishes the production package through `.github/workflows/release.yml`
-- `staging` publishes prerelease artifacts with the `staging` dist-tag through `.github/workflows/staging-publish.yml`
+```
+npm error code ENOVERSIONS
+npm error No versions available for @a5c-ai/babysitter-observer-dashboard
+```
 
-If you see `E404` or `ENOVERSIONS`, verify the branch-specific publish workflow succeeded before retrying the install.
+Along with a message like:
+
+```
+Safe-chain: Some package versions were suppressed due to minimum age requirement.
+```
+
+This happens because Safe Chain suppresses npm package versions that were published less than 24 hours ago as a supply-chain security measure. If a new version of the dashboard was released recently, Safe Chain will block it until it passes the minimum age threshold.
+
+**Workaround:** Add the `--safe-chain-skip-minimum-package-age` flag to bypass the age check:
+
+```bash
+npx -y @a5c-ai/babysitter-observer-dashboard@latest --safe-chain-skip-minimum-package-age
+```
+
+This only affects recently published versions. After 24 hours from publication, the package version will pass Safe Chain's age requirement and the standard command will work without the extra flag.
 
 ## Known Limitations
 
@@ -480,8 +505,8 @@ The API and configuration format may change between minor versions.
 - **Single-instance only** -- Running multiple observer instances watching the same directories is untested and may produce duplicate SSE events.
 - **Large run directories** -- Discovery scans are cached and debounced (filesystem rescans happen at most once per 60 seconds, triggered by the watcher on new-run events). The digest API reads purely from the in-memory cache with zero filesystem I/O. Thousands of run directories are handled efficiently, though initial startup may take a few seconds for the first scan.
 - **Runs visible only after first write to `.a5c/runs/`** -- The dashboard monitors `.a5c/runs/` directories for run data. Regular Claude Code terminal sessions that do not use babysitter orchestration will not appear on the dashboard. A run becomes visible only after the babysitter runtime writes its first journal entry to `.a5c/runs/<runId>/journal/`. This means there is a brief delay between starting a babysitter process and seeing it on the dashboard.
-- **No run deletion or archival** -- The observer is fully read-only (except for the settings panel). There is no UI to delete, archive, or export runs.
-- **Browser notifications** -- Notification support depends on browser permissions and may not work in all environments.
+- **No run deletion or archival** -- There is no UI to delete, archive, or export runs. The single sanctioned write path is recording a breakpoint answer: it writes `result.json` plus one `EFFECT_RESOLVED` journal entry (via the settings panel and the breakpoint-answer action) and never runs, resumes, or otherwise drives the orchestrator itself.
+- **No browser/desktop notification permission UI** -- The dashboard shows in-app toast notifications (and a notification panel) for new runs, completions, failures, and breakpoints; it does not prompt for OS-level notification permission, so it cannot fire desktop notifications unless permission was already granted by some other means.
 
 
 

@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-28T12:00:02.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_HIDBP_001",
+    "invocationKey": "kanban/hidden-breakpoint:S000001:approve-archive-rotation",
+    "invocationHash": "hash-approve-archive-rotation",
+    "stepId": "S000001",
+    "taskId": "approve-archive-rotation",
+    "kind": "breakpoint",
+    "label": "Hidden project deploy: approve the archive rotation?",
+    "taskDefRef": "tasks/01KTEST_KANBAN_HIDBP_001/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-p004-2"
+}

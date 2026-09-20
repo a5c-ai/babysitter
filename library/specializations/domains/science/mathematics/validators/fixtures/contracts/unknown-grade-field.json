@@ -1,0 +1,15 @@
+{
+  "roundId":"round-1",
+  "artifactSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "lens":"dependency-use-site",
+  "categoryScores":{"coreMathematicalValidity":35,"lemmaUseSiteClosure":15,"domainEdgeCompleteness":20,"exactReductionComplexity":15,"expositionAmbiguity":5,"deterministicArtifactSemantics":10},
+  "totalScore":100,
+  "deductions":[],
+  "findings":[],
+  "blockingIssues":[],
+  "perfectScoreDefensible":true,
+  "materialDisagreements":[],
+  "gateManifest":{"gateResults":[{"gateId":"registry","required":true,"status":"pass","unknown":true}]},
+  "edgeBinding":{"edgeSha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","profileId":"submodular-optimization","profileVersion":"1.0.0","strictness":"review","openRows":[]},
+  "unknownTopLevel":true
+}

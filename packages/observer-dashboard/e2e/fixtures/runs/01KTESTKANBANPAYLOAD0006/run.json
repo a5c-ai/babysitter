@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANPAYLOAD0006",
+  "request": "kanban/payload-gate",
+  "processId": "kanban/payload-gate",
+  "projectName": "kanban-board-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-payload-gate.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-payload-gate.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-30T09:00:00.000Z",
+  "completionSecret": "e2ekanbanfixture00060000"
+}

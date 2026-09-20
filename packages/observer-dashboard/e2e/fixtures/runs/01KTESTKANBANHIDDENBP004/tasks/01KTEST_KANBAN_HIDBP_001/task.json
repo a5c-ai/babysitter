@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_KANBAN_HIDBP_001",
+  "taskId": "approve-archive-rotation",
+  "invocationKey": "kanban/hidden-breakpoint:S000001:approve-archive-rotation",
+  "stepId": "S000001",
+  "kind": "breakpoint",
+  "title": "Approval: hidden project archive rotation",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_KANBAN_HIDBP_001/input.json",
+    "outputJsonPath": "tasks/01KTEST_KANBAN_HIDBP_001/result.json"
+  },
+  "inputs": {
+    "question": "Hidden project deploy: approve the archive rotation?",
+    "title": "Approval: hidden project archive rotation",
+    "options": [
+      "approve",
+      "reject"
+    ]
+  }
+}

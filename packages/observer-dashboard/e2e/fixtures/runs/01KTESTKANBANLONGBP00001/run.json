@@ -1,0 +1,14 @@
+{
+  "runId": "01KTESTKANBANLONGBP00001",
+  "request": "kanban/long-breakpoint",
+  "processId": "kanban/long-breakpoint",
+  "projectName": "kanban-board-project",
+  "entrypoint": {
+    "importPath": "../../processes/kanban-long-breakpoint.js",
+    "exportName": "process"
+  },
+  "processPath": "../../processes/kanban-long-breakpoint.js",
+  "layoutVersion": "2026.01-storage-preview",
+  "createdAt": "2026-01-25T09:00:00.000Z",
+  "completionSecret": "e2ekanbanfixture00010000"
+}

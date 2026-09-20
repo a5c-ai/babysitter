@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2026.01.tasks-v1",
+  "effectId": "01KTEST_AGENT_EFFECT_001",
+  "taskId": "generate-report",
+  "invocationKey": "test/pending-breakpoint:S000001:generate-report",
+  "stepId": "S000001",
+  "kind": "agent",
+  "title": "Generate test report",
+  "io": {
+    "inputJsonPath": "tasks/01KTEST_AGENT_EFFECT_001/input.json",
+    "outputJsonPath": "tasks/01KTEST_AGENT_EFFECT_001/result.json"
+  },
+  "agent": {
+    "name": "generate-report",
+    "prompt": {
+      "role": "analyst",
+      "task": "Generate test report",
+      "instructions": ["Analyze data", "Return JSON"]
+    }
+  }
+}

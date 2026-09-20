@@ -1,0 +1,15 @@
+{
+  "type": "EFFECT_REQUESTED",
+  "recordedAt": "2026-01-26T10:00:03.000Z",
+  "data": {
+    "effectId": "01KTEST_KANBAN_APPRA_002",
+    "invocationKey": "kanban/approve-flow:S000002:publish-flow-summary",
+    "invocationHash": "hash-publish-flow-summary",
+    "stepId": "S000002",
+    "taskId": "publish-flow-summary",
+    "kind": "agent",
+    "label": "Publish flow summary",
+    "taskDefRef": "tasks/01KTEST_KANBAN_APPRA_002/task.json"
+  },
+  "checksum": "e2e-kanban-fixture-0002-3"
+}
