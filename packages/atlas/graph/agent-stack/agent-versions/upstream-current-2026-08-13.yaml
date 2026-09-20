@@ -1,0 +1,493 @@
+# Additive upstream release records from the 2026-08-13 agent-version tracker.
+nodeKind: AgentVersion
+id: agentVersion:amp:0-0-1786595533-g5ba330
+attributes:
+  agentId: "amp"
+  agentProductId: agent:amp
+  displayName: "Amp CLI 0.0.1786595533-g5ba330"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.0.1786595533-g5ba330"
+  currentVersion: "0.0.1786595533-g5ba330"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@ampcode/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1786595533-g5ba330"
+  cliCommand: "amp"
+  summary: "Timestamped Amp npm release; no public build-specific changelog was found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.0.1786320433-geeee54 to 0.0.1786595533-g5ba330."
+    - "npm metadata identifies @ampcode/cli as the Amp CLI package and keeps the latest dist-tag on 0.0.1786595533-g5ba330."
+    - "No public build-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @ampcode/cli."
+  releaseHighlights:
+    - "npm package update to @ampcode/cli 0.0.1786595533-g5ba330."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:amp
+  sourced_from:
+    - evidence:amp-0-0-1786595533-g5ba330-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:antigravity:1-1-12
+attributes:
+  agentId: "antigravity"
+  agentProductId: agent:antigravity-cli
+  displayName: "Antigravity CLI 1.1.12"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.1.12"
+  currentVersion: "1.1.12"
+  releasedAt: "2026-08-11"
+  upstreamReleaseTag: "1.1.12"
+  releaseNotesUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.12"
+  cliCommand: "antigravity"
+  summary: "Antigravity CLI release adding artifact heading outline navigation, more non-interactive print-mode slash-command answers, machine-readable models/agents output, hidden slash-command skill frontmatter, markdown artifact rendering, terminal hyperlink and tool-call summary improvements, headless-mode fixes, and startup diagnostics fixes."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 1.1.11 to 1.1.12."
+    - "Artifact viewer heading outline opens with t and affects artifact navigation modeling."
+    - "Print mode now answers /permissions, /hooks, /help, /changelog, and /config in text/json/stream-json without starting an agent turn."
+    - "models and agents subcommands now accept --output-format json and stream-json and keep errors/progress off stdout."
+    - "Skills can set disable-slash-command: true in SKILL.md frontmatter, hiding them from slash menus and direct /name resolution while preserving model invocation."
+    - "Tool declarations per-session limit increased, reducing failure risk for heavy MCP/plugin/skill setups."
+    - "Headless -p runs now make choices instead of stalling on unattended questions."
+    - "--mode is now honored in headless -p runs, affecting launchBehavior and promptExtraFlags validation."
+    - "No package-name or install-method migration was published for the GitHub release distribution."
+  releaseHighlights:
+    - "Artifact heading outline navigation with t."
+    - "More print-mode read-only slash-command answers."
+    - "--output-format json and stream-json for models and agents."
+    - "disable-slash-command skill frontmatter."
+    - "Markdown alert callout and carousel rendering."
+    - "Higher per-session tool declaration limit."
+    - "Headless -p choice and --mode fixes."
+  installMethods:
+    - install:github-release
+  launchBehavior:
+    promptExtraFlags:
+      - flag: "--mode"
+        changedIn: "1.1.12"
+        notes: "Valid values such as accept-edits and plan now apply in headless -p runs; invalid values warn."
+  commands:
+    - name: "models"
+      changedIn: "1.1.12"
+      flags:
+        - "--output-format"
+      outputFormats:
+        - "json"
+        - "stream-json"
+    - name: "agents"
+      changedIn: "1.1.12"
+      flags:
+        - "--output-format"
+      outputFormats:
+        - "json"
+        - "stream-json"
+  skillFrontmatter:
+    disableSlashCommand: true
+edges:
+  version_of:
+    - agent:antigravity-cli
+  sourced_from:
+    - evidence:antigravity-1-1-12-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:claude:2-1-229
+attributes:
+  agentId: "claude"
+  agentProductId: agent:claude-code
+  displayName: "Claude Code 2.1.229"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "2.1.229"
+  currentVersion: "2.1.229"
+  releasedAt: "2026-08-12"
+  sourcePackage: "@anthropic-ai/claude-code"
+  upstreamReleaseTag: "v2.1.229"
+  releaseNotesUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.229"
+  cliCommand: "claude"
+  summary: "Claude Code release adding Remote Control continuation docs, server-supplied self-hosted-runner hooks, gateway SSE keepalive pings, plugin marketplace command sources, and multiple terminal/Remote Control reliability fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 2.1.226 to 2.1.229."
+    - "Documented claude remote-control --continue affects Remote Control launch/resume command modeling."
+    - "Server-supplied Claude Code hook support for self-hosted runner sessions affects hook-adapter parity with managed environments."
+    - "SSE keepalive pings during long thinking pauses affect gateway streaming timeout assumptions for Vertex and Bedrock upstreams."
+    - "Plugin marketplace command sources allow a local command to resolve a plugin directory each session; plugin discovery/install metadata should model command-backed sources and mode: link."
+    - "ListAgents now distinguishes offline Remote Control sessions and cloud sessions, affecting session-state projections."
+    - "Changed /commit-push-pr safety so git/gh commands with dangerous flags such as --force, --amend, and --no-verify are no longer auto-approved."
+    - "Self-hosted runner Windows startup now requires explicit --base-dir."
+    - "Install command remains npm install -g @anthropic-ai/claude-code."
+  releaseHighlights:
+    - "claude remote-control --continue documentation."
+    - "Server-supplied hooks for self-hosted runner sessions."
+    - "SSE keepalive pings for gateway streaming responses."
+    - "Plugin marketplace command sources with link mode."
+    - "Remote Control session offline/cloud labels."
+    - "Safer /commit-push-pr auto-approval behavior."
+  installMethods:
+    - install:npm
+  launchBehavior:
+    promptExtraFlags:
+      - flag: "--base-dir"
+        valueName: "path"
+        appliesTo: "self-hosted runner Windows startup"
+        introducedIn: "2.1.229"
+        notes: "Required explicitly on Windows self-hosted runners; there is no default checkout directory."
+  remoteControl:
+    continueMostRecentCommand: "claude remote-control --continue"
+    listAgentsSessionStates:
+      - "offline"
+      - "cloud"
+  pluginDiscovery:
+    marketplaceCommandSources: true
+    sourceMode:
+      - "link"
+    notes: "A command source can print a plugin directory that is re-resolved every session and applied without a restart."
+  gatewayStreaming:
+    sseKeepalivePings: true
+    upstreams:
+      - "Vertex"
+      - "Bedrock"
+edges:
+  version_of:
+    - agent:claude-code
+  sourced_from:
+    - evidence:claude-code-2-1-229-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:claude-agent-sdk:0-3-229
+attributes:
+  agentId: "claude-agent-sdk"
+  agentProductId: agent:claude-agent-sdk
+  displayName: "Claude Agent SDK 0.3.229"
+  runtimeFamily: "sdk"
+  releaseChannel: "stable"
+  versionRange: "0.3.229"
+  currentVersion: "0.3.229"
+  releasedAt: "2026-08-12"
+  sourcePackage: "@anthropic-ai/claude-agent-sdk"
+  upstreamReleaseTag: "v0.3.229"
+  releaseNotesUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.229"
+  summary: "Claude Agent SDK TypeScript release adding terminal slash-command metadata and correcting over-limit request terminal reasons."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.3.226 to 0.3.229."
+    - "System init messages now include terminal_slash_commands, affecting Remote Control clients that need to hide terminal-only commands."
+    - "Conversations whose messages exceed the API 32 MB request limit now end with terminal_reason api_error instead of image_error; StopFailure error_details begins with request_body_over_limit."
+    - "No transport, package-name, install-method, or migration change was documented."
+    - "Official update commands remain npm, yarn, pnpm, and bun package upgrade commands for @anthropic-ai/claude-agent-sdk@0.3.229."
+  releaseHighlights:
+    - "terminal_slash_commands added to system init message."
+    - "Over-32 MB request failures now report terminal_reason api_error."
+  installMethods:
+    - install:npm
+  sdkSurface:
+    systemInitFields:
+      - "terminal_slash_commands"
+    terminalReasons:
+      overRequestBodyLimit: "api_error"
+      previousOverRequestBodyLimit: "image_error"
+    stopFailureErrorDetailsPrefix: "request_body_over_limit"
+edges:
+  version_of:
+    - agent:claude-agent-sdk
+  sourced_from:
+    - evidence:claude-agent-sdk-0-3-229-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:droid:0-195-0
+attributes:
+  agentId: "droid"
+  agentProductId: agent:droid
+  displayName: "Factory Droid CLI 0.195.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.195.0"
+  currentVersion: "0.195.0"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@factory/cli"
+  releaseNotesUrl: "https://www.npmjs.com/package/@factory/cli/v/0.195.0"
+  cliCommand: "droid"
+  summary: "Factory Droid CLI npm release; public version-specific release notes were not found."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.191.1 to 0.195.0."
+    - "npm metadata identifies @factory/cli as Factory Droid CLI and points repository metadata at Factory-AI/factory."
+    - "No public 0.195.0-specific CLI flag, transport/API, model, package-name, install-method, or migration change was found."
+    - "Install command remains npm install -g @factory/cli."
+  releaseHighlights:
+    - "npm package update to @factory/cli 0.195.0."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:droid
+  sourced_from:
+    - evidence:droid-0-195-0-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:gemini:0-55-1
+attributes:
+  agentId: "gemini"
+  agentProductId: agent:gemini-cli
+  displayName: "Gemini CLI 0.55.1"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.55.1"
+  currentVersion: "0.55.1"
+  releasedAt: "2026-08-11"
+  sourcePackage: "@google/gemini-cli"
+  upstreamReleaseTag: "v0.55.1"
+  releaseNotesUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.55.1"
+  cliCommand: "gemini"
+  summary: "Gemini CLI release adding tool registry discovery and multiple core/security fixes around path blocklists, memory import symlink escapes, macOS sandbox gitconfig access, A2A cancellation, and prompt-injection loop mitigation."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.54.4 to 0.55.1."
+    - "Tool registry discovery affects tool capability discovery metadata."
+    - "Vertex base URL updates affect provider endpoint configuration."
+    - "Sensitive path blocklists are enforced case-insensitively and VS Code human-in-the-loop handling was hardened."
+    - "Memory import symlink escape fixes and macOS sandbox ~/.gitconfig read-only policy affect sandbox/security modeling."
+    - "A2A server cancellation and workspace trust/task isolation fixes affect multi-agent transport/session handling."
+    - "No package-name or install-method migration was published; install remains npm install -g @google/gemini-cli."
+  releaseHighlights:
+    - "Tool registry discovery."
+    - "Vertex base URL update."
+    - "Case-insensitive sensitive path blocklist enforcement."
+    - "Symlink escape fix in memory import processor."
+    - "Read-only ~/.gitconfig in the macOS sandbox."
+    - "A2A cancellation, workspace trust, and task isolation fixes."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:gemini-cli
+  sourced_from:
+    - evidence:gemini-cli-0-55-1-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:copilot:1-0-79
+attributes:
+  agentId: "copilot"
+  agentProductId: agent:copilot-cli
+  displayName: "GitHub Copilot CLI 1.0.79"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.0.79"
+  currentVersion: "1.0.79"
+  releasedAt: "2026-08-10"
+  sourcePackage: "gh-copilot"
+  upstreamReleaseTag: "v1.0.79"
+  releaseNotesUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.79"
+  cliCommand: "gh"
+  summary: "GitHub Copilot CLI release changing sandbox policy/settings behavior, adding worktree base controls, plugin extension support, kimi-k3 support, plan-plus-autopilot mode, concurrent session management, queued local prompts/commands, and multiple sandbox/auth fixes."
+  assimilationNotes:
+    - "Latest official stable release moved from recorded 1.0.78 to 1.0.79."
+    - "BREAKING: sandbox setting allowDevToolCaches was renamed to allowDevToolAccess; the old key is ignored."
+    - "Sandbox auth settings moved from sandbox.gitAuth and sandbox.ghAuth to sandbox.auth.git and sandbox.auth.gh; old SDK request keys are rejected as invalid."
+    - "Enterprise allow-auto-only policy allows /allow-all auto while blocking full allow-all, affecting permission-policy modeling."
+    - "worktreeBaseRef controls whether /worktree, /worktree new, and --worktree start from HEAD or remote default branch; all now default to HEAD."
+    - "Agent Plugins spec plugins can ship extensions under com.github.copilot/extensions/."
+    - "New kimi-k3 model support affects model catalog metadata."
+    - "--plan can combine with --mode autopilot to plan then implement without waiting for approval."
+    - "/app opens the current session in GitHub Copilot desktop app, requiring app 1.1.3 or later."
+    - "Local sessions can queue prompts, shell commands, and supported slash commands to run after the current task."
+  releaseHighlights:
+    - "Sandbox auth settings moved under sandbox.auth."
+    - "BREAKING allowDevToolCaches renamed to allowDevToolAccess."
+    - "worktreeBaseRef setting and HEAD default for worktree starts."
+    - "Agent Plugins extension directory support."
+    - "kimi-k3 model support."
+    - "--plan with --mode autopilot."
+    - "Concurrent sessions tab/sidebar and queued local prompts."
+  installMethods:
+    - install:gh-extension
+  launchBehavior:
+    promptExtraFlags:
+      - flag: "--worktree"
+        changedIn: "1.0.79"
+        notes: "Now follows worktreeBaseRef and defaults to HEAD rather than the remote default branch."
+      - flag: "--plan"
+        changedIn: "1.0.79"
+        notes: "Can combine with --mode autopilot."
+      - flag: "--mode"
+        valueName: "autopilot"
+        changedIn: "1.0.79"
+        notes: "With --plan, plans first and then implements without waiting for approval."
+  sandbox:
+    renamedSettings:
+      - from: "allowDevToolCaches"
+        to: "allowDevToolAccess"
+      - from: "sandbox.gitAuth"
+        to: "sandbox.auth.git"
+      - from: "sandbox.ghAuth"
+        to: "sandbox.auth.gh"
+    policySupport:
+      - "enterprise allow-auto-only"
+      - "enterprise proxy URL with user-controlled credentials"
+  pluginDiscovery:
+    extensionDirectory: "com.github.copilot/extensions/"
+edges:
+  version_of:
+    - agent:copilot-cli
+  sourced_from:
+    - evidence:copilot-cli-1-0-79-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:omp:17-3-0
+attributes:
+  agentId: "omp"
+  agentProductId: agent:omp
+  displayName: "Oh-My-Pi 17.3.0"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "17.3.0"
+  currentVersion: "17.3.0"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@oh-my-pi/pi-coding-agent"
+  upstreamReleaseTag: "v17.3.0"
+  releaseNotesUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.3.0"
+  cliCommand: "omp"
+  summary: "Oh-My-Pi release adding model/catalog support for OpenAI Daybreak and GPT-5.6 Cyber models, Nix support, per-agent advisors, a redesigned /agents hub, authoritative OpenCode Go usage, and multiple breaking configuration/API changes around thinking-loop guards, advisor settings, and OpenAICompat metadata."
+  assimilationNotes:
+    - "Latest npm moved from recorded 17.2.12 to 17.3.0."
+    - "Breaking API rename: withGeminiThinkingLoopGuard became withThinkingLoopGuard and now applies to Gemini, DeepSeek, and Grok model-id families."
+    - "Breaking catalog removal: OpenAICompat.enableGeminiThinkingLoopGuard was removed; thinking-loop eligibility is derived from model.id family."
+    - "Breaking config removal: advisor.subagents was removed; subagent advisors move to per-agent frontmatter or task.agentAdvisor, with advisor.subagents: true auto-migrating to task.agentAdvisor: { task: \"on\" }."
+    - "OpenCode Go integration now uses the official usage endpoint with real-time credential validation and multi-key routing by headroom, replacing hardcoded caps and legacy local request-cost estimates."
+    - "OpenAI Daybreak Blue, Daybreak Red, and GPT-5.6 Cyber models were added with long-context pricing, token limits, tools, and reasoning-effort controls."
+    - "Ollama, DeepSeek, xAI, Together AI, Perplexity, DashScope, Anthropic cache-write, OpenAI/Daybreak thinking, and provider credential-health fixes affect provider capability and transport metadata."
+    - "First-party Nix support adds reproducible source builds, a pinned development shell, NixOS and Home Manager modules, and offline Bun dependency support."
+    - "The /agents interface was redesigned as a fullscreen hub with scope sidebar, type-to-filter search, pinned detail pane, mouse support, and property chips."
+    - "omp update and startup version checks now follow the omp.rename pointer in the published manifest in preparation for an npm package rename."
+    - "Install command remains npm install -g @oh-my-pi/pi-coding-agent for this version."
+  releaseHighlights:
+    - "Breaking thinking-loop guard API rename."
+    - "advisor.subagents removal with task.agentAdvisor migration."
+    - "OpenAICompat.enableGeminiThinkingLoopGuard removal."
+    - "Official OpenCode Go usage endpoint integration."
+    - "OpenAI Daybreak and GPT-5.6 Cyber model metadata."
+    - "First-party Nix support."
+    - "Per-agent advisors and redesigned /agents hub."
+    - "Preparation for upcoming npm package rename via omp.rename manifest pointer."
+  installMethods:
+    - install:npm
+  breakingChanges:
+    - from: "withGeminiThinkingLoopGuard"
+      to: "withThinkingLoopGuard"
+      affectedSurface: "pi-ai provider guard integration"
+    - removed: "OpenAICompat.enableGeminiThinkingLoopGuard"
+      affectedSurface: "pi-catalog OpenAI-compatible metadata"
+    - removed: "advisor.subagents"
+      replacement: "task.agentAdvisor or per-agent advisor frontmatter"
+  providerCatalog:
+    addedModels:
+      - "OpenAI Daybreak Blue"
+      - "OpenAI Daybreak Red"
+      - "GPT-5.6 Cyber"
+    reasoningEffortControls:
+      - "off"
+      - "low"
+      - "medium"
+      - "high"
+      - "xhigh"
+      - "max"
+  packageRename:
+    manifestPointer: "omp.rename"
+    status: "prepared; package name unchanged for 17.3.0"
+edges:
+  version_of:
+    - agent:omp
+  sourced_from:
+    - evidence:omp-17-3-0-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:opencode:1-18-18
+attributes:
+  agentId: "opencode"
+  agentProductId: agent:opencode
+  displayName: "OpenCode 1.18.18"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "1.18.18"
+  currentVersion: "1.18.18"
+  releasedAt: "2026-08-13"
+  sourcePackage: "opencode-ai"
+  upstreamReleaseTag: "v1.18.18"
+  releaseNotesUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.18"
+  cliCommand: "opencode"
+  summary: "OpenCode release fixing Kimi provider system prompt selection and xAI xhigh reasoning effort."
+  assimilationNotes:
+    - "Latest npm moved from recorded 1.18.16 to 1.18.18."
+    - "Official Moonshot and Kimi providers now select the Kimi system prompt correctly, affecting provider prompt-template metadata."
+    - "xhigh reasoning effort for xAI models was fixed, affecting model reasoning-effort mapping."
+    - "No package-name, install-method, CLI flag, transport/API, or migration change was published."
+    - "Install command remains npm install -g opencode-ai."
+  releaseHighlights:
+    - "Kimi system prompt selection fix for Moonshot/Kimi providers."
+    - "xAI xhigh reasoning-effort fix."
+  installMethods:
+    - install:npm
+edges:
+  version_of:
+    - agent:opencode
+  sourced_from:
+    - evidence:opencode-1-18-18-2026-08-13
+---
+nodeKind: AgentVersion
+id: agentVersion:qwen:0-21-11
+attributes:
+  agentId: "qwen"
+  agentProductId: agent:qwen
+  displayName: "Qwen Code 0.21.11"
+  runtimeFamily: "cli-harness"
+  releaseChannel: "stable"
+  versionRange: "0.21.11"
+  currentVersion: "0.21.11"
+  releasedAt: "2026-08-13"
+  sourcePackage: "@qwen-code/qwen-code"
+  upstreamReleaseTag: "v0.21.11"
+  releaseNotesUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.11"
+  cliCommand: "qwen"
+  summary: "Qwen Code release adding Agent Plugins v1, /coordinate native multi-agent workflows, bounded ACP NDJSON buffers, Goal v3 ACP sessions, Channels web-shell view, OpenTelemetry session lifecycle events, and multiple provider/session fixes."
+  assimilationNotes:
+    - "Latest npm moved from recorded 0.21.8 to 0.21.11."
+    - "Agent Plugins v1 support affects plugin discovery, installation, and capability metadata."
+    - "New /coordinate command enables native multi-agent workflows with read-only teammates and automated result forwarding to the leader agent."
+    - "Bound daemon ACP NDJSON buffers and Goal v3 ACP sessions affect ACP adapter buffering, create/edit/pause/resume/clear action handling, and turn scheduling."
+    - "OpenTelemetry session.start and session.end lifecycle events affect observability mappings."
+    - "Web Shell Channels view tracks DingTalk, Feishu, and WeCom integration sessions alongside tasks."
+    - "Web Shell supports Qwen 3.8 reasoning controls from the model chip, including Thinking mode and effort selection."
+    - "No package-name or install-method migration was published; install remains npm install -g @qwen-code/qwen-code."
+  releaseHighlights:
+    - "Agent Plugins v1."
+    - "/coordinate read-only teammate workflows."
+    - "Bound daemon ACP NDJSON buffers."
+    - "ACP Goal v3 create/edit/pause/resume/clear runtime."
+    - "OpenTelemetry session lifecycle events."
+    - "Channels view for DingTalk, Feishu, and WeCom."
+    - "Qwen 3.8 reasoning controls in Web Shell."
+  installMethods:
+    - install:npm
+  pluginDiscovery:
+    agentPluginsV1: true
+    introducedIn: "0.21.11"
+  multiAgent:
+    coordinateCommand: "/coordinate"
+    teammateMode: "read-only"
+    automatedResultForwarding: true
+  acp:
+    boundedDaemonNdjsonBuffers: true
+    goalV3Actions:
+      - "create"
+      - "edit"
+      - "pause"
+      - "resume"
+      - "clear"
+  telemetry:
+    sessionLifecycleEvents:
+      - "session.start"
+      - "session.end"
+edges:
+  version_of:
+    - agent:qwen
+  sourced_from:
+    - evidence:qwen-code-0-21-11-2026-08-13
