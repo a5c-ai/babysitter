@@ -1,0 +1,16 @@
+nodeKind: ModelFamily
+id: model-family:grok-voice
+attributes:
+  displayName: "Grok Voice"
+  providerId: xai
+  family: grok-voice
+  modalities:
+    - audio
+    - text
+  status: current
+  homepageUrl: "https://docs.x.ai/docs/models"
+edges:
+  has_version:
+    - model:grok-voice-think-fast-2-0@current
+  provided_by:
+    - provider:xai

@@ -1,0 +1,10 @@
+nodeKind: Provider
+id: provider:xai
+patch: true
+edges:
+  serves:
+    - model:grok-voice-think-fast-2-0@current
+  supports:
+    - target: capability:streaming
+      level: full
+      notes: xAI's public model catalog lists Grok Voice Think Fast 2.0 on a REALTIME endpoint.

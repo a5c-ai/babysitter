@@ -1,0 +1,47 @@
+nodeKind: ModelTransportProtocol
+id: model-transport:xai-realtime-voice
+attributes:
+  displayName: "xAI realtime voice"
+  vendor: "xAI"
+  specUrl: "https://docs.x.ai/developers/model-capabilities/audio/voice"
+  streamingFraming: realtime
+  usageEnvelope: xai-realtime-usage
+  thinkingChannel: none
+  firstSpecVersion: "2026-08-07"
+  currentSpecVersion: "2026-08-07"
+  status: preview
+  requestBodyShape: |
+    Realtime voice session using xAI voice/audio routes. The public model
+    catalog represents grok-voice-think-fast-2.0 as an audioModels entry with
+    REALTIME endpoint basis CONCURRENCY, TEXT/AUDIO input modalities, and
+    TEXT/AUDIO output modalities.
+  responseBodyShape: |
+    Bidirectional realtime audio/text events. Exact event envelope and proxy
+    support should be confirmed against the xAI voice API reference before
+    using this protocol in transport adapters.
+  streamingEventTypes:
+    - session
+    - input_audio
+    - output_audio
+    - output_text
+    - error
+  errorEnvelope: |
+    xAI provider errors follow its REST/realtime API conventions. Realtime
+    voice-specific envelopes require adapter validation.
+  rateLimitSignaling: |
+    The model catalog lists concurrency-based tiers. Runtime headers and
+    quota response shapes should be confirmed against live xAI responses.
+  authHeaderFormat: |
+    Authorization: Bearer <XAI_API_KEY>
+  versioningHeader: |
+    No model-specific versioning header identified in the reviewed docs.
+  notes: |
+    This protocol is separate from openai-compat because Grok Voice Think Fast
+    2.0 is a bidirectional realtime audio model, not a chat-completions model.
+edges:
+  realizes:
+    - target: layer:3-transport
+  served_by:
+    - provider:xai
+  spoken_by:
+    - model:grok-voice-think-fast-2-0@current
