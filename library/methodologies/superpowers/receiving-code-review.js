@@ -18,53 +18,127 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 // AGENT TASK DEFINITIONS
 // ============================================================================
 
-const agentReadFeedbackTask = defineTask('review-receive-read', async (args, ctx) => {
-  return { parsed: args };
-}, {
+const agentReadFeedbackTask = defineTask('review-receive-read', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Read and Parse Review Feedback',
   labels: ['superpowers', 'code-review', 'receiving'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Review Recipient - Feedback Parser',
+      task: 'Read the review feedback in full and parse it into discrete, individually addressable items.',
+      context: args,
+      instructions: [
+        'Read every piece of feedback completely before splitting it up',
+        'Give each item an id, its content, and the file and line it refers to when stated',
+        'Carry the severity the reviewer gave, or "unknown" when none was given',
+        'Group the items into categories (correctness, design, style, tests, docs)',
+        'Do not judge or answer the feedback at this step - only parse it'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['items', 'totalItems', 'categories']
+    }
+  },
   io: {
-    inputs: { feedback: 'array', baseSha: 'string', headSha: 'string' },
-    outputs: { items: 'array', totalItems: 'number', categories: 'object' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const agentVerifyFeedbackTask = defineTask('review-receive-verify', async (args, ctx) => {
-  return { verification: args };
-}, {
+const agentVerifyFeedbackTask = defineTask('review-receive-verify', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Verify Feedback Against Codebase Reality',
   labels: ['superpowers', 'code-review', 'verification'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Review Recipient - Verifier',
+      task: 'Check one feedback item against what the codebase actually does before any judgement is formed about it.',
+      context: args,
+      instructions: [
+        'Read the code the item refers to; do not rely on the reviewer description of it',
+        'State the codebase reality in plain terms: what the code does today',
+        'Set verified to true only when the situation the reviewer describes actually exists',
+        'Set technicallySound to true only when the suggested change would be correct here',
+        'Give a recommendation grounded in the code you read, citing file and line',
+        'Do not perform agreement: an unverified item is reported as unverified'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['verified', 'codebaseReality', 'technicallySound', 'recommendation']
+    }
+  },
   io: {
-    inputs: { item: 'object', branchName: 'string' },
-    outputs: { verified: 'boolean', codebaseReality: 'string', technicallySound: 'boolean', recommendation: 'string' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const agentEvaluateFeedbackTask = defineTask('review-receive-evaluate', async (args, ctx) => {
-  return { evaluation: args };
-}, {
+const agentEvaluateFeedbackTask = defineTask('review-receive-evaluate', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Evaluate Feedback for This Codebase',
   labels: ['superpowers', 'code-review', 'evaluation'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Review Recipient - Evaluator',
+      task: 'Decide what to do with one verified feedback item for this codebase: implement, defer or push back.',
+      context: args,
+      instructions: [
+        'Return action as exactly one of implement, defer or pushback',
+        'Push back when the suggestion breaks existing functionality, violates YAGNI, conflicts with an architectural decision, or the reviewer lacked context',
+        'Set pushback to true and give a specific technical pushbackReason whenever you push back',
+        'Give priority as critical, important or minor',
+        'Reason from the verification result and the code, not from the tone of the feedback',
+        'Neither blind agreement nor reflexive disagreement - the reasoning must stand on the code'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['action', 'reasoning', 'pushback', 'pushbackReason', 'priority']
+    }
+  },
   io: {
-    inputs: { item: 'object', verification: 'object' },
-    outputs: { action: 'string', reasoning: 'string', pushback: 'boolean', pushbackReason: 'string', priority: 'string' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const agentImplementFeedbackItemTask = defineTask('review-receive-implement', async (args, ctx) => {
-  return { implementation: args };
-}, {
+const agentImplementFeedbackItemTask = defineTask('review-receive-implement', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Implement Single Review Feedback Item',
   labels: ['superpowers', 'code-review', 'implementation'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Review Recipient - Implementer',
+      task: 'Implement exactly one accepted review feedback item on the branch under review and run the tests.',
+      context: args,
+      instructions: [
+        'Change only what this one item requires - do not fold in other items',
+        'Run the test suite after the change and capture its real output',
+        'Report testsPass strictly from the observed exit status, never from expectation',
+        'List every file you changed with its full path',
+        'Set applied to false when the change could not be made, and say why in testOutput'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['applied', 'filesChanged', 'testsPass', 'testOutput']
+    }
+  },
   io: {
-    inputs: { item: 'object', evaluation: 'object', branchName: 'string' },
-    outputs: { applied: 'boolean', filesChanged: 'array', testsPass: 'boolean', testOutput: 'string' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
 // ============================================================================
 // MAIN PROCESS
@@ -190,6 +264,9 @@ export async function process(inputs, ctx) {
         { path: 'artifacts/review/evaluation-summary.md', format: 'markdown', label: 'Evaluation Summary' }
       ]
     }
+  }, {
+    label: 'Review Feedback Evaluation',
+    breakpointId: 'superpowers.receiving-code-review.evaluation'
   });
 
   // ============================================================================
@@ -222,6 +299,9 @@ export async function process(inputs, ctx) {
         question: `Tests failing after implementing review item ${i + 1}: "${item.content}". Fix before continuing.`,
         title: 'Review Implementation Test Failure',
         context: { runId: ctx.runId }
+      }, {
+        label: 'Review Implementation Test Failure',
+        breakpointId: 'superpowers.receiving-code-review.test-failure'
       });
     }
   }
