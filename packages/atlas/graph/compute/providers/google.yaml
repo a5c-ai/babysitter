@@ -66,6 +66,7 @@ edges:
   serves:
   - model:gemini-3-1-pro@current
   - model:gemini-2-5-pro@current
+  - model:gemini-omni-flash-preview@current
   emits_message_type:
   - protocol-message:gemini-content
   - protocol-message:gemini-part-text

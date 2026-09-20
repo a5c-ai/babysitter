@@ -1,0 +1,108 @@
+{
+  "baseBranch": "staging",
+  "branchName": "model-versions/daily-2026-08-19",
+  "providers": [
+    {
+      "provider": "Anthropic",
+      "families": "Claude Opus, Sonnet, Haiku",
+      "searches": [
+        "anthropic new model release 2026",
+        "claude new model"
+      ],
+      "officialDocs": [
+        "https://docs.anthropic.com/en/docs/about-claude/models"
+      ]
+    },
+    {
+      "provider": "OpenAI",
+      "families": "GPT-5.x, GPT-4o, o-series reasoning models",
+      "searches": [
+        "openai new model release 2026",
+        "gpt new model"
+      ],
+      "officialDocs": [
+        "https://platform.openai.com/docs/models"
+      ]
+    },
+    {
+      "provider": "Google Gemini",
+      "families": "Gemini 2.x, Gemini Flash, Gemini Pro",
+      "searches": [
+        "google gemini new model 2026",
+        "gemini model update"
+      ],
+      "officialDocs": [
+        "https://ai.google.dev/gemini-api/docs/models"
+      ]
+    },
+    {
+      "provider": "xAI",
+      "families": "Grok-3, Grok-2, Grok-beta",
+      "searches": [
+        "xai grok new model 2026",
+        "grok model release"
+      ],
+      "officialDocs": [
+        "https://docs.x.ai/docs/models"
+      ]
+    },
+    {
+      "provider": "Meta",
+      "families": "Llama 4.x",
+      "searches": [
+        "meta llama new model 2026",
+        "llama release"
+      ]
+    },
+    {
+      "provider": "DeepSeek",
+      "families": "DeepSeek-V4, DeepSeek-Coder, DeepSeek-R1",
+      "searches": [
+        "deepseek new model 2026",
+        "deepseek v4"
+      ]
+    },
+    {
+      "provider": "Mistral",
+      "families": "Mistral Large, Codestral, Pixtral",
+      "searches": [
+        "mistral new model 2026",
+        "mistral AI release"
+      ]
+    },
+    {
+      "provider": "Alibaba Qwen",
+      "families": "Qwen-3, Qwen-Coder",
+      "searches": [
+        "qwen new model 2026",
+        "qwen code model"
+      ]
+    },
+    {
+      "provider": "Amazon Nova",
+      "families": "Nova Pro, Nova Lite",
+      "searches": [
+        "amazon nova model 2026",
+        "bedrock new models"
+      ]
+    },
+    {
+      "provider": "Cohere",
+      "families": "Command R+, Embed v4",
+      "searches": [
+        "cohere new model 2026",
+        "command-r"
+      ]
+    },
+    {
+      "provider": "Together AI / Fireworks / Groq",
+      "families": "inference provider model availability and exclusive or early-access models",
+      "searches": [
+        "Together AI new models 2026",
+        "Fireworks AI new models 2026",
+        "GroqCloud new models 2026"
+      ]
+    }
+  ],
+  "prompt": "You are a model version tracker. Check ALL major model providers for new model releases, version updates, deprecations, and capability changes. Build Atlas, read current model records and evidence claims, search the web for every listed provider, compare findings against graph records, create model-version-update issues with real research content when missing, update graph YAML and create one PR against staging if graph YAML changes are needed and feasible, then print a comprehensive summary table covering every provider."
+}

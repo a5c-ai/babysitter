@@ -1,0 +1,75 @@
+nodeKind: EvidenceSource
+id: evidence:google-gemini-omni-flash-issue-1827
+attributes:
+  displayName: "Google Gemini Omni Flash Preview documentation for issue #1827"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/models/gemini-omni-flash
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/models/gemini-omni-flash
+  locator: "Gemini Omni Flash model page listing gemini-omni-flash-preview, preview status, 1,048,576-token context window, and video generation/editing capability"
+  capturedAt: "2026-08-19T07:30:00Z"
+  observedAt: "2026-08-19T07:30:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-19T07:30:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-gemini-omni-guide-issue-1827
+attributes:
+  displayName: "Google Gemini API Omni guide for issue #1827"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.google.dev/gemini-api/docs/omni
+  sourcePathOrUrl: https://ai.google.dev/gemini-api/docs/omni
+  locator: "Gemini API Omni guide describing conversational video generation and editing through the Interactions API"
+  capturedAt: "2026-08-19T07:30:00Z"
+  observedAt: "2026-08-19T07:30:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-19T07:30:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-cloud-gemini-omni-flash-issue-1827
+attributes:
+  displayName: "Google Cloud Gemini Omni Flash Preview model page for issue #1827"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/omni-flash-preview
+  sourcePathOrUrl: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/omni-flash-preview
+  locator: "Gemini Enterprise Agent Platform page with release date, deprecation date, Agent Platform token limits, video length limits, and supported/unsupported feature matrix"
+  capturedAt: "2026-08-19T07:30:00Z"
+  observedAt: "2026-08-19T07:30:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-19T07:30:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:google-deepmind-gemini-omni-flash-card-issue-1827
+attributes:
+  displayName: "Google DeepMind Gemini Omni Flash model card for issue #1827"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://deepmind.google/models/model-cards/gemini-omni-flash/
+  sourcePathOrUrl: https://deepmind.google/models/model-cards/gemini-omni-flash/
+  locator: "DeepMind model card describing Gemini Omni Flash as a native multimodal text, image, audio, and video input to video-output model"
+  capturedAt: "2026-08-19T07:30:00Z"
+  observedAt: "2026-08-19T07:30:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-19T07:30:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
