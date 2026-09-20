@@ -25,7 +25,7 @@ attributes:
   supportsFineTuning: false
   providerModelIds:
     deepseekApi: deepseek-v4-pro
-    deepseekVersion: DeepSeek-V4-Pro
+    deepseekVersion: DeepSeek-V4-Pro-0813
   regions:
     - global
 edges:
