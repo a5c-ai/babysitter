@@ -1,0 +1,37 @@
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-premier-model-card
+attributes:
+  displayName: "Amazon Nova Premier model card"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-premier.html
+  sourcePathOrUrl: https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-premier.html
+  locator: "Nova Premier model ids, modalities, context window, output limit, lifecycle, EOL, and Bedrock API support"
+  capturedAt: '2026-08-06T00:00:00Z'
+  observedAt: '2026-08-06T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-08-06T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:amazon-nova-premier-launch-blog
+attributes:
+  displayName: "Amazon Nova Premier launch blog"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://aws.amazon.com/blogs/aws/amazon-nova-premier-our-most-capable-model-for-complex-tasks-and-teacher-for-model-distillation/
+  sourcePathOrUrl: https://aws.amazon.com/blogs/aws/amazon-nova-premier-our-most-capable-model-for-complex-tasks-and-teacher-for-model-distillation/
+  locator: "Nova Premier launch announcement, complex-task positioning, and distillation-teacher use case"
+  capturedAt: '2026-08-06T00:00:00Z'
+  observedAt: '2026-08-06T00:00:00Z'
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: '@a5c-ai/catalog'
+  reviewedAt: '2026-08-06T00:00:00Z'
+edges:
+  has_trust_level:
+    - trust-level:official-web
