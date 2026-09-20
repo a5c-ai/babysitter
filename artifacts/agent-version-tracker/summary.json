@@ -1,196 +1,178 @@
 {
   "checkedAgents": [
     {
-      "agent": "amp",
-      "displayName": "Amp CLI",
-      "latestVersion": "0.0.1786320433-geeee54",
-      "previousRecordedVersion": "0.0.1784264425-g070593",
+      "agent": "Amp CLI",
       "source": "npm:@ampcode/cli",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1703",
-      "graphUpdated": true
+      "latestVersion": "0.0.1786752172-g5bf5f5",
+      "previousGraphVersion": "0.0.1786320433-geeee54",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1779"
     },
     {
-      "agent": "antigravity",
-      "displayName": "Antigravity CLI",
-      "latestVersion": "1.1.11",
-      "previousRecordedVersion": "1.1.3",
+      "agent": "Antigravity CLI",
       "source": "github:google-antigravity/antigravity-cli",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1661",
-      "graphUpdated": true
+      "latestVersion": "1.1.13",
+      "previousGraphVersion": "1.1.11",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1763"
     },
     {
-      "agent": "claude",
-      "displayName": "Claude Code",
-      "latestVersion": "2.1.226",
-      "previousRecordedVersion": "2.1.212",
-      "source": "npm:@anthropic-ai/claude-code",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1690",
-      "graphUpdated": true
+      "agent": "Claude Code",
+      "source": "npm:@anthropic-ai/claude-code, github:anthropics/claude-code",
+      "latestVersion": "2.1.233",
+      "previousGraphVersion": "2.1.226",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1780"
     },
     {
-      "agent": "claude-agent-sdk",
-      "displayName": "Claude Agent SDK",
-      "latestVersion": "0.3.226",
-      "previousRecordedVersion": "0.3.212",
-      "source": "npm:@anthropic-ai/claude-agent-sdk",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1691",
-      "graphUpdated": true
+      "agent": "Claude Agent SDK",
+      "source": "npm:@anthropic-ai/claude-agent-sdk, github:anthropics/claude-agent-sdk-typescript",
+      "latestVersion": "0.3.233",
+      "previousGraphVersion": "0.3.226",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1781"
     },
     {
-      "agent": "codex",
-      "displayName": "Codex CLI",
+      "agent": "Codex CLI",
+      "source": "npm:@openai/codex, github:openai/codex",
       "latestVersion": "0.147.0",
-      "previousRecordedVersion": "0.144.5",
-      "source": "npm:@openai/codex",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1664",
-      "graphUpdated": true
+      "previousGraphVersion": "0.147.0",
+      "status": "already current in graph",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1664"
     },
     {
-      "agent": "codex-sdk",
-      "displayName": "OpenAI Node SDK",
+      "agent": "OpenAI Node SDK / Codex SDK adapter",
+      "source": "npm:openai, github:openai/openai-node",
       "latestVersion": "7.4.0",
-      "previousRecordedVersion": "6.48.0",
-      "source": "npm:openai",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1609",
-      "graphUpdated": true
+      "previousGraphVersion": "7.4.0",
+      "status": "already current in graph",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1609"
     },
     {
-      "agent": "copilot",
-      "displayName": "GitHub Copilot CLI",
-      "latestVersion": "1.0.78",
-      "previousRecordedVersion": "1.0.71",
+      "agent": "GitHub Copilot CLI",
       "source": "github:github/copilot-cli",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1610",
-      "graphUpdated": true
+      "latestVersion": "1.0.80",
+      "previousGraphVersion": "1.0.78",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1766"
     },
     {
-      "agent": "cursor",
-      "displayName": "Cursor",
-      "latestVersion": "2026-08-03 changelog",
-      "previousRecordedVersion": "3.11 / 2026-07 coverage",
-      "source": "https://cursor.com/changelog",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1611",
-      "graphUpdated": true
+      "agent": "Cursor",
+      "source": "web:cursor.com/changelog",
+      "latestVersion": "2026-08-13-changelog",
+      "previousGraphVersion": "2026-08-03-changelog",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1771"
     },
     {
-      "agent": "droid",
-      "displayName": "Factory Droid CLI",
-      "latestVersion": "0.191.1",
-      "previousRecordedVersion": "0.174.0",
+      "agent": "Factory Droid CLI",
       "source": "npm:@factory/cli",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1704",
-      "graphUpdated": true
+      "latestVersion": "0.197.0",
+      "previousGraphVersion": "0.191.1",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1782"
     },
     {
-      "agent": "gemini",
-      "displayName": "Gemini CLI",
-      "latestVersion": "0.54.4",
-      "previousRecordedVersion": "0.51.0",
-      "source": "github:google-gemini/gemini-cli",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1665",
-      "graphUpdated": true
+      "agent": "Gemini CLI",
+      "source": "npm:@google/gemini-cli, github:google-gemini/gemini-cli",
+      "latestVersion": "0.55.1",
+      "previousGraphVersion": "0.54.4",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1731"
     },
     {
-      "agent": "hermes",
-      "displayName": "Hermes Agent",
-      "latestVersion": "0.20.0 / v2026.8.3",
-      "previousRecordedVersion": "0.18.2",
+      "agent": "Hermes Agent",
       "source": "github:NousResearch/hermes-agent",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1614",
-      "graphUpdated": true
+      "latestVersion": "0.20.1 / v2026.8.13",
+      "previousGraphVersion": "0.20.0",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1768"
     },
     {
-      "agent": "omp",
-      "displayName": "Oh-My-Pi",
-      "latestVersion": "17.2.12",
-      "previousRecordedVersion": "17.0.2",
-      "source": "github:can1357/oh-my-pi",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1699",
-      "graphUpdated": true
+      "agent": "Oh-My-Pi",
+      "source": "npm:@oh-my-pi/pi-coding-agent, github:can1357/oh-my-pi",
+      "latestVersion": "17.3.4",
+      "previousGraphVersion": "17.2.12",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1783"
     },
     {
-      "agent": "openclaw",
-      "displayName": "OpenClaw",
-      "latestVersion": "2026.7.1-2",
-      "previousRecordedVersion": "2026.7.1",
+      "agent": "OpenClaw",
       "source": "github:openclaw/openclaw",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1616",
-      "graphUpdated": true
+      "latestVersion": "2026.7.1-2",
+      "previousGraphVersion": "2026.7.1-2",
+      "status": "already current in graph; newer published beta/pre-release not recorded as stable",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1616"
     },
     {
-      "agent": "opencode",
-      "displayName": "OpenCode",
-      "latestVersion": "1.18.16",
-      "previousRecordedVersion": "1.18.3",
-      "source": "npm:opencode-ai",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1705",
-      "graphUpdated": true
+      "agent": "OpenCode",
+      "source": "npm:opencode-ai, github:anomalyco/opencode",
+      "latestVersion": "1.18.18",
+      "previousGraphVersion": "1.18.16",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1747"
     },
     {
-      "agent": "pi",
-      "displayName": "Pi",
-      "latestVersion": "0.84.1",
-      "previousRecordedVersion": "0.80.10",
-      "source": "github:earendil-works/pi",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1668",
-      "graphUpdated": true
+      "agent": "Pi",
+      "source": "npm:@earendil-works/pi-coding-agent, github:earendil-works/pi",
+      "latestVersion": "0.84.2",
+      "previousGraphVersion": "0.84.1",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1784"
     },
     {
-      "agent": "qwen",
-      "displayName": "Qwen Code",
-      "latestVersion": "0.21.8",
-      "previousRecordedVersion": "0.19.11",
-      "source": "npm:@qwen-code/qwen-code",
-      "issue": "https://github.com/a5c-ai/babysitter/issues/1698",
-      "graphUpdated": true
+      "agent": "Qwen Code",
+      "source": "npm:@qwen-code/qwen-code, github:QwenLM/qwen-code",
+      "latestVersion": "0.21.12",
+      "previousGraphVersion": "0.21.8",
+      "status": "new graph record",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1785"
     }
   ],
   "newVersions": [
-    "amp 0.0.1786320433-geeee54",
-    "antigravity 1.1.11",
-    "claude 2.1.226",
-    "claude-agent-sdk 0.3.226",
-    "codex 0.147.0",
-    "codex-sdk 7.4.0",
-    "copilot 1.0.78",
-    "cursor changelog 2026-08-03",
-    "droid 0.191.1",
-    "gemini 0.54.4",
-    "hermes 0.20.0",
-    "omp 17.2.12",
-    "openclaw 2026.7.1-2",
-    "opencode 1.18.16",
-    "pi 0.84.1",
-    "qwen 0.21.8"
+    "amp 0.0.1786752172-g5bf5f5",
+    "antigravity 1.1.13",
+    "claude 2.1.233",
+    "claude-agent-sdk 0.3.233",
+    "copilot 1.0.80",
+    "cursor 2026-08-13-changelog",
+    "droid 0.197.0",
+    "gemini 0.55.1",
+    "hermes 0.20.1",
+    "omp 17.3.4",
+    "opencode 1.18.18",
+    "pi 0.84.2",
+    "qwen 0.21.12"
   ],
   "issuesCreated": [
-    "https://github.com/a5c-ai/babysitter/issues/1703",
-    "https://github.com/a5c-ai/babysitter/issues/1704",
-    "https://github.com/a5c-ai/babysitter/issues/1705"
+    "https://github.com/a5c-ai/babysitter/issues/1779",
+    "https://github.com/a5c-ai/babysitter/issues/1780",
+    "https://github.com/a5c-ai/babysitter/issues/1781",
+    "https://github.com/a5c-ai/babysitter/issues/1782",
+    "https://github.com/a5c-ai/babysitter/issues/1783",
+    "https://github.com/a5c-ai/babysitter/issues/1784",
+    "https://github.com/a5c-ai/babysitter/issues/1785"
   ],
   "issuesExisting": [
-    "https://github.com/a5c-ai/babysitter/issues/1661",
-    "https://github.com/a5c-ai/babysitter/issues/1690",
-    "https://github.com/a5c-ai/babysitter/issues/1691",
+    "https://github.com/a5c-ai/babysitter/issues/1763",
+    "https://github.com/a5c-ai/babysitter/issues/1766",
+    "https://github.com/a5c-ai/babysitter/issues/1731",
+    "https://github.com/a5c-ai/babysitter/issues/1768",
+    "https://github.com/a5c-ai/babysitter/issues/1747",
+    "https://github.com/a5c-ai/babysitter/issues/1771",
     "https://github.com/a5c-ai/babysitter/issues/1664",
     "https://github.com/a5c-ai/babysitter/issues/1609",
-    "https://github.com/a5c-ai/babysitter/issues/1610",
-    "https://github.com/a5c-ai/babysitter/issues/1611",
-    "https://github.com/a5c-ai/babysitter/issues/1665",
-    "https://github.com/a5c-ai/babysitter/issues/1614",
-    "https://github.com/a5c-ai/babysitter/issues/1699",
-    "https://github.com/a5c-ai/babysitter/issues/1616",
-    "https://github.com/a5c-ai/babysitter/issues/1668",
-    "https://github.com/a5c-ai/babysitter/issues/1698"
+    "https://github.com/a5c-ai/babysitter/issues/1616"
   ],
   "changedFiles": [
-    "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-08-10.yaml",
-    "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-08-10.yaml"
+    "packages/atlas/graph/agent-stack/agent-versions/upstream-current-2026-08-15.yaml",
+    "packages/atlas/graph/catalog-meta/evidence-sources/upstream-current-2026-08-15.yaml",
+    "artifacts/agent-version-tracker/upstream-targets-and-latest.json",
+    "artifacts/agent-version-tracker/summary.json"
   ],
   "notes": [
-    "Target list came from listPluginTargetDescriptors().filter(t => t.externalRepo) plus adapter npm install commands.",
-    "All @a5c-ai/* babysitter plugin packages were excluded.",
-    "Created missing agent-version-update issues for Amp 0.0.1786320433-geeee54, Factory Droid CLI 0.191.1, and OpenCode 1.18.16.",
-    "Amp and Factory Droid had npm package metadata but no public build-specific changelog for the exact latest versions."
+    "Excluded all @a5c-ai/* generated plugin packages from latest-version checks.",
+    "Used npm view for npm-distributed upstream packages and GitHub releases / official changelog pages for non-npm signals.",
+    "Did not duplicate Codex CLI 0.147.0, OpenAI Node SDK 7.4.0, or OpenClaw 2026.7.1-2 because they were already represented in the graph."
   ]
 }
