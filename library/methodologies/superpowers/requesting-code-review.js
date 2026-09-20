@@ -18,53 +18,128 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 // AGENT TASK DEFINITIONS
 // ============================================================================
 
-const agentGetReviewContextTask = defineTask('review-request-context', async (args, ctx) => {
-  return { context: args };
-}, {
+const agentGetReviewContextTask = defineTask('review-request-context', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Get Review Context (SHAs, changed files)',
   labels: ['superpowers', 'code-review', 'context'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Review Coordinator - Review Context Collector',
+      task: 'Resolve the base and head SHAs for the change under review and enumerate the changed files and diff statistics.',
+      context: args,
+      instructions: [
+        'Resolve the base SHA: use the provided baseSha when it is set, otherwise the merge-base with the default branch',
+        'Resolve the head SHA: use the provided headSha when it is set, otherwise HEAD',
+        'List every file changed between the base and head SHAs',
+        'Collect diff statistics: files changed, insertions, deletions',
+        'Report the resolved SHAs verbatim so downstream reviewers examine the same range'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['baseSha', 'headSha', 'changedFiles', 'diffStats']
+    }
+  },
   io: {
-    inputs: { baseSha: 'string', headSha: 'string' },
-    outputs: { baseSha: 'string', headSha: 'string', changedFiles: 'array', diffStats: 'object' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const agentSpecComplianceReviewTask = defineTask('review-request-spec', async (args, ctx) => {
-  return { review: args };
-}, {
+const agentSpecComplianceReviewTask = defineTask('review-request-spec', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Spec Compliance Review',
   labels: ['superpowers', 'code-review', 'spec-compliance'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Reviewer - Spec Compliance Specialist',
+      task: 'Review the diff between the base and head SHAs against the stated plan or requirements and report spec compliance.',
+      context: args,
+      instructions: [
+        'Read the plan or requirements at planPath when one is provided',
+        'Compare the diff against every stated requirement',
+        'List requirements that are missing or only partially implemented',
+        'List work present in the diff that no requirement asked for',
+        'List places where the implementation misunderstood a requirement',
+        'Set compliant to true only when nothing is missing and nothing is misunderstood'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['compliant', 'missingRequirements', 'extraWork', 'misunderstandings']
+    }
+  },
   io: {
-    inputs: { description: 'string', planPath: 'string', baseSha: 'string', headSha: 'string' },
-    outputs: { compliant: 'boolean', missingRequirements: 'array', extraWork: 'array', misunderstandings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const agentCodeQualityReviewTask = defineTask('review-request-quality', async (args, ctx) => {
-  return { review: args };
-}, {
+const agentCodeQualityReviewTask = defineTask('review-request-quality', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Code Quality Review',
   labels: ['superpowers', 'code-review', 'code-quality'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Reviewer - Code Quality Specialist',
+      task: 'Review the diff between the base and head SHAs for correctness, structure, error handling and adherence to project conventions.',
+      context: args,
+      instructions: [
+        'Check correctness: logic errors, off-by-one, unhandled edge cases',
+        'Check error handling: no empty catch blocks, no silently swallowed failures',
+        'Check structure, naming and consistency with the surrounding codebase',
+        'Check test coverage for the changed behaviour',
+        'Record genuine strengths as well as issues',
+        'Classify each issue with a severity: critical, important or minor',
+        'Set approved to false when any critical or important issue is present'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'strengths', 'issues', 'assessment', 'severity']
+    }
+  },
   io: {
-    inputs: { description: 'string', planPath: 'string', baseSha: 'string', headSha: 'string' },
-    outputs: { approved: 'boolean', strengths: 'array', issues: 'array', assessment: 'string', severity: 'string' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const agentActOnFeedbackTask = defineTask('review-request-act', async (args, ctx) => {
-  return { actions: args };
-}, {
+const agentActOnFeedbackTask = defineTask('review-request-act', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Act on Review Feedback',
   labels: ['superpowers', 'code-review', 'feedback-action'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Code Review Coordinator - Feedback Triage',
+      task: 'Triage the spec compliance and code quality review findings into critical fixes, important fixes and minor notes.',
+      context: args,
+      instructions: [
+        'Critical: fix immediately - correctness, security or missing requirements',
+        'Important: fix before proceeding - quality issues that would block a merge',
+        'Minor: note for later - style and preference items',
+        'Keep each entry actionable: what to change and where',
+        'Set allResolved to true only when no critical or important item remains open'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['criticalFixes', 'importantFixes', 'minorNotes', 'allResolved']
+    }
+  },
   io: {
-    inputs: { specReview: 'object', qualityReview: 'object' },
-    outputs: { criticalFixes: 'array', importantFixes: 'array', minorNotes: 'array', allResolved: 'boolean' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
 // ============================================================================
 // MAIN PROCESS
@@ -200,6 +275,9 @@ export async function process(inputs, ctx) {
           { path: 'artifacts/review/review-results.md', format: 'markdown', label: 'Review Results' }
         ]
       }
+    }, {
+      label: 'Code Review Results',
+      breakpointId: 'superpowers.requesting-code-review.verdict'
     });
   }
 

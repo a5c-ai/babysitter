@@ -17,89 +17,221 @@ import { defineTask } from '@a5c-ai/babysitter-sdk';
 // AGENT TASK DEFINITIONS
 // ============================================================================
 
-const productManagerReviewTask = defineTask('metaswarm-pm-review', async (args, _ctx) => {
-  return { review: args };
-}, {
+const productManagerReviewTask = defineTask('metaswarm-pm-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Product Manager Design Review',
   labels: ['metaswarm', 'design-review', 'product-manager'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Reviewer - Product Manager',
+      task: 'Review the implementation plan for use case validity, user benefit and scope alignment with the original issue.',
+      context: args,
+      instructions: [
+        'Validate that the plan addresses the use cases stated in the issue description',
+        'State the concrete user benefit each work unit delivers',
+        'Flag scope creep: work units that serve no stated use case',
+        'Flag scope gaps: stated use cases that no work unit covers',
+        'Report reviewerRole as "product-manager"',
+        'Set approved to false when any blocking finding remains - never approve to unblock the workflow'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'useCaseValidation', 'userBenefits', 'scopeAlignment', 'findings']
+    }
+  },
   io: {
-    inputs: { planDocument: 'string', workUnits: 'array', issueDescription: 'string' },
-    outputs: { approved: 'boolean', useCaseValidation: 'object', userBenefits: 'array', scopeAlignment: 'object', findings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const architectReviewTask = defineTask('metaswarm-architect-review', async (args, _ctx) => {
-  return { review: args };
-}, {
+const architectReviewTask = defineTask('metaswarm-architect-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Architect Design Review',
   labels: ['metaswarm', 'design-review', 'architect'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Reviewer - Architect',
+      task: 'Review the implementation plan for architectural fit, pattern consistency and the technical debt it would incur.',
+      context: args,
+      instructions: [
+        'Assess how the plan fits the existing architecture and its boundaries',
+        'Name the patterns the plan uses and whether they match the codebase',
+        'List the technical debt the plan creates and whether it is acknowledged',
+        'Flag any work unit that cannot be built as described',
+        'Report reviewerRole as "architect"',
+        'Set approved to false when any blocking finding remains - never approve to unblock the workflow'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'architecturalFit', 'patterns', 'technicalDebt', 'findings']
+    }
+  },
   io: {
-    inputs: { planDocument: 'string', workUnits: 'array', issueDescription: 'string' },
-    outputs: { approved: 'boolean', architecturalFit: 'object', patterns: 'array', technicalDebt: 'array', findings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const designerReviewTask = defineTask('metaswarm-designer-review', async (args, _ctx) => {
-  return { review: args };
-}, {
+const designerReviewTask = defineTask('metaswarm-designer-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Designer UX/API Review',
   labels: ['metaswarm', 'design-review', 'designer'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Reviewer - Designer',
+      task: 'Review the implementation plan for user-facing and API design quality and developer experience.',
+      context: args,
+      instructions: [
+        'Assess the user-facing surface the plan introduces or changes',
+        'Assess the API design: naming, shape, versioning and error semantics',
+        'Assess developer experience: discoverability, defaults and documentation',
+        'Flag inconsistencies with existing surfaces',
+        'Report reviewerRole as "designer"',
+        'Set approved to false when any blocking finding remains - never approve to unblock the workflow'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'uxAssessment', 'apiDesign', 'developerExperience', 'findings']
+    }
+  },
   io: {
-    inputs: { planDocument: 'string', workUnits: 'array', issueDescription: 'string' },
-    outputs: { approved: 'boolean', uxAssessment: 'object', apiDesign: 'object', developerExperience: 'object', findings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const securityDesignReviewTask = defineTask('metaswarm-security-design-review', async (args, _ctx) => {
-  return { review: args };
-}, {
+const securityDesignReviewTask = defineTask('metaswarm-security-design-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Security Design Threat Modeling Review',
   labels: ['metaswarm', 'design-review', 'security'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Reviewer - Security Design',
+      task: 'Threat model the implementation plan and check it against the OWASP Top 10 before any code is written.',
+      context: args,
+      instructions: [
+        'Build a threat model: assets, trust boundaries, entry points and attackers',
+        'Check the plan against each relevant OWASP Top 10 category',
+        'Propose a concrete mitigation for every threat you raise',
+        'Flag any work unit that would widen a trust boundary without a control',
+        'Report reviewerRole as "security-design"',
+        'Set approved to false when any unmitigated threat remains - never approve to unblock the workflow'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'threatModel', 'owaspFindings', 'mitigations', 'findings']
+    }
+  },
   io: {
-    inputs: { planDocument: 'string', workUnits: 'array', issueDescription: 'string' },
-    outputs: { approved: 'boolean', threatModel: 'object', owaspFindings: 'array', mitigations: 'array', findings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const uxReviewTask = defineTask('metaswarm-ux-review', async (args, _ctx) => {
-  return { review: args };
-}, {
+const uxReviewTask = defineTask('metaswarm-ux-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'UX Reviewer Design Assessment',
   labels: ['metaswarm', 'design-review', 'ux'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Reviewer - UX Reviewer',
+      task: 'Assess the implementation plan for usability, accessibility and the coherence of the user flows it defines.',
+      context: args,
+      instructions: [
+        'Walk each user flow the plan defines and flag dead ends or ambiguous states',
+        'Check accessibility: keyboard paths, contrast, labelling and screen reader semantics',
+        'Score overall usability from 0 to 100 and justify the score',
+        'Flag flows that assume knowledge the user does not have',
+        'Report reviewerRole as "ux"',
+        'Set approved to false when any blocking finding remains - never approve to unblock the workflow'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'usabilityScore', 'accessibilityFindings', 'userFlowIssues', 'findings']
+    }
+  },
   io: {
-    inputs: { planDocument: 'string', workUnits: 'array', issueDescription: 'string' },
-    outputs: { approved: 'boolean', usabilityScore: 'number', accessibilityFindings: 'array', userFlowIssues: 'array', findings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const ctoReviewTask = defineTask('metaswarm-cto-review', async (args, _ctx) => {
-  return { review: args };
-}, {
+const ctoReviewTask = defineTask('metaswarm-cto-review', (args, taskCtx) => ({
   kind: 'agent',
   title: 'CTO TDD Readiness and Codebase Alignment Review',
   labels: ['metaswarm', 'design-review', 'cto'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Reviewer - CTO',
+      task: 'Assess whether the plan is ready for test-driven implementation, aligned with the codebase, and acceptable in risk.',
+      context: args,
+      instructions: [
+        'Check TDD readiness: every work unit must have an observable, testable outcome',
+        'Check codebase alignment: the plan must build on what exists rather than beside it',
+        'Assess delivery risk: unknowns, dependencies, blast radius and rollback',
+        'Flag any work unit that cannot be verified by a test',
+        'Report reviewerRole as "cto"',
+        'Set approved to false when any blocking finding remains - never approve to unblock the workflow'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['approved', 'tddReadiness', 'codebaseAlignment', 'riskAssessment', 'findings']
+    }
+  },
   io: {
-    inputs: { planDocument: 'string', workUnits: 'array', issueDescription: 'string' },
-    outputs: { approved: 'boolean', tddReadiness: 'object', codebaseAlignment: 'object', riskAssessment: 'object', findings: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
-const consolidateReviewsTask = defineTask('metaswarm-consolidate-design-reviews', async (args, _ctx) => {
-  return { consolidation: args };
-}, {
+const consolidateReviewsTask = defineTask('metaswarm-consolidate-design-reviews', (args, taskCtx) => ({
   kind: 'agent',
   title: 'Consolidate Design Review Findings',
   labels: ['metaswarm', 'design-review', 'consolidation'],
+  agent: {
+    name: 'general-purpose',
+    prompt: {
+      role: 'Metaswarm Design Review - Consolidator',
+      task: 'Merge the six specialist reviews of this iteration into one deduplicated finding list with blockers and action items.',
+      context: args,
+      instructions: [
+        'Deduplicate findings that several reviewers raised, keeping every reviewer attribution',
+        'Separate blockers (a reviewer withheld approval) from non-blocking findings',
+        'Turn each blocker into a concrete action item against a named work unit',
+        'Set allApproved to true only when every one of the six reviews approved',
+        'Do not soften or drop a reviewer finding to reach approval'
+      ],
+      outputFormat: 'JSON'
+    },
+    outputSchema: {
+      type: 'object',
+      required: ['allApproved', 'consolidatedFindings', 'actionItems', 'blockers']
+    }
+  },
   io: {
-    inputs: { reviews: 'array', iteration: 'number' },
-    outputs: { allApproved: 'boolean', consolidatedFindings: 'array', actionItems: 'array', blockers: 'array' }
+    inputJsonPath: `tasks/${taskCtx.effectId}/input.json`,
+    outputJsonPath: `tasks/${taskCtx.effectId}/output.json`
   }
-});
+}));
 
 // ============================================================================
 // MAIN PROCESS
@@ -180,6 +312,9 @@ export async function process(inputs, ctx) {
       question: `Design review gate exhausted ${maxIterations} iterations without unanimous approval. Escalating to human for override or revision decision.`,
       title: 'Design Review Gate: Human Escalation',
       context: { runId: ctx.runId }
+    }, {
+      label: 'Design Review Gate: Human Escalation',
+      breakpointId: 'metaswarm.metaswarm-design-review.escalation'
     });
   }
 
