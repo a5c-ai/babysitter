@@ -24,12 +24,14 @@ function isICloudDrivePath(candidatePath: string): boolean {
   return normalized === ICLOUD_DRIVE_MARKER || normalized.includes(`${ICLOUD_DRIVE_MARKER}/`);
 }
 
-async function resolveExistingAncestorRealPath(inputPath: string): Promise<string | undefined> {
+async function resolvePathThroughExistingAncestor(inputPath: string): Promise<string | undefined> {
   let current = path.resolve(inputPath);
+  const missingSegments: string[] = [];
   let reachedFilesystemRoot = false;
   while (!reachedFilesystemRoot) {
     try {
-      return await fs.realpath(current);
+      const realAncestor = await fs.realpath(current);
+      return path.join(realAncestor, ...missingSegments.reverse());
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
       if (err.code !== "ENOENT") {
@@ -39,6 +41,7 @@ async function resolveExistingAncestorRealPath(inputPath: string): Promise<strin
       if (parent === current) {
         reachedFilesystemRoot = true;
       } else {
+        missingSegments.push(path.basename(current));
         current = parent;
       }
     }
@@ -47,9 +50,9 @@ async function resolveExistingAncestorRealPath(inputPath: string): Promise<strin
 }
 
 export async function detectICloudDrivePath(inputPath: string): Promise<string | undefined> {
-  const realAncestor = await resolveExistingAncestorRealPath(inputPath);
+  const canonicalPath = await resolvePathThroughExistingAncestor(inputPath);
   const candidates = [
-    realAncestor,
+    canonicalPath,
     path.resolve(inputPath),
     inputPath,
   ].filter((candidate): candidate is string => typeof candidate === "string" && candidate.trim() !== "");

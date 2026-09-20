@@ -201,6 +201,33 @@ describe('composeBabysitSkillPrompt', () => {
     const output = composeBabysitSkillPrompt(createPromptContextFromCatalog('pi'));
     expect(output).not.toContain('Non-hook-driven continuation');
   });
+
+  it('uses the deterministic OMP driver without advertising the legacy manual posting loop', () => {
+    const output = composeBabysitSkillPrompt(createPromptContextFromCatalog('oh-my-pi'));
+
+    expect(output).toContain('babysitter_drive');
+    expect(output).toContain('babysitter_breakpoint_respond');
+    expect(output).toContain('exact one-item native `task` payload');
+    expect(output).toContain('Never invoke `task:post` or `run:iterate` for a driver-owned effect');
+    expect(output).toContain('Do not fall back to manual posting');
+    expect(output).toContain('Never fabricate, infer, or synthesize breakpoint approval');
+    expect(output).toContain('Shell task definitions are trusted process code');
+    expect(output).toContain('`interpreter: "bash"`');
+    expect(output).toContain('authoritative `OMP_SESSION_ID`');
+    expect(output).toContain('Return the driver-provided `completionProof`');
+    expect(output).not.toContain('PID-scoped session marker');
+    expect(output).not.toContain('`AGENT_SESSION_ID` env var');
+    expect(output).not.toContain('Use the SDK CLI to drive the orchestration loop');
+    expect(output).not.toContain('**Post results** - commit results back through `task:post`');
+    for (const forbidden of [
+      'Call `run:iterate`, perform each effect, post results, and repeat',
+      '$CLI run:iterate <runId>',
+      'The orchestrating agent must execute the command',
+      'When the run is completed, the CLI will emit a `completionProof`',
+    ]) {
+      expect(output).not.toContain(forbidden);
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -292,6 +319,23 @@ describe('composeProcessCreatePrompt', () => {
 // 4. composeOrchestrationPrompt
 // ---------------------------------------------------------------------------
 describe('composeOrchestrationPrompt', () => {
+  it('keeps OMP orchestration driver-owned without affirmative manual-loop instructions', () => {
+    const output = composeOrchestrationPrompt(createPromptContextFromCatalog('oh-my-pi'));
+
+    expect(output).toContain('babysitter_drive');
+    expect(output).toContain('babysitter_breakpoint_respond');
+    expect(output).toContain('Return the driver-provided `completionProof`');
+    expect(output).toContain('Never fabricate, infer, or synthesize breakpoint approval');
+    for (const forbidden of [
+      'Call `run:iterate`, perform each effect, post results, and repeat',
+      '$CLI run:iterate <runId>',
+      'The orchestrating agent must execute the command',
+      'When the run is completed, the CLI will emit a `completionProof`',
+    ]) {
+      expect(output).not.toContain(forbidden);
+    }
+  });
+
   it('contains run:create section', () => {
     const output = composeOrchestrationPrompt(createPromptContextFromCatalog('claude-code'));
     expect(output).toContain('### 2. Create run and bind session');

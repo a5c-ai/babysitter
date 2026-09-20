@@ -1,8 +1,8 @@
-import { promises as fs } from "node:fs";
+import { constants as fsConstants, promises as fs, type Stats } from "node:fs";
+import { createHash } from "node:crypto";
 import * as path from "node:path";
 import { commitEffectCancellation, commitEffectResult } from "../../runtime/commitEffectResult";
 import { readTaskDefinition } from "../../storage/tasks";
-import type { JsonRecord } from "../../storage/types";
 import type { ParsedArgs } from "./types";
 import { USAGE } from "./usage";
 import { collapseDoubledA5cRuns, resolveRunDir } from "./args";
@@ -20,35 +20,8 @@ import {
   loadTaskResultPreview,
   toTaskListEntry,
 } from "./runState";
+export const MAX_CHECKSUM_BOUND_FILE_BYTES = 1024 * 1024;
 
-function readStringField(value: JsonRecord | undefined, key: string): string | undefined {
-  const candidate = value?.[key];
-  return typeof candidate === "string" ? candidate : undefined;
-}
-
-function readNumericField(value: JsonRecord | undefined, key: string): number | undefined {
-  const candidate = value?.[key];
-  return typeof candidate === "number" && Number.isFinite(candidate) ? candidate : undefined;
-}
-
-function coerceShellFailureResult(errorPayload: unknown, stdout?: string, stderr?: string) {
-  const payloadData = isJsonRecord(errorPayload)
-    ? isJsonRecord(errorPayload.data)
-      ? errorPayload.data
-      : errorPayload
-    : undefined;
-  const exitCode = readNumericField(payloadData, "exitCode") ?? 1;
-  return {
-    success: false,
-    exitCode,
-    stdout: stdout ?? readStringField(payloadData, "stdout") ?? "",
-    stderr: stderr ?? readStringField(payloadData, "stderr") ?? "",
-    error:
-      readStringField(payloadData, "error") ??
-      readStringField(payloadData, "message") ??
-      `Shell command exited with code ${exitCode}`,
-  };
-}
 
 function resolveMaybeRunRelative(runDir: string, candidate?: string) {
   if (!candidate) return undefined;
@@ -60,6 +33,145 @@ function resolveMaybeRunRelative(runDir: string, candidate?: string) {
     return candidate;
   }
   return collapseDoubledA5cRuns(path.join(runDir, candidate));
+}
+
+function validateSha256(value: string | undefined, flag: string): boolean {
+  if (value === undefined) return true;
+  if (/^[a-f0-9]{64}$/.test(value)) return true;
+  console.error(`[task:post] ${flag} must be exactly 64 lowercase hexadecimal characters`);
+  return false;
+}
+
+async function readChecksumBoundFile(
+  runDir: string,
+  filename: string,
+  expectedSha256: string,
+  flag: "--value-sha256" | "--error-sha256",
+): Promise<Buffer> {
+  if (filename === "-") {
+    throw new Error(`[task:post] ${flag} requires a file path, not stdin`);
+  }
+  const requestedPath = await resolveTrustedRootAlias(
+    path.resolve(resolveMaybeRunRelative(runDir, filename)!),
+  );
+  const beforeAncestors = await readLexicalAncestorStats(requestedPath, flag);
+  const beforePath = await fs.lstat(requestedPath);
+  if (beforePath.isSymbolicLink()) {
+    throw new Error(`[task:post] ${flag} path must not be a symbolic link`);
+  }
+  const openFlags = fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0);
+  const handle = await fs.open(requestedPath, openFlags);
+  try {
+    const before = await handle.stat();
+    assertChecksumFileStat(before, flag);
+    if (before.size > MAX_CHECKSUM_BOUND_FILE_BYTES) {
+      throw new Error(
+        `[task:post] ${flag} file is too large; maximum is ${MAX_CHECKSUM_BOUND_FILE_BYTES} bytes`,
+      );
+    }
+    const allocation = Buffer.allocUnsafe(MAX_CHECKSUM_BOUND_FILE_BYTES + 1);
+    let length = 0;
+    while (length < allocation.length) {
+      const { bytesRead } = await handle.read(allocation, length, allocation.length - length, length);
+      if (bytesRead === 0) break;
+      length += bytesRead;
+    }
+    if (length > MAX_CHECKSUM_BOUND_FILE_BYTES) {
+      throw new Error(
+        `[task:post] ${flag} file is too large; maximum is ${MAX_CHECKSUM_BOUND_FILE_BYTES} bytes`,
+      );
+    }
+    const after = await handle.stat();
+    if (!sameChecksumFileStat(before, after) || after.size !== length) {
+      throw new Error(`[task:post] ${flag} file changed while it was being authenticated`);
+    }
+    const bytes = Buffer.from(allocation.subarray(0, length));
+    const [afterPath, afterAncestors] = await Promise.all([
+      fs.lstat(requestedPath),
+      readLexicalAncestorStats(requestedPath, flag),
+    ]);
+    if (
+      afterPath.isSymbolicLink()
+      || !sameChecksumFileIdentity(beforePath, afterPath)
+      || !sameChecksumFileIdentity(after, afterPath)
+      || beforeAncestors.length !== afterAncestors.length
+      || beforeAncestors.some((entry, index) =>
+        !sameChecksumFileIdentity(entry.stat, afterAncestors[index].stat)
+      )
+    ) {
+      throw new Error(`[task:post] ${flag} path changed while it was being authenticated`);
+    }
+    const actualSha256 = createHash("sha256").update(bytes).digest("hex");
+    if (actualSha256 !== expectedSha256) {
+      throw new Error(`[task:post] ${flag} checksum mismatch`);
+    }
+    return bytes;
+  } finally {
+    await handle.close();
+  }
+}
+
+function assertChecksumFileStat(stat: Stats, flag: string): void {
+  if (!stat.isFile()) throw new Error(`[task:post] ${flag} requires a regular file`);
+}
+
+function sameChecksumFileIdentity(left: Stats, right: Stats): boolean {
+  return left.dev === right.dev && left.ino === right.ino;
+}
+
+function sameChecksumFileStat(left: Stats, right: Stats): boolean {
+  return sameChecksumFileIdentity(left, right)
+    && left.size === right.size
+    && left.mtimeMs === right.mtimeMs
+    && left.ctimeMs === right.ctimeMs;
+}
+
+async function resolveTrustedRootAlias(filePath: string): Promise<string> {
+  if (process.platform !== "darwin" || (filePath !== "/var" && !filePath.startsWith("/var/"))) {
+    return filePath;
+  }
+  const varStat = await fs.lstat("/var");
+  if (!varStat.isSymbolicLink()) return filePath;
+  const canonicalVar = await fs.realpath("/var");
+  if (canonicalVar !== "/private/var") {
+    throw new Error("[task:post] refusing an unexpected macOS /var root alias");
+  }
+  return path.join(canonicalVar, path.relative("/var", filePath));
+}
+
+async function readLexicalAncestorStats(
+  filePath: string,
+  flag: string,
+): Promise<Array<{ path: string; stat: Stats }>> {
+  const parsed = path.parse(filePath);
+  const relativeParts = filePath.slice(parsed.root.length).split(path.sep).filter(Boolean);
+  const ancestors: Array<{ path: string; stat: Stats }> = [];
+  let current = parsed.root;
+  for (const part of relativeParts.slice(0, -1)) {
+    current = path.join(current, part);
+    const stat = await fs.lstat(current);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`[task:post] ${flag} path ancestors must not contain symbolic links`);
+    }
+    if (!stat.isDirectory()) {
+      throw new Error(`[task:post] ${flag} path ancestor is not a directory`);
+    }
+    ancestors.push({ path: current, stat });
+  }
+  return ancestors;
+}
+
+
+function parseErrorBytes(bytes: Buffer, requireJson: boolean): unknown {
+  const trimmed = bytes.toString("utf8").trim();
+  if (!trimmed.length) return undefined;
+  try {
+    return JSON.parse(trimmed) as unknown;
+  } catch (error) {
+    if (requireJson) throw error;
+    const message = trimmed.replace(/^Error:\s*/, "");
+    return { name: "Error", message };
+  }
 }
 
 async function readJsonFile(runDir: string, filename?: string): Promise<unknown> {
@@ -93,17 +205,7 @@ async function readErrorFile(runDir: string, filename?: string): Promise<unknown
   const raw = filename === "-"
     ? await readStdinUtf8()
     : await fs.readFile(resolveMaybeRunRelative(runDir, filename)!, "utf8");
-  const trimmed = raw.trim();
-  if (!trimmed.length) return undefined;
-  try {
-    return JSON.parse(trimmed) as unknown;
-  } catch {
-    // Not JSON — treat the file contents as the error message itself. Strip a
-    // leading "Error: " prefix (the result of String(new Error(message))) so
-    // the surfaced message is the underlying failure, not doubled.
-    const message = trimmed.replace(/^Error:\s*/, "");
-    return { name: "Error", message };
-  }
+  return parseErrorBytes(Buffer.from(raw), false);
 }
 
 function readInlineJson(raw?: string): unknown {
@@ -145,6 +247,24 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
     console.error("[task:post] --value-inline is only supported with --status ok");
     return 1;
   }
+  if (!validateSha256(parsed.valueSha256, "--value-sha256")) return 1;
+  if (!validateSha256(parsed.errorSha256, "--error-sha256")) return 1;
+  if (parsed.valueSha256 && !parsed.valuePath) {
+    console.error("[task:post] --value-sha256 requires --value <file>");
+    return 1;
+  }
+  if (parsed.errorSha256 && !parsed.errorPath) {
+    console.error("[task:post] --error-sha256 requires --error <file>");
+    return 1;
+  }
+  if (parsed.taskStatus === "ok" && (parsed.errorPath || parsed.errorSha256)) {
+    console.error("[task:post] --error and --error-sha256 require --status error");
+    return 1;
+  }
+  if (parsed.taskStatus === "error" && (parsed.valuePath || parsed.valueInline || parsed.valueSha256)) {
+    console.error("[task:post] --value, --value-inline, and --value-sha256 require --status ok");
+    return 1;
+  }
   if (parsed.taskStatus === "ok" && !parsed.valuePath && !parsed.valueInline) {
     console.error("[task:post] ok results require --value or --value-inline");
     return 1;
@@ -177,24 +297,44 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   const metadata = isJsonRecord(metadataRaw) ? metadataRaw : undefined;
   const stdout = parsed.stdoutFile ? await readTextFile(runDir, parsed.stdoutFile) : undefined;
   const stderr = parsed.stderrFile ? await readTextFile(runDir, parsed.stderrFile) : undefined;
-  const errorPayload =
-    parsed.taskStatus === "error"
-      ? (await readErrorFile(runDir, parsed.errorPath)) ?? { name: "Error", message: "Task reported failure" }
-      : undefined;
-  const value =
-    parsed.taskStatus === "ok"
-      ? parsed.valueInline
-        ? readInlineJson(parsed.valueInline)
-        : await readJsonFile(runDir, parsed.valuePath)
-      : undefined;
-  const normalizedShellFailure = parsed.taskStatus === "error" && record.kind === "shell";
-  const committedStatus = normalizedShellFailure ? "ok" : parsed.taskStatus;
+  let errorPayload: unknown;
+  if (parsed.taskStatus === "error") {
+    if (parsed.errorPath && parsed.errorSha256) {
+      const bytes = await readChecksumBoundFile(
+        runDir,
+        parsed.errorPath,
+        parsed.errorSha256,
+        "--error-sha256",
+      );
+      errorPayload = parseErrorBytes(bytes, true);
+    } else {
+      errorPayload = await readErrorFile(runDir, parsed.errorPath);
+    }
+    errorPayload ??= { name: "Error", message: "Task reported failure" };
+  }
+  let value: unknown;
+  if (parsed.taskStatus === "ok") {
+    if (parsed.valueInline) {
+      value = readInlineJson(parsed.valueInline);
+    } else if (parsed.valuePath && parsed.valueSha256) {
+      const bytes = await readChecksumBoundFile(
+        runDir,
+        parsed.valuePath,
+        parsed.valueSha256,
+        "--value-sha256",
+      );
+      const trimmed = bytes.toString("utf8").trim();
+      value = trimmed.length ? (JSON.parse(trimmed) as unknown) : undefined;
+    } else {
+      value = await readJsonFile(runDir, parsed.valuePath);
+    }
+  }
+  const committedStatus = parsed.taskStatus;
 
   const plan = {
     runDir: toRunRelativePosix(runDir, runDir) ?? runDir,
     effectId: parsed.effectId,
     status: committedStatus,
-    normalizedShellFailure,
     valueProvided: Boolean(parsed.valuePath || parsed.valueInline),
     errorProvided: Boolean(parsed.errorPath),
     stdoutRef: parsed.stdoutRef ?? null,
@@ -220,7 +360,7 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
       committedStatus === "ok"
         ? {
             status: "ok",
-            value: normalizedShellFailure ? coerceShellFailureResult(errorPayload, stdout, stderr) : value,
+            value,
             stdout,
             stderr,
             stdoutRef: parsed.stdoutRef,
@@ -246,10 +386,9 @@ export async function handleTaskPost(parsed: ParsedArgs): Promise<number> {
   const stderrRef = normalizeArtifactRef(runDir, committed.stderrRef) ?? null;
   const resultRef = normalizeArtifactRef(runDir, committed.resultRef) ?? null;
   if (parsed.json) {
-    console.log(JSON.stringify({ status: committedStatus, normalizedShellFailure, committed, stdoutRef, stderrRef, resultRef }));
+    console.log(JSON.stringify({ status: committedStatus, committed, stdoutRef, stderrRef, resultRef }));
   } else {
     const parts = [`[task:post] status=${committedStatus}`];
-    if (normalizedShellFailure) parts.push("normalizedShellFailure=true");
     if (stdoutRef) parts.push(`stdoutRef=${stdoutRef}`);
     if (stderrRef) parts.push(`stderrRef=${stderrRef}`);
     if (resultRef) parts.push(`resultRef=${resultRef}`);

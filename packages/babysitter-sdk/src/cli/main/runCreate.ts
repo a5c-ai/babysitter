@@ -31,6 +31,14 @@ import {
 import { formatIterationMetadata, readRunMetadataSafe } from "./runState";
 import type { ParsedArgs } from "./types";
 import { USAGE } from "./usage";
+import {
+  acquireSessionReservation,
+  getSessionFilePath,
+  readSessionFile,
+  releaseSessionReservation,
+  sessionFileExists,
+  type SessionReservation,
+} from "../../session";
 
 export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   // --entry is optional for bare runs (no process attached)
@@ -110,26 +118,16 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     }
   }
 
-  const requestedHarness = parsed.harness ?? (parsed.sessionId ? getAdapter().name : undefined);
-  const result = await createRun({
-    runsDir,
-    runId: parsed.runIdOverride,
-    request: parsed.requestId,
-    prompt: parsed.prompt,
-    harness: requestedHarness,
-    processRevision: parsed.processRevision,
-    ...(!isBareRun && absoluteImportPath && parsed.processId ? {
-      process: {
-        processId: parsed.processId,
-        importPath: absoluteImportPath,
-        exportName: entrypoint?.exportName,
-      },
-    } : {}),
-    inputs,
-    ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
-  });
-
-  const detectedAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
+  const detectedAdapter = parsed.harness
+    ? getAdapterByName(parsed.harness)
+    : process.env.OMP_SESSION_ID || process.env.OMP_PLUGIN_ROOT
+      ? getAdapterByName("oh-my-pi")
+      : process.env.PI_SESSION_ID || process.env.PI_PLUGIN_ROOT
+        ? getAdapterByName("pi")
+      : getAdapter();
+  const requestedHarness = parsed.harness
+    ?? (detectedAdapter && detectedAdapter.name !== "custom" ? detectedAdapter.name : undefined)
+    ?? (parsed.sessionId ? getAdapter().name : undefined);
   const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined || (detectedAdapter && detectedAdapter.name !== "custom");
   const adapter = shouldBindSession ? detectedAdapter : undefined;
   if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
@@ -141,30 +139,116 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     }
     return 1;
   }
-
+  if (adapter?.name === "oh-my-pi") {
+    const ompSessionId = process.env.OMP_SESSION_ID;
+    const babysitterSessionId = process.env.BABYSITTER_SESSION_ID;
+    const safeSessionId = /^[A-Za-z0-9._:-]{1,256}$/;
+    const bindingError = !ompSessionId || !safeSessionId.test(ompSessionId)
+      ? "A valid authoritative OMP_SESSION_ID is required before creating an OMP run."
+      : babysitterSessionId !== undefined && (!safeSessionId.test(babysitterSessionId) || babysitterSessionId !== ompSessionId)
+        ? "OMP_SESSION_ID and BABYSITTER_SESSION_ID do not identify the same session."
+        : undefined;
+    if (bindingError) {
+      if (parsed.json) {
+        console.log(JSON.stringify({ error: "OMP_SESSION_BINDING_INVALID", message: bindingError }));
+      } else {
+        process.stderr.write(`Error: ${bindingError}\n`);
+      }
+      return 1;
+    }
+  }
+  const resolvedSessionId = adapter?.resolveSessionId(parsed);
+  let ompStateFile: string | undefined;
+  let ompReservation: SessionReservation | undefined;
+  if (adapter?.name === "oh-my-pi" && resolvedSessionId) {
+    const stateDir = adapter.resolveStateDir({
+      stateDir: parsed.stateDir,
+      pluginRoot: adapter.resolvePluginRoot(parsed),
+    });
+    if (!stateDir) {
+      console.error(JSON.stringify({
+        error: "OMP_SESSION_STATE_UNAVAILABLE",
+        message: "The OMP session state directory could not be resolved.",
+      }));
+      return 1;
+    }
+    ompStateFile = getSessionFilePath(stateDir, resolvedSessionId);
+    try {
+      ompReservation = await acquireSessionReservation(ompStateFile);
+    } catch {
+      console.error(JSON.stringify({
+        error: "OMP_SESSION_CREATION_BUSY",
+        message: "Another OMP run creation is already reserving this session.",
+      }));
+      return 1;
+    }
+  }
+  let result: Awaited<ReturnType<typeof createRun>>;
   let sessionBound;
-  if (adapter) {
-    const sessionId = adapter.resolveSessionId(parsed);
-    sessionBound = sessionId
-      ? await adapter.bindSession({
-          sessionId,
-          runId: result.runId,
-          runDir: result.runDir,
-          pluginRoot: adapter.resolvePluginRoot(parsed),
-          stateDir: parsed.stateDir,
-          runsDir,
-          maxIterations: parsed.maxIterations,
-          prompt: parsed.prompt ?? "",
-          verbose: parsed.verbose,
-          json: parsed.json,
-        })
-      : {
-          harness: parsed.harness ?? adapter.name,
-          sessionId: "",
-          error: adapter.getMissingSessionIdHint?.() ?? "No session ID provided. Use --session-id or set AGENT_SESSION_ID.",
-        };
-  } else if (parsed.sessionId !== undefined && parsed.harness) {
-    sessionBound = { harness: parsed.harness, sessionId: "", error: `Unsupported harness: ${parsed.harness}` };
+  try {
+    if (ompStateFile && await sessionFileExists(ompStateFile)) {
+      try {
+        await readSessionFile(ompStateFile);
+      } catch (error) {
+        console.error(JSON.stringify({
+          error: "OMP_SESSION_STATE_INVALID",
+          message: `OMP session state could not be validated: ${error instanceof Error ? error.message : String(error)}`,
+        }));
+        return 1;
+      }
+    }
+    const metadata = {
+      ...(parsed.interactive === false ? { nonInteractive: true } : {}),
+      ...(adapter && resolvedSessionId ? {
+        sessionBinding: { harness: adapter.name, sessionId: resolvedSessionId },
+      } : {}),
+    };
+    result = await createRun({
+      runsDir,
+      runId: parsed.runIdOverride,
+      request: parsed.requestId,
+      prompt: parsed.prompt,
+      harness: requestedHarness,
+      processRevision: parsed.processRevision,
+      ...(!isBareRun && absoluteImportPath && parsed.processId ? {
+        process: {
+          processId: parsed.processId,
+          importPath: absoluteImportPath,
+          exportName: entrypoint?.exportName,
+        },
+      } : {}),
+      inputs,
+      ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
+    });
+
+    if (adapter) {
+      sessionBound = resolvedSessionId
+        ? await adapter.bindSession({
+            sessionId: resolvedSessionId,
+            runId: result.runId,
+            runDir: result.runDir,
+            pluginRoot: adapter.resolvePluginRoot(parsed),
+            stateDir: parsed.stateDir,
+            runsDir,
+            maxIterations: parsed.maxIterations,
+            prompt: parsed.prompt ?? "",
+            verbose: parsed.verbose,
+            json: parsed.json,
+          })
+        : {
+            harness: parsed.harness ?? adapter.name,
+            sessionId: "",
+            error: adapter.getMissingSessionIdHint?.() ?? "No session ID provided. Use --session-id or set AGENT_SESSION_ID.",
+          };
+    } else if (parsed.sessionId !== undefined && parsed.harness) {
+      sessionBound = { harness: parsed.harness, sessionId: "", error: `Unsupported harness: ${parsed.harness}` };
+    }
+    if (adapter?.name === "oh-my-pi" && sessionBound?.error) {
+      await fs.rm(result.runDir, { recursive: true, force: true });
+      return 1;
+    }
+  } finally {
+    if (ompReservation) await releaseSessionReservation(ompReservation);
   }
 
   let initialIteration: RunIterateResult | undefined;
@@ -249,7 +333,7 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       console.log(`[run:create] initialIteration status=${initialIteration.status} reason=${initialIteration.reason ?? ""}`);
     }
   }
-  return sessionBound?.fatal ? 1 : 0;
+  return sessionBound?.fatal || (adapter?.name === "oh-my-pi" && sessionBound?.error) ? 1 : 0;
 }
 
 async function shouldSeedInitialIterationAfterRunCreate(args: {

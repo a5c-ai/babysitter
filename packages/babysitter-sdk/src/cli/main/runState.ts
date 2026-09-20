@@ -19,6 +19,7 @@ type RunLifecycleState = "created" | "waiting" | "completed" | "halted" | "faile
 
 export interface TaskListEntry {
   effectId: string;
+  invocationKey: string;
   taskId: string;
   stepId: string;
   status: string;
@@ -85,6 +86,7 @@ export async function readStateCacheSafe(runDir: string, command: string): Promi
 export function toTaskListEntry(record: EffectRecord, runDir: string): TaskListEntry {
   return {
     effectId: record.effectId,
+    invocationKey: record.invocationKey,
     taskId: record.taskId ?? "unknown",
     stepId: record.stepId ?? "unknown",
     status: record.status ?? "unknown",
