@@ -332,6 +332,65 @@ describe("handleHookRun dispatcher", () => {
     const output = JSON.parse(getStdout().trim());
     expect(output.decision).toBeUndefined();
   });
+
+  it.each([
+    "post-tool-use",
+    "subagent-stop",
+    "notification",
+    "pre-compact",
+  ])("treats plugin-registered %s as a silent no-op", async (hookType) => {
+    const code = await callWithStdin('{"tool_name":"Edit"}', {
+      hookType,
+      harness: "unified",
+      json: true,
+    });
+    expect(code).toBe(0);
+    expect(stderrChunks.join("")).toBe("");
+    expect(getStdout()).toBe("");
+  });
+
+  it("recognizes every hook type the unified plugin manifest registers", async () => {
+    const pluginRoot = path.resolve(
+      __dirname, "..", "..", "..", "..", "..", "..", "plugins", "babysitter-unified",
+    );
+    const manifest = JSON.parse(
+      await fs.readFile(path.join(pluginRoot, "plugin.json"), "utf8"),
+    ) as { hooks: Record<string, string> };
+    // Hook types with real handlers have side effects of their own and are
+    // covered by the dedicated suites below; the rest must be clean no-ops.
+    const handled = new Set([
+      "stop", "session-end", "session-start", "user-prompt-submit", "pre-tool-use",
+    ]);
+    const passive: string[] = [];
+    for (const script of Object.values(manifest.hooks)) {
+      const body = await fs.readFile(path.join(pluginRoot, script), "utf8");
+      const hookType = /--hook-type\s+([a-z-]+)/.exec(body)?.[1];
+      expect(hookType, `${script} should invoke hook:run --hook-type`).toBeDefined();
+      if (!handled.has(hookType!)) passive.push(hookType!);
+    }
+    expect(passive).toContain("post-tool-use");
+
+    for (const hookType of passive) {
+      stderrChunks = [];
+      stdoutChunks = [];
+      const code = await callWithStdin("{}", { hookType, harness: "unified", json: true });
+      expect({ hookType, code, stderr: stderrChunks.join("") }).toEqual({
+        hookType,
+        code: 0,
+        stderr: "",
+      });
+    }
+  });
+
+  it("still rejects hook types nothing registers", async () => {
+    const code = await callWithStdin("{}", {
+      hookType: "post-tool-usee",
+      harness: "unified",
+      json: true,
+    });
+    expect(code).toBe(1);
+    expect(stderrChunks.join("")).toContain("UNKNOWN_HOOK_TYPE");
+  });
 });
 
 describe("handleHookRun stop", () => {
