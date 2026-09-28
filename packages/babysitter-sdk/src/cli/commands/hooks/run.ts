@@ -155,6 +155,29 @@ async function handlePreToolUse(): Promise<number> {
 }
 
 // ---------------------------------------------------------------------------
+// Registered-but-passive hook types
+//
+// The unified plugin manifest (plugins/babysitter-unified/plugin.json) wires
+// these lifecycle events to `hook:run`, but babysitter takes no action on
+// them. They must complete as a clean no-op (exit 0, nothing on stdout or
+// stderr, no UNKNOWN_HOOK_TYPE log entry): PostToolUse has no matcher, so it
+// fires after every tool call, and an error here surfaces as a hook-error
+// notice in the host and floods hooks.log.
+// ---------------------------------------------------------------------------
+
+const PASSIVE_HOOK_TYPES = new Set([
+  "post-tool-use",
+  "subagent-stop",
+  "notification",
+  "pre-compact",
+  "after-agent",
+  "session-idle",
+  "shell-env",
+  "before-prompt-build",
+  "before-provider-request",
+]);
+
+// ---------------------------------------------------------------------------
 // Main dispatcher
 // ---------------------------------------------------------------------------
 
@@ -250,6 +273,10 @@ export async function handleHookRun(args: HookRunCommandArgs): Promise<number> {
       exitCode = await adapter.handleSessionStartHook(args);
       break;
     default: {
+      if (PASSIVE_HOOK_TYPES.has(hookType)) {
+        exitCode = 0;
+        break;
+      }
       const error = {
         error: "UNKNOWN_HOOK_TYPE",
         message: `Unknown hook type: ${hookType}. Supported: stop, session-end, session-start, user-prompt-submit, pre-tool-use`,
