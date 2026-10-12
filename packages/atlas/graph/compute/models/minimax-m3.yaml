@@ -1,0 +1,75 @@
+nodeKind: ModelVersion
+id: model:minimax-m3@current
+attributes:
+  displayName: "MiniMax M3"
+  costPerMTokInput: 0
+  costPerMTokOutput: 0
+  providerModelIds:
+    - minimax-m3
+    - MiniMaxAI/MiniMax-M3
+    - fireworks/minimax-m3
+    - minimax/m3
+  supportsExtendedThinking: true
+  supportsThinkingBudgetTokens: false
+  modelFamilyId: model-family:minimax-m3
+  versionRange: '>=3.0.0 <4.0.0'
+  kind: multimodal
+  contextWindowTokens: 1000000
+  modalities:
+    - text
+    - image
+  modalityDirections:
+    - kind: text
+      direction: input
+    - kind: image
+      direction: input
+    - kind: text
+      direction: output
+  releaseDate: '2026-06-01'
+  lifecycleStatus: ga
+  lifecycleStatusChangedAt: '2026-06-01'
+  modelCardUrl: https://www.minimax.io/models/text/m3
+  supportsFineTuning: false
+  regions:
+    - global
+  notes: |
+    MiniMax and Together describe up to a 1M-token context window. Fireworks
+    currently documents a 512K-token serverless endpoint context, so provider
+    availability claims should preserve endpoint-specific limits.
+edges:
+  belongs_to_family:
+    - target: model-family:minimax-m3
+  realizes:
+    - target: layer:1-model
+  version_of:
+    - model-family:minimax-m3
+  served_by:
+    - provider:together-ai
+    - provider:fireworks-ai
+    - provider:foundry
+    - provider:cloudflare-ai
+  speaks:
+    - model-transport:openai-compat
+  supports:
+    - target: capability:supports-tool-use
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:minimax-m3-model-card
+        - evidence:minimax-m3-tool-use-doc
+    - target: capability:vision-input
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:minimax-m3-model-card
+        - evidence:fireworks-minimax-m3-model-card
+    - target: capability:extended-thinking
+      versionRange: '>=3.0.0 <4.0.0'
+      level: partial
+      evidenceSourceIds:
+        - evidence:minimax-m3-tool-use-doc
+    - target: capability:can-multi-turn
+      versionRange: '>=3.0.0 <4.0.0'
+      level: full
+      evidenceSourceIds:
+        - evidence:minimax-m3-model-card

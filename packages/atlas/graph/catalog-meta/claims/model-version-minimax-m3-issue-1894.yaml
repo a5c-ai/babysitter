@@ -1,0 +1,114 @@
+---
+nodeKind: Claim
+id: claim:model-version-minimax-m3-current-identity
+attributes:
+  subjectId: model:minimax-m3@current
+  attribute: providerModelIds
+  value: minimax-m3, MiniMaxAI/MiniMax-M3, fireworks/minimax-m3, minimax/m3
+  subjectKind: ModelVersion
+  statement: model:minimax-m3@current tracks MiniMax M3 and provider aliases used by MiniMax, Together AI, Fireworks AI, and Cloudflare Workers AI.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:minimax-m3-model-card
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+    - evidence:cloudflare-minimax-m3-model-card
+  claimedAt: '2026-08-24T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:minimax-m3-model-card
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+    - evidence:cloudflare-minimax-m3-model-card
+  about_subject:
+    - model:minimax-m3@current
+---
+nodeKind: Claim
+id: claim:model-version-minimax-m3-current-contextwindowtokens
+attributes:
+  subjectId: model:minimax-m3@current
+  attribute: contextWindowTokens
+  value: '1000000'
+  subjectKind: ModelVersion
+  statement: model:minimax-m3@current supports up to a 1M-token context window, with endpoint-specific provider limits tracked separately where documented.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:minimax-m3-model-card
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+  claimedAt: '2026-08-24T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:minimax-m3-model-card
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+  about_subject:
+    - model:minimax-m3@current
+---
+nodeKind: Claim
+id: claim:model-version-minimax-m3-current-capabilities
+attributes:
+  subjectId: model:minimax-m3@current
+  attribute: capabilities
+  value: multimodal input, code, agentic tool use, interleaved thinking, OpenAI-compatible serving
+  subjectKind: ModelVersion
+  statement: model:minimax-m3@current supports text and image input, code and agentic workloads, tool use, interleaved thinking, and OpenAI-compatible serving through third-party providers.
+  confidence: medium
+  provenanceKind: vendor-doc
+  evidenceStrength: moderate
+  status: accepted
+  evidenceSourceIds:
+    - evidence:minimax-m3-model-card
+    - evidence:minimax-m3-tool-use-doc
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+  claimedAt: '2026-08-24T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:minimax-m3-model-card
+    - evidence:minimax-m3-tool-use-doc
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+  about_subject:
+    - model:minimax-m3@current
+---
+nodeKind: Claim
+id: claim:model-version-minimax-m3-current-cross-provider-availability
+attributes:
+  subjectId: model:minimax-m3@current
+  attribute: served_by
+  value: provider:together-ai, provider:fireworks-ai, provider:foundry, provider:cloudflare-ai
+  subjectKind: ModelVersion
+  statement: model:minimax-m3@current is available through Together AI, Fireworks AI, Microsoft Foundry, and Cloudflare Workers AI catalog pages.
+  confidence: high
+  provenanceKind: vendor-doc
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+    - evidence:foundry-minimax-m3-catalog
+    - evidence:cloudflare-minimax-m3-model-card
+  claimedAt: '2026-08-24T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+edges:
+  backed_by_evidence:
+    - evidence:together-minimax-m3-model-page
+    - evidence:fireworks-minimax-m3-model-card
+    - evidence:foundry-minimax-m3-catalog
+    - evidence:cloudflare-minimax-m3-model-card
+  about_subject:
+    - model:minimax-m3@current

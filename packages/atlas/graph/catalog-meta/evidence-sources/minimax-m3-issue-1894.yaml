@@ -1,0 +1,133 @@
+---
+nodeKind: EvidenceSource
+id: evidence:minimax-m3-model-card
+attributes:
+  displayName: "MiniMax model page - MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://www.minimax.io/models/text/m3
+  sourcePathOrUrl: https://www.minimax.io/models/text/m3
+  locator: "MiniMax M3 model documentation"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:minimax-m3-release-notes
+attributes:
+  displayName: "MiniMax platform release notes - MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://platform.minimax.io/docs/release-notes/models
+  sourcePathOrUrl: https://platform.minimax.io/docs/release-notes/models
+  locator: "MiniMax M3 release note"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:minimax-m3-tool-use-doc
+attributes:
+  displayName: "MiniMax docs - tool use with MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://platform.minimax.io/docs/guides/chat-model/tool-call
+  sourcePathOrUrl: https://platform.minimax.io/docs/guides/chat-model/tool-call
+  locator: "MiniMax M3 tool-use and interleaved-thinking documentation"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:together-minimax-m3-model-page
+attributes:
+  displayName: "Together AI model page - MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://www.together.ai/models/minimax-m3
+  sourcePathOrUrl: https://www.together.ai/models/minimax-m3
+  locator: "Together AI MiniMax M3 model catalog page"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:fireworks-minimax-m3-model-card
+attributes:
+  displayName: "Fireworks AI model card - MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://fireworks.ai/models/fireworks/minimax-m3
+  sourcePathOrUrl: https://fireworks.ai/models/fireworks/minimax-m3
+  locator: "Fireworks AI MiniMax M3 model card"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:foundry-minimax-m3-catalog
+attributes:
+  displayName: "Microsoft Foundry model catalog - MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://ai.azure.com/catalog/models/FW-MiniMax-M3
+  sourcePathOrUrl: https://ai.azure.com/catalog/models/FW-MiniMax-M3
+  locator: "Microsoft Foundry MiniMax M3 catalog page"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
+---
+nodeKind: EvidenceSource
+id: evidence:cloudflare-minimax-m3-model-card
+attributes:
+  displayName: "Cloudflare Workers AI model card - MiniMax M3"
+  kindLabel: web
+  trustLevel: trust-level:official-web
+  sourceUrl: https://developers.cloudflare.com/ai/models/minimax/m3/
+  sourcePathOrUrl: https://developers.cloudflare.com/ai/models/minimax/m3/
+  locator: "Cloudflare Workers AI MiniMax M3 model card"
+  capturedAt: "2026-08-24T00:00:00Z"
+  observedAt: "2026-08-24T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-24T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:official-web
