@@ -1,0 +1,501 @@
+# Evidence captured during the 2026-08-20 upstream agent-version tracker run.
+nodeKind: EvidenceSource
+id: evidence:amp-0-0-1787203428-g9220f3-2026-08-20
+attributes:
+  displayName: "Amp CLI 0.0.1787203428-g9220f3 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1787203428-g9220f3"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1787203428-g9220f3"
+  locator: "npm @ampcode/cli v0.0.1787203428-g9220f3"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T05:30:48Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    npm metadata reports @ampcode/cli latest version
+    0.0.1787203428-g9220f3. The package description identifies it as the Amp
+    frontier coding agent CLI. No public build-specific changelog, CLI flag,
+    transport/API, model, package-name, install-method, or migration change was
+    found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:amp:0-0-1787203428-g9220f3
+    - agent:amp
+---
+nodeKind: EvidenceSource
+id: evidence:antigravity-1-1-16-2026-08-20
+attributes:
+  displayName: "Antigravity CLI 1.1.16 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.16"
+  sourcePathOrUrl: "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.16"
+  locator: "google-antigravity/antigravity-cli release 1.1.16"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T04:14:18Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Antigravity CLI 1.1.16 release notes document MCP management
+    subcommands, large-workspace @ file completion improvements,
+    .antigravityignore filtering, Gemini API-key reasoning effort support,
+    unknown-field preservation in /mcp config edits, binary MCP resource
+    offload, WIF refresh fixes, OSC 8 fallback fixes, and prompt/editor fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:antigravity:1-1-16
+    - agent:antigravity-cli
+---
+nodeKind: EvidenceSource
+id: evidence:claude-code-2-1-237-2026-08-20
+attributes:
+  displayName: "Claude Code v2.1.237 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.237"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-code/releases/tag/v2.1.237"
+  locator: "anthropics/claude-code release v2.1.237"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T00:54:41Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Claude Code 2.1.237 release notes document prompt caching fixes
+    for sessions using an LLM gateway or custom base URL and a built-in Concise
+    output style selectable under Output style in /config.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude:2-1-237
+    - agent:claude-code
+---
+nodeKind: EvidenceSource
+id: evidence:claude-agent-sdk-0-3-237-2026-08-20
+attributes:
+  displayName: "Claude Agent SDK TypeScript v0.3.237 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.237"
+  sourcePathOrUrl: "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.237"
+  locator: "anthropics/claude-agent-sdk-typescript release v0.3.237"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T00:54:27Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Claude Agent SDK TypeScript 0.3.237 release notes document parity
+    with Claude Code v2.1.237 and npm/yarn/pnpm/bun update commands.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:claude-agent-sdk:0-3-237
+    - agent:claude-agent-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:codex-rust-v0-148-0-2026-08-20
+attributes:
+  displayName: "Codex CLI rust-v0.148.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/codex/releases/tag/rust-v0.148.0"
+  sourcePathOrUrl: "https://github.com/openai/codex/releases/tag/rust-v0.148.0"
+  locator: "openai/codex release rust-v0.148.0"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-18T22:26:03Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Codex CLI rust-v0.148.0 release notes document Markdown
+    conversation export, codex exec fork, TUI resume-picker archive/restore,
+    startup prompt drafting, estimated thread cost/credits in status surfaces,
+    Amazon Bedrock Runtime provider support, asynchronous hooks, and MCP tool
+    invocation from hooks.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agent-version:codex@0.148.0
+    - agent:codex
+---
+nodeKind: EvidenceSource
+id: evidence:openai-node-7-5-0-2026-08-20
+attributes:
+  displayName: "OpenAI Node SDK v7.5.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openai/openai-node/releases/tag/v7.5.0"
+  sourcePathOrUrl: "https://github.com/openai/openai-node/releases/tag/v7.5.0"
+  locator: "openai/openai-node release v7.5.0"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-17T19:13:41Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official OpenAI Node SDK 7.5.0 release notes document Bedrock Runtime
+    endpoint support, Daybreak and gpt-5.6-cyber model identifiers,
+    ServiceTier and ImageDetail types, WebSocket stream IDs, workload identity
+    access-token issued events, Sora video API deprecation, ultrafast tier
+    support, structured MCP/WebSocket errors, and security/streaming fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:codex-sdk:7-5-0
+    - agent:codex-sdk
+---
+nodeKind: EvidenceSource
+id: evidence:copilot-cli-1-0-80-2026-08-20
+attributes:
+  displayName: "GitHub Copilot CLI v1.0.80 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.80"
+  sourcePathOrUrl: "https://github.com/github/copilot-cli/releases/tag/v1.0.80"
+  locator: "github/copilot-cli release v1.0.80"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-14T02:28:39Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official GitHub Copilot CLI 1.0.80 release notes document model
+    configuration updates. No package-name, install-method, CLI flag,
+    transport/API, or migration change was published for this exact stable
+    release.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:copilot:1-0-80
+    - agent:copilot-cli
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-changelog-2026-08-19-2026-08-20
+attributes:
+  displayName: "Cursor 2026-08-19 changelog"
+  kindLabel: official-changelog
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/08-19-26"
+  sourcePathOrUrl: "https://cursor.com/changelog/08-19-26"
+  locator: "Cursor changelog 2026-08-19 Cloud Agents and Cursor Harness Improvements"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T06:58:00Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Cursor's 2026-08-19 changelog documents cloud-agent subscriptions for PRs,
+    Slack threads, and schedules; Custom Modes that pin skills in chat; and
+    steering messages that wait for the next tool call instead of interrupting
+    the agent mid-action.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:changelog-2026-08-19
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-origin-code-hosting-2026-08-20
+attributes:
+  displayName: "Cursor Origin Code Hosting changelog"
+  kindLabel: official-changelog
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/origin-code-hosting"
+  sourcePathOrUrl: "https://cursor.com/changelog/origin-code-hosting"
+  locator: "Cursor changelog 2026-08-17 Origin Code Hosting"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T06:58:00Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Cursor's 2026-08-17 Origin Code Hosting changelog documents Cursor-hosted
+    repos, GitHub repo sync, PR/code browsing, bidirectional GitHub comment
+    sync, review and merge flows from Cursor, and app integrations for Vercel,
+    Depot, and Buildkite.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:changelog-2026-08-19
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:cursor-builds-2026-08-20
+attributes:
+  displayName: "Cursor Cloud Agents Builds changelog"
+  kindLabel: official-changelog
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://cursor.com/changelog/08-13-26"
+  sourcePathOrUrl: "https://cursor.com/changelog/08-13-26"
+  locator: "Cursor changelog 2026-08-13 Cloud Agents Start 3x Faster with Builds"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T06:58:00Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Cursor's 2026-08-13 changelog documents Cloud Agent Builds: ready-to-use
+    environment copies, 10x faster internal environment boot, 3x faster time
+    to first token, last-successful-build fallback, setup-agent migration
+    testing, manual build triggering, debugging, and stale-build controls.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:cursor:changelog-2026-08-19
+    - agent:cursor
+---
+nodeKind: EvidenceSource
+id: evidence:droid-0-200-0-2026-08-20
+attributes:
+  displayName: "Factory Droid CLI 0.200.0 npm package metadata"
+  kindLabel: package-metadata
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://www.npmjs.com/package/@factory/cli/v/0.200.0"
+  sourcePathOrUrl: "https://www.npmjs.com/package/@factory/cli/v/0.200.0"
+  locator: "npm @factory/cli v0.200.0"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T02:46:13Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    npm metadata reports @factory/cli latest version 0.200.0. The package
+    description identifies it as Factory Droid CLI and repository metadata
+    points to Factory-AI/factory under apps/cli. No public version-specific
+    changelog, CLI flag, transport/API, model, package-name, install-method,
+    or migration change was found.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:droid:0-200-0
+    - agent:droid
+---
+nodeKind: EvidenceSource
+id: evidence:gemini-cli-0-56-0-2026-08-20
+attributes:
+  displayName: "Gemini CLI v0.56.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.56.0"
+  sourcePathOrUrl: "https://github.com/google-gemini/gemini-cli/releases/tag/v0.56.0"
+  locator: "google-gemini/gemini-cli release v0.56.0"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-19T19:29:38Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Gemini CLI 0.56.0 release notes publish a full changelog compare
+    from v0.55.1 to v0.56.0. No curated version-specific CLI flag,
+    transport/API, model, package-name, install-method, or migration change was
+    documented in the release body.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:gemini:0-56-0
+    - agent:gemini-cli
+---
+nodeKind: EvidenceSource
+id: evidence:hermes-agent-0-20-4-2026-08-20
+attributes:
+  displayName: "Hermes Agent v0.20.4 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.18"
+  sourcePathOrUrl: "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.18"
+  locator: "NousResearch/hermes-agent release v2026.8.18"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-18T07:26:46Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Hermes Agent v0.20.4 release notes describe a patch rollup since
+    v0.20.3, including desktop glass/translucency surfaces, tabbed
+    Sessions/Bots sidebar, Bot Mode group-chat fixes, NVIDIA SkillEvaluator
+    Tier 1 advisory scanning on skill installs, cron media-send hardening,
+    SessionDB fixes, hermes update parked-branch honesty, and kanban native OS
+    notifications.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:hermes:0-20-4
+    - agent:hermes
+---
+nodeKind: EvidenceSource
+id: evidence:omp-17-4-0-2026-08-20
+attributes:
+  displayName: "Oh-My-Pi v17.4.0 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.4.0"
+  sourcePathOrUrl: "https://github.com/can1357/oh-my-pi/releases/tag/v17.4.0"
+  locator: "can1357/oh-my-pi release v17.4.0"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T06:37:51Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Oh-My-Pi 17.4.0 release notes document breaking Tokenizer API
+    changes, explicit Tokenizer requirements for context management, /cleanse,
+    omp cleanse, omp ps, composer layouts, statusLine.contextLine,
+    async/backgroundable eval cells, /extended-context, speculative compaction,
+    native tokenizers, long-context cost tiers, compaction.methodOrder, and
+    provider/tool/TUI fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:omp:17-4-0
+    - agent:omp
+---
+nodeKind: EvidenceSource
+id: evidence:openclaw-2026-6-34-2026-08-20
+attributes:
+  displayName: "OpenClaw v2026.6.34 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.6.34"
+  sourcePathOrUrl: "https://github.com/openclaw/openclaw/releases/tag/v2026.6.34"
+  locator: "openclaw/openclaw release v2026.6.34"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-08T07:22:14Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official OpenClaw 2026.6.34 release notes identify an extended-stable
+    hardening release covering browser/network boundaries, provider run
+    resilience, channel recovery, diagnostics credential protection, local
+    runtime state, dependency security, and upcoming Plugin SDK deprecations
+    for before_agent_start, root openclaw/plugin-sdk imports,
+    providerAuthEnvVars, and channelEnvVars.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:openclaw:2026-6-34
+    - agent:openclaw
+---
+nodeKind: EvidenceSource
+id: evidence:opencode-1-18-19-2026-08-20
+attributes:
+  displayName: "OpenCode v1.18.19 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.19"
+  sourcePathOrUrl: "https://github.com/anomalyco/opencode/releases/tag/v1.18.19"
+  locator: "anomalyco/opencode release v1.18.19"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-20T06:22:06Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official OpenCode 1.18.19 release notes document native OpenAI and
+    Anthropic passthroughs for Cloudflare AI Gateway models, Codex rate-limit
+    matching, removal of unsupported Qwen sampling defaults, /connect provider
+    display fixes, malformed pricing tolerance, OpenAI websocket message-size
+    fallback, ChatGPT workspace compute-residency forwarding to Codex requests,
+    default Console URL updates, web search for OpenCode Go, v1 database
+    compatibility, and desktop server-dialog editability.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:opencode:1-18-19
+    - agent:opencode
+---
+nodeKind: EvidenceSource
+id: evidence:pi-0-84-2-2026-08-20
+attributes:
+  displayName: "Pi v0.84.2 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/earendil-works/pi/releases/tag/v0.84.2"
+  sourcePathOrUrl: "https://github.com/earendil-works/pi/releases/tag/v0.84.2"
+  locator: "earendil-works/pi release v0.84.2"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-14T10:14:32Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Pi 0.84.2 release notes document fullscreen transcript search,
+    configurable default tools, fullscreen exit output, --use-theme,
+    extension pi.sendUserMessage() expandPromptTemplates, Cloudflare AI
+    Gateway binding fetch, AssistantMessage.endTurn diagnostics, OpenAI
+    Responses additional_tools preference, JSON/RPC streaming usage fixes, and
+    many provider/TUI fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:pi:0-84-2
+    - agent:pi
+---
+nodeKind: EvidenceSource
+id: evidence:qwen-code-0-21-14-2026-08-20
+attributes:
+  displayName: "Qwen Code v0.21.14 release notes"
+  kindLabel: release-notes
+  trustLevel: trust-level:official-web
+  sourceUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.14"
+  sourcePathOrUrl: "https://github.com/QwenLM/qwen-code/releases/tag/v0.21.14"
+  locator: "QwenLM/qwen-code release v0.21.14"
+  capturedAt: "2026-08-20T07:10:00Z"
+  observedAt: "2026-08-19T02:46:42Z"
+  observedBy: codex-delegated-agent-version-tracker
+  freshnessWindowDays: 45
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-20T07:10:00Z"
+  notes: |
+    Official Qwen Code 0.21.14 release notes document qwen sessions ps and
+    live-session registry JSON output, Web Shell input/SSE reliability,
+    immediate spam-comment minimization, /advisor read-only second opinions,
+    workflow agent workingDir pins, review lane analysis, Aone Code GitLab
+    provider support, Local Control consolidation, pollable turn-status
+    endpoints, and autofix handoff fixes.
+edges:
+  has_trust_level:
+    - trust-level:official-web
+  references:
+    - agentVersion:qwen:0-21-14
+    - agent:qwen
