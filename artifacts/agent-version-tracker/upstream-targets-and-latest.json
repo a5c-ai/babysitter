@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T07:02:23.039Z",
+  "generatedAt": "2026-08-26T07:25:00Z",
   "targets": [
     {
       "id": "antigravity",
@@ -81,90 +81,253 @@
   ],
   "installPackages": [
     {
-      "packageName": "openai",
-      "sourceLine": "packages/adapters/codecs/src/codex-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g openai' },"
-    },
-    {
+      "agent": "amp",
       "packageName": "@ampcode/cli",
-      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:        command: 'npm install -g @ampcode/cli',"
+      "latestVersion": "0.0.1787717482-gaaf55c"
     },
     {
-      "packageName": "@ampcode/cli",
-      "sourceLine": "packages/adapters/codecs/src/amp-adapter.ts:          command: 'npm install -g @ampcode/cli',"
-    },
-    {
-      "packageName": "@qwen-code/qwen-code",
-      "sourceLine": "packages/adapters/codecs/src/qwen-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @qwen-code/qwen-code' },"
-    },
-    {
-      "packageName": "@factory/cli",
-      "sourceLine": "packages/adapters/codecs/src/droid-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @factory/cli' },"
-    },
-    {
-      "packageName": "@factory/cli",
-      "sourceLine": "packages/adapters/codecs/src/droid-adapter.ts:        { step: 2, description: 'Install Droid CLI', command: 'npm install -g @factory/cli' },"
-    },
-    {
-      "packageName": "opencode-ai",
-      "sourceLine": "packages/adapters/codecs/src/opencode-http-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g opencode-ai' },"
-    },
-    {
-      "packageName": "@pi-ai/sdk",
-      "sourceLine": "packages/adapters/codecs/src/pi-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @pi-ai/sdk' },"
-    },
-    {
-      "packageName": "@anthropic-ai/claude-agent-sdk",
-      "sourceLine": "packages/adapters/codecs/src/claude-agent-sdk-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-agent-sdk' },"
-    },
-    {
-      "packageName": "@openai/codex",
-      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @openai/codex' },"
-    },
-    {
-      "packageName": "@openai/codex",
-      "sourceLine": "packages/adapters/codecs/src/codex-websocket-adapter.ts:          command: 'npm install -g @openai/codex',"
-    },
-    {
+      "agent": "claude",
       "packageName": "@anthropic-ai/claude-code",
-      "sourceLine": "packages/adapters/codecs/src/claude-remote-control-adapter.ts:      { platform: 'all', type: 'npm', command: 'npm install -g @anthropic-ai/claude-code' },"
+      "latestVersion": "2.1.246"
+    },
+    {
+      "agent": "claude-agent-sdk",
+      "packageName": "@anthropic-ai/claude-agent-sdk",
+      "latestVersion": "0.3.246"
+    },
+    {
+      "agent": "codex",
+      "packageName": "@openai/codex",
+      "latestVersion": "0.149.1"
+    },
+    {
+      "agent": "codex-sdk",
+      "packageName": "openai",
+      "latestVersion": "7.5.0"
+    },
+    {
+      "agent": "droid",
+      "packageName": "@factory/cli",
+      "latestVersion": "0.204.0"
+    },
+    {
+      "agent": "gemini",
+      "packageName": "@google/gemini-cli",
+      "latestVersion": "0.57.0"
+    },
+    {
+      "agent": "hermes",
+      "packageName": "hermes-agent",
+      "latestVersion": "0.20.5"
+    },
+    {
+      "agent": "omp",
+      "packageName": "@oh-my-pi/pi-coding-agent",
+      "latestVersion": "18.0.5"
+    },
+    {
+      "agent": "openclaw",
+      "packageName": "openclaw",
+      "latestVersion": "2026.7.1-2",
+      "latestPrereleaseObserved": "2026.8.1-beta.3"
+    },
+    {
+      "agent": "opencode",
+      "packageName": "opencode-ai",
+      "latestVersion": "1.18.23"
+    },
+    {
+      "agent": "pi",
+      "packageName": "@earendil-works/pi-coding-agent",
+      "latestVersion": "0.84.3"
+    },
+    {
+      "agent": "qwen",
+      "packageName": "@qwen-code/qwen-code",
+      "latestVersion": "0.22.1"
+    },
+    {
+      "agent": "pi-sdk-adapter",
+      "packageName": "@pi-ai/sdk",
+      "error": "npm 404; package not found in registry"
     }
   ],
-  "npmLatest": [
+  "checkedAgents": [
     {
-      "packageName": "@ampcode/cli",
-      "latestVersion": "0.0.1786320433-geeee54"
+      "agent": "amp",
+      "displayName": "Amp CLI",
+      "previousRecordedVersion": "0.0.1786320433-geeee54",
+      "latestVersion": "0.0.1787717482-gaaf55c",
+      "source": "npm:@ampcode/cli",
+      "releaseNotes": "https://www.npmjs.com/package/@ampcode/cli/v/0.0.1787717482-gaaf55c",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1907",
+      "graphUpdated": true,
+      "notes": "No public build-specific changelog found."
     },
     {
-      "packageName": "@anthropic-ai/claude-agent-sdk",
-      "latestVersion": "0.3.226"
+      "agent": "antigravity",
+      "displayName": "Antigravity CLI",
+      "previousRecordedVersion": "1.1.11",
+      "latestVersion": "1.1.21",
+      "source": "github:google-antigravity/antigravity-cli",
+      "releaseNotes": "https://github.com/google-antigravity/antigravity-cli/releases/tag/1.1.21",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1908",
+      "graphUpdated": true,
+      "notes": "/voice, mic-serve, status-line cost, embedded ripgrep, permission updates."
     },
     {
-      "packageName": "@anthropic-ai/claude-code",
-      "latestVersion": "2.1.226"
+      "agent": "claude",
+      "displayName": "Claude Code",
+      "previousRecordedVersion": "2.1.226",
+      "latestVersion": "2.1.246",
+      "source": "npm:@anthropic-ai/claude-code",
+      "releaseNotes": "https://github.com/anthropics/claude-code/releases/tag/v2.1.246",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1909",
+      "graphUpdated": true,
+      "notes": "Permission UI, MCP, plugin/background session, non-interactive continuation fixes."
     },
     {
-      "packageName": "@factory/cli",
-      "latestVersion": "0.191.1"
+      "agent": "claude-agent-sdk",
+      "displayName": "Claude Agent SDK",
+      "previousRecordedVersion": "0.3.226",
+      "latestVersion": "0.3.246",
+      "source": "npm:@anthropic-ai/claude-agent-sdk",
+      "releaseNotes": "https://github.com/anthropics/claude-agent-sdk-typescript/releases/tag/v0.3.246",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1910",
+      "graphUpdated": true,
+      "notes": "user_message_uuid, costBasis, managed modelPricing, perTaskStopAffordance."
     },
     {
-      "packageName": "@openai/codex",
-      "latestVersion": "0.147.0"
+      "agent": "codex",
+      "displayName": "Codex CLI",
+      "previousRecordedVersion": "0.147.0",
+      "latestVersion": "0.149.1",
+      "source": "npm:@openai/codex",
+      "releaseNotes": "https://github.com/openai/codex/releases/tag/rust-v0.149.1",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1891",
+      "graphUpdated": true,
+      "notes": "Patch release with compare-link release notes only."
     },
     {
-      "packageName": "@pi-ai/sdk",
-      "error": "Command failed: npm view @pi-ai/sdk@latest version\nnpm error code E404\nnpm error 404 Not Found - GET https://registry.npmjs.org/@pi-ai%2fsdk - Not found\nnpm error 404\nnpm error 404  '@pi-ai/sdk@latest' is not in this registry.\nnpm error 404\nnpm error 404 Note that you can also install from a\nnpm error 404 tarball, folder, http url, or git url.\nnpm error A complete log of this run can be found in: /home/runner/.npm/_logs/2026-08-10T07_02_21_544Z-debug-0.log\n"
+      "agent": "codex-sdk",
+      "displayName": "OpenAI Node SDK",
+      "previousRecordedVersion": "7.4.0",
+      "latestVersion": "7.5.0",
+      "source": "npm:openai",
+      "releaseNotes": "https://github.com/openai/openai-node/releases/tag/v7.5.0",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1809",
+      "graphUpdated": true,
+      "notes": "Bedrock endpoint, new model IDs, WebSocket stream IDs, structured errors."
     },
     {
-      "packageName": "@qwen-code/qwen-code",
-      "latestVersion": "0.21.8"
+      "agent": "copilot",
+      "displayName": "GitHub Copilot CLI",
+      "previousRecordedVersion": "1.0.78",
+      "latestVersion": "1.0.80",
+      "source": "github:github/copilot-cli",
+      "releaseNotes": "https://github.com/github/copilot-cli/releases/tag/v1.0.80",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1766",
+      "graphUpdated": true,
+      "notes": "Model configuration update."
     },
     {
-      "packageName": "openai",
-      "latestVersion": "7.4.0"
+      "agent": "cursor",
+      "displayName": "Cursor",
+      "previousRecordedVersion": "2026-08-03 changelog",
+      "latestVersion": "2026-08-19 changelog",
+      "source": "https://cursor.com/changelog/08-19-26",
+      "releaseNotes": "https://cursor.com/changelog/08-19-26",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1853",
+      "graphUpdated": true,
+      "notes": "Existing issues #1853 and #1833 cover this changelog."
     },
     {
-      "packageName": "opencode-ai",
-      "latestVersion": "1.18.16"
+      "agent": "droid",
+      "displayName": "Factory Droid CLI",
+      "previousRecordedVersion": "0.191.1",
+      "latestVersion": "0.204.0",
+      "source": "npm:@factory/cli",
+      "releaseNotes": "https://www.npmjs.com/package/@factory/cli/v/0.204.0",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1911",
+      "graphUpdated": true,
+      "notes": "No public build-specific changelog found."
+    },
+    {
+      "agent": "gemini",
+      "displayName": "Gemini CLI",
+      "previousRecordedVersion": "0.54.4",
+      "latestVersion": "0.57.0",
+      "source": "npm:@google/gemini-cli",
+      "releaseNotes": "https://github.com/google-gemini/gemini-cli/releases/tag/v0.57.0",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1912",
+      "graphUpdated": true,
+      "notes": "OAuth, IDE, retry, abort rollback, git state, TUI timeout fixes."
+    },
+    {
+      "agent": "hermes",
+      "displayName": "Hermes Agent",
+      "previousRecordedVersion": "0.20.0",
+      "latestVersion": "0.20.5 / v2026.8.19",
+      "source": "npm:hermes-agent + github:NousResearch/hermes-agent",
+      "releaseNotes": "https://github.com/NousResearch/hermes-agent/releases/tag/v2026.8.19",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1871",
+      "graphUpdated": true,
+      "notes": "Patch rollup with Bot Mode, attachments, keyless web tier, CLI polish."
+    },
+    {
+      "agent": "omp",
+      "displayName": "Oh-My-Pi",
+      "previousRecordedVersion": "17.2.12",
+      "latestVersion": "18.0.5",
+      "source": "npm:@oh-my-pi/pi-coding-agent",
+      "releaseNotes": "https://github.com/can1357/oh-my-pi/releases/tag/v18.0.5",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1914",
+      "graphUpdated": true,
+      "notes": "DeepInfra/Yolo-Auto, OpenRouter OAuth, OMP git, :img, if-bench, breaking helper/TUI API renames."
+    },
+    {
+      "agent": "openclaw",
+      "displayName": "OpenClaw",
+      "previousRecordedVersion": "2026.7.1-2",
+      "latestVersion": "2026.7.1-2",
+      "source": "npm:openclaw + github:openclaw/openclaw",
+      "releaseNotes": "https://github.com/openclaw/openclaw/releases/tag/v2026.7.1-2",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1616",
+      "graphUpdated": false,
+      "notes": "Stable npm @latest unchanged; beta v2026.8.1-beta.3 observed but not recorded as stable."
+    },
+    {
+      "agent": "opencode",
+      "displayName": "OpenCode",
+      "previousRecordedVersion": "1.18.16",
+      "latestVersion": "1.18.23",
+      "source": "npm:opencode-ai",
+      "releaseNotes": "https://github.com/anomalyco/opencode/releases/tag/v1.18.23",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1901",
+      "graphUpdated": true,
+      "notes": "Cloudflare AI Gateway routing, Anthropic slug conversion, parent session headers, GitHub OIDC auth."
+    },
+    {
+      "agent": "pi",
+      "displayName": "Pi",
+      "previousRecordedVersion": "0.84.1",
+      "latestVersion": "0.84.3",
+      "source": "npm:@earendil-works/pi-coding-agent",
+      "releaseNotes": "https://github.com/earendil-works/pi/releases/tag/v0.84.3",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1902",
+      "graphUpdated": true,
+      "notes": "PowerShell tool, safer updates, /thinking, GoogleThinkingLevel rename, provider/toolChoice changes."
+    },
+    {
+      "agent": "qwen",
+      "displayName": "Qwen Code",
+      "previousRecordedVersion": "0.21.8",
+      "latestVersion": "0.22.1",
+      "source": "npm:@qwen-code/qwen-code",
+      "releaseNotes": "https://github.com/QwenLM/qwen-code/releases/tag/v0.22.0",
+      "issue": "https://github.com/a5c-ai/babysitter/issues/1913",
+      "graphUpdated": true,
+      "notes": "No v0.22.1 GitHub release found; used v0.22.0 notes plus npm latest metadata."
     }
   ]
 }
