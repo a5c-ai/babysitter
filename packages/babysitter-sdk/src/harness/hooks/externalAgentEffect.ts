@@ -160,7 +160,10 @@ async function resolveOneExternalAgentEffect(args: {
         model: asString(decision?.responder?.model) ?? asString(agent?.model) ?? args.model,
       },
     });
-    const answerText = breakpoint.answers?.[0]?.text ?? "";
+    const answerText = breakpoint.answers?.[0]?.text;
+    if (typeof answerText !== "string") {
+      throw new Error(`External agent effect ${args.record.effectId} completed without a direct result`);
+    }
     const agentMux = breakpoint.context?.metadata?.agentMux;
     const finishedAt = new Date().toISOString();
     const { commitEffectResult } = await import("../../runtime/commitEffectResult");
