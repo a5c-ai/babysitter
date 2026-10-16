@@ -1,6 +1,6 @@
 ---
-description: Clean up .a5c/runs and .a5c/processes directories. Aggregates insights from completed/failed runs into docs/run-history-insights.md, then removes old run data and orphaned process files.
-argument-hint: "[--dry-run] [--keep-days N] Optional flags. --dry-run shows what would be removed without deleting. --keep-days N keeps runs newer than N days (default 7)."
+description: Clean up .a5c/runs and .a5c/processes directories. Aggregates insights from completed/failed runs into docs/run-history-insights.md, then archives and removes old run data after confirmation, and reports orphaned process files (removed only with --remove-orphaned-processes).
+argument-hint: "[--dry-run] [--keep-days N] [--remove-orphaned-processes] Optional flags. --dry-run shows what would be removed without deleting. --keep-days N keeps runs newer than N days (default 7). --remove-orphaned-processes also archives and removes orphaned process files (reported only by default)."
 allowed-tools: Read, Grep, Write, Task, Bash, Edit, Grep, Glob, WebFetch, WebSearch, Search, AskUserQuestion, TodoWrite, TodoRead, Skill, BashOutput, KillShell, MultiEdit, LS
 ---
 
@@ -15,7 +15,7 @@ babysitter process-library:active --json
 Read `binding.dir` from that JSON and create/run the cleanup process from `cradle/cleanup-runs.js#process` relative to that active library root. Do not use plugin-cache-relative cradle paths.
 
 Implementation notes (for the process):
-- Parse arguments for `--dry-run` flag (if present, set dryRun: true in inputs) and `--keep-days N` (default: 7)
+- Parse arguments for `--dry-run` flag (if present, set dryRun: true in inputs) `--keep-days N` (default: 7), and `--remove-orphaned-processes` (if present, set removeOrphanedProcesses: true in inputs)
 
 CRITICAL: The cleanup MUST follow this exact phase order. Do NOT delete any run before Phase 2 completes.
 
@@ -39,10 +39,11 @@ Phase 2 — Aggregate insights (BEFORE any deletion):
 
 Phase 3 — Confirm removal:
 - In interactive mode, show the user what will be removed via a breakpoint
-- In non-interactive mode (yolo), proceed with defaults
+- In non-interactive mode (yolo), the confirm breakpoint is auto-approved without selecting the removal option, so nothing is removed (insights are still written). Run interactively to remove.
 - In dry-run mode, stop here and show what would be removed
 
 Phase 4 — Remove:
+- Removal happens only inside the process, after the exact removal option is chosen at the breakpoint. Never delete runs manually.
 - Delete the terminal runs older than keep-days threshold
-- Identify and remove orphaned process files not referenced by remaining runs
+- Report orphaned process files not referenced by remaining runs (report-only by default; removed only with `removeOrphanedProcesses: true`, and never if git-tracked or if its name appears in another file in the processes directory, a conservative "named by another file" match)
 - Show remaining run count and disk usage after cleanup
