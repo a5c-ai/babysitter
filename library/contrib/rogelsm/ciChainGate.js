@@ -41,6 +41,15 @@ export const DEFAULT_FLAKE_SIGNATURES = [
   'job-timeout|has exceeded the maximum execution time of',
 ];
 
+/**
+ * True only when the SDK package itself is absent. A missing transitive dependency of an installed SDK
+ * also raises ERR_MODULE_NOT_FOUND (and its message names the SDK path), but starts with a different
+ * `Cannot find package '<dep>'`, so it is NOT "not installed".
+ */
+export function isSdkMissing(e) {
+  return e?.code === 'ERR_MODULE_NOT_FOUND' && String(e.message).startsWith("Cannot find package '@a5c-ai/babysitter-sdk'");
+}
+
 // Optional SDK, loaded dynamically so the pure parts work without an install.
 let sdkDefineTask = null;
 let sdkLoadError = null;
@@ -48,8 +57,7 @@ try {
   ({ defineTask: sdkDefineTask } = await import('@a5c-ai/babysitter-sdk'));
 } catch (e) {
   // Only "the SDK itself is not installed" is benign; a broken install must surface its real cause.
-  const notInstalled = e?.code === 'ERR_MODULE_NOT_FOUND' && String(e.message).includes('@a5c-ai/babysitter-sdk');
-  if (!notInstalled) sdkLoadError = e;
+  if (!isSdkMissing(e)) sdkLoadError = e;
 }
 
 /** Single-quote a value for safe shell interpolation. */
@@ -87,11 +95,11 @@ END { print "MAX\t" mx }`;
  * @param {string[]} [o.workflows=['ci']] - workflow names/files; ALL must succeed, in order
  * @param {number} [o.pollSeconds=30]
  * @param {number} [o.maxPolls=100] - polls per workflow before failing as "no completed run"
- * @param {string[]} [o.skipConclusions=['skipped']] - conclusions ignored when picking the newest run
+ * @param {string[]} [o.skipConclusions=['skipped']] - conclusions ignored: runs with these conclusions are not counted
  * @param {0|1} [o.flakeRetries=0] - 1: re-run ONLY the failed jobs, ONCE, and only when EVERY failed
  *   job's log matches a flake signature. Unknown failures, empty logs and a second failure still fail.
  * @param {string[]} [o.flakeSignatures=DEFAULT_FLAKE_SIGNATURES] - `<name>|<literal substring>` entries
- * @param {number} [o.maxJobMinutes] - fail when a (non-skipped) job ran longer; fails if no job matched
+ * @param {number} [o.maxJobMinutes] - fail when a (non-skipped) job ran longer; fails if no job matched. Measures the deciding run only (the first non-success counted run, else the newest), not every run
  * @param {string} [o.jobPrefix=''] - only jobs whose name starts with this count toward the budget
  * @returns {string}
  */

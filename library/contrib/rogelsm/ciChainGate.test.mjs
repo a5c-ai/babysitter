@@ -5,7 +5,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, chmodSync, readFileSync, existsS
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ciChainGateCommand, ciChainGate, findProdPushWithoutCiGate, DEFAULT_FLAKE_SIGNATURES } from './ciChainGate.js';
+import { ciChainGateCommand, ciChainGate, findProdPushWithoutCiGate, isSdkMissing, DEFAULT_FLAKE_SIGNATURES } from './ciChainGate.js';
 
 const sh = (cmd, opts = {}) => spawnSync('bash', ['-c', cmd], { encoding: 'utf8', ...opts });
 const root = mkdtempSync(join(tmpdir(), 'ci-chain-'));
@@ -256,6 +256,14 @@ test('static check passes a gated process, comments, feature-branch pushes and a
   assert.deepEqual(findProdPushWithoutCiGate("run('git push origin feature-x')"), []);
   assert.deepEqual(findProdPushWithoutCiGate(`// ci-gate: the release job gates on CI itself\nrun('npm publish')`), []);
   assert.equal(findProdPushWithoutCiGate(`run('npm publish')\nciChainGate('g', { branch: 'dev' })`).length, 1, 'a gate AFTER the push does not count');
+});
+
+test('isSdkMissing: only the SDK package itself counts as not installed', () => {
+  const mk = (message, code = 'ERR_MODULE_NOT_FOUND') => Object.assign(new Error(message), { code });
+  assert.equal(isSdkMissing(mk("Cannot find package '@a5c-ai/babysitter-sdk' imported from /x/ciChainGate.js")), true);
+  assert.equal(isSdkMissing(mk("Cannot find package 'dep-x' imported from /x/node_modules/@a5c-ai/babysitter-sdk/i.js")), false);
+  assert.equal(isSdkMissing(mk("Cannot find package '@a5c-ai/babysitter-sdk' imported from /x", 'ERR_OTHER')), false);
+  assert.equal(isSdkMissing(undefined), false);
 });
 
 test.after(() => rmSync(root, { recursive: true, force: true }));
