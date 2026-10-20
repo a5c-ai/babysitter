@@ -32,8 +32,12 @@ if [ "$1" = run ] && { [ "$2" = view ] || [ "$2" = rerun ]; }; then
   esac
   exit 0
 fi
-wf=""
-while [ $# -gt 0 ]; do case "$1" in --workflow) wf="$2"; shift;; esac; shift; done
+wf=""; jqx=""
+while [ $# -gt 0 ]; do case "$1" in --workflow) wf="$2"; shift;; --jq) jqx="$2"; shift;; esac; shift; done
+# <wf>.runs.json: raw run list, filtered by the REAL --jq expression the gate passes (via system jq).
+if [ -f "$STUB/$wf.runs.json" ]; then jq -r "$jqx" "$STUB/$wf.runs.json"; exit 0; fi
+# <wf>.row2 replaces <wf>.row once any rerun happened (the list then reflects the re-run result).
+if [ -f "$STUB/$wf.row2" ] && [ -f "$STUB/calls.log" ]; then printf '%b' "$(cat "$STUB/$wf.row2")"; exit 0; fi
 [ -f "$STUB/$wf.row" ] && printf '%b' "$(cat "$STUB/$wf.row")"
 exit 0
 `);
@@ -101,10 +105,37 @@ test('(b) a flake-signature failure is retried once (failed jobs only) and can t
     'log-111.txt': FLAKE_LOG,
     'view-111-0.row': 'in_progress\\t\\t1\\n',
     'view-111-1.row': 'completed\\tsuccess\\t2\\n',
+    'ci.row2': 'success\\t111\\n',
   });
   assert.ok(ok(r), r.stdout + r.stderr);
   assert.match(r.stdout, /CI_FLAKE_RERUN=e2e \(desktop\):font-download/);
   assert.equal(r.calls.match(/^rerun 111$/gm).length, 1);
+});
+
+const jqRun = (id, status, conclusion) => ({ databaseId: id, status, conclusion });
+const hasJq = sh('command -v jq').status === 0;
+test('a completed success next to an in_progress run of the same commit does NOT pass', { skip: !hasJq }, () => {
+  const r = run({ workflows: ['ci'] }, {}, {
+    'ci.runs.json': JSON.stringify([jqRun(2, 'in_progress', null), jqRun(1, 'completed', 'success')]),
+  });
+  assert.notEqual(r.status, 0);
+  assert.doesNotMatch(r.stdout, /CI_CHAIN_OK/);
+  assert.match(r.stdout, /no completed run/);
+});
+
+test('a green run next to a red run of the same commit fails', { skip: !hasJq }, () => {
+  const r = run({ workflows: ['ci'] }, {}, {
+    'ci.runs.json': JSON.stringify([jqRun(2, 'completed', 'success'), jqRun(1, 'completed', 'failure')]),
+  });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stdout, /concluded failure \(run 1\)/);
+});
+
+test('every run completed green (plus a skipped one) passes', { skip: !hasJq }, () => {
+  const r = run({ workflows: ['ci'] }, {}, {
+    'ci.runs.json': JSON.stringify([jqRun(3, 'completed', 'skipped'), jqRun(2, 'completed', 'success'), jqRun(1, 'completed', 'success')]),
+  });
+  assert.ok(ok(r), r.stdout + r.stderr);
 });
 
 test('(b2) a flake that fails again is NOT retried a second time', () => {
@@ -145,7 +176,7 @@ test('a custom flakeSignatures list replaces the defaults', () => {
   let r = run({ workflows: ['ci'], flakeRetries: 1 }, { ci: 'failure\\t111\\n' }, log);
   assert.equal(r.calls.includes('rerun'), false, 'not in the defaults');
   r = run({ workflows: ['ci'], flakeRetries: 1, flakeSignatures: ['registry|ECONNRESET while fetching'] }, { ci: 'failure\\t111\\n' },
-    { ...log, 'view-111-1.row': 'completed\\tsuccess\\t2\\n' });
+    { ...log, 'view-111-1.row': 'completed\\tsuccess\\t2\\n', 'ci.row2': 'success\\t111\\n' });
   assert.ok(ok(r), r.stdout);
   assert.ok(DEFAULT_FLAKE_SIGNATURES.length > 0);
 });
@@ -160,6 +191,12 @@ test('(d) an over-budget job fails and names job, minutes and budget', () => {
 
 test('an in-budget job passes; a slow job outside jobPrefix is ignored', () => {
   const r = run(budget, { ci: 'success\\t111\\n' }, { 'jobs-111.txt': 'lint\\t1200\\ne2e (desktop)\\t540\\n' });
+  assert.ok(ok(r), r.stdout);
+  assert.match(r.stdout, /JOB_MAX_MIN=9\n/);
+});
+
+test('a budget with no jobPrefix counts every job and passes (empty-prefix path)', () => {
+  const r = run({ workflows: ['ci'], maxJobMinutes: 15 }, { ci: 'success\\t111\\n' }, { 'jobs-111.txt': 'lint\\t60\\ne2e (desktop)\\t540\\n' });
   assert.ok(ok(r), r.stdout);
   assert.match(r.stdout, /JOB_MAX_MIN=9\n/);
 });

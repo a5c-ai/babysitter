@@ -24,7 +24,7 @@
  *   // CI/lint side: static check over a process source string.
  *   findProdPushWithoutCiGate(fs.readFileSync('process.js', 'utf8')); // -> [{line, command}]
  *
- * Needs `gh` (authenticated), `git`, `jq` and `awk` at run time. `ciChainGateCommand` and
+ * Needs `gh` (authenticated), `git` and `awk` at run time (the jq filters run inside `gh --jq`). `ciChainGateCommand` and
  * `findProdPushWithoutCiGate` are pure and import-free; the SDK is only loaded (optionally) by
  * `ciChainGate` so the builder and the static check stay usable without an install.
  *
@@ -43,7 +43,14 @@ export const DEFAULT_FLAKE_SIGNATURES = [
 
 // Optional SDK, loaded dynamically so the pure parts work without an install.
 let sdkDefineTask = null;
-try { ({ defineTask: sdkDefineTask } = await import('@a5c-ai/babysitter-sdk')); } catch { /* optional */ }
+let sdkLoadError = null;
+try {
+  ({ defineTask: sdkDefineTask } = await import('@a5c-ai/babysitter-sdk'));
+} catch (e) {
+  // Only "the SDK itself is not installed" is benign; a broken install must surface its real cause.
+  const notInstalled = e?.code === 'ERR_MODULE_NOT_FOUND' && String(e.message).includes('@a5c-ai/babysitter-sdk');
+  if (!notInstalled) sdkLoadError = e;
+}
 
 /** Single-quote a value for safe shell interpolation. */
 function shq(v) {
@@ -60,15 +67,17 @@ const AWK_FLAKE_PRINT = String.raw`BEGIN { FS = "\t" } $1 == "MATCH" { print "CI
 const JQ_JOB_SECONDS = String.raw`.jobs[] | select(.conclusion != "skipped" and .startedAt != null and .completedAt != null) | "\(.name)\t\((.completedAt|fromdateiso8601) - (.startedAt|fromdateiso8601))"`;
 // awk: `OVER\t<name>\t<min>` per job over budget, then `MAX\t<min>` (-1 = no matching job).
 const AWK_JOB_BUDGET = String.raw`BEGIN { FS = "\t"; mx = -1 }
-NF >= 2 && index($1, p) == 1 { s = $2 + 0; mn = int((s + 59) / 60); if (mn > mx) mx = mn; if (s > max) print "OVER\t" $1 "\t" mn }
+NF >= 2 && (p == "" || substr($1, 1, length(p)) == p) { s = $2 + 0; mn = int((s + 59) / 60); if (mn > mx) mx = mn; if (s > max) print "OVER\t" $1 "\t" mn }
 END { print "MAX\t" mx }`;
 
 /**
  * Build the bash script (pure; throws on invalid options).
  *
  * For HEAD of `branch` (asserts HEAD == origin/<branch>) each workflow is polled in order with
- * `gh run list --workflow <w> --branch <branch> --commit $SHA`; each must conclude `success`.
- * A workflow with no completed run after maxPolls fails (an absent run is never a pass).
+ * `gh run list --workflow <w> --branch <branch> --commit $SHA`. EVERY run of that workflow for the
+ * commit is considered: polling continues while any run is queued/in progress, then every run whose
+ * conclusion is not in skipConclusions must be `success`. No completed run after maxPolls fails
+ * (an absent run is never a pass).
  * Prints `<W>_RUN=<id>` per workflow and CI_CHAIN_OK last, only on success.
  *
  * @param {object} o
@@ -116,7 +125,10 @@ export function ciChainGateCommand(o = {}) {
   }
   if (o.jobPrefix !== undefined && typeof o.jobPrefix !== 'string') throw new Error('ciChainGateCommand: jobPrefix must be a string');
   const jobPrefix = o.jobPrefix || '';
-  const select = `select(.status=="completed"${skip.map((c) => ` and .conclusion!="${c}"`).join('')})`;
+  // gh --jq: "pending" while ANY run of the commit is not completed; otherwise the first non-success
+  // counted run (else the newest) as "<conclusion>\t<id>"; "" when every run was skipped/none exist.
+  const counted = `select(.conclusion!=null${skip.map((c) => ` and .conclusion!="${c}"`).join('')})`;
+  const listJq = `if any(.[]; .status!="completed") then "pending" else [.[]|${counted}] as $r | if ($r|length)==0 then "" else (([$r[]|select(.conclusion!="success")]|.[0]) // $r[0]) | "\\(.conclusion)\\t\\(.databaseId)" end end`;
   const clean = (w) => w.replace(/["\\$`']/g, '');
 
   const steps = workflows.map((w) => {
@@ -149,23 +161,24 @@ if [ "\${JMAX:--1}" != "-1" ]; then echo "JOB_MAX_MIN=$JMAX"; JOBS_SEEN=$((JOBS_
 OVER=$(printf '%s\\n' "$JB" | awk -F "$TAB" -v b=${shq(String(maxJobMinutes))} '$1 == "OVER" { print "FAIL: job " $2 " took " $3 " min, budget " b }')
 if [ -n "$OVER" ]; then printf '%s\\n' "$OVER"; exit 1; fi` : '';
     return `
-CONC=""; RID=""; WAIT=""; WAIT_ATT=0; RETRY=0
+CONC=""; RID=""; WAIT=""; WAIT_ATT=0; RETRY=0; REWAIT=0
 while :; do
   CONC=""; RID=""
   i=0
   while [ "$i" -lt ${maxPolls} ]; do
     i=$((i + 1))
     if [ -z "$WAIT" ]; then
-      ROW=$(gh run list --repo "$REPO" --workflow ${shq(w)} --branch "$BR" --commit "$SHA" --json status,conclusion,databaseId --jq '[.[]|${select}][0] | if . then "\\(.conclusion)\\t\\(.databaseId)" else "" end' 2>/dev/null) || ROW=""
-      if [ -n "$ROW" ]; then CONC=\${ROW%%"$TAB"*}; RID=\${ROW#*"$TAB"}; break; fi
+      ROW=$(gh run list --repo "$REPO" --workflow ${shq(w)} --branch "$BR" --commit "$SHA" --json status,conclusion,databaseId --jq ${shq(listJq)} 2>/dev/null) || ROW=""
+      if [ -n "$ROW" ] && [ "$ROW" != pending ]; then CONC=\${ROW%%"$TAB"*}; RID=\${ROW#*"$TAB"}; break; fi
     else
       ROW=$(gh run view "$WAIT" --repo "$REPO" --json status,conclusion,attempt --jq '"\\(.status)\\t\\(.conclusion)\\t\\(.attempt)"' 2>/dev/null) || ROW=""
       VST=\${ROW%%"$TAB"*}; VREST=\${ROW#*"$TAB"}; VCONC=\${VREST%%"$TAB"*}; VATT=\${VREST##*"$TAB"}
       case "$VATT" in ''|*[!0-9]*) VATT=0 ;; esac
-      if [ "$VST" = completed ] && [ "$VATT" -gt "$WAIT_ATT" ]; then CONC=$VCONC; RID=$WAIT; break; fi
+      if [ "$VST" = completed ] && [ "$VATT" -gt "$WAIT_ATT" ]; then WAIT=""; REWAIT=1; break; fi
     fi
     [ "$i" -lt ${maxPolls} ] && sleep ${pollSeconds}
   done
+  if [ "$REWAIT" = 1 ]; then REWAIT=0; continue; fi
   if [ -z "$CONC" ]; then echo "FAIL: workflow ${clean(w)} has no completed run for $SHA on $BR after ${maxPolls} polls"; exit 1; fi
   echo "${tag}=$RID"
   [ "$CONC" = success ] && break${flake}
@@ -203,6 +216,7 @@ export function ciChainGate(id, opts = {}, deps = {}) {
   if (typeof id !== 'string' || !id.trim()) throw new Error('ciChainGate: id must be a non-empty string');
   const command = ciChainGateCommand(opts);
   const define = deps.defineTask || sdkDefineTask;
+  if (!deps.defineTask && sdkLoadError) throw new Error(`ciChainGate: @a5c-ai/babysitter-sdk failed to load: ${sdkLoadError.message}`, { cause: sdkLoadError });
   if (typeof define !== 'function') throw new Error('ciChainGate: @a5c-ai/babysitter-sdk is not installed (ciChainGateCommand works without it)');
   const workflows = Array.isArray(opts.workflows) && opts.workflows.length ? opts.workflows : ['ci'];
   const attempts = 1 + (opts.flakeRetries === 1 ? 1 : 0);
