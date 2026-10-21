@@ -11,10 +11,39 @@
  *   - detectAdapter() returns unified when AGENT_UNIFIED_ADAPTER=1
  */
 
+import * as fs from "node:fs/promises";
+import * as os from "node:os";
+import * as path from "node:path";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { createUnifiedAdapter } from "../adapter";
 import { getAdapterByName, detectAdapter, resetAdapter } from "../../registry";
 import { HarnessCapability } from "../../types";
+import { getSessionFilePath, readSessionFile } from "../../../session/parse";
+import { writeSessionFile } from "../../../session/write";
+import type { SessionState } from "../../../session/types";
+import { createRun } from "../../../runtime/createRun";
+import type { CreateRunResult } from "../../../runtime/types";
+
+vi.mock("../../../runtime/createRun", () => ({ createRun: vi.fn() }));
+
+function mockRun(runsDir: string, runId: string): CreateRunResult {
+  return {
+    runId,
+    runDir: path.join(runsDir, runId),
+    metadata: {} as CreateRunResult["metadata"],
+  };
+}
+
+async function createSessionFixture() {
+  const root = await fs.mkdtemp(
+    path.join(os.tmpdir(), "babysitter-unified-session-start-"),
+  );
+  const stateDir = path.join(root, "state");
+  const runsDir = path.join(root, "runs");
+  await fs.mkdir(stateDir, { recursive: true });
+  await fs.mkdir(runsDir, { recursive: true });
+  return { root, stateDir, runsDir };
+}
 
 // Env vars we touch — save/restore to prevent leaking
 const ENV_KEYS = [
@@ -54,6 +83,7 @@ beforeEach(() => {
     delete process.env[key];
   }
   resetAdapter();
+  vi.mocked(createRun).mockReset();
 });
 
 afterEach(() => {
@@ -293,6 +323,87 @@ describe("createUnifiedAdapter", () => {
     const code = await adapter.handleSessionStartHook({ json: false });
     expect(code).toBe(0);
     writeSpy.mockRestore();
+  });
+
+  it.each([true, false])(
+    "preserves an existing session run binding on SessionStart (active=%s)",
+    async (active) => {
+      const fixture = await createSessionFixture();
+      const sessionId = "synthetic-active-session";
+      const now = "2026-10-21T12:00:00Z";
+      const state: SessionState = {
+        active,
+        iteration: 4,
+        maxIterations: 100,
+        runId: "existing-run",
+        runDir: path.join(fixture.runsDir, "existing-run"),
+        runIds: ["prior-run", "existing-run"],
+        startedAt: now,
+        lastIterationAt: now,
+        iterationTimes: [3],
+      };
+      await writeSessionFile(
+        getSessionFilePath(fixture.stateDir, sessionId),
+        state,
+        "synthetic prompt",
+      );
+      process.env.AGENT_SESSION_ID = sessionId;
+      vi.mocked(createRun).mockResolvedValue(
+        mockRun(fixture.runsDir, "replacement-run"),
+      );
+      const writeSpy = vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+      try {
+        const adapter = createUnifiedAdapter();
+        expect(await adapter.handleSessionStartHook({
+          json: false,
+          stateDir: fixture.stateDir,
+          runsDir: fixture.runsDir,
+        })).toBe(0);
+
+        const persisted = await readSessionFile(
+          getSessionFilePath(fixture.stateDir, sessionId),
+        );
+        expect(persisted.state).toMatchObject(state);
+        expect(persisted.prompt).toBe("synthetic prompt");
+        expect(createRun).not.toHaveBeenCalled();
+      } finally {
+        writeSpy.mockRestore();
+        await fs.rm(fixture.root, { recursive: true, force: true });
+      }
+    },
+  );
+
+  it("creates one bare run for a new session and reuses it on repeated SessionStart", async () => {
+    const fixture = await createSessionFixture();
+    const sessionId = "synthetic-new-session";
+    process.env.AGENT_SESSION_ID = sessionId;
+    vi.mocked(createRun).mockResolvedValue(mockRun(fixture.runsDir, "synthetic-run"));
+    const writeSpy = vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+    try {
+      const adapter = createUnifiedAdapter();
+      const args = {
+        json: false,
+        stateDir: fixture.stateDir,
+        runsDir: fixture.runsDir,
+      };
+      expect(await adapter.handleSessionStartHook(args)).toBe(0);
+      const first = await readSessionFile(getSessionFilePath(fixture.stateDir, sessionId));
+      expect(first.state.active).toBe(true);
+      expect(first.state.runId).toBe("synthetic-run");
+      expect(first.state.runIds).toEqual(["synthetic-run"]);
+      expect(first.state.runDir).toBe(path.join(fixture.runsDir, "synthetic-run"));
+
+      expect(await adapter.handleSessionStartHook(args)).toBe(0);
+      const second = await readSessionFile(getSessionFilePath(fixture.stateDir, sessionId));
+      expect(second.state.runId).toBe(first.state.runId);
+      expect(second.state.runIds).toEqual(first.state.runIds);
+      expect(createRun).toHaveBeenCalledTimes(1);
+    } finally {
+      writeSpy.mockRestore();
+      await fs.rm(fixture.root, { recursive: true, force: true });
+    }
   });
 });
 

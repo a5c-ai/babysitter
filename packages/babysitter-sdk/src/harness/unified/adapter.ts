@@ -19,6 +19,12 @@
 
 import * as path from "node:path";
 import { normalizeSessionStateDir } from "../../config";
+import { readSessionFile } from "../../session/parse";
+import {
+  addRunToSession,
+  getCurrentTimestamp,
+  updateSessionState,
+} from "../../session/write";
 import { HarnessCapability } from "../types";
 import type {
   HarnessAdapter,
@@ -195,17 +201,39 @@ export function createUnifiedAdapter(): HarnessAdapter {
       const stateDir = normalizeSessionStateDir(
         args.stateDir ?? process.env.BABYSITTER_STATE_DIR,
       );
+      let sessionFilePath: string | undefined;
+      let sessionFile: Awaited<ReturnType<typeof readSessionFile>> | undefined;
       if (stateDir) {
-        await initializeSessionState(sessionId, stateDir, {
+        const initialized = await initializeSessionState(sessionId, stateDir, {
           verbose: args.verbose,
         });
+        sessionFilePath = initialized.filePath;
+        try {
+          sessionFile = await readSessionFile(sessionFilePath);
+        } catch (err) {
+          if (args.verbose) {
+            const message = err instanceof Error ? err.message : String(err);
+            process.stderr.write(`[session-start] session state unavailable: ${message}\n`);
+          }
+          process.stdout.write("{}\n");
+          return 0;
+        }
+
+        // SessionStart may be delivered again after restore. Preserve any
+        // existing binding instead of replacing it with an unrelated bare run.
+        if (sessionFile.state.runId) {
+          if (args.verbose) {
+            process.stderr.write(
+              `[session-start] preserving existing run binding: ${sessionFile.state.runId}\n`,
+            );
+          }
+          process.stdout.write("{}\n");
+          return 0;
+        }
       }
 
-      // Auto-create a bare run for babysitter-plugin sessions so .a5c/runs/
-      // exists from the start — the agent can attach a process later via
-      // run:assign-process. The run ID is written into session state so the
-      // stop hook doesn't kill the session before the agent has a chance to
-      // assign a process.
+      // Auto-create a bare run for an unbound babysitter-plugin session so
+      // the agent can attach a process later via run:assign-process.
       try {
         const { createRun } = await import("../../runtime/createRun");
         const { resolveRunsDir } = await import("../../config");
@@ -214,14 +242,22 @@ export function createUnifiedAdapter(): HarnessAdapter {
           runsDir,
           harness: "unified",
         });
-        if (stateDir && sessionId) {
-          const { updateSessionState } = await import("../../session/write");
-          const { getSessionFilePath } = await import("../../session/parse");
-          const filePath = getSessionFilePath(stateDir, sessionId);
-          await updateSessionState(filePath, {
-            runId: result.runId,
-            runIds: [result.runId],
-          });
+        if (sessionFilePath && sessionFile) {
+          const nextState = addRunToSession(sessionFile.state, result.runId);
+          const now = getCurrentTimestamp();
+          await updateSessionState(
+            sessionFilePath,
+            {
+              ...nextState,
+              active: true,
+              iteration: 1,
+              runDir: result.runDir,
+              startedAt: now,
+              lastIterationAt: now,
+              iterationTimes: [],
+            },
+            { state: sessionFile.state, prompt: sessionFile.prompt },
+          );
         }
         if (args.verbose) {
           process.stderr.write(`[session-start] bare run created and bound: ${result.runId}\n`);
