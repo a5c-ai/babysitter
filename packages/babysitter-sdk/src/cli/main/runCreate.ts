@@ -111,6 +111,19 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
   }
 
   const requestedHarness = parsed.harness ?? (parsed.sessionId ? getAdapter().name : undefined);
+  const detectedAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
+  const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined || (detectedAdapter && detectedAdapter.name !== "custom");
+  const adapter = shouldBindSession ? detectedAdapter : undefined;
+  if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
+    const message = `The "${adapter.name}" harness auto-detects session IDs. Do not pass --session-id explicitly when running inside ${adapter.name}.`;
+    if (parsed.json) {
+      console.log(JSON.stringify({ error: "SESSION_ID_CONFLICT", message }));
+    } else {
+      process.stderr.write(`Error: ${message}\n`);
+    }
+    return 1;
+  }
+
   const result = await createRun({
     runsDir,
     runId: parsed.runIdOverride,
@@ -128,19 +141,6 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     inputs,
     ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
   });
-
-  const detectedAdapter = parsed.harness ? getAdapterByName(parsed.harness) : getAdapter();
-  const shouldBindSession = parsed.sessionId !== undefined || parsed.harness !== undefined || (detectedAdapter && detectedAdapter.name !== "custom");
-  const adapter = shouldBindSession ? detectedAdapter : undefined;
-  if (parsed.sessionId && adapter?.autoResolvesSessionId?.()) {
-    const message = `The "${adapter.name}" harness auto-detects session IDs. Do not pass --session-id explicitly when running inside ${adapter.name}.`;
-    if (parsed.json) {
-      console.log(JSON.stringify({ error: "SESSION_ID_CONFLICT", message }));
-    } else {
-      process.stderr.write(`Error: ${message}\n`);
-    }
-    return 1;
-  }
 
   let sessionBound;
   if (adapter) {

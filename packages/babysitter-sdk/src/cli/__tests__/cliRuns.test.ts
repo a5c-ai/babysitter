@@ -460,6 +460,32 @@ describe("babysitter run:create CLI", () => {
     expect(await listRunDirs()).toHaveLength(0);
   });
 
+  it("rejects --session-id under an auto-resolving harness without creating a run (issue #2108)", async () => {
+    const entryFile = await writeEntrypoint("processes/conflict.mjs", `export async function process() { return true; }\n`);
+    process.env.AGENT_SESSION_ID = "env-session";
+    const before = await fs.readdir(runsRoot);
+
+    const cli = createBabysitterCli();
+    const exitCode = await cli.run([
+      "run:create",
+      "--runs-dir",
+      runsRoot,
+      "--process-id",
+      "ci/conflict",
+      "--entry",
+      `${entryFile}#process`,
+      "--harness",
+      "claude-code",
+      "--session-id",
+      "explicit-session",
+      "--json",
+    ]);
+
+    expect(exitCode).toBe(1);
+    expect(readLastJsonLine(logSpy)).toMatchObject({ error: "SESSION_ID_CONFLICT" });
+    expect((await fs.readdir(runsRoot)).sort()).toEqual(before.sort());
+  });
+
   it("accepts --prompt flag and persists prompt in metadata and journal", async () => {
     const entryFile = await writeEntrypoint("processes/prompted.mjs", `export async function process() {\n  return "prompted";\n}\n`);
 
