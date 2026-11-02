@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { AgentEndEvent, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { execSync } from "child_process";
 import * as path from "path";
 import { initI18n, t } from "./i18n.js";
@@ -49,12 +49,28 @@ function sessionStartInput(ctx?: ExtensionContext): Record<string, unknown> {
   };
 }
 
-function stopHookInput(ctx?: ExtensionContext): Record<string, unknown> {
+function finalAssistantText(messages: AgentEndEvent["messages"]): string | undefined {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== "assistant") continue;
+    const text = message.content
+      .filter((content) => content.type === "text")
+      .map((content) => content.text)
+      .join("\n");
+    return text || undefined;
+  }
+}
+
+function stopHookInput(
+  ctx?: ExtensionContext,
+  lastAssistantMessage?: string,
+): Record<string, unknown> {
   const sessionId = syncSessionEnvironment(ctx);
   return {
     event: "stop",
     cwd: ctx?.cwd ?? process.cwd(),
     ...(sessionId ? { session_id: sessionId } : {}),
+    ...(lastAssistantMessage ? { last_assistant_message: lastAssistantMessage } : {}),
   };
 }
 
@@ -110,11 +126,14 @@ export default function activate(pi: ExtensionAPI): void {
   // continue, so this handler simply relays that decision. When no run is
   // active, agent_end is a no-op.
   // ---------------------------------------------------------------------------
-  pi.on("agent_end", async (_event, ctx) => {
+  pi.on("agent_end", async (event, ctx) => {
     if (stopHookInFlight) return;
     stopHookInFlight = true;
     try {
-      const result = runProxiedHook("babysitter-proxied-stop.js", stopHookInput(ctx));
+      const result = runProxiedHook(
+        "babysitter-proxied-stop.js",
+        stopHookInput(ctx, finalAssistantText(event.messages)),
+      );
       // Only re-prompt when the stop hook asks to continue the loop. A `{}`
       // result (no active run / run complete) leaves the turn ended, so the
       // loop terminates naturally — never an unconditional re-trigger.

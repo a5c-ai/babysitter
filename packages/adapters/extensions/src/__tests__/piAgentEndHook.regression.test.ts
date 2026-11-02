@@ -16,7 +16,8 @@ import * as fs from 'fs';
 import { createRequire } from 'module';
 import * as os from 'os';
 import * as path from 'path';
-import { afterEach, describe, expect, it } from 'vitest';
+import * as ts from 'typescript';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { compile } from '../compiler.js';
 
@@ -98,6 +99,79 @@ describe('pi target ships agent_end wiring + proxied hook scripts (#948)', () =>
     },
     120_000,
   );
+
+  it('relays the final assistant promise to the stop hook for completion recognition (#2091)', async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pi-2091-'));
+    tempDirs.push(tempDir);
+    const hookInputs: Record<string, unknown>[] = [];
+    const childProcess = createRequire(import.meta.url)('child_process') as typeof import('child_process');
+    const originalExecSync = childProcess.execSync;
+    childProcess.execSync = ((_, options) => {
+      const input = JSON.parse(String(options?.input ?? '{}')) as Record<string, unknown>;
+      hookInputs.push(input);
+      return Buffer.from(
+        input.last_assistant_message === '<promise>proof-2091</promise>'
+          ? '{}'
+          : JSON.stringify({ decision: 'block', reason: 'continue loop' }),
+      );
+    }) as typeof execSync;
+
+    try {
+      const extensionSource = fs.readFileSync(
+        path.join(UNIFIED_PLUGIN_DIR, 'per-harness', 'pi', 'extensions-index.ts'),
+        'utf8',
+      );
+      fs.writeFileSync(
+        path.join(tempDir, 'extensions-index.js'),
+        ts.transpileModule(extensionSource, {
+          compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+        }).outputText,
+      );
+      fs.writeFileSync(
+        path.join(tempDir, 'i18n.js'),
+        'exports.initI18n = () => {}; exports.t = (_key, fallback) => fallback;',
+      );
+      const activate = createRequire(path.join(tempDir, 'loader.cjs'))(
+        './extensions-index.js',
+      ).default as (pi: unknown) => void;
+      let agentEnd: ((event: unknown, context: unknown) => Promise<void>) | undefined;
+      const sendUserMessage = vi.fn();
+      activate({
+        on: (event: string, handler: typeof agentEnd) => {
+          if (event === 'agent_end') agentEnd = handler;
+          return () => {};
+        },
+        registerCommand: () => {},
+        sendUserMessage,
+      });
+
+      await agentEnd?.(
+        {
+          messages: [
+            { role: 'user', content: 'finish the run' },
+            {
+              role: 'assistant',
+              content: [{ type: 'text', text: '<promise>proof-2091</promise>' }],
+            },
+          ],
+        },
+        {
+          cwd: '/tmp/project',
+          sessionManager: { getSessionId: () => 'session-2091' },
+        },
+      );
+
+      expect(hookInputs).toContainEqual(expect.objectContaining({
+        event: 'stop',
+        cwd: '/tmp/project',
+        session_id: 'session-2091',
+        last_assistant_message: '<promise>proof-2091</promise>',
+      }));
+      expect(sendUserMessage).not.toHaveBeenCalled();
+    } finally {
+      childProcess.execSync = originalExecSync;
+    }
+  });
 
   it(
     'packs Pi bin entry points that resolve the shipped install-shared.cjs (#1581)',
