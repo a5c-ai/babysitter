@@ -19,6 +19,44 @@ edges:
     - trust-level:vendor-doc
 ---
 nodeKind: EvidenceSource
+id: evidence:deepseek-v4-flash-vision-exp-release
+attributes:
+  displayName: "DeepSeek API Docs - DeepSeek-V4-Flash-Vision-Exp release"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/updates/
+  sourcePathOrUrl: https://api-docs.deepseek.com/updates/
+  locator: "changelog - 2026-08-21 DeepSeek-V4-Flash-Vision-Exp"
+  capturedAt: "2026-08-22T00:00:00Z"
+  observedAt: "2026-08-22T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-22T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
+id: evidence:deepseek-v4-flash-vision-exp-pricing
+attributes:
+  displayName: "DeepSeek API Docs - DeepSeek-V4-Flash-Vision-Exp pricing"
+  kindLabel: web
+  trustLevel: trust-level:vendor-doc
+  sourceUrl: https://api-docs.deepseek.com/quick_start/pricing/
+  sourcePathOrUrl: https://api-docs.deepseek.com/quick_start/pricing/
+  locator: "model details table - deepseek-v4-flash-vision-exp"
+  capturedAt: "2026-08-22T00:00:00Z"
+  observedAt: "2026-08-22T00:00:00Z"
+  observedBy: a5c-ai-catalog
+  freshnessWindowDays: 30
+  reviewOwner: "@a5c-ai/catalog"
+  reviewedAt: "2026-08-22T00:00:00Z"
+edges:
+  has_trust_level:
+    - trust-level:vendor-doc
+---
+nodeKind: EvidenceSource
 id: evidence:deepseek-v4-pricing
 attributes:
   displayName: "DeepSeek API Docs - Models & Pricing"

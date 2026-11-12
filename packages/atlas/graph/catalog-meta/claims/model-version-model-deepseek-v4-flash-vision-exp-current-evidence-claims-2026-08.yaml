@@ -1,0 +1,147 @@
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-flash-vision-exp-current-model-code
+attributes:
+  subjectId: model:deepseek-v4-flash-vision-exp@current
+  attribute: modelCode
+  value: deepseek-v4-flash-vision-exp
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-flash-vision-exp@current maps to the DeepSeek API model code deepseek-v4-flash-vision-exp.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-flash-vision-exp-release
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  claimedAt: '2026-08-22T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for issue #1874 exact model ID.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-flash-vision-exp-release
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  about_subject:
+    - model:deepseek-v4-flash-vision-exp@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-flash-vision-exp-current-release-date
+attributes:
+  subjectId: model:deepseek-v4-flash-vision-exp@current
+  attribute: releaseDate
+  value: '2026-08-21'
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-flash-vision-exp@current releaseDate is 2026-08-21.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-flash-vision-exp-release
+  claimedAt: '2026-08-22T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for the DeepSeek changelog release date.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-flash-vision-exp-release
+  about_subject:
+    - model:deepseek-v4-flash-vision-exp@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-flash-vision-exp-current-context
+attributes:
+  subjectId: model:deepseek-v4-flash-vision-exp@current
+  attribute: contextWindowTokens
+  value: 1000000
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-flash-vision-exp@current contextWindowTokens is 1000000 and maxOutputTokens is 384000.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  claimedAt: '2026-08-22T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for context and maximum output limits.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  about_subject:
+    - model:deepseek-v4-flash-vision-exp@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-flash-vision-exp-current-modalities
+attributes:
+  subjectId: model:deepseek-v4-flash-vision-exp@current
+  attribute: modalities
+  value: text,image
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-flash-vision-exp@current accepts text and image input and produces text output.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-flash-vision-exp-release
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  claimedAt: '2026-08-22T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for experimental multimodal vision support.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-flash-vision-exp-release
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  about_subject:
+    - model:deepseek-v4-flash-vision-exp@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-flash-vision-exp-current-capabilities
+attributes:
+  subjectId: model:deepseek-v4-flash-vision-exp@current
+  attribute: capabilities
+  value: json-output,tool-calls,responses-api,anthropic-api,chat-prefix-completion,no-fim
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-flash-vision-exp@current supports JSON Output, Tool Calls, Responses API, Anthropic API, and Chat Prefix Completion beta; FIM completion is not supported.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  claimedAt: '2026-08-22T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for API and feature support.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  about_subject:
+    - model:deepseek-v4-flash-vision-exp@current
+---
+nodeKind: Claim
+id: claim:model-version-model-deepseek-v4-flash-vision-exp-current-pricing
+attributes:
+  subjectId: model:deepseek-v4-flash-vision-exp@current
+  attribute: pricing
+  value: offPeakCacheHitInput=0.007;peakCacheHitInput=0.014;offPeakCacheMissInput=0.22;peakCacheMissInput=0.44;offPeakOutput=0.66;peakOutput=1.32
+  subjectKind: ModelVersion
+  statement: model:deepseek-v4-flash-vision-exp@current is priced per million tokens with off-peak/peak cache-hit input at $0.007/$0.014, cache-miss input at $0.22/$0.44, and output at $0.66/$1.32.
+  confidence: high
+  provenanceKind: observation
+  evidenceStrength: strong
+  status: accepted
+  evidenceSourceIds:
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  claimedAt: '2026-08-22T00:00:00Z'
+  claimedBy: a5c-ai-catalog
+  claimKind: assertion
+  note: Evidence binding for token pricing and image-token billing.
+edges:
+  backed_by_evidence:
+    - evidence:deepseek-v4-flash-vision-exp-pricing
+  about_subject:
+    - model:deepseek-v4-flash-vision-exp@current
