@@ -387,7 +387,7 @@ Mark as FAIL if:
 
 **Goal:** Surface multiple live harness sessions that may compete for the same session ID.
 
-- Enumerate files in `~/.a5c/` matching the pattern `current-session-*-pid-*`.
+- Enumerate files in `~/.a5c/state/` matching the pattern `current-session-*-pid-*`.
 - Count markers per harness (derived from the filename).
 - If more than one live marker exists for the same harness, mark as INFO ("Multiple live Claude Code / harness sessions detected; ensure each shell scopes `AGENT_SESSION_ID` appropriately -- the PID marker handles this automatically").
 - Otherwise mark as PASS.

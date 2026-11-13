@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, unlinkSync } from "node:fs";
 import * as path from "node:path";
 import { getGlobalStateDir, getReadableRunsDirs, resolveRunsDir } from "../config";
 import { isProcessAlive } from "../utils/processLiveness";
+import { readSessionMarkerFile } from "../utils/sessionMarker";
 import { readSessionFile, writeSessionFile } from "./index";
 
 const STATE_STALE_MS = 24 * 60 * 60 * 1000;
@@ -65,8 +66,7 @@ function listMarkerFiles(stateDir: string, harnessFilter?: string): MarkerInfo[]
     const absPath = path.join(stateDir, name);
     let sessionId: string | undefined;
     try {
-      const raw = readFileSync(absPath, "utf8").trim();
-      sessionId = raw || undefined;
+      sessionId = readSessionMarkerFile(absPath, parsed.pid);
     } catch {
       // Best effort.
     }
@@ -75,7 +75,7 @@ function listMarkerFiles(stateDir: string, harnessFilter?: string): MarkerInfo[]
       absPath,
       harness: parsed.harness,
       pid: parsed.pid,
-      alive: isProcessAlive(parsed.pid),
+      alive: isProcessAlive(parsed.pid) && Boolean(sessionId),
       sessionId,
     });
   }

@@ -37,6 +37,7 @@
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "test": "vitest run",
+    "test:session-start-shell": "node scripts/test-session-start-shell.cjs",
     "test:watch": "vitest",
     "smoke:cli": "node scripts/smoke-cli.js --runs-dir packages/babysitter-sdk/test-fixtures/cli/runs/smoke",
     "verify:package-health": "node scripts/verify-package-health.cjs"

@@ -290,7 +290,7 @@ describe("createUnifiedAdapter", () => {
   it("handleSessionStartHook() returns 0", async () => {
     const writeSpy = vi.spyOn(process.stdout, "write").mockReturnValue(true);
     const adapter = createUnifiedAdapter();
-    const code = await adapter.handleSessionStartHook({ json: false });
+    const code = await adapter.handleSessionStartHook({ json: false, stdinPayload: "" });
     expect(code).toBe(0);
     writeSpy.mockRestore();
   });

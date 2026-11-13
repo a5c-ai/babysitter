@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { getGlobalStateDir } from "../config";
 import { isProcessAlive } from "../utils/processLiveness";
+import { getProcessStartIdentity } from "./processIdentity";
 import {
   findHarnessAncestorPid,
   __resetCacheForTests as resetAncestorCache,
@@ -26,7 +27,7 @@ export const SESSION_PID_MARKER_ENV_VAR_DEPRECATED = "BABYSITTER_ENABLE_SESSION_
 
 export function isSessionPidMarkerEnabled(): boolean {
   const raw = process.env[SESSION_PID_MARKER_ENV_VAR] ?? process.env[SESSION_PID_MARKER_ENV_VAR_DEPRECATED];
-  if (!raw) return false;
+  if (raw === undefined) return true;
   const normalized = raw.trim().toLowerCase();
   return normalized === "1" || normalized === "true";
 }
@@ -74,10 +75,31 @@ export function writeSessionMarker(harness: string, sessionId: string): string |
   if (!isSessionPidMarkerEnabled()) return undefined;
   const info = findHarnessAncestorPid(deriveProcessNames(harness));
   if (!info) return undefined;
+  const processStartIdentity = getProcessStartIdentity(info.pid);
+  if (!processStartIdentity) return undefined;
   const target = getSessionMarkerPath(harness, info.pid);
-  atomicWriteString(target, `${sessionId}\n`);
+  try {
+    atomicWriteString(target, JSON.stringify({ version: 1, sessionId, processStartIdentity }) + "\n");
+  } catch {
+    return undefined;
+  }
   try { cleanupDeadSessionMarkers(); } catch { /* ignore */ }
   return target;
+}
+
+/** Legacy PID-only markers cannot prove they belong to the current process. */
+export function readSessionMarkerFile(filePath: string, pid: number): string | undefined {
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(filePath, "utf8"));
+    if (!parsed || typeof parsed !== "object") return undefined;
+    const marker = parsed as { version?: unknown; sessionId?: unknown; processStartIdentity?: unknown };
+    if (marker.version !== 1 || typeof marker.sessionId !== "string" || !marker.sessionId ||
+        typeof marker.processStartIdentity !== "string") return undefined;
+    const currentIdentity = getProcessStartIdentity(pid);
+    return currentIdentity && currentIdentity === marker.processStartIdentity ? marker.sessionId : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 const MARKER_FILENAME_RE = /^current-session-.+-pid-(\d+)$/;
@@ -131,12 +153,8 @@ export function readSessionMarkerDetails(harness: string): SessionMarkerDetails 
   if (!ancestorAlive) return undefined;
   const target = getSessionMarkerPath(harness, info.pid);
   if (!existsSync(target)) return undefined;
-  try {
-    const content = readFileSync(target, "utf8").trim();
-    return content ? { sessionId: content, ancestorPid: info.pid, ancestorAlive } : undefined;
-  } catch {
-    return undefined;
-  }
+  const sessionId = readSessionMarkerFile(target, info.pid);
+  return sessionId ? { sessionId, ancestorPid: info.pid, ancestorAlive } : undefined;
 }
 
 export function resolveSessionIdWithMarker(

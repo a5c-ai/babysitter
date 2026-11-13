@@ -101,7 +101,9 @@ describe("runSessionWhoami", () => {
 
   it("ignores pid markers when the feature flag is disabled", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
-    writeSessionMarker("claude-code", "SESS-FROM-MARKER");
+    const markerPath = writeSessionMarker("claude-code", "SESS-FROM-MARKER");
+    expect(markerPath).toBeTruthy();
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "0";
 
     const result = runSessionWhoami({ harness: "claude-code" });
     expect(result.sessionId).toBeNull();

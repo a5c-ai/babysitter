@@ -34,7 +34,8 @@ import {
 import { createUnifiedContext } from "./promptContext";
 import { handleStopHookCommon } from "../hooks/stopHookHandler";
 import { buildStopHookContinuation } from "../hooks/stopHookContinuation";
-import { initializeSessionState } from "../hooks/utils";
+import { initializeSessionState, parseHookInput, readStdin, safeStr } from "../hooks/utils";
+import { isSessionPidMarkerEnabled, writeSessionMarker } from "../../utils/sessionMarker";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -186,11 +187,27 @@ export function createUnifiedAdapter(): HarnessAdapter {
     },
 
     async handleSessionStartHook(args: HookHandlerArgs): Promise<number> {
-      // Initialize session state
-      const sessionId = process.env.AGENT_SESSION_ID;
-      if (!sessionId) {
+      // The Claude Code hook supplies its native session ID on stdin. An
+      // inherited AGENT_SESSION_ID is not proof of the new hook's session.
+      let rawInput = args.stdinPayload;
+      if (rawInput === undefined) {
+        try {
+          rawInput = await readStdin();
+        } catch {
+          rawInput = "";
+        } finally {
+          process.stdin.unref?.();
+        }
+      }
+      const nativeSessionId = safeStr(parseHookInput(rawInput), "session_id");
+      if (!nativeSessionId) {
         process.stdout.write("{}\n");
         return 0;
+      }
+      const sessionId = nativeSessionId;
+      const markerPath = writeSessionMarker("claude-code", nativeSessionId);
+      if (!markerPath && isSessionPidMarkerEnabled()) {
+        process.stderr.write("[session-start] Could not write claude-code PID marker; session:whoami may not resolve this session.\n");
       }
       const stateDir = normalizeSessionStateDir(
         args.stateDir ?? process.env.BABYSITTER_STATE_DIR,

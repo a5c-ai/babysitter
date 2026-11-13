@@ -16,8 +16,12 @@ import {
   __resetCacheForTests,
   __setAncestorResolverForTests,
   getSessionMarkerPath,
+  writeSessionMarker,
 } from "../../utils/sessionMarker";
 import * as runSupportModule from "../main/runSupport";
+import { createUnifiedAdapter } from "../../harness/unified/adapter";
+import { createClaudeCodeAdapter } from "../../harness/adapters/claude-code";
+import { runSessionWhoami } from "../../session/whoami";
 
 const realReadRunMetadata = readRunMetadata;
 
@@ -162,8 +166,7 @@ describe("babysitter run:create CLI", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
 
     const markerPath = getSessionMarkerPath("claude-code", process.pid);
-    await fs.mkdir(path.dirname(markerPath), { recursive: true });
-    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+    expect(writeSessionMarker("claude-code", currentSessionId)).toBe(markerPath);
 
     const cli = createBabysitterCli();
     const exitCode = await cli.run([
@@ -196,6 +199,95 @@ describe("babysitter run:create CLI", () => {
     await fs.rm(globalStateRoot, { recursive: true, force: true });
   });
 
+  it("binds a run after SessionStart without a marker feature flag", async () => {
+    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-hook-state-"));
+    try {
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+      process.env.AGENT_SESSION_ID = "stale-inherited-session";
+      __resetCacheForTests();
+      __setAncestorResolverForTests(() => ({ pid: process.pid }));
+      const markerPath = getSessionMarkerPath("claude-code", process.pid);
+
+      await createClaudeCodeAdapter().handleSessionStartHook({
+        json: true,
+        stdinPayload: "{}",
+        stateDir: path.join(globalStateRoot, "untrusted-state"),
+      });
+      await expect(fs.access(markerPath)).rejects.toThrow();
+
+      const hookCode = await createUnifiedAdapter().handleSessionStartHook({
+        json: true,
+        stdinPayload: JSON.stringify({ session_id: "hook-session" }),
+        stateDir: path.join(globalStateRoot, "unified-state"),
+        runsDir: path.join(globalStateRoot, "unified-runs"),
+      });
+      expect(hookCode).toBe(0);
+      expect(JSON.parse(await fs.readFile(markerPath, "utf8"))).toMatchObject({ sessionId: "hook-session" });
+      expect(runSessionWhoami({ harness: "claude-code" })).toMatchObject({
+        sessionId: "hook-session",
+        resolvedFrom: "pid-marker",
+        ancestorPid: process.pid,
+        ancestorAlive: true,
+        markerPath,
+        envVarMatches: false,
+      });
+
+      const exitCode = await createBabysitterCli().run([
+        "run:create", "--runs-dir", runsRoot, "--harness", "claude-code", "--json",
+      ]);
+      expect(exitCode).toBe(0);
+      expect(readLastJsonLine(logSpy).session).toMatchObject({
+        sessionId: "hook-session",
+        resolvedFrom: "pid-marker",
+      });
+    } finally {
+      await fs.rm(globalStateRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("does not create session state or a run from stale env without a native SessionStart ID", async () => {
+    const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-missing-native-"));
+    try {
+      const stateDir = path.join(globalStateRoot, "state");
+      const hookRunsDir = path.join(globalStateRoot, "hook-runs");
+      process.env.BABYSITTER_GLOBAL_STATE_DIR = globalStateRoot;
+      process.env.AGENT_SESSION_ID = "stale-inherited-session";
+      __resetCacheForTests();
+      __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+      const hookCode = await createUnifiedAdapter().handleSessionStartHook({
+        json: true,
+        stdinPayload: "{}",
+        stateDir,
+        runsDir: hookRunsDir,
+      });
+
+      expect(hookCode).toBe(0);
+      await expect(fs.access(getSessionMarkerPath("claude-code", process.pid))).rejects.toThrow();
+      await expect(fs.access(stateDir)).rejects.toThrow();
+      await expect(fs.access(hookRunsDir)).rejects.toThrow();
+    } finally {
+      await fs.rm(globalStateRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps SessionStart nonfatal when its PID marker directory cannot be written", async () => {
+    const blockedRoot = path.join(runsRoot, "blocked-global-root");
+    await fs.writeFile(blockedRoot, "not a directory");
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = blockedRoot;
+    __resetCacheForTests();
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+
+    const hookCode = await createUnifiedAdapter().handleSessionStartHook({
+      json: true,
+      stdinPayload: JSON.stringify({ session_id: "native-session" }),
+      stateDir: path.join(runsRoot, "hook-state"),
+      runsDir: path.join(runsRoot, "hook-runs"),
+    });
+    expect(hookCode).toBe(0);
+    await expect(fs.access(getSessionMarkerPath("claude-code", process.pid))).rejects.toThrow();
+  });
+
   it("keeps claude-code env-first binding when trust-env is explicitly set", async () => {
     const entryFile = await writeEntrypoint("processes/claude-trust-env.mjs", `export async function process() { return true; }\n`);
     const globalStateRoot = await fs.mkdtemp(path.join(os.tmpdir(), "cli-run-create-claude-trust-"));
@@ -210,8 +302,7 @@ describe("babysitter run:create CLI", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
 
     const markerPath = getSessionMarkerPath("claude-code", process.pid);
-    await fs.mkdir(path.dirname(markerPath), { recursive: true });
-    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+    expect(writeSessionMarker("claude-code", currentSessionId)).toBe(markerPath);
 
     const cli = createBabysitterCli();
     const exitCode = await cli.run([
@@ -288,8 +379,7 @@ describe("babysitter run:create CLI", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
 
     const markerPath = getSessionMarkerPath("claude-code", process.pid);
-    await fs.mkdir(path.dirname(markerPath), { recursive: true });
-    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+    expect(writeSessionMarker("claude-code", currentSessionId)).toBe(markerPath);
 
     const cli = createBabysitterCli();
     const exitCode = await cli.run([
@@ -337,8 +427,7 @@ describe("babysitter run:create CLI", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
 
     const markerPath = getSessionMarkerPath("claude-code", process.pid);
-    await fs.mkdir(path.dirname(markerPath), { recursive: true });
-    await fs.writeFile(markerPath, `${currentSessionId}\n`);
+    expect(writeSessionMarker("claude-code", currentSessionId)).toBe(markerPath);
 
     const cli = createBabysitterCli();
     const exitCode = await cli.run([
