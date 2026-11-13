@@ -4,6 +4,7 @@ import { BreakpointResult, BreakpointRoutingOptions, BreakpointStrategy, Defined
 import { runTaskIntrinsic, TaskIntrinsicContext } from "./task";
 import { InternalProcessContext } from "../processContext";
 import { appendEvent } from "../../storage/journal";
+import { requiresInteractiveApproval } from "./breakpointPolicy";
 
 interface BreakpointArgs<T = unknown> {
   payload: T;
@@ -49,16 +50,23 @@ export async function runBreakpointIntrinsic<T = unknown>(
   const label = deriveBreakpointLabel(payload, options?.label);
   const breakpointId = options?.breakpointId ?? slugifyBreakpointId(label);
 
-  // In non-interactive mode, auto-approve breakpoints without dispatching a task.
+  // Non-interactive gates are decided here, before task dispatch.
   const ctx = context as Partial<InternalProcessContext>;
   if (ctx.nonInteractive) {
-    const bpLabel = options?.label ?? "unnamed";
+    const protectedGate = requiresInteractiveApproval(options ?? {});
+    const refused = protectedGate && ctx.nonInteractiveOwnerGates !== "approve";
+    const result: BreakpointResult = refused
+      ? { approved: false, deferred: true, response: "Requires interactive approval" }
+      : { approved: true, auto: true, response: "Auto-approved (non-interactive mode)" };
+    const bpLabel = label === DEFAULT_BREAKPOINT_LABEL
+      ? (options?.breakpointId || breakpointId || "unnamed")
+      : label;
 
     let logSeq: number;
     if (ctx.logSeq !== undefined && ctx.recordedLogSeqs !== undefined) {
       logSeq = ++ctx.logSeq;
       if (ctx.recordedLogSeqs.has(logSeq)) {
-        return Promise.resolve({ approved: true, response: "Auto-approved (non-interactive mode)" });
+        return result;
       }
       ctx.recordedLogSeqs.add(logSeq);
       void fs.appendFile(
@@ -75,12 +83,22 @@ export async function runBreakpointIntrinsic<T = unknown>(
       await appendEvent({
         runDir: context.runDir,
         eventType: "PROCESS_LOG",
-        event: { logSeq, label: "breakpoint:skipped", message: `Breakpoint '${bpLabel}' auto-approved (non-interactive mode)` },
+        event: {
+          logSeq,
+          label: refused ? "breakpoint:deferred" : "breakpoint:skipped",
+          breakpointLabel: bpLabel,
+          breakpointId,
+          expert: options?.expert ?? null,
+          tags: options?.tags ?? [],
+          message: refused
+            ? `Breakpoint '${bpLabel}' requires interactive approval`
+            : `Breakpoint '${bpLabel}' auto-approved (non-interactive mode)`,
+        },
       });
     } catch {
       // Never let logging break orchestration.
     }
-    return { approved: true, response: "Auto-approved (non-interactive mode)" };
+    return result;
   }
 
   // Disambiguate repeated breakpoints within one process run. The breakpoint
@@ -125,6 +143,12 @@ function deriveBreakpointLabel(payload: unknown, provided?: string): string {
   }
   if (payload && typeof payload === "object" && "label" in (payload as Record<string, unknown>)) {
     const inferred = (payload as Record<string, unknown>).label;
+    if (typeof inferred === "string" && inferred.length) {
+      return inferred;
+    }
+  }
+  if (payload && typeof payload === "object" && "title" in (payload as Record<string, unknown>)) {
+    const inferred = (payload as Record<string, unknown>).title;
     if (typeof inferred === "string" && inferred.length) {
       return inferred;
     }

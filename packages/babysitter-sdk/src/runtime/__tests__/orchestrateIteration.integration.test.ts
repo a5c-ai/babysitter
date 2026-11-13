@@ -686,6 +686,37 @@ describe("orchestrateIteration integration", () => {
     expect(journal.some((event) => event.type === "RUN_FAILED")).toBe(false);
   });
 
+  test("does not auto-approve a protected non-interactive breakpoint", async () => {
+    const processDir = path.join(tmpRoot, "processes-protected-breakpoint");
+    await fs.mkdir(processDir, { recursive: true });
+    const processPath = path.join(processDir, "protected.mjs");
+    await fs.writeFile(processPath, `
+      export async function process(_inputs, ctx) {
+        return await ctx.breakpoint({ title: "Deploy production" },
+          { breakpointId: "deploy.owner", expert: "owner", tags: ["destructive"] });
+      }
+    `, "utf8");
+    const { runDir } = await createRunDir({
+      runsRoot: tmpRoot,
+      runId: "run-protected-breakpoint",
+      request: "protected breakpoint test",
+      processPath,
+      inputs: {},
+      extraMetadata: { nonInteractive: true },
+    });
+    await appendEvent({ runDir, eventType: "RUN_CREATED", event: { runId: "run-protected-breakpoint" } });
+    const result = await orchestrateIteration({ runDir });
+    expect(result.status).toBe("completed");
+    const journal = await loadJournal(runDir);
+    expect(journal.find((event) => event.type === "PROCESS_LOG")?.data).toMatchObject({
+      label: "breakpoint:deferred",
+      breakpointLabel: "Deploy production",
+      breakpointId: "deploy.owner",
+      expert: "owner",
+      tags: ["destructive"],
+    });
+  });
+
   test("completes replay correctly after cwd changes when the run was created from a relative runsDir", async () => {
     const workspace = await fs.mkdtemp(path.join(tmpRoot, "relative-run-workspace-"));
     const processPath = await writeProcessFile(workspace, "relative.mjs");

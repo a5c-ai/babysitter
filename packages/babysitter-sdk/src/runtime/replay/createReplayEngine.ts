@@ -88,6 +88,7 @@ export async function createReplayEngine(options: CreateReplayEngineOptions): Pr
     logger: options.logger,
     recordedLogSeqs,
     nonInteractive: Boolean(metadata.nonInteractive),
+    nonInteractiveOwnerGates: metadata.nonInteractiveOwnerGates === "approve" ? "approve" : "refuse",
     subprocessSupport: options.subprocessSupport,
     policyEngine,
     reportPolicyDecision,

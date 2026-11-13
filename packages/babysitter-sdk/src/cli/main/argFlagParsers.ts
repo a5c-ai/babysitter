@@ -128,6 +128,10 @@ export const FLAG_PARSERS: Record<string, FlagParser> = {
     parsed.metadataPath = expectFlagValue(args, index + 1, "--metadata");
     return index + 1;
   },
+  "--breakpoint-declarations": (parsed, args, index) => {
+    parsed.breakpointDeclarationsPath = expectFlagValue(args, index + 1, "--breakpoint-declarations");
+    return index + 1;
+  },
   "--invocation-key": (parsed, args, index) => {
     parsed.invocationKey = expectFlagValue(args, index + 1, "--invocation-key");
     return index + 1;

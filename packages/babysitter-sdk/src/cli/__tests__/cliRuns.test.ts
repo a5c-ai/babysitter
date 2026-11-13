@@ -76,6 +76,34 @@ describe("babysitter run:create CLI", () => {
     await fs.rm(runsRoot, { recursive: true, force: true });
   });
 
+  it("preflights declared owner gates and supports an explicit non-interactive opt-in", async () => {
+    const entryFile = await writeEntrypoint("processes/gated.mjs", "export async function process() {}\n");
+    const declarationsPath = path.join(runsRoot, "breakpoints.json");
+    await fs.writeFile(declarationsPath, JSON.stringify([{ breakpointId: "deploy.owner", expert: "owner" }]));
+    const args = [
+      "run:create", "--runs-dir", runsRoot, "--process-id", "deploy/gated",
+      "--entry", entryFile, "--non-interactive", "--breakpoint-declarations", declarationsPath,
+    ];
+    const cli = createBabysitterCli();
+    expect(await cli.run(args)).toBe(1);
+    expect(await fs.readdir(runsRoot)).toEqual(["breakpoints.json", "processes"]);
+    expect(await cli.run([...args, "--allow-auto-approve-owner-gates"])).toBe(0);
+    const metadata = await readRunMetadata(await expectSingleRunDir());
+    expect(metadata.nonInteractiveOwnerGates).toBe("approve");
+  });
+
+  it("rejects a static owner gate without a declarations file", async () => {
+    const entryFile = await writeEntrypoint("processes/owner.mjs", `export async function process(_, ctx) {
+      return ctx.breakpoint({ title: "Ship" }, { expert: "owner", tags: ["destructive"] });
+    }`);
+    const cli = createBabysitterCli();
+    expect(await cli.run([
+      "run:create", "--runs-dir", runsRoot, "--process-id", "ship",
+      "--entry", entryFile, "--non-interactive",
+    ])).toBe(1);
+    expect(await listRunDirs()).toEqual([]);
+  });
+
   it("creates a run on disk and records metadata plus RUN_CREATED event", async () => {
     const entryFile = await writeEntrypoint("processes/pipeline.mjs", `export async function handler() {\n  return "ok";\n}\n`);
     const inputsPath = path.join(runsRoot, "inputs.json");

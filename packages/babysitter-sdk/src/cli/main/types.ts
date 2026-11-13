@@ -35,6 +35,7 @@ export interface ParsedArgs {
   processId?: string;
   entrySpecifier?: string;
   inputsPath?: string;
+  breakpointDeclarationsPath?: string;
   runIdOverride?: string;
   processRevision?: string;
   requestId?: string;
@@ -93,6 +94,7 @@ export interface ParsedArgs {
   tag?: string;
   model?: string;
   interactive?: boolean;
+  allowAutoApproveOwnerGates?: boolean;
   retrospectAll?: boolean;
   runIds?: string[];
   keepDays?: number;

@@ -12,8 +12,24 @@ import { validateAgainstSchema } from "./schemaValidator";
 import { BabysitterRuntimeError } from "./exceptions";
 import { resolveProjectRootForRun, resolveRunsDir } from "../config";
 import { hashProcessCodeFile } from "./processCodeHash";
+import { requiresInteractiveApproval } from "./intrinsics/breakpointPolicy";
+import { findProtectedBreakpointInSource } from "./breakpointPreflight";
 
 export async function createRun(options: CreateRunOptions): Promise<CreateRunResult> {
+  if (options.metadata?.nonInteractive === true
+    && options.metadata.nonInteractiveOwnerGates !== "approve") {
+    const declared = options.breakpointDeclarations?.find(requiresInteractiveApproval);
+    const blocked = declared?.breakpointId
+      ?? (options.process
+        ? await findProtectedBreakpointInSource(options.process.importPath, options.process.exportName)
+        : undefined);
+    if (declared || blocked) {
+      throw new BabysitterRuntimeError(
+        "NonInteractiveBreakpointPreflightError",
+        `Breakpoint '${blocked ?? "unnamed"}' requires interactive approval`,
+      );
+    }
+  }
   const runId = options.runId ?? nextUlid();
   validateRunId(runId);
   const runsDir = path.resolve(options.runsDir ?? resolveRunsDir());

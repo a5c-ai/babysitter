@@ -24,6 +24,109 @@ afterEach(async () => {
 });
 
 describe("createRun", () => {
+  test("preflight rejects declared protected gates before creating a run", async () => {
+    await expect(createRun({
+      runsDir: tmpRoot,
+      metadata: { nonInteractive: true },
+      breakpointDeclarations: [{ breakpointId: "deploy.owner", expert: "owner" }],
+    })).rejects.toThrow("deploy.owner");
+    expect(await fs.readdir(tmpRoot)).toEqual([]);
+  });
+
+  test("preflight discovers a static owner gate without caller declarations", async () => {
+    const entryFile = path.join(tmpRoot, "owner-gate.mjs");
+    await fs.writeFile(entryFile, `export async function process(_inputs, ctx) {
+      return ctx.breakpoint({ title: "Deploy production" }, {
+        breakpointId: "deploy.owner", expert: "owner", tags: ["destructive", "approval-gate"]
+      });
+    }`);
+    await expect(createRun({
+      runsDir: tmpRoot,
+      process: { processId: "deploy", importPath: entryFile },
+      metadata: { nonInteractive: true },
+    })).rejects.toThrow("deploy.owner");
+    expect(await fs.readdir(tmpRoot)).toEqual(["owner-gate.mjs"]);
+  });
+
+  test("preflight allows an ordinary statically written breakpoint", async () => {
+    const entryFile = path.join(tmpRoot, "ordinary-gate.mjs");
+    await fs.writeFile(entryFile, `export async function process(_inputs, ctx) {
+      return ctx.breakpoint({ title: "Review draft" }, { tags: ["review"] });
+    }`);
+    const run = await createRun({
+      runsDir: tmpRoot,
+      process: { processId: "review", importPath: entryFile },
+      metadata: { nonInteractive: true },
+    });
+    expect(run.metadata.nonInteractive).toBe(true);
+  });
+
+  test("preflight follows a renamed exported context binding", async () => {
+    const entryFile = path.join(tmpRoot, "renamed-gate.mjs");
+    await fs.writeFile(entryFile, `export async function process(_inputs, runtime) {
+      const alias = runtime;
+      return alias.breakpoint({ title: "Deploy" }, { expert: "owner" });
+    }`);
+    await expect(createRun({
+      runsDir: tmpRoot,
+      process: { processId: "deploy", importPath: entryFile },
+      metadata: { nonInteractive: true },
+    })).rejects.toThrow("protected breakpoint");
+    expect(await fs.readdir(tmpRoot)).toEqual(["renamed-gate.mjs"]);
+  });
+
+  test("preflight ignores breakpoint text in comments and strings", async () => {
+    const entryFile = path.join(tmpRoot, "comments.mjs");
+    await fs.writeFile(entryFile, `export async function process(_inputs, runtime) {
+      // runtime.breakpoint({}, { expert: "owner" });
+      const example = 'runtime.breakpoint({}, { tags: ["destructive"] })';
+      return runtime.breakpoint({ title: example }, { tags: ["review"] });
+    }`);
+    const run = await createRun({
+      runsDir: tmpRoot,
+      process: { processId: "review", importPath: entryFile },
+      metadata: { nonInteractive: true },
+    });
+    expect(run.metadata.nonInteractive).toBe(true);
+  });
+
+  test("preflight permits a process with no context parameter", async () => {
+    const entryFile = path.join(tmpRoot, "no-context.mjs");
+    await fs.writeFile(entryFile, "export async function process() { return true; }");
+    const run = await createRun({
+      runsDir: tmpRoot,
+      process: { processId: "plain", importPath: entryFile },
+      metadata: { nonInteractive: true },
+    });
+    expect(run.metadata.nonInteractive).toBe(true);
+  });
+
+  test("preflight rejects dynamic routing options on a direct breakpoint call", async () => {
+    const entryFile = path.join(tmpRoot, "dynamic-gate.mjs");
+    await fs.writeFile(entryFile, `export async function process(inputs, runtime) {
+      return runtime.breakpoint({ title: "Deploy" }, inputs.gateOptions);
+    }`);
+    await expect(createRun({
+      runsDir: tmpRoot,
+      process: { processId: "deploy", importPath: entryFile },
+      metadata: { nonInteractive: true },
+    })).rejects.toThrow("dynamic breakpoint options");
+  });
+
+  test("preflight permits ordinary gates and explicit protected-gate opt-in", async () => {
+    const ordinary = await createRun({
+      runsDir: tmpRoot,
+      metadata: { nonInteractive: true },
+      breakpointDeclarations: [{ breakpointId: "read.only", tags: ["review"] }],
+    });
+    expect(ordinary.metadata.nonInteractive).toBe(true);
+    const optedIn = await createRun({
+      runsDir: tmpRoot,
+      metadata: { nonInteractive: true, nonInteractiveOwnerGates: "approve" },
+      breakpointDeclarations: [{ breakpointId: "deploy.owner", expert: "owner" }],
+    });
+    expect(optedIn.metadata.nonInteractiveOwnerGates).toBe("approve");
+  });
   test("generates a run id, persists metadata, and appends RUN_CREATED", async () => {
     vi.spyOn(ulids, "nextUlid").mockReturnValue("01HZWTESTRUNID");
     const entryFile = path.join(tmpRoot, "processes", "pipeline.mjs");
