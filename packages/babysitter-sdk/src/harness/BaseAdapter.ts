@@ -25,6 +25,7 @@ import { handleStopHookCommon } from "./hooks/stopHookHandler";
 import { buildStopHookContinuation } from "./hooks/stopHookContinuation";
 import { initializeSessionState, readStdin, parseHookInput, safeStr } from "./hooks/utils";
 import {
+  isSessionPidMarkerEnabled,
   resolveSessionIdWithMarker,
   writeSessionMarker,
 } from "../utils/sessionMarker";
@@ -248,16 +249,17 @@ export abstract class BaseHarnessAdapter implements HarnessAdapter {
     }
 
     const hookInput = parseHookInput(rawInput);
-    let sessionId =
+    const nativeSessionId =
       safeStr(hookInput, "session_id") ||
-      safeStr(hookInput, "conversation_id") ||
-      process.env.AGENT_SESSION_ID ||
-      "";
+      safeStr(hookInput, "conversation_id");
+    let sessionId = nativeSessionId || process.env.AGENT_SESSION_ID || "";
+    let trustedMarkerSource = Boolean(nativeSessionId);
     if (!sessionId) {
       // Check harness-native and fallback session env vars
       for (const envVar of [...this.config.sessionIdEnvVars, ...(this.config.fallbackSessionIdEnvVars ?? [])]) {
         if (envVar !== "AGENT_SESSION_ID" && process.env[envVar]) {
           sessionId = process.env[envVar]!;
+          trustedMarkerSource = true;
           break;
         }
       }
@@ -276,7 +278,12 @@ export abstract class BaseHarnessAdapter implements HarnessAdapter {
         verbose: args.verbose,
       });
     }
-    writeSessionMarker(this.config.name, sessionId);
+    if (trustedMarkerSource) {
+      const markerPath = writeSessionMarker(this.config.name, sessionId);
+      if (!markerPath && isSessionPidMarkerEnabled()) {
+        process.stderr.write(`[session-start] Could not write ${this.config.name} PID marker; session:whoami may not resolve this session.\n`);
+      }
+    }
 
     process.stdout.write("{}\n");
     return 0;

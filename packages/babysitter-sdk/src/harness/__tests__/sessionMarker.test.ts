@@ -67,9 +67,16 @@ describe("getSessionMarkerPath", () => {
 });
 
 describe("write/read round-trip with injected ancestor", () => {
-  it("disables pid markers by default", () => {
+  it("enables pid markers by default and permits an explicit opt-out", () => {
     __setAncestorResolverForTests(() => ({ pid: process.pid }));
 
+    expect(isSessionPidMarkerEnabled()).toBe(true);
+    expect(writeSessionMarker("claude-code", "sess-default")).toBe(
+      getSessionMarkerPath("claude-code", process.pid),
+    );
+    expect(readSessionMarker("claude-code")).toBe("sess-default");
+
+    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "0";
     expect(isSessionPidMarkerEnabled()).toBe(false);
     expect(writeSessionMarker("claude-code", "sess-disabled")).toBeUndefined();
     expect(readSessionMarker("claude-code")).toBeUndefined();
@@ -94,10 +101,35 @@ describe("write/read round-trip with injected ancestor", () => {
   });
 
   it("readSessionMarker returns undefined when ancestor is dead", () => {
-    process.env.AGENT_ENABLE_SESSION_PID_MARKERS = "1";
     // 999999 is almost certainly not a live process.
     __setAncestorResolverForTests(() => ({ pid: 999999 }));
+    writeSessionMarker("claude-code", "stale-session");
     expect(readSessionMarker("claude-code")).toBeUndefined();
+  });
+
+  it("rejects markers from a prior process that reused a PID", async () => {
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    const markerPath = writeSessionMarker("claude-code", "old-session")!;
+    const marker = JSON.parse(await fs.readFile(markerPath, "utf8"));
+    marker.processStartIdentity = "prior-process-start";
+    await fs.writeFile(markerPath, JSON.stringify(marker));
+    expect(readSessionMarker("claude-code")).toBeUndefined();
+  });
+
+  it("ignores legacy PID-only markers because PID reuse cannot be ruled out", async () => {
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    const markerPath = getSessionMarkerPath("claude-code", process.pid);
+    await fs.mkdir(path.dirname(markerPath), { recursive: true });
+    await fs.writeFile(markerPath, "old-session\n");
+    expect(readSessionMarker("claude-code")).toBeUndefined();
+  });
+
+  it("returns no marker when the state directory is unwritable", async () => {
+    const blockedRoot = path.join(tmpDir, "blocked-root");
+    await fs.writeFile(blockedRoot, "file, not a directory");
+    process.env.BABYSITTER_GLOBAL_STATE_DIR = blockedRoot;
+    __setAncestorResolverForTests(() => ({ pid: process.pid }));
+    expect(writeSessionMarker("claude-code", "session")).toBeUndefined();
   });
 
   it("two different harnesses produce two different marker files", () => {
@@ -107,6 +139,23 @@ describe("write/read round-trip with injected ancestor", () => {
     writeSessionMarker("codex", "codex-session");
     expect(readSessionMarker("claude-code")).toBe("claude-session");
     expect(readSessionMarker("codex")).toBe("codex-session");
+  });
+
+  it("keeps concurrent Claude sessions scoped to their ancestor PID", () => {
+    let activePid = process.pid;
+    const otherPid = process.ppid;
+    __setAncestorResolverForTests(() => ({ pid: activePid }));
+
+    writeSessionMarker("claude-code", "session-a");
+    activePid = otherPid;
+    writeSessionMarker("claude-code", "session-b");
+
+    expect(readSessionMarker("claude-code")).toBe("session-b");
+    activePid = process.pid;
+    expect(readSessionMarker("claude-code")).toBe("session-a");
+    expect(getSessionMarkerPath("claude-code", otherPid)).not.toBe(
+      getSessionMarkerPath("claude-code", process.pid),
+    );
   });
 });
 

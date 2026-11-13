@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { promises as fs, writeFileSync, mkdirSync } from "node:fs";
+import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { resolveSessionIdDetailed } from "../adapters/claude-code";
 import {
   __resetCacheForTests,
   __setAncestorResolverForTests,
-  getSessionMarkerPath,
+  writeSessionMarker,
 } from "../../utils/sessionMarker";
 
 let savedSessionId: string | undefined;
@@ -94,7 +94,5 @@ describe("resolveSessionIdDetailed (unified)", () => {
 });
 
 function seedMarker(sessionId: string): void {
-  const markerPath = getSessionMarkerPath("claude-code", process.pid);
-  mkdirSync(path.dirname(markerPath), { recursive: true });
-  writeFileSync(markerPath, `${sessionId}\n`);
+  writeSessionMarker("claude-code", sessionId);
 }

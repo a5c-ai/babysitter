@@ -48,6 +48,7 @@ function buildConfig(): AdapterConfig {
     extraActivationEnvVars: ["CLAUDE_ENV_FILE"],
     pluginRootEnvVars: ["CLAUDE_PLUGIN_ROOT"],
     sessionIdEnvVars: ["AGENT_SESSION_ID"],
+    missingSessionIdHint: "No Claude Code session ID was found. Check that SessionStart wrote a live PID marker under ~/.a5c/state/ and that this command runs beneath the Claude Code process.",
     pluginRootVar: "${CLAUDE_PLUGIN_ROOT}",
     interactiveToolName: "AskUserQuestion tool",
     sessionEnvVars: "AGENT_SESSION_ID",

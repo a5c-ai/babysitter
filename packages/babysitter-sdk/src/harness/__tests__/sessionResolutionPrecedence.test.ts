@@ -13,13 +13,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { promises as fs, writeFileSync, mkdirSync } from "node:fs";
+import { promises as fs } from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import {
   __resetCacheForTests,
   __setAncestorResolverForTests,
-  getSessionMarkerPath,
+  writeSessionMarker,
 } from "../../utils/sessionMarker";
 import { createCodexAdapter } from "../adapters/codex";
 import { createGeminiCliAdapter } from "../adapters/gemini-cli";
@@ -94,9 +94,8 @@ afterEach(async () => {
 });
 
 function seedMarker(harness: string, pid: number, sessionId: string): void {
-  const markerPath = getSessionMarkerPath(harness, pid);
-  mkdirSync(path.dirname(markerPath), { recursive: true });
-  writeFileSync(markerPath, `${sessionId}\n`);
+  expect(pid).toBe(process.pid);
+  writeSessionMarker(harness, sessionId);
 }
 
 describe("adapter session-id resolution precedence", () => {

@@ -7,6 +7,7 @@ import { getGlobalStateDir } from "../../config";
 import { getSessionFilePath, writeSessionFile } from "../index";
 import { runSessionCleanup } from "../cleanup";
 import type { SessionState } from "../types";
+import { __resetCacheForTests, __setAncestorResolverForTests, writeSessionMarker } from "../../utils/sessionMarker";
 
 let tmpDir: string;
 let stateDir: string;
@@ -32,6 +33,7 @@ beforeEach(async () => {
   process.env.BABYSITTER_GLOBAL_STATE_DIR = tmpDir;
   stateDir = getGlobalStateDir();
   mkdirSync(stateDir, { recursive: true });
+  __setAncestorResolverForTests(() => ({ pid: process.pid }));
 });
 
 afterEach(async () => {
@@ -45,13 +47,11 @@ afterEach(async () => {
   } catch {
     // Ignore cleanup errors.
   }
+  __resetCacheForTests();
 });
 
 async function seedFixtures(): Promise<void> {
-  writeFileSync(
-    path.join(stateDir, `current-session-claude-code-pid-${process.pid}`),
-    "SESS-A\n",
-  );
+  writeSessionMarker("claude-code", "SESS-A");
   writeFileSync(
     path.join(stateDir, "current-session-claude-code-pid-999999"),
     "SESS-B\n",
@@ -121,6 +121,23 @@ describe("runSessionCleanup", () => {
 
     const content = readFileSync(getSessionFilePath(stateDir, "SESS-B"), "utf8");
     expect(content).toMatch(/active: true/);
+  });
+
+  it("removes a marker whose PID was reused by another process", async () => {
+    await seedFixtures();
+    const markerPath = path.join(stateDir, `current-session-claude-code-pid-${process.pid}`);
+    const marker = JSON.parse(readFileSync(markerPath, "utf8"));
+    marker.processStartIdentity = "previous-process";
+    writeFileSync(markerPath, JSON.stringify(marker));
+
+    const result = await runSessionCleanup({
+      harness: "claude-code",
+      stateDir,
+      runsDir: path.join(tmpDir, "nonexistent-runs"),
+    });
+
+    expect(result.markersRemoved).toContain(path.basename(markerPath));
+    expect(existsSync(markerPath)).toBe(false);
   });
 });
 

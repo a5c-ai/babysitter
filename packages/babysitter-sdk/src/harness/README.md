@@ -43,6 +43,11 @@ await writeSessionMarker('<harness-key>', sessionId);
 The marker is keyed on both the harness key and the ancestor harness PID, so
 concurrent sessions from different harnesses (or different instances of the
 same harness) do not collide.
+Markers are enabled by default and stored under `~/.a5c/state/`. Set
+`AGENT_ENABLE_SESSION_PID_MARKERS=0` to disable both writes and reads.
+Each marker records the process start identity as well as the session ID.
+Readers ignore older PID-only markers because a recycled PID could otherwise
+bind a new process to an old session; `session:cleanup` removes them.
 
 ### Harness key slugging rules
 
