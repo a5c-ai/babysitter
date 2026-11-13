@@ -45,6 +45,9 @@ export const BOOLEAN_FLAGS: Record<string, (parsed: ParsedArgs) => void> = {
   "--non-interactive": (parsed) => {
     parsed.interactive = false;
   },
+  "--allow-auto-approve-owner-gates": (parsed) => {
+    parsed.allowAutoApproveOwnerGates = true;
+  },
   "--include-remote": (parsed) => {
     parsed.includeRemote = true;
   },

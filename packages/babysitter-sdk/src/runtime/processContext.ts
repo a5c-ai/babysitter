@@ -26,6 +26,7 @@ export interface ProcessContextInit extends Omit<TaskIntrinsicContext, "now"> {
   recordedLogSeqs?: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive?: boolean;
+  nonInteractiveOwnerGates?: "refuse" | "approve";
   /** Internal-only gate for subprocess orchestration support. */
   subprocessSupport?: SubprocessSupportMode;
 }
@@ -39,6 +40,7 @@ export interface InternalProcessContext extends TaskIntrinsicContext {
   recordedLogSeqs: Set<number>;
   /** When true, breakpoints are auto-approved without human interaction. */
   nonInteractive: boolean;
+  nonInteractiveOwnerGates: "refuse" | "approve";
   subprocessSupport: SubprocessSupportMode;
   cleanupCallbacks: Array<() => void | Promise<void>>;
   cleanupFlushed: boolean;
@@ -60,6 +62,7 @@ export function createProcessContext(init: ProcessContextInit): CreateProcessCon
     logSeq: 0,
     recordedLogSeqs: init.recordedLogSeqs ?? new Set(),
     nonInteractive: init.nonInteractive ?? false,
+    nonInteractiveOwnerGates: init.nonInteractiveOwnerGates ?? "refuse",
     subprocessSupport: init.subprocessSupport ?? "disabled",
     cleanupCallbacks: [],
     cleanupFlushed: false,

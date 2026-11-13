@@ -6,6 +6,7 @@ import { appendEvent, loadJournal } from "../../storage/journal";
 import { writeFileAtomic } from "../../storage/atomic";
 import { rebuildStateCache } from "../../runtime/replay/stateCache";
 import type { IterationMetadata } from "../../runtime/types";
+import type { BreakpointDeclaration } from "../../runtime/types";
 import type { JournalEvent, JsonRecord } from "../../storage/types";
 import { nextUlid } from "../../storage/ulids";
 import {
@@ -78,6 +79,24 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
     }
   }
 
+  let breakpointDeclarations: BreakpointDeclaration[] | undefined;
+  if (parsed.breakpointDeclarationsPath) {
+    try {
+      const raw: unknown = JSON.parse(await fs.readFile(parsed.breakpointDeclarationsPath, "utf8"));
+      if (!Array.isArray(raw) || raw.some((item) => !isJsonRecord(item)
+        || (item.breakpointId !== undefined && typeof item.breakpointId !== "string")
+        || (item.expert !== undefined && typeof item.expert !== "string"
+          && (!Array.isArray(item.expert) || item.expert.some((expert) => typeof expert !== "string")))
+        || (item.tags !== undefined && (!Array.isArray(item.tags) || item.tags.some((tag) => typeof tag !== "string"))))) {
+        throw new Error("--breakpoint-declarations must contain an array of breakpoint option objects");
+      }
+      breakpointDeclarations = raw as BreakpointDeclaration[];
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : String(error));
+      return 1;
+    }
+  }
+
   if (parsed.dryRun) {
     const summary = {
       dryRun: true,
@@ -139,7 +158,11 @@ export async function handleRunCreate(parsed: ParsedArgs): Promise<number> {
       },
     } : {}),
     inputs,
-    ...(parsed.interactive === false ? { metadata: { nonInteractive: true } } : {}),
+    breakpointDeclarations,
+    ...(parsed.interactive === false ? { metadata: {
+      nonInteractive: true,
+      ...(parsed.allowAutoApproveOwnerGates ? { nonInteractiveOwnerGates: "approve" } : {}),
+    } } : {}),
   });
 
   let sessionBound;

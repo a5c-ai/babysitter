@@ -35,6 +35,12 @@ npm exec --yes --package @a5c-ai/babysitter-sdk@latest -- babysitter-mcp-server 
 
 The optional interactive runtime commands such as `create-run`, `resume-run`, `plan`, `yolo`, `observe`, and `tui` live in the separate `@a5c-ai/genty-platform` package.
 
+### Non-interactive breakpoint gates
+
+In `run:create --non-interactive` runs, breakpoints with an `expert` or a `destructive`, `destroy`, or `approval-gate` tag return `{ approved: false, deferred: true }` by default. Other breakpoints retain automatic approval. Use `--allow-auto-approve-owner-gates` only when the run is explicitly allowed to approve those gates; the equivalent API metadata is `nonInteractiveOwnerGates: "approve"`.
+
+At launch, the SDK parses the exported process function and checks direct breakpoint calls on its context parameter, including renamed parameters. It refuses protected gates and direct calls with dynamic routing options before writing the run directory or journal. For gates declared outside that entrypoint, pass `--breakpoint-declarations gates.json` with an array such as `[{"breakpointId":"deploy.owner","expert":"owner"}]`; the API equivalent is `createRun({ breakpointDeclarations: [...] })`. Breakpoints selected inside imported helpers cannot always be discovered at launch; the runtime policy still checks them when reached.
+
 ## API Surface
 
 ```ts

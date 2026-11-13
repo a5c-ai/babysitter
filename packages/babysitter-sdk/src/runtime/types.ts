@@ -23,6 +23,9 @@ export interface BreakpointRoutingOptions {
   presentAlwaysApprove?: boolean;
 }
 
+/** A gate known before process execution, for non-interactive launch preflight. */
+export type BreakpointDeclaration = Pick<BreakpointRoutingOptions, "breakpointId" | "expert" | "tags">;
+
 // AutoApprovalResult is defined in breakpoints/types.ts and re-exported from breakpoints/index.ts
 
 export interface BreakpointResult {
@@ -127,6 +130,8 @@ export interface CreateRunOptions {
   processRevision?: string;
   layoutVersion?: string;
   metadata?: JsonRecord;
+  /** Statically known gates. Dynamic ctx.breakpoint calls are still checked at runtime. */
+  breakpointDeclarations?: BreakpointDeclaration[];
   nested?: {
     parentRunId: string;
     parentEffectId?: string;

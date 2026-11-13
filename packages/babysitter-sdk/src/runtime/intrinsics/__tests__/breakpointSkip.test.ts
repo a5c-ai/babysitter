@@ -55,6 +55,7 @@ describe("runBreakpointIntrinsic non-interactive skip", () => {
 
     expect(result).toEqual({
       approved: true,
+      auto: true,
       response: "Auto-approved (non-interactive mode)",
     });
     expect(runTaskIntrinsic).not.toHaveBeenCalled();
@@ -75,6 +76,57 @@ describe("runBreakpointIntrinsic non-interactive skip", () => {
     expect(call.eventType).toBe("PROCESS_LOG");
     expect(call.event.label).toBe("breakpoint:skipped");
     expect(call.event.message).toContain("review-gate");
+  });
+
+  it("defers protected gates without opt-in and records their identity", async () => {
+    const { runBreakpointIntrinsic } = await import("../breakpoint");
+    const { runTaskIntrinsic } = await import("../task");
+    const { appendEvent } = await import("../../../storage/journal");
+    const ctx = buildContext(true);
+    const result = await runBreakpointIntrinsic(
+      { title: "Deploy production" }, ctx,
+      { breakpointId: "deploy.owner", expert: "owner", tags: ["destructive", "approval-gate"] },
+    );
+    expect(result).toMatchObject({ approved: false, deferred: true });
+    expect(runTaskIntrinsic).not.toHaveBeenCalled();
+    expect(appendEvent).toHaveBeenCalledWith(expect.objectContaining({
+      event: expect.objectContaining({
+        label: "breakpoint:deferred",
+        breakpointLabel: "Deploy production",
+        breakpointId: "deploy.owner",
+        expert: "owner",
+        tags: ["destructive", "approval-gate"],
+      }),
+    }));
+  });
+
+  it("refuses protected tags without an expert and permits explicit opt-in", async () => {
+    const { runBreakpointIntrinsic } = await import("../breakpoint");
+    const ctx = buildContext(true);
+    expect(await runBreakpointIntrinsic({ label: "delete" }, ctx, { tags: ["destructive"] }))
+      .toMatchObject({ approved: false, deferred: true });
+    Object.assign(ctx, { nonInteractiveOwnerGates: "approve" });
+    expect(await runBreakpointIntrinsic({ label: "delete" }, ctx, { tags: ["destructive"] }))
+      .toMatchObject({ approved: true, auto: true });
+  });
+
+  it("uses payload labels and titles for journal identity and interactive keys", async () => {
+    const { runBreakpointIntrinsic } = await import("../breakpoint");
+    const { appendEvent } = await import("../../../storage/journal");
+    const { runTaskIntrinsic } = await import("../task");
+    const ctx = buildContext(true);
+    await runBreakpointIntrinsic({ label: "Payload label", title: "Ignored title" }, ctx);
+    await runBreakpointIntrinsic({ title: "Owner review" }, ctx);
+    await runBreakpointIntrinsic({}, ctx, { breakpointId: "explicit.gate" });
+    const events = (appendEvent as ReturnType<typeof vi.fn>).mock.calls.map((call) => call[0].event);
+    expect(events[0]).toMatchObject({ breakpointLabel: "Payload label", breakpointId: "payload-label" });
+    expect(events[1]).toMatchObject({ breakpointLabel: "Owner review", breakpointId: "owner-review" });
+    expect(events[2]).toMatchObject({ breakpointLabel: "explicit.gate", breakpointId: "explicit.gate" });
+    const interactive = buildContext(false);
+    (runTaskIntrinsic as ReturnType<typeof vi.fn>).mockResolvedValue({ approved: true });
+    await runBreakpointIntrinsic({ title: "Owner review" }, interactive);
+    expect((runTaskIntrinsic as ReturnType<typeof vi.fn>).mock.calls[0][0].invokeOptions.key)
+      .toBe("__sdk.breakpoint.owner-review");
   });
 
   it("uses sequential positive logSeq (not -1) for each auto-approved breakpoint", async () => {
